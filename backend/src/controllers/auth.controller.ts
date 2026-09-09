@@ -26,7 +26,7 @@ export const me = async (req: Request, res: Response) => {
     res.json({
       id: user.id,
       email: user.email,
-      name: user.fullName,
+      fullName: user.fullName,
       role: user.role,
     });
   } catch (err) {
@@ -72,7 +72,7 @@ export const signup = async (
     res.status(201).json({
       id: user.id,
       email: user.email,
-      name: user.fullName,
+      fullName: user.fullName,
       role: user.role,
     });
   });
@@ -98,7 +98,7 @@ export const login = async (req: Request, res: Response) => {
     res.json({
       id: user.id,
       email: user.email,
-      name: user.fullName,
+      fullName: user.fullName,
       role: user.role,
     });
   });

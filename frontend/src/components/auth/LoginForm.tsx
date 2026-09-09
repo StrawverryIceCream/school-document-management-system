@@ -15,7 +15,27 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
+type LoginFormProps = React.ComponentProps<"div"> & {
+  error: string | null;
+  loading: boolean;
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  email: string;
+  setEmail: React.Dispatch<React.SetStateAction<string>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+};
+
+const LoginForm = ({
+  className,
+  error,
+  loading,
+  handleSubmit,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  ...props
+}: LoginFormProps) => {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -26,7 +46,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -34,6 +54,8 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   required
                 />
               </Field>
@@ -47,10 +69,19 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
               </Field>
+              {error && <p className="text-base text-destructive">{error}</p>}
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Logging in..." : "Login"}
+                </Button>
                 <Button variant="outline" type="button">
                   Login with Google
                 </Button>
