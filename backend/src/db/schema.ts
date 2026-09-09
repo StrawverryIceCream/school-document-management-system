@@ -12,7 +12,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-
 const timestamps = {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -31,7 +30,6 @@ export const requestStatusEnum = pgEnum("request_status", [
   "cancelled",
 ]);
 
-
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   studentId: text("student_id").unique(),
@@ -48,15 +46,19 @@ export const documentTypes = pgTable("document_types", {
   name: text("name").notNull(),
   description: text("description"),
   fee: numeric("fee", { precision: 10, scale: 2 }).notNull().default("0"),
-  isActive: boolean("is_active").notNull().default(true), 
+  isActive: boolean("is_active").notNull().default(true),
   requiredFields: jsonb("required_fields").notNull().default("[]"),
   ...timestamps,
 });
 
 export const documentRequests = pgTable("document_requests", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  documentTypeId: integer("document_type_id").references(() => documentTypes.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  documentTypeId: integer("document_type_id")
+    .references(() => documentTypes.id)
+    .notNull(),
   purpose: text("purpose"),
   formData: jsonb("form_data").notNull().default("{}"),
   status: requestStatusEnum("status").notNull().default("pending"),
@@ -68,7 +70,9 @@ export const documentRequests = pgTable("document_requests", {
 
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
-  requestId: integer("request_id").references(() => documentRequests.id).notNull(),
+  requestId: integer("request_id")
+    .references(() => documentRequests.id)
+    .notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   method: text("method").notNull(),
   receiptNumber: text("receipt_number").notNull().unique(),
@@ -78,7 +82,9 @@ export const payments = pgTable("payments", {
 
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
   requestId: integer("request_id").references(() => documentRequests.id),
   message: text("message").notNull(),
   isRead: boolean("is_read").notNull().default(false),
@@ -94,18 +100,21 @@ export const documentTypesRelations = relations(documentTypes, ({ many }) => ({
   requests: many(documentRequests),
 }));
 
-export const documentRequestsRelations = relations(documentRequests, ({ one, many }) => ({
-  user: one(users, {
-    fields: [documentRequests.userId],
-    references: [users.id],
+export const documentRequestsRelations = relations(
+  documentRequests,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [documentRequests.userId],
+      references: [users.id],
+    }),
+    documentType: one(documentTypes, {
+      fields: [documentRequests.documentTypeId],
+      references: [documentTypes.id],
+    }),
+    payments: many(payments),
+    notifications: many(notifications),
   }),
-  documentType: one(documentTypes, {
-    fields: [documentRequests.documentTypeId],
-    references: [documentTypes.id],
-  }),
-  payments: many(payments),
-  notifications: many(notifications),
-}));
+);
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
   request: one(documentRequests, {

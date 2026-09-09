@@ -1,24 +1,10 @@
-import { Router, type Response, type Request } from "express";
+import { Router } from "express";
+import { login, signup, me, logout } from "../controllers/auth.controller.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
-
-interface SignupBody {
-  email: string;
-  password: string;
-  name: string;
-}
-
-router.post(
-  "/signup",
-  async (req: Request<{}, {}, SignupBody>, res: Response) => {
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-      return res
-        .status(400)
-        .json({ error: "Email, password, and name are required" });
-    }
-    res.json({ email, name });
-  },
-);
-
+router.get("/me", requireAuth, me);
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/logout", logout);
 export default router;
