@@ -1,4 +1,5 @@
 
+import { ModeToggle } from "../ModeToggle";
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 
@@ -13,7 +14,9 @@ const SiteHeader = () => {
           className="mx-2 h-8 self-center"
         />
         <h1 className="text-base font-medium">Dashboard</h1>
-    
+        <div className="ml-auto flex items-center gap-2">
+          <ModeToggle />
+        </div>
       </div>
     </header>
   );
