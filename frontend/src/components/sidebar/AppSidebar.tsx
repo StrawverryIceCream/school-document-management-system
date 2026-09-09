@@ -1,6 +1,7 @@
 import {
   AppWindow,
   CircleDashedCheck,
+  FileInputIcon,
   FileSearchCorner,
   FileText,
   Gauge,
@@ -20,13 +21,21 @@ import {
 import NavItems from "./NavItems";
 import NavSecondary from "./NavSecondary";
 import NavUser from "./NavUser";
+import NavMain from "./NavMain";
 
 const data = {
   user: { name: "Alyson" },
-  admin: [
+  navMain: [
+    {
+      title: "My Request ",
+      url: "#",
+      icon: FileInputIcon,
+    },
+  ],
+  navItems: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: Gauge,
     },
     {
@@ -76,14 +85,15 @@ const AppSidebar = () => {
             >
               <a href="/home">
                 <FileText className="size-5!" />
-                <span className="text-base font-semibold">LOLLL</span>
+                <span className="text-base font-semibold">Doc Manager.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavItems items={data.admin} />
+        <NavMain items={data.navMain}/>
+        <NavItems items={data.navItems} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

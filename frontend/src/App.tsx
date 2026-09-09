@@ -11,7 +11,7 @@ export default function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
         <Route path="/auth" element={<Auth />} />

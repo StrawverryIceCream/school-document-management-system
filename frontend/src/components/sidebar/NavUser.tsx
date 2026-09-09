@@ -1,5 +1,6 @@
 import {
   ArrowLeftRight,
+  CircleUser,
   EllipsisVertical,
   LogOut,
   UserIcon,
@@ -51,7 +52,7 @@ const NavUser = ({ user }: { user: { name: string } }) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuItem>
-              <UserIcon />
+              <CircleUser />
               Profile
             </DropdownMenuItem>
             <DropdownMenuSeparator />
