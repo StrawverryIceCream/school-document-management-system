@@ -22,6 +22,7 @@ import NavItems from "./NavItems";
 import NavSecondary from "./NavSecondary";
 import NavUser from "./NavUser";
 import NavMain from "./NavMain";
+import { useAuth } from "@/hooks/useAuth";
 
 const data = {
   user: { name: "Alyson" },
@@ -74,6 +75,10 @@ const data = {
 };
 
 const AppSidebar = () => {
+  const { user } = useAuth();
+  if (!user) {
+    return null;
+  }
   return (
     <Sidebar collapsible="icon" variant="inset" className="transition-[width] ">
       <SidebarHeader>
@@ -92,12 +97,12 @@ const AppSidebar = () => {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain}/>
+        <NavMain items={data.navMain} />
         <NavItems items={data.navItems} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

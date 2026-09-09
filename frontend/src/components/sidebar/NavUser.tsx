@@ -19,9 +19,26 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import type { User } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-const NavUser = ({ user }: { user: { name: string } }) => {
+const NavUser = ({ user }: { user: User }) => {
+  const navigate = useNavigate();
   const { isMobile } = useSidebar();
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch(err){
+      console.log(err)
+    }
+    finally {
+      navigate("/login");
+    }
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -33,7 +50,10 @@ const NavUser = ({ user }: { user: { name: string } }) => {
             >
               <UserIcon className="h-8 w-8 rounded-lg" />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.fullName}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user.email}
+                </span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -47,7 +67,7 @@ const NavUser = ({ user }: { user: { name: string } }) => {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user.fullName}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -60,7 +80,10 @@ const NavUser = ({ user }: { user: { name: string } }) => {
               <ArrowLeftRight />
               Switch Account
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={handleLogout}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>
