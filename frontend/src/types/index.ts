@@ -1,5 +1,4 @@
-// Enums — match your pgEnum definitions
-export type UserRole = "student" | "staff" | "admin"; // adjust to your actual userRoleEnum values
+export type UserRole = "student" | "staff" | "admin" | "teacher"; 
 export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
 
 export interface Timestamps {
@@ -8,7 +7,7 @@ export interface Timestamps {
 }
 
 export interface User extends Timestamps {
-  id: number;
+  id: string;
   studentId: string | null;
   fullName: string;
   email: string;
