@@ -1,8 +1,7 @@
 // Enums — match your pgEnum definitions
 export type UserRole = "student" | "staff" | "admin"; // adjust to your actual userRoleEnum values
-export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // adjust to your actual requestStatusEnum values
+export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
 
-// Shared timestamp fields (matches your `...timestamps` spread)
 export interface Timestamps {
   createdAt: Date;
   updatedAt: Date;
