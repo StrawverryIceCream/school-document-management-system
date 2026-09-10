@@ -9,7 +9,7 @@ function AppLayout() {
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <main className="flex flex-1 flex-col">
+        <main className="flex flex-1 flex-col overflow-hidden">
           <Outlet />
         </main>
       </SidebarInset>

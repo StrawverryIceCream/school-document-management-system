@@ -8,6 +8,7 @@ import Signup from "./pages/Signup";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { AuthProvider } from "./provider/AuthProvider";
 import RequireAuth from "./components/RequireAuth";
+import Accounts from "./pages/Accounts";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/accounts" element={<Accounts />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
