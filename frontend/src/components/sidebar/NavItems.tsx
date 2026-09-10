@@ -7,7 +7,7 @@ import {
   SidebarMenuItem,
 } from "../ui/sidebar";
 
-const NavItems = ({
+function NavItems({
   items,
 }: {
   items: {
@@ -15,7 +15,7 @@ const NavItems = ({
     url: string;
     icon: LucideIcon;
   }[];
-}) => {
+}) {
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -34,6 +34,6 @@ const NavItems = ({
       </SidebarGroupContent>
     </SidebarGroup>
   );
-};
+}
 
 export default NavItems;

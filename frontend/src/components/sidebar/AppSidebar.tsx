@@ -74,7 +74,7 @@ const data = {
   ],
 };
 
-const AppSidebar = () => {
+function AppSidebar() {
   const { user } = useAuth();
   if (!user) {
     return null;
@@ -106,6 +106,6 @@ const AppSidebar = () => {
       </SidebarFooter>
     </Sidebar>
   );
-};
+}
 
 export default AppSidebar;

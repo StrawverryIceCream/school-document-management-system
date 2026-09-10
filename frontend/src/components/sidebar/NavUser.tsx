@@ -23,7 +23,7 @@ import type { User } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-const NavUser = ({ user }: { user: User }) => {
+function NavUser({ user }: { user: User }) {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
@@ -92,6 +92,6 @@ const NavUser = ({ user }: { user: User }) => {
       </SidebarMenuItem>
     </SidebarMenu>
   );
-};
+}
 
 export default NavUser;

@@ -8,7 +8,7 @@ import {
 } from "../ui/sidebar";
 import type React from "react";
 
-const NavSecondary = ({
+function NavSecondary({
   items,
   ...props
 }: {
@@ -17,7 +17,7 @@ const NavSecondary = ({
     url: string;
     icon: LucideIcon;
   }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) => {
+} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -36,6 +36,6 @@ const NavSecondary = ({
       </SidebarGroupContent>
     </SidebarGroup>
   );
-};
+}
 
 export default NavSecondary;

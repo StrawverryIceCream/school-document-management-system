@@ -7,7 +7,7 @@ import {
   SidebarMenuItem,
 } from "../ui/sidebar";
 
-const NavMain = ({
+function NavMain({
   items,
 }: {
   items: {
@@ -15,7 +15,7 @@ const NavMain = ({
     url: string;
     icon: LucideIcon;
   }[];
-}) => {
+}) {
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -40,6 +40,6 @@ const NavMain = ({
       </SidebarGroupContent>
     </SidebarGroup>
   );
-};
+}
 
 export default NavMain;
