@@ -8,6 +8,13 @@ import Signup from "./pages/Signup";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { AuthProvider } from "./provider/AuthProvider";
 import RequireAuth from "./components/RequireAuth";
+import Accounts from "./pages/Accounts";
+import RequireRole from "./components/RequireRole";
+import DocumentTypes from "./pages/DocumentTypes";
+import Windows from "./pages/Windows";
+import AllRequest from "./pages/AllRequest";
+import NewRequest from "./pages/NewRequest";
+import MyRequest from "./pages/MyRequest";
 
 export default function App() {
   return (
@@ -23,7 +30,49 @@ export default function App() {
               }
             >
               <Route path="/home" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/new-request" element={<NewRequest />} />
+              <Route path="/my-request" element={<MyRequest />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireRole allowedRoles={["admin", "staff"]}>
+                    <Dashboard />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="/accounts"
+                element={
+                  <RequireRole allowedRoles={["admin"]}>
+                    <Accounts />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="/document-types"
+                element={
+                  <RequireRole allowedRoles={["admin", "staff"]}>
+                    <DocumentTypes />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="/windows"
+                element={
+                  <RequireRole allowedRoles={["admin", "staff"]}>
+                    <Windows />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="/all-request"
+                element={
+                  <RequireRole allowedRoles={["admin", "staff"]}>
+                    <AllRequest />
+                  </RequireRole>
+                }
+              />
               <Route path="/profile" element={<Profile />} />
             </Route>
             <Route path="/login" element={<Login />} />

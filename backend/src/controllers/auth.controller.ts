@@ -13,8 +13,8 @@ interface SignupBody {
 
 export const me = async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.session.userId);
-    if (!Number.isInteger(userId)) {
+    const userId = req.session.userId;
+    if (!userId) {
       return res.status(401).json({ error: "Not logged in" });
     }
 
@@ -23,12 +23,14 @@ export const me = async (req: Request, res: Response) => {
     });
 
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
     res.json({
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       role: user.role,
     });
+
   } catch (err) {
     console.error("[/me] error:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -49,6 +51,7 @@ export const signup = async (
   const existing = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
+  
   if (existing) {
     return res.status(409).json({ error: "Email already in use" });
   }
@@ -109,3 +112,4 @@ export const logout = (req: Request, res: Response) => {
     res.status(204).send();
   });
 };
+

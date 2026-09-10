@@ -7,8 +7,9 @@ import {
   SidebarMenuItem,
 } from "../ui/sidebar";
 import type React from "react";
+import { NavLink } from "react-router-dom";
 
-const NavSecondary = ({
+function NavSecondary({
   items,
   ...props
 }: {
@@ -17,7 +18,7 @@ const NavSecondary = ({
     url: string;
     icon: LucideIcon;
   }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) => {
+} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -25,10 +26,10 @@ const NavSecondary = ({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <a href={item.url}>
+                <NavLink to={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </NavLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -36,6 +37,6 @@ const NavSecondary = ({
       </SidebarGroupContent>
     </SidebarGroup>
   );
-};
+}
 
 export default NavSecondary;

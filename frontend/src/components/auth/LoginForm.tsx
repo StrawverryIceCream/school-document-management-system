@@ -25,7 +25,7 @@ type LoginFormProps = React.ComponentProps<"div"> & {
   setPassword: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const LoginForm = ({
+function LoginForm({
   className,
   error,
   loading,
@@ -35,7 +35,7 @@ const LoginForm = ({
   password,
   setPassword,
   ...props
-}: LoginFormProps) => {
+}: LoginFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -95,6 +95,6 @@ const LoginForm = ({
       </Card>
     </div>
   );
-};
+}
 
 export default LoginForm;

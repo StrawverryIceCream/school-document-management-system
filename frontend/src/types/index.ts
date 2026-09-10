@@ -1,15 +1,20 @@
-// Enums — match your pgEnum definitions
-export type UserRole = "student" | "staff" | "admin"; // adjust to your actual userRoleEnum values
-export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // adjust to your actual requestStatusEnum values
+export const userRoles = [
+  "student",
+  "staff",
+  "admin",
+  "teacher",
+] as const;
 
-// Shared timestamp fields (matches your `...timestamps` spread)
+export type UserRole = "student" | "staff" | "admin" | "teacher"; 
+export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
+
 export interface Timestamps {
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface User extends Timestamps {
-  id: number;
+  id: string;
   studentId: string | null;
   fullName: string;
   email: string;
@@ -17,7 +22,6 @@ export interface User extends Timestamps {
   role: UserRole;
 }
 
-// Shape of one entry in documentTypes.requiredFields (JSONB)
 export interface RequiredFieldDefinition {
   key: string;
   label: string;
@@ -64,8 +68,6 @@ export interface Notification extends Timestamps {
   message: string;
   isRead: boolean;
 }
-
-// Convenience: relations populated when you `.with()` / join in queries
 export interface DocumentRequestWithRelations extends DocumentRequest {
   user?: User;
   documentType?: DocumentType;

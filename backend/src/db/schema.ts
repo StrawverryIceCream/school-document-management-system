@@ -1,7 +1,6 @@
 import {
   pgTable,
-  serial,
-  integer,
+  uuid,
   text,
   timestamp,
   date,
@@ -20,7 +19,7 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
-export const userRoleEnum = pgEnum("user_role", ["student", "staff"]);
+export const userRoleEnum = pgEnum("user_role", ["student", "teacher", "admin", "staff"]);
 
 export const requestStatusEnum = pgEnum("request_status", [
   "pending",
@@ -31,7 +30,7 @@ export const requestStatusEnum = pgEnum("request_status", [
 ]);
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(), 
   studentId: text("student_id").unique(),
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
@@ -41,7 +40,7 @@ export const users = pgTable("users", {
 });
 
 export const documentTypes = pgTable("document_types", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   description: text("description"),
@@ -52,11 +51,11 @@ export const documentTypes = pgTable("document_types", {
 });
 
 export const documentRequests = pgTable("document_requests", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")            // FK type must match referenced PK type
     .references(() => users.id)
     .notNull(),
-  documentTypeId: integer("document_type_id")
+  documentTypeId: uuid("document_type_id")
     .references(() => documentTypes.id)
     .notNull(),
   purpose: text("purpose"),
@@ -69,8 +68,8 @@ export const documentRequests = pgTable("document_requests", {
 });
 
 export const payments = pgTable("payments", {
-  id: serial("id").primaryKey(),
-  requestId: integer("request_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  requestId: uuid("request_id")
     .references(() => documentRequests.id)
     .notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
@@ -81,11 +80,11 @@ export const payments = pgTable("payments", {
 });
 
 export const notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
     .references(() => users.id)
     .notNull(),
-  requestId: integer("request_id").references(() => documentRequests.id),
+  requestId: uuid("request_id").references(() => documentRequests.id),
   message: text("message").notNull(),
   isRead: boolean("is_read").notNull().default(false),
   ...timestamps,

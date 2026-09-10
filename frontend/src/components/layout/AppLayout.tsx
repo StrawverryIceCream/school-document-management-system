@@ -3,18 +3,18 @@ import AppSidebar from "../sidebar/AppSidebar";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import SiteHeader from "../sidebar/SiteHeader";
 
-const AppLayout = () => {
+function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <main className="flex flex-1 flex-col">
+        <main className="flex flex-1 flex-col overflow-hidden">
           <Outlet />
         </main>
       </SidebarInset>
     </SidebarProvider>
   );
-};
+}
 
 export default AppLayout;

@@ -8,6 +8,7 @@ import {
   Search,
   Settings,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,62 +24,79 @@ import NavSecondary from "./NavSecondary";
 import NavUser from "./NavUser";
 import NavMain from "./NavMain";
 import { useAuth } from "@/hooks/useAuth";
+import type { UserRole } from "@/types";
+import { NavLink } from "react-router-dom";
 
-const data = {
-  user: { name: "Alyson" },
-  navMain: [
-    {
-      title: "My Request ",
-      url: "#",
-      icon: FileInputIcon,
-    },
-  ],
-  navItems: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: Gauge,
-    },
-    {
-      title: "Accounts",
-      url: "#",
-      icon: UserRound,
-    },
-    {
-      title: "DocumentTypes",
-      url: "#",
-      icon: FileSearchCorner,
-    },
-    {
-      title: "Windows",
-      url: "#",
-      icon: AppWindow,
-    },
-    {
-      title: "All Request",
-      url: "#",
-      icon: CircleDashedCheck,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-    },
-  ],
+type NavItem = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  roles?: UserRole[];
 };
 
-const AppSidebar = () => {
+const navMain: NavItem[] = [
+  {
+    title: "My Request ",
+    url: "/my-request",
+    icon: FileInputIcon,
+  },
+];
+
+const navItems: NavItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Gauge,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Accounts",
+    url: "/accounts",
+    icon: UserRound,
+    roles: ["admin"],
+  },
+  {
+    title: "DocumentTypes",
+    url: "/document-types",
+    icon: FileSearchCorner,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Windows",
+    url: "/windows",
+    icon: AppWindow,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "All Request",
+    url: "/all-request",
+    icon: CircleDashedCheck,
+    roles: ["admin", "staff"],
+  },
+];
+
+const navSecondary: NavItem[] = [
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+  },
+  {
+    title: "Search",
+    url: "#",
+    icon: Search,
+  },
+];
+
+function AppSidebar() {
   const { user } = useAuth();
   if (!user) {
     return null;
   }
+
+  const permittedNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(user.role),
+  );
   return (
     <Sidebar collapsible="icon" variant="inset" className="transition-[width] ">
       <SidebarHeader>
@@ -88,24 +106,24 @@ const AppSidebar = () => {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="/home">
+              <NavLink to="/home">
                 <FileText className="size-5!" />
                 <span className="text-base font-semibold">Doc Manager.</span>
-              </a>
+              </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavItems items={data.navItems} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMain} />
+        {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );
-};
+}
 
 export default AppSidebar;

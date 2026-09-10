@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
@@ -45,6 +45,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Login;

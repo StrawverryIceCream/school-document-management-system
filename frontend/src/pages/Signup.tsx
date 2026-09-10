@@ -4,7 +4,7 @@ import { signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Signup = () => {
+function Signup() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,6 +63,6 @@ const Signup = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Signup;
