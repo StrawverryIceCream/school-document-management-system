@@ -97,11 +97,9 @@ export async function updateUserById(
 
     const validRoles = ["student", "teacher", "admin", "staff"];
     if (role && !validRoles.includes(role)) {
-      return res
-        .status(400)
-        .json({
-          error: `Invalid role. Must be one of: ${validRoles.join(", ")}`,
-        });
+      return res.status(400).json({
+        error: `Invalid role. Must be one of: ${validRoles.join(", ")}`,
+      });
     }
 
     const updateData: any = {};
@@ -123,5 +121,30 @@ export async function updateUserById(
   } catch (err) {
     console.error("[updateUserById] error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function deleteUserById(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+
+    const deletedUsers = await db
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning({
+        id: users.id,
+      });
+
+    if (deletedUsers.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("[deleteUserById] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }

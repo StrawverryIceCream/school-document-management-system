@@ -14,7 +14,7 @@ import { useUsers } from "@/hooks/useUsers";
 function AccountsTable() {
   const { loading, users } = useUsers();
   const [editingUser, setEditingUser] = useState<string | null>(null);
-  
+
   function setEdit(isEditing: boolean, userId: string) {
     setEditingUser(isEditing ? userId : null);
   }

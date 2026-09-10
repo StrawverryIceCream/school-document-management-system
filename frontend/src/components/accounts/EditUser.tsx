@@ -12,7 +12,7 @@ import {
   DropdownMenuSubContent,
 } from "../ui/dropdown-menu";
 import { userRoles, type User, type UserRole } from "@/types";
-import { updateUserById } from "@/api/user";
+import { deleteUserById, updateUserById } from "@/api/user";
 import { useUsers } from "@/hooks/useUsers";
 
 function EditUser({
@@ -30,6 +30,15 @@ function EditUser({
       refreshAccounts();
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  async function handleDeleteUser() {
+    try {
+      await deleteUserById(user.id);
+      await refreshAccounts();
+    } catch (err) {
+      console.log("Failed to delete user:", err);
     }
   }
 
@@ -68,7 +77,9 @@ function EditUser({
           </DropdownMenuPortal>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" onClick={handleDeleteUser}>
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -35,10 +35,7 @@ export async function getUserById(id: string) {
   return res.json();
 }
 
-export async function updateUserById(
-  id: string,
-  data: UpdateUserBody,
-) {
+export async function updateUserById(id: string, data: UpdateUserBody) {
   const res = await fetch(`/api/users/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -52,6 +49,19 @@ export async function updateUserById(
       `/api/users/${id} update failed ${res.status}${text ? `: ${text}` : ""}`,
     );
   }
+}
 
+export async function deleteUserById(id: string) {
+  const res = await fetch(`/api/users/${id}`, {
+    credentials: "include",
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `/api/users/${id} delete failed ${res.status}${text ? `: ${text}` : ""}`,
+    );
+  }
   return res.json();
 }

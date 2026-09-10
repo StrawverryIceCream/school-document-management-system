@@ -1,6 +1,6 @@
 import { SignupForm } from "@/components/auth/SignupForm";
 import { ModeToggle } from "@/components/ModeToggle";
-import { signup } from "@/api/auth";
+import { login, signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -30,6 +30,7 @@ function Signup() {
     setLoading(true);
     try {
       await signup(email, password, fullName, studentId);
+      await login(email, password);
       navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
