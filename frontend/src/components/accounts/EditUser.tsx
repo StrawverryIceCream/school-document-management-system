@@ -14,6 +14,7 @@ import {
 import { userRoles, type User, type UserRole } from "@/types";
 import { deleteUserById, updateUserById } from "@/api/user";
 import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/hooks/useAuth";
 
 function EditUser({
   user,
@@ -23,7 +24,9 @@ function EditUser({
   setEdit: (isEditing: boolean, userId: string) => void;
 }) {
   const { refreshAccounts } = useUsers();
+  const { user: currentUser } = useAuth();
 
+  if (!currentUser) return null;
   async function handleRoleChange(role: UserRole) {
     try {
       await updateUserById(user.id, { role });
@@ -61,25 +64,31 @@ function EditUser({
         >
           Edit
         </DropdownMenuItem>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              {userRoles.map((role) => (
-                <DropdownMenuItem
-                  key={role}
-                  onSelect={() => handleRoleChange(role)}
-                >
-                  {role}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={handleDeleteUser}>
-          Delete
-        </DropdownMenuItem>
+        {user.id !== currentUser.id ? (
+          <>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {userRoles.map((role) => (
+                    <DropdownMenuItem
+                      key={role}
+                      onSelect={() => handleRoleChange(role)}
+                    >
+                      {role}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={handleDeleteUser}>
+              Delete
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <></>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

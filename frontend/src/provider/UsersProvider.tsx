@@ -17,7 +17,7 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
   }, [role, debounceSearch]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebounceSearch(search), 350);
+    const timeout = setTimeout(() => setDebounceSearch(search), 250);
     return () => clearTimeout(timeout);
   }, [search]);
 
