@@ -56,8 +56,8 @@ const navItems: NavItem[] = [
     roles: ["admin"],
   },
   {
-    title: "DocumentTypes",
-    url: "/document-types",
+    title: "Document Manager",
+    url: "/document-manager",
     icon: FileSearchCorner,
     roles: ["admin", "staff"],
   },
