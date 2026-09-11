@@ -12,12 +12,21 @@ import EditRow from "./EditRow";
 import { useUsers } from "@/hooks/useUsers";
 
 function AccountsTable() {
-  const { loading, users } = useUsers();
+  const { loading, users, error } = useUsers();
   const [editingUser, setEditingUser] = useState<string | null>(null);
 
   function setEdit(isEditing: boolean, userId: string) {
     setEditingUser(isEditing ? userId : null);
   }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-lg text-muted-foreground">Something went wrong: {error}</p>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex h-full w-full items-center justify-center">

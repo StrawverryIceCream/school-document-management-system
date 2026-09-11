@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import { db } from "../db/db.js";
 import { users } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, and, ilike, or, count } from "drizzle-orm";
 
 interface UpdateUserBody {
   fullName?: string;
@@ -12,14 +12,55 @@ interface UpdateUserBody {
 
 export async function getAllUsers(req: Request, res: Response) {
   try {
-    const allUsers = await db.query.users.findMany({
-      columns: {
-        passwordHash: false,
-      },
-      orderBy: (users, { desc }) => [desc(users.createdAt)],
-    });
+    const { search, role, page = "1", limit = "20" } = req.query;
 
-    res.json(allUsers);
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(
+      100,
+      Math.max(1, parseInt(limit as string, 10) || 20),
+    );
+    const offset = (pageNum - 1) * limitNum;
+
+    const conditions = [];
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(users.fullName, `%${search}%`),
+          ilike(users.email, `%${search}%`),
+          ilike(users.studentId, `%${search}%`),
+        ),
+      );
+    }
+
+    if (role) {
+      conditions.push(eq(users.role, role as any));
+    }
+
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const [allUsers, totalResult] = await Promise.all([
+      db.query.users.findMany({
+        columns: { passwordHash: false },
+        where: whereClause,
+        orderBy: (users, { desc }) => [desc(users.createdAt)],
+        limit: limitNum,
+        offset,
+      }),
+      db.select({ total: count() }).from(users).where(whereClause),
+    ]);
+
+    const total = totalResult?.[0]?.total ?? 0;
+    
+    res.json({
+      data: allUsers,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (err) {
     console.error("[getAllUsers] error:", err);
     res.status(500).json({ error: "Internal server error" });

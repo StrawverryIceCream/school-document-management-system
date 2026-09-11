@@ -1,3 +1,5 @@
+import type { User } from "@/types";
+
 interface UpdateUserBody {
   fullName?: string;
   studentId?: string | null;
@@ -5,15 +7,44 @@ interface UpdateUserBody {
   email?: string;
 }
 
-export async function getAllUsers() {
-  const res = await fetch("/api/users", {
+export interface GetAllUsersParams {
+  search?: string;
+  role?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedUsersResponse {
+  data: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export async function getAllUsers(
+  params: GetAllUsersParams = {},
+): Promise<PaginatedUsersResponse> {
+  const searchParams = new URLSearchParams();
+
+  if (params.search) searchParams.set("search", params.search);
+  if (params.role) searchParams.set("role", params.role);
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.limit) searchParams.set("limit", String(params.limit));
+
+  const query = searchParams.toString();
+  const url = `/api/users${query ? `?${query}` : ""}`;
+
+  const res = await fetch(url, {
     credentials: "include",
   });
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(
-      `/api/users responded ${res.status}${text ? `: ${text}` : ""}`,
+      `${url} responded ${res.status}${text ? `: ${text}` : ""}`,
     );
   }
 

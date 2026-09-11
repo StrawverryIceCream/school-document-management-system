@@ -10,6 +10,7 @@ import { requireRoles } from "../middleware/requireRoles.js";
 import validateId from "../middleware/validateId.js";
 
 const router = Router();
+
 router.get("/", requireAuth, requireRoles("admin"), getAllUsers);
 router.get(
   "/:id",
