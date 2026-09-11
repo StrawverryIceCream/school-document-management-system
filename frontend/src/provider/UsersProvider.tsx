@@ -48,7 +48,15 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
   }
   return (
     <UsersContext.Provider
-      value={{ users, setRole, search, setSearch, loading, error, refreshAccounts }}
+      value={{
+        users,
+        setRole,
+        search,
+        setSearch,
+        loading,
+        error,
+        refreshAccounts,
+      }}
     >
       {children}
     </UsersContext.Provider>

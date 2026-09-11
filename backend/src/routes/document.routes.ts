@@ -13,5 +13,5 @@ router.use(requireAuth);
 router.get("/", requireRoles("admin", "staff"), getAllDocument);
 router.get("/:id", requireRoles("admin", "staff"), getDocumentById);
 router.post("/", requireRoles("admin"), createDocument);
-router.patch("/", requireRoles("admin"), updateDocumentType);
+router.patch("/:id", requireRoles("admin"), updateDocumentType);
 export default router;
