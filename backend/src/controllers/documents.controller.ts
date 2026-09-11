@@ -82,7 +82,7 @@ export async function getDocumentById(
 
 export async function createDocument(req: Request, res: Response) {
   try {
-    const { code, name, description, requiredFields, fee } = req.body;
+    const { code, name, description, requiredFields, fee, isActive } = req.body;
 
     if (
       !code ||
@@ -110,7 +110,7 @@ export async function createDocument(req: Request, res: Response) {
       ...(description?.trim() ? { description: description.trim() } : {}),
       requiredFields,
       fee,
-      isActive: true,
+      isActive: isActive ?? true,
     };
 
     const [document] = await db

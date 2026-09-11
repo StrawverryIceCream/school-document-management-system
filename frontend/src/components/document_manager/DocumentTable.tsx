@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Button } from "../ui/button";
-import { Edit } from "lucide-react";
+import { Edit, PencilOff, Settings2 } from "lucide-react";
 
 function DocumentTable() {
   const { documents, loading, error } = useDocuments();
@@ -36,11 +36,11 @@ function DocumentTable() {
         <TableRow>
           <TableHead className="w-30">ID</TableHead>
           <TableHead className="w-30">Code</TableHead>
-          <TableHead className="w-60">Name</TableHead>
-          <TableHead className="w-100">Description</TableHead>
-          <TableHead className="w-60">Required Fields</TableHead>
-          <TableHead className="w-40">Fee</TableHead>
-          <TableHead className="w-40">Status</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Description</TableHead>
+          <TableHead className="w-50">Required Fields</TableHead>
+          <TableHead>Fee</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Action</TableHead>
         </TableRow>
       </TableHeader>
@@ -52,13 +52,29 @@ function DocumentTable() {
             </TableCell>
             <TableCell>{document.code}</TableCell>
             <TableCell>{document.name}</TableCell>
-            <TableCell>{document.description}</TableCell>
-            <TableCell>{document.id}</TableCell>
-            <TableCell>{document.fee}</TableCell>
-            <TableCell>{document.isActive}</TableCell>
+            <TableCell className=" max-w-100 truncate">
+              {document.description}
+            </TableCell>
             <TableCell>
-              <Button>
+              <Button variant="outline">
+                <Settings2 />
+                <span>Required Fields</span>
+              </Button>
+            </TableCell>
+            <TableCell>₱{document.fee}</TableCell>
+            <TableCell
+              className={document.isActive ? "text-green-600" : "text-red-600"}
+            >
+              {document.isActive ? "Active" : "Inactive"}
+            </TableCell>
+            <TableCell className="flex item-center gap-2">
+              <Button variant="default">
                 <Edit />
+                <span>Edit</span>
+              </Button>
+              <Button variant="destructive">
+                <PencilOff />
+                <span>Disable</span>
               </Button>
             </TableCell>
           </TableRow>

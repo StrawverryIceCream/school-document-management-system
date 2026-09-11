@@ -40,6 +40,15 @@ export interface DocumentType extends Timestamps {
   requiredFields: RequiredFieldDefinition[];
 }
 
+export interface NewDocument {
+  code: string;
+  name: string;
+  description: string;
+  fee: string;
+  isActive: boolean;
+  requiredFields: RequiredFieldDefinition[];
+};
+
 export interface DocumentRequest extends Timestamps {
   id: number;
   userId: number;

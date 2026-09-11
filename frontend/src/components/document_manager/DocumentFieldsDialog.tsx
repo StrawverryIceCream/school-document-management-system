@@ -1,21 +1,56 @@
-import type { DocumentType } from "@/types";
+import type { NewDocument } from "@/types";
 import { Field } from "../ui/field";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { useState } from "react";
+
 
 function DocumentFieldsDialog({
   setNewDocument,
 }: {
-  setNewDocument: (value: DocumentType | null) => void;
+  setNewDocument: React.Dispatch<React.SetStateAction<NewDocument | null>>;
 }) {
+  const [form, setForm] = useState<NewDocument>({
+    code: "",
+    name: "",
+    description: "",
+    fee: "",
+    isActive: true,
+    requiredFields: [],
+  });
+
+  const updateField = <K extends keyof NewDocument>(
+    key: K,
+    value: NewDocument[K],
+  ) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setNewDocument((prev) => ({
+      ...(prev ?? {
+        code: "",
+        name: "",
+        description: "",
+        fee: "",
+        isActive: true,
+        requiredFields: [],
+      }),
+      [key]: value,
+    }));
+  };
+
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
         <Field>
           <Label htmlFor="code">Code</Label>
-          <Input id="code" name="code" placeholder="TOR" />
+          <Input
+            id="code"
+            name="code"
+            placeholder="TOR"
+            value={form.code}
+            onChange={(e) => updateField("code", e.target.value)}
+          />
         </Field>
 
         <Field>
@@ -26,13 +61,21 @@ function DocumentFieldsDialog({
             type="number"
             step="0.01"
             placeholder="0.00"
+            value={form.fee}
+            onChange={(e) => updateField("fee", e.target.value)}
           />
         </Field>
       </div>
 
       <Field>
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" placeholder="Transcript of Records" />
+        <Input
+          id="name"
+          name="name"
+          placeholder="Transcript of Records"
+          value={form.name}
+          onChange={(e) => updateField("name", e.target.value)}
+        />
       </Field>
 
       <Field>
@@ -41,6 +84,8 @@ function DocumentFieldsDialog({
           id="description"
           name="description"
           placeholder="Brief description shown to requesters"
+          value={form.description}
+          onChange={(e) => updateField("description", e.target.value)}
         />
       </Field>
 
@@ -51,7 +96,12 @@ function DocumentFieldsDialog({
             Inactive documents can&apos;t be requested by students.
           </p>
         </div>
-        <Switch id="isActive" name="isActive" defaultChecked />
+        <Switch
+          id="isActive"
+          name="isActive"
+          checked={form.isActive}
+          onCheckedChange={(checked) => updateField("isActive", checked)}
+        />
       </Field>
     </>
   );

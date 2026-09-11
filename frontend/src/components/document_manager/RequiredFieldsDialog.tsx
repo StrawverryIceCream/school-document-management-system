@@ -12,39 +12,46 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { useState } from "react";
-import type { DocumentType } from "@/types";
+import type { NewDocument, RequiredFieldDefinition } from "@/types";
 
-interface Field {
-  label: string;
-  type: string;
-  required: boolean;
-}
 
 function RequiredFieldsDialog({
   setNewDocument,
 }: {
-  setNewDocument: (value: DocumentType | null) => void;
+  setNewDocument: React.Dispatch<React.SetStateAction<NewDocument | null>>;
 }) {
-  const [fields, setFields] = useState<Field[]>([]);
-  const [newField, setNewField] = useState({
-    label: "",
-    type: "text",
-    required: true,
-  });
+  const [fields, setFields] = useState<RequiredFieldDefinition[]>([]);
+
+
+   const syncFields = (nextFields: RequiredFieldDefinition[]) => {
+    setFields(nextFields);
+
+    setNewDocument((prev) => ({
+      code: prev?.code ?? "",
+      name: prev?.name ?? "",
+      description: prev?.description ?? "",
+      fee: prev?.fee ?? "0",
+      isActive: prev?.isActive ?? true,
+      requiredFields: nextFields,
+    }));
+  };
 
   function handleAddField() {
-    if (!newField.label.trim()) return;
-
-    setFields((prev) => [
-      ...prev,
-      { ...newField, label: newField.label.trim() },
-    ]);
-
-    setNewField({
+    const field: RequiredFieldDefinition = {
+      key: `field-${Date.now()}`,
       label: "",
       type: "text",
       required: true,
-    });
+    };
+    syncFields([...fields, field]);
+  }
+
+  function handleUpdateField(key: string, updates: Partial<RequiredFieldDefinition>) {
+    syncFields(fields.map((f) => (f.key === key ? { ...f, ...updates } : f)));
+  }
+
+  function handleRemoveField(key: string) {
+    syncFields(fields.filter((f) => f.key !== key));
   }
 
   return (
@@ -62,64 +69,47 @@ function RequiredFieldsDialog({
         </Button>
       </div>
 
-      <div className="flex items-start gap-2 rounded-lg border p-2.5">
-        <div className="flex-1 space-y-2">
-          <Input
-            placeholder="Field label (e.g. School Year)"
-            value={newField.label}
-            onChange={(e) =>
-              setNewField((prev) => ({ ...prev, label: e.target.value }))
-            }
-          />
+      {fields.map((field) => (
+        <div key={field.key} className="flex items-start gap-2 rounded-lg border p-2.5">
+          <div className="flex-1 space-y-2">
+            <Input
+              placeholder="Field label (e.g. School Year)"
+              value={field.label}
+              onChange={(e) => handleUpdateField(field.key, { label: e.target.value })}
+            />
 
-          <div className="flex items-center gap-3">
-            <Select
-              value={newField.type}
-              onValueChange={(value) =>
-                setNewField((prev) => ({ ...prev, type: value }))
-              }
-            >
-              <SelectTrigger className="w-35">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="text">Text</SelectItem>
-                <SelectItem value="number">Number</SelectItem>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="file">File upload</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                defaultChecked
-                checked={newField.required}
-                onCheckedChange={(checked) =>
-                  setNewField((prev) => ({ ...prev, required: checked }))
+            <div className="flex items-center gap-3">
+              <Select
+                value={field.type}
+                onValueChange={(value) =>
+                  handleUpdateField(field.key, {
+                    type: value as RequiredFieldDefinition["type"],
+                  })
                 }
-              />
-              <span className="text-sm text-muted-foreground">Required</span>
+              >
+                <SelectTrigger className="w-35">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="select">Select</SelectItem>
+                  <SelectItem value="checkbox">Checkbox</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={field.required}
+                  onCheckedChange={(checked) => handleUpdateField(field.key, { required: checked })}
+                />
+                <span className="text-sm text-muted-foreground">Required</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <Button type="button" variant="ghost" size="icon">
-          <Trash2 className="w-4 h-4 text-destructive" />
-        </Button>
-      </div>
-      {fields.map((field) => (
-        <div key={field.label} className="flex items-center gap-2">
-          <div className="flex flex-1 items-center justify-between rounded-lg border p-3">
-            <Label htmlFor="isActive">{field.label}</Label>
-            <p className="text-sm text-muted-foreground">{field.type}</p>
-          </div>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-          >
+          <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveField(field.key)}>
             <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>
