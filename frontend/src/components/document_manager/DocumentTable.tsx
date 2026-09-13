@@ -7,11 +7,18 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Button } from "../ui/button";
-import { Edit, PencilOff, Settings2 } from "lucide-react";
+import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
+import { useState } from "react";
+import EditDocumentRow from "./EditDocumentRow";
+import EditDocument from "./EditDocument";
 
 function DocumentTable() {
   const { documents, loading, error } = useDocuments();
+  const [editingDocument, setEditingDocument] = useState<number | null>(null);
+
+  function setEdit(isEditing: boolean, documentId: number) {
+    setEditingDocument(isEditing ? documentId : null);
+  }
 
   if (error) {
     return (
@@ -46,37 +53,42 @@ function DocumentTable() {
       </TableHeader>
       <TableBody>
         {documents.map((document) => (
-          <TableRow key={document.id}>
+          <TableRow
+            key={document.id}
+            className={!document.isActive ? "text-muted-foreground" : ""}
+          >
             <TableCell className="font-medium max-w-25 truncate">
               {document.id}
             </TableCell>
-            <TableCell>{document.code}</TableCell>
-            <TableCell>{document.name}</TableCell>
-            <TableCell className=" max-w-100 truncate">
-              {document.description}
-            </TableCell>
-            <TableCell>
-              <Button variant="outline">
-                <Settings2 />
-                <span>Required Fields</span>
-              </Button>
-            </TableCell>
-            <TableCell>₱{document.fee}</TableCell>
-            <TableCell
-              className={document.isActive ? "text-green-600" : "text-red-600"}
-            >
-              {document.isActive ? "Active" : "Inactive"}
-            </TableCell>
-            <TableCell className="flex item-center gap-2">
-              <Button variant="default">
-                <Edit />
-                <span>Edit</span>
-              </Button>
-              <Button variant="destructive">
-                <PencilOff />
-                <span>Disable</span>
-              </Button>
-            </TableCell>
+            {editingDocument === document.id ? (
+              <EditDocumentRow document={document} setEdit={setEdit} />
+            ) : (
+              <>
+                <TableCell>{document.code}</TableCell>
+                <TableCell>{document.name}</TableCell>
+                <TableCell className="max-w-100 truncate">
+                  {document.description}
+                </TableCell>
+                <TableCell>
+                  <DocumentRequiredFieldDialog
+                    requiredFields={document.requiredFields}
+                  />
+                </TableCell>
+                <TableCell>₱{document.fee}</TableCell>
+                <TableCell
+                  className={
+                    document.isActive ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  {document.isActive ? "Active" : "Inactive"}
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-end">
+                    <EditDocument document={document} setEdit={setEdit} />
+                  </div>
+                </TableCell>
+              </>
+            )}
           </TableRow>
         ))}
       </TableBody>

@@ -6,7 +6,6 @@ export interface RequiredField {
   required: boolean;
 }
 
-
 export interface GetAllDocumentParams {
   search?: string;
   isActive?: boolean;
@@ -38,7 +37,8 @@ export async function getAllDocument(
   const searchParams = new URLSearchParams();
 
   if (params.search) searchParams.set("search", params.search);
-  if (params.isActive !== undefined) searchParams.set("isActive", String(params.isActive));
+  if (params.isActive !== undefined)
+    searchParams.set("isActive", String(params.isActive));
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 
@@ -78,4 +78,17 @@ export async function updateDocument(
   });
 
   return handleResponse<DocumentType>(res, url);
+}
+
+export async function deleteDocumentById(
+  id: string,
+): Promise<{ message: string }> {
+  const url = `/api/documents/${id}`;
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return handleResponse<{ message: string }>(res, url);
 }

@@ -6,7 +6,6 @@ import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { useState } from "react";
 
-
 function DocumentFieldsDialog({
   setNewDocument,
 }: {

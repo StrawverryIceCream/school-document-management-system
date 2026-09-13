@@ -172,3 +172,28 @@ export async function updateDocumentType(
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function deleteDocumentById(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+
+    const deletedDocument = await db
+      .delete(documentTypes)
+      .where(eq(documentTypes.id, id))
+      .returning({
+        id: documentTypes.id,
+      });
+
+    if (deletedDocument.length === 0) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    return res.status(200).json({ message: "Document deleted successfully" });
+  } catch (err) {
+    console.error("[deleteDocumentById] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
