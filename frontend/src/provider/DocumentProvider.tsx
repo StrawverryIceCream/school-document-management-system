@@ -7,11 +7,22 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [isActive, setIsActive] = useState<boolean | undefined>(undefined);
+  const [debounceSearch, setDebounceSearch] = useState(search);
 
   const loadDocuments = useCallback(async (): Promise<DocumentType[]> => {
-    const response = await getAllDocument();
+    const response = await getAllDocument({
+      search: debounceSearch,
+      isActive: isActive,
+    });
     return response.data;
-  }, []);
+  }, [debounceSearch, isActive]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebounceSearch(search), 250);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   useEffect(() => {
     loadDocuments()
@@ -33,7 +44,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       setError(null);
     } catch (error) {
       console.log(error);
-      setError(error instanceof Error ? error.message : "Failed to load users");
+      setError(error instanceof Error ? error.message : "Failed to load documents");
     } finally {
       setLoading(false);
     }
@@ -41,7 +52,16 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <DocumentContext.Provider
-      value={{ documents, loading, error, refreshDocument }}
+      value={{
+        documents,
+        loading,
+        error,
+        search,
+        setSearch,
+        isActive,
+        setIsActive,
+        refreshDocument
+      }}
     >
       {children}
     </DocumentContext.Provider>
