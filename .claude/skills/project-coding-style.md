@@ -1,5 +1,5 @@
 ---
-name: project-coding-style
+name: school-management-system-coding-style
 description: >
   Enforces the coding standards, architectural patterns, and best practices for this school document management system.
   Use this skill when writing new code, refactoring existing code, reviewing PRs, or when the user asks about
