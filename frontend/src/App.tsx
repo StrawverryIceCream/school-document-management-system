@@ -15,11 +15,13 @@ import Windows from "./pages/Windows";
 import AllRequest from "./pages/AllRequest";
 import NewRequest from "./pages/NewRequest";
 import MyRequest from "./pages/MyRequest";
+import { Toaster } from "sonner";
 
 export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <Toaster />
         <BrowserRouter>
           <Routes>
             <Route

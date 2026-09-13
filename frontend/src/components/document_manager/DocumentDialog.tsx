@@ -10,6 +10,7 @@ import { useState } from "react";
 import DocumentDialogHeader from "./DocumentDialogHeader";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DialogFooter } from "../ui/dialog";
+import { toast } from "sonner";
 
 function DocumentDialog() {
   const { refreshDocument } = useDocuments();
@@ -33,9 +34,12 @@ function DocumentDialog() {
         isActive: newDocument?.isActive ?? true,
         requiredFields: newDocument?.requiredFields ?? [],
       });
-      refreshDocument();
       setOpen(false);
+      await refreshDocument();
       setCurrentPage(1);
+      toast.success("Document Created", {
+        description: `${newDocument.name} added successfully.`,
+      });
       setNewDocument(null);
     } catch (err) {
       console.log(err);
@@ -85,7 +89,11 @@ function DocumentDialog() {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button type="button" onClick={handleNext} disabled={!isPage1Valid}>
+              <Button
+                type="button"
+                onClick={handleNext}
+                disabled={!isPage1Valid}
+              >
                 Next
               </Button>
             </>

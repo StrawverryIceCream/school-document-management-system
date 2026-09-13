@@ -8,8 +8,10 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import type { DocumentType } from "@/types";
-import { updateDocument } from "@/api/document";
+import { deleteDocumentById, updateDocument } from "@/api/document";
 import { useDocuments } from "@/hooks/useDocuments";
+import DocumentDeleteAlert from "./DocumentDeleteAlert";
+import { toast } from "sonner";
 
 function EditDocument({
   document,
@@ -22,10 +24,22 @@ function EditDocument({
 
   async function handleToggleActive() {
     try {
-      await updateDocument(String(document.id), { isActive: !document.isActive });
+      await updateDocument(String(document.id), {
+        isActive: !document.isActive,
+      });
       refreshDocument();
     } catch (err) {
       console.log("Failed to toggle document status:", err);
+    }
+  }
+
+  async function handleDeleteDocument() {
+    try {
+      await deleteDocumentById(String(document.id));
+      refreshDocument();
+      toast.success("Successfully Deleted");
+    } catch (err) {
+      console.log("Failed to delete document:", err);
     }
   }
 
@@ -55,6 +69,9 @@ function EditDocument({
         >
           {document.isActive ? "Disable" : "Enable"}
         </DropdownMenuItem>
+        {!document.isActive && (
+          <DocumentDeleteAlert handleDeleteDocument={handleDeleteDocument} />
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
