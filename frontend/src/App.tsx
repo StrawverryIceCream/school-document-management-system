@@ -10,7 +10,7 @@ import { AuthProvider } from "./provider/AuthProvider";
 import RequireAuth from "./components/RequireAuth";
 import Accounts from "./pages/Accounts";
 import RequireRole from "./components/RequireRole";
-import DocumentTypes from "./pages/DocumentTypes";
+import DocumentManager from "./pages/DocumentManager";
 import Windows from "./pages/Windows";
 import AllRequest from "./pages/AllRequest";
 import NewRequest from "./pages/NewRequest";
@@ -50,10 +50,10 @@ export default function App() {
                 }
               />
               <Route
-                path="/document-types"
+                path="/document-manager"
                 element={
                   <RequireRole allowedRoles={["admin", "staff"]}>
-                    <DocumentTypes />
+                    <DocumentManager />
                   </RequireRole>
                 }
               />

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import session from "express-session";
 import authRouter from "./routes/auth.routes.js";
 import usersRouter from "./routes/users.routes.js";
+import documentRouter from "./routes/document.routes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,7 @@ app.get("/", (req, res) => res.send("hello"));
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/documents", documentRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not Found" });

@@ -35,10 +35,19 @@ export interface DocumentType extends Timestamps {
   code: string;
   name: string;
   description: string | null;
-  fee: string; // numeric columns come back as string from pg driver
+  fee: string;
   isActive: boolean;
   requiredFields: RequiredFieldDefinition[];
 }
+
+export interface NewDocument {
+  code: string;
+  name: string;
+  description: string;
+  fee: string;
+  isActive: boolean;
+  requiredFields: RequiredFieldDefinition[];
+};
 
 export interface DocumentRequest extends Timestamps {
   id: number;

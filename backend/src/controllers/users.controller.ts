@@ -51,7 +51,7 @@ export async function getAllUsers(req: Request, res: Response) {
     ]);
 
     const total = totalResult?.[0]?.total ?? 0;
-    
+
     res.json({
       data: allUsers,
       pagination: {
