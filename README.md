@@ -1,4 +1,4 @@
-# Registrar Management System
+# School Document Management System
 
 A web-based system that lets students and teachers request school-issued documents (e.g. Transcript of Records, Certificate of Registration, True Copy of Grades) online — instead of lining up at the registrar's office — with online payment, digital receipts, and status notifications when documents are ready for release.
 
