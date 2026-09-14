@@ -23,7 +23,7 @@ function DocumentGrid() {
   return (
     <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
       {documents.map((document) => (
-        <DocumentCard document={document} />
+        <DocumentCard key={document.id} document={document} />
       ))}
     </div>
   );

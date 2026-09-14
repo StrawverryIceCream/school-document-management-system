@@ -25,8 +25,8 @@ function CreateRequest() {
 
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Choose Document</DialogTitle>
-          <DialogDescription>Set up new request, first choose the document
+          <DialogTitle>Step 1</DialogTitle>
+          <DialogDescription>Choose Document
           </DialogDescription>
         </DialogHeader>
         <DocumentList />

@@ -1,8 +1,14 @@
 import CreateRequest from "@/components/new_request/CreateRequest";
 import DocumentGrid from "@/components/new_request/DocumentGrid";
+import NewRequestForm from "@/components/new_request/NewRequestForm";
+import { useParams } from "react-router-dom";
 
 function NewRequest() {
-  return (
+  const { id } = useParams<{ id?: string }>();
+
+  return id ? (
+    <NewRequestForm />
+  ) : (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mx-auto h-full flex flex-col">
         <div className="flex items-start justify-between mb-8">

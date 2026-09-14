@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
 
 function DocumentList() {
   const { documents, loading, error } = useDocuments();
@@ -45,7 +46,9 @@ function DocumentList() {
               <CardContent className="px-4 pb-4 text-muted-foreground">
                 <p>{doc.description}</p>
                 <div className="flex justify-end">
-                  <Button variant="outline" size="sm">Select</Button>
+                  <Button variant="default" size="sm" asChild>
+                    <Link to={`/new-request/${doc.id}`}>Select</Link>
+                  </Button>
                 </div>
               </CardContent>
             </AccordionContent>
