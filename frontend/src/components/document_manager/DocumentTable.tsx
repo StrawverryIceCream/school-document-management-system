@@ -43,7 +43,7 @@ function DocumentTable() {
         <TableRow>
           <TableHead className="w-30">ID</TableHead>
           <TableHead className="w-30">Code</TableHead>
-          <TableHead>Name</TableHead>
+          <TableHead className="w-50">Name</TableHead>
           <TableHead>Description</TableHead>
           <TableHead className="w-50">Required Fields</TableHead>
           <TableHead>Fee</TableHead>

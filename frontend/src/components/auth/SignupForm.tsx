@@ -73,14 +73,21 @@ export function SignupForm({
             </Field>
             <Field>
               <FieldLabel htmlFor="studentId">Student Id</FieldLabel>
-              <Input
-                id="studentId"
-                type="text"
-                placeholder="TUP-M-XXXX"
-                required
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-              />
+                <Input
+                  id="studentId"
+                  type="text"
+                  placeholder="TUP-M-XXXX"
+                  required
+                  value={studentId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.startsWith("TUP-M-")) {
+                      setStudentId(value);
+                    } else {
+                      setStudentId("TUP-M-");
+                    }
+                  }}
+                />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>

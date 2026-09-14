@@ -1,14 +1,16 @@
 import { SignupForm } from "@/components/auth/SignupForm";
 import { ModeToggle } from "@/components/ModeToggle";
-import { login, signup } from "@/api/auth";
+import { signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 function Signup() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("")
+  const [studentId, setStudentId] = useState("TUP-M-")
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ function Signup() {
       await signup(email, password, fullName, studentId);
       await login(email, password);
       navigate("/home");
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
