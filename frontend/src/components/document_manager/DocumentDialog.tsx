@@ -73,7 +73,7 @@ function DocumentDialog() {
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
-        <DocumentDialogHeader />
+        <DocumentDialogHeader type="Add" />
 
         <FieldGroup>
           {currentPage === 1 ? (

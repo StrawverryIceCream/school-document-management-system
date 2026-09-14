@@ -7,11 +7,15 @@ import {
   DropdownMenuContent,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
+import { Dialog, DialogContent } from "../ui/dialog";
 import type { DocumentType } from "@/types";
 import { deleteDocumentById, updateDocument } from "@/api/document";
 import { useDocuments } from "@/hooks/useDocuments";
 import DocumentDeleteAlert from "./DocumentDeleteAlert";
+import EditRequiredFieldsDialog from "./EditRequiredFieldsDialog";
 import { toast } from "sonner";
+import { useState } from "react";
+import DocumentDialogHeader from "./DocumentDialogHeader";
 
 function EditDocument({
   document,
@@ -21,6 +25,7 @@ function EditDocument({
   setEdit: (isEditing: boolean, documentId: number) => void;
 }) {
   const { refreshDocument } = useDocuments();
+  const [editFieldsOpen, setEditFieldsOpen] = useState(false);
 
   async function handleToggleActive() {
     try {
@@ -62,6 +67,9 @@ function EditDocument({
         >
           Edit
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setEditFieldsOpen(true)}>
+          Edit Fields
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant={!document.isActive ? "default" : "destructive"}
@@ -73,6 +81,21 @@ function EditDocument({
           <DocumentDeleteAlert handleDeleteDocument={handleDeleteDocument} />
         )}
       </DropdownMenuContent>
+
+      <Dialog open={editFieldsOpen} onOpenChange={setEditFieldsOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DocumentDialogHeader type="Edit"/>
+          <EditRequiredFieldsDialog
+            documentId={document.id}
+            initialFields={document.requiredFields}
+            onSaveSuccess={() => {
+              setEditFieldsOpen(false);
+              refreshDocument();
+            }}
+            onCancel={() => setEditFieldsOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </DropdownMenu>
   );
 }

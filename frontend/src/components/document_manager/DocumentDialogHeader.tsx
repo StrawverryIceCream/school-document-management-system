@@ -1,11 +1,11 @@
 import { DialogHeader, DialogDescription, DialogTitle } from "../ui/dialog";
 
-function DocumentDialogHeader() {
+function DocumentDialogHeader({ type }: { type: "Add" | "Edit" }) {
   return (
     <DialogHeader>
-      <DialogTitle>Add Document</DialogTitle>
+      <DialogTitle>{type} Document</DialogTitle>
       <DialogDescription>
-        Set up a document students and teachers can request. Add any info
+        Set up a document students and teachers can request. {type} any info
         they&apos;ll need to provide when requesting it.
       </DialogDescription>
     </DialogHeader>
