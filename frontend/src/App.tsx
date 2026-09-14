@@ -35,7 +35,7 @@ export default function App() {
               >
                 <Route path="/home" element={<Home />} />
                 <Route path="/" element={<Home />} />
-                <Route path="/new-request" element={<NewRequest />} />
+                <Route path="/new-request/:id?" element={<NewRequest />} />
                 <Route path="/my-request" element={<MyRequest />} />
                 <Route
                   path="/dashboard"

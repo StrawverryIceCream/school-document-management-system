@@ -49,6 +49,22 @@ export async function getAllDocument(
   return handleResponse<PaginatedDocumentResponse>(res, url);
 }
 
+
+export async function getDocumentById(id: string): Promise<DocumentType> {
+  const res = await fetch(`/api/documents/${id}`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `/api/documents/${id} responded ${res.status}${text ? `: ${text}` : ""}`,
+    );
+  }
+
+  return res.json() as Promise<DocumentType>;
+}
+
 export async function createDocument(
   payload: Omit<DocumentType, "id" | "createdAt" | "updatedAt">,
 ): Promise<DocumentType> {

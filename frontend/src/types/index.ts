@@ -30,6 +30,8 @@ export interface RequiredFieldDefinition {
   options?: string[]; // for "select" type
 }
 
+export type RequiredFieldValues = Record<string, string | number | boolean>;
+
 export interface DocumentType extends Timestamps {
   id: number;
   code: string;
