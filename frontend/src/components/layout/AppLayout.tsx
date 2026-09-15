@@ -5,7 +5,7 @@ import SiteHeader from "../sidebar/SiteHeader";
 
 function AppLayout() {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh">
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />

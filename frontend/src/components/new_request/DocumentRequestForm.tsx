@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DocumentType, RequiredFieldValues } from "@/types";
+import { Textarea } from "../ui/textarea";
 
 type DocumentRequestFormProps = {
   document: DocumentType;
@@ -37,25 +38,15 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
   }
 
   return (
-    <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="mx-auto h-full flex flex-col max-w-2xl">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-normal">
-              {document.name}
-            </h1>
-            {document.description && (
-              <p className="text-sm mt-2 text-muted-foreground">
-                {document.description}
-              </p>
-            )}
-          </div>
-          <span className="text-lg font-medium">${document.fee}</span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <FieldGroup>
-            {document.requiredFields.map((fieldDef) => (
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+      <FieldGroup>
+        <Field key="purpose">
+          <FieldLabel htmlFor="purpose">Purpose</FieldLabel>
+          <Textarea></Textarea>
+        </Field>
+        {document.requiredFields.map(
+          (fieldDef) =>
+            fieldDef.label !== "Purpose" && (
               <Field key={fieldDef.key}>
                 <FieldLabel htmlFor={fieldDef.key}>{fieldDef.label}</FieldLabel>
                 {fieldDef.type === "text" && (
@@ -114,15 +105,14 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
                   />
                 )}
               </Field>
-            ))}
-          </FieldGroup>
+            ),
+        )}
+      </FieldGroup>
 
-          <Button type="submit" disabled={submitting} className="mt-6">
-            {submitting ? "Submitting..." : "Submit Request"}
-          </Button>
-        </form>
-      </div>
-    </div>
+      <Button type="submit" disabled={submitting} className="mt-6">
+        {submitting ? "Submitting..." : "Submit Request"}
+      </Button>
+    </form>
   );
 }
 

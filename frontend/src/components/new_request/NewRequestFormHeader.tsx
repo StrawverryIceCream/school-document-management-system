@@ -1,9 +1,23 @@
-import React from 'react'
+import type { DocumentType } from "@/types";
 
-function NewRequestFormHeader() {
+function NewRequestFormHeader({ document }: { document: DocumentType }) {
   return (
-    <div>NewRequestFormHeader</div>
-  )
+    <div>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-normal">
+            {document.name}
+          </h1>
+          {document.description && (
+            <p className="text-sm mt-2 text-muted-foreground">
+              {document.description}
+            </p>
+          )}
+        </div>
+        <span className="text-lg font-medium">₱{document.fee}</span>
+      </div>
+    </div>
+  );
 }
 
-export default NewRequestFormHeader
+export default NewRequestFormHeader;
