@@ -24,9 +24,12 @@ function NewRequest() {
           <CreateRequest />
 
           <div className="flex items-start justify-between mb-8 mt-8">
-            <h1 className="text-2xl font-bold tracking-normal">
-              Available Documents
-            </h1>
+            <div>
+              <h1 className="text-2xl font-bold tracking-normal">
+                Step 1
+              </h1>
+              <p className="text-sm mt-2">Choose available documents.</p>
+            </div>
           </div>
 
           <DocumentGrid />

@@ -14,7 +14,6 @@ function NewRequestFormHeader({ document }: { document: DocumentType }) {
             </p>
           )}
         </div>
-        <span className="text-lg font-medium">₱{document.fee}</span>
       </div>
     </div>
   );

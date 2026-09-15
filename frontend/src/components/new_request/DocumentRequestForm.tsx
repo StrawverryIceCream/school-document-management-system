@@ -1,6 +1,5 @@
 // components/documents/DocumentRequestForm.tsx
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
@@ -14,31 +13,15 @@ import {
 import type { DocumentType, RequiredFieldValues } from "@/types";
 import { Textarea } from "../ui/textarea";
 
-type DocumentRequestFormProps = {
-  document: DocumentType;
-  onSubmit: (values: RequiredFieldValues) => Promise<void>;
-};
-
-function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
+function DocumentRequestForm({ document }: { document: DocumentType }) {
   const [values, setValues] = useState<RequiredFieldValues>({});
-  const [submitting, setSubmitting] = useState(false);
 
   function setField(key: string, value: string | number | boolean) {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitting(true);
-    try {
-      await onSubmit(values);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+    <form className="flex-1 overflow-y-auto">
       <FieldGroup>
         <Field key="purpose">
           <FieldLabel htmlFor="purpose">Purpose</FieldLabel>
@@ -48,7 +31,10 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
           (fieldDef) =>
             fieldDef.label !== "Purpose" && (
               <Field key={fieldDef.key}>
-                <FieldLabel htmlFor={fieldDef.key}>{fieldDef.label}</FieldLabel>
+                <FieldLabel htmlFor={fieldDef.key}>
+                  {fieldDef.label}
+                  {fieldDef.required && "*"}
+                </FieldLabel>
                 {fieldDef.type === "text" && (
                   <Input
                     id={fieldDef.key}
@@ -108,10 +94,6 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
             ),
         )}
       </FieldGroup>
-
-      <Button type="submit" disabled={submitting} className="mt-6">
-        {submitting ? "Submitting..." : "Submit Request"}
-      </Button>
     </form>
   );
 }
