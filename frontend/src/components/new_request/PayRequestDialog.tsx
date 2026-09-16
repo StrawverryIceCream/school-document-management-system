@@ -19,8 +19,8 @@ function PayRequestDialog() {
 
       <DialogContent className="sm:max-w-2xl max-h-4xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Step 1</DialogTitle>
-          <DialogDescription>Choose Document</DialogDescription>
+          <DialogTitle>Step 3</DialogTitle>
+          <DialogDescription>Pay the appropriate fine.</DialogDescription>
         </DialogHeader>
       </DialogContent>
     </Dialog>
