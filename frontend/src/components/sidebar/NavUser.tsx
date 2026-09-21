@@ -1,6 +1,5 @@
 import {
   ArrowLeftRight,
-  CircleUser,
   EllipsisVertical,
   LogOut,
   UserIcon,
@@ -22,6 +21,7 @@ import {
 import type { User } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Profile from "../profile/Profile";
 
 function NavUser({ user }: { user: User }) {
   const navigate = useNavigate();
@@ -31,10 +31,9 @@ function NavUser({ user }: { user: User }) {
   async function handleLogout() {
     try {
       await logout();
-    } catch(err){
-      console.log(err)
-    }
-    finally {
+    } catch (err) {
+      console.log(err);
+    } finally {
       navigate("/login");
     }
   }
@@ -71,10 +70,8 @@ function NavUser({ user }: { user: User }) {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuItem>
-              <CircleUser />
-              Profile
-            </DropdownMenuItem>
+            <Profile />
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <ArrowLeftRight />

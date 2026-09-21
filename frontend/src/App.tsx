@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import AppLayout from "./components/layout/AppLayout";
 import Signup from "./pages/Signup";
@@ -77,7 +76,6 @@ export default function App() {
                     </RequireRole>
                   }
                 />
-                <Route path="/profile" element={<Profile />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
