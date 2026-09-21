@@ -9,12 +9,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
+} from "recharts"; {/* may error cause recharts doesnt exist on the dependencies, modify to use Shadcn components instead, already installed charts*/}
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
 import type { RequestType } from "@/types";
 
-
+{/* use int erface, never types*/}
 type ChartField = keyof Pick <
   RequestType,
   "status" | "documentType" | "college" | "paymentStatus"
