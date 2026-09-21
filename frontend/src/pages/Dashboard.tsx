@@ -1,6 +1,7 @@
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import RequestSearchToolbar from "@/components/dashboard/RequestSearchToolbar";
+import RequestsStatusChart from "@/components/dashboard/RequestStatusChart";
 import RequestTable from "@/components/dashboard/RequestTable";
 import { DashboardProvider } from "@/provider/DashboardProvider";
 
@@ -12,6 +13,7 @@ function Dashboard() {
           <DashboardHeader />
           <StatsOverview />
           <RequestSearchToolbar />
+          <RequestsStatusChart />
           <RequestTable />
         </div>
       </div>
