@@ -6,7 +6,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "../ui/separator";
-import { Card } from "../ui/card";
 
 export interface NotificationType {
   id: number;
