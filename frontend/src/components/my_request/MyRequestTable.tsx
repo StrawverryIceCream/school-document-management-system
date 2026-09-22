@@ -92,7 +92,7 @@ function MyRequestTable() {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead className="w-[130px]">Request ID</TableHead>
+                <TableHead className="w-32.5">Request ID</TableHead>
                 <TableHead>Document</TableHead>
                 <TableHead>Date Requested</TableHead>
                 <TableHead>Request Status</TableHead>
@@ -102,9 +102,12 @@ function MyRequestTable() {
             <TableBody>
               {mockRequests.map((request) => (
                 <TableRow key={request.id}>
-                  <TableCell className="font-medium">REQ-{request.id}</TableCell>
+                  <TableCell className="font-medium">
+                    REQ-{request.id}
+                  </TableCell>
                   <TableCell>
-                    {documentNames[request.documentTypeId] ?? `Document #${request.documentTypeId}`}
+                    {documentNames[request.documentTypeId] ??
+                      `Document #${request.documentTypeId}`}
                   </TableCell>
                   <TableCell>
                     {new Date(request.createdAt).toLocaleDateString("en-US", {

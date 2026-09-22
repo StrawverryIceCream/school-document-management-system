@@ -5,8 +5,8 @@ import MyRequestTable from "@/components/my_request/MyRequestTable";
 
 function MyRequest() {
   return (
-    <div className="h-full overflow-auto px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-      <div className="mx-auto w-full max-w-[1600px] space-y-6">
+    <div className="h-full overflow-hidden p-6 sm:p-10">
+      <div className="mx-auto h-full flex flex-col space-y-6">
         <MyRequestHeader />
         <MyRequestCards />
         <MyRequestFilters />
