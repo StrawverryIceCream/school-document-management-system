@@ -17,15 +17,17 @@ import NewRequest from "./pages/NewRequest";
 import MyRequest from "./pages/MyRequest";
 import { Toaster } from "sonner";
 import { DocumentProvider } from "./provider/DocumentProvider";
+import { RequestProvider } from "./provider/RequestProvider";
 
 export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <DocumentProvider>
-          <Toaster />
-          <BrowserRouter>
-            <Routes>
+          <RequestProvider>
+            <Toaster />
+            <BrowserRouter>
+              <Routes>
               <Route
                 element={
                   <RequireAuth>
@@ -81,8 +83,9 @@ export default function App() {
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </RequestProvider>
         </DocumentProvider>
       </ThemeProvider>
     </AuthProvider>

@@ -1,34 +1,24 @@
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { collegeOptions, type StatusFilter } from "@/context/RequestContext";
+import { useRequests } from "@/hooks/useRequests";
 
-export type StatusFilter = "all" | "pending" | "processing" | "ready" | "claimed" | "cancelled";
+export type { StatusFilter } from "@/context/RequestContext";
 
-interface RequestHeaderProps {
-  search: string;
-  onSearchChange: (value: string) => void;
-  statusFilter: StatusFilter;
-  onStatusChange: (value: StatusFilter) => void;
-  collegeFilter: string;
-  onCollegeChange: (value: string) => void;
-  windowFilter: string;
-  onWindowChange: (value: string) => void;
-  collegeOptions: readonly string[];
-  windowOptions: string[];
-}
+function RequestHeader() {
+  const {
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    collegeFilter,
+    setCollegeFilter,
+    windowFilter,
+    setWindowFilter,
+    windowOptions,
+  } = useRequests();
 
-function RequestHeader({
-  search,
-  onSearchChange,
-  statusFilter,
-  onStatusChange,
-  collegeFilter,
-  onCollegeChange,
-  windowFilter,
-  onWindowChange,
-  collegeOptions,
-  windowOptions,
-}: RequestHeaderProps) {
   return (
     <div className="mb-6 space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -48,7 +38,7 @@ function RequestHeader({
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search applicant, document, or request ID"
             className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
           />
@@ -62,7 +52,7 @@ function RequestHeader({
             <select
               aria-label="Filter by college"
               value={collegeFilter}
-              onChange={(event) => onCollegeChange(event.target.value)}
+              onChange={(event) => setCollegeFilter(event.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
             >
               <option value="all">All colleges</option>
@@ -81,7 +71,7 @@ function RequestHeader({
             <select
               aria-label="Filter by window"
               value={windowFilter}
-              onChange={(event) => onWindowChange(event.target.value)}
+              onChange={(event) => setWindowFilter(event.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
               disabled={windowOptions.length === 0}
             >
@@ -96,7 +86,7 @@ function RequestHeader({
         </div>
       </div>
 
-      <Tabs value={statusFilter} onValueChange={(value) => onStatusChange(value as StatusFilter)}>
+      <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
         <TabsList className="h-10">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>

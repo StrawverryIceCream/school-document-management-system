@@ -7,15 +7,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Eye, FileText, UserRound } from "lucide-react";
 import type { RequestRow } from "@/types";
+import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
 
 export type { RequestRow } from "@/types";
 
@@ -113,69 +107,7 @@ function RequestTable({
         </Table>
       </div>
 
-      <Dialog open={Boolean(selectedRequest)} onOpenChange={(isOpen) => !isOpen && onCloseRequest()}>
-        {selectedRequest && (
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Request details</DialogTitle>
-              <DialogDescription>
-                Review the selected request information from the live request data source.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 pt-2 text-sm">
-              <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/40 p-3">
-                <span className="text-muted-foreground">Request ID</span>
-                <span className="font-semibold">#{selectedRequest.id}</span>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Applicant</p>
-                  <p className="mt-1 font-medium">{selectedRequest.applicant}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Status</p>
-                  <p className="mt-1 inline-flex rounded-full bg-muted px-2 py-1 text-xs font-medium capitalize">
-                    {selectedRequest.status}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Document</p>
-                  <p className="mt-1 font-medium">{selectedRequest.document}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Date submitted</p>
-                  <p className="mt-1 font-medium">{selectedRequest.submittedAt ?? "Not available"}</p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">College</p>
-                  <p className="mt-1 font-medium">{selectedRequest.college ?? "Not available"}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Window</p>
-                  <p className="mt-1 font-medium">{selectedRequest.window ?? "Not available"}</p>
-                </div>
-              </div>
-
-              {selectedRequest.purpose && (
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Purpose</p>
-                  <p className="mt-1 rounded-md bg-muted/40 p-3 text-foreground">
-                    {selectedRequest.purpose}
-                  </p>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      <RequestDetailsDialog request={selectedRequest} onClose={onCloseRequest} />
     </>
   );
 }
