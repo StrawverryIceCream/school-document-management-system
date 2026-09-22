@@ -22,7 +22,7 @@ export interface PaginatedRequestResponse {
 // UI without a running backend. Everything below this line is the only
 // thing that changed — DashboardProvider.tsx and every component that
 // calls these two functions stays exactly the same either way.
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true";
+const USE_MOCK_DATA = "true";
 
 // Simulates real network latency so loading states are actually visible
 // while testing with mock data.

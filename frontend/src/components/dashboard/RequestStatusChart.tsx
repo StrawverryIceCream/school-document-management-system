@@ -100,7 +100,7 @@ function RequestsStatusChart() {
             No data for this view yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[260px] w-full">
+          <ChartContainer config={chartConfig} className="h-65 w-full">
             {config.chartType === "bar" ? (
               <BarChart data={data}>
                 <CartesianGrid vertical={false} />

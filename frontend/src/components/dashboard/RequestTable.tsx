@@ -35,7 +35,10 @@ function RequestTable() {
         <TableBody>
           {requests.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell
+                colSpan={5}
+                className="text-center text-muted-foreground"
+              >
                 No requests found.
               </TableCell>
             </TableRow>
@@ -45,7 +48,9 @@ function RequestTable() {
                 <TableCell>{r.studentName}</TableCell>
                 <TableCell>{r.documentType}</TableCell>
                 <TableCell>{r.college}</TableCell>
-                <TableCell>{new Date(r.submittedAt).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(r.submittedAt).toLocaleDateString()}
+                </TableCell>
                 <TableCell>
                   <Badge variant="secondary">{r.status}</Badge>
                 </TableCell>
