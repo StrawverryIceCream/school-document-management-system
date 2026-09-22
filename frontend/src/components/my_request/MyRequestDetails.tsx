@@ -62,44 +62,44 @@ function MyRequestDetails({
           View Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-2xl sm:max-w-2xl">
+        <DialogHeader className="space-y-2">
           <DialogTitle>Request Details</DialogTitle>
           <DialogDescription>
             Review the selected request information.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 pt-2 text-sm">
-          <div className="flex items-center justify-between gap-4">
+        <div className="space-y-4 pt-2 text-sm">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Request ID</span>
             <span className="font-medium">REQ-{request.id}</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Document</span>
             <span className="font-medium">{documentName}</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Date Requested</span>
             <span className="font-medium">{formatDate(request.createdAt)}</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Purpose</span>
             <span className="font-medium">{request.purpose ?? "—"}</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Request Status</span>
             <span
-              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${getStatusBadgeClasses(request.status)}`}
+              className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium capitalize ${getStatusBadgeClasses(request.status)}`}
             >
               {request.status}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Release Date</span>
             <span className="font-medium">{request.releaseDate ?? "—"}</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Student ID</span>
             <span className="font-medium">
               {typeof request.formData.studentId === "string"
@@ -107,13 +107,13 @@ function MyRequestDetails({
                 : "—"}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Notes</span>
             <span className="font-medium">{request.staffNotes ?? "—"}</span>
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-2">
           <Button variant="outline">Close</Button>
         </DialogFooter>
       </DialogContent>
