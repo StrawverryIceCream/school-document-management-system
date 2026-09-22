@@ -1,5 +1,5 @@
-export { cn } from "cn"
-
+export { cn } from "cn";
+import { useLocation } from "react-router-dom";
 
 export function formatDate(dateString: string | Date) {
   const date = new Date(dateString);
@@ -16,14 +16,21 @@ export function formatDate(dateString: string | Date) {
 }
 
 export function getInitials(name: string): string {
-    const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(/\s+/);
 
-    if (parts.length === 1) {
-        return parts[0].slice(0, 2).toUpperCase();
-    }
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
 
-    const firstName = parts[0];
-    const lastName = parts[parts.length - 1];
+  const firstName = parts[0];
+  const lastName = parts[parts.length - 1];
 
-    return (firstName[0] + lastName[0]).toUpperCase();
+  return (firstName[0] + lastName[0]).toUpperCase();
+}
+
+export function useCurrentRouteLabel() {
+  const location = useLocation();
+  const segment =
+    location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+  return segment.charAt(0).toUpperCase() + segment.slice(1);
 }
