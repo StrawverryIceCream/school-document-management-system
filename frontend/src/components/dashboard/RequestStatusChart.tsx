@@ -1,32 +1,28 @@
 import { useMemo } from "react";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts"; {/* may error cause recharts doesnt exist on the dependencies, modify to use Shadcn components instead, already installed charts*/}
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import type { RequestType } from "@/types";
 
-{/* use int erface, never types*/}
-type ChartField = keyof Pick <
+// kept as a `type` (not `interface`) on purpose: `keyof Pick<...>` is a
+// mapped/utility type and interfaces can't express that in TS.
+type ChartField = keyof Pick<
   RequestType,
   "status" | "documentType" | "college" | "paymentStatus"
 >;
 
-interface ChartConfig {
+interface ChartFieldConfig {
   title: string;
   chartType: "bar" | "line";
   groupBy: ChartField | "claimedAtDate";
 }
 
-const chartConfigByStatus: Record<string, ChartConfig> = {
+const chartConfigByStatus: Record<string, ChartFieldConfig> = {
   all: { title: "Requests by status", chartType: "bar", groupBy: "status" },
   pending: {
     title: "Pending requests by document type",
@@ -55,7 +51,17 @@ const chartConfigByStatus: Record<string, ChartConfig> = {
   },
 };
 
-function buildChartData(requests: RequestType[], config: ChartConfig) {
+// Maps each dataKey drawn on the chart to a label/color. ChartContainer reads
+// this to expose --color-count as a CSS variable, so the color stays in sync
+// with the theme's chart palette instead of a hardcoded hex.
+const chartConfig = {
+  count: {
+    label: "Requests",
+    color: "var(--chart-1)",
+  },
+};
+
+function buildChartData(requests: RequestType[], config: ChartFieldConfig) {
   const counts = new Map<string, number>();
 
   for (const req of requests) {
@@ -94,37 +100,45 @@ function RequestsStatusChart() {
             No data for this view yet.
           </p>
         ) : (
-          <ResponsiveContainer width="100%" height={260}>
+          <ChartContainer config={chartConfig} className="h-[260px] w-full">
             {config.chartType === "bar" ? (
               <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis allowDecimals={false} fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#0F6E56" radius={[4, 4, 0, 0]} />
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
               </BarChart>
             ) : (
               <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis allowDecimals={false} fontSize={12} />
-                <Tooltip />
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#0F6E56"
+                  stroke="var(--color-count)"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                 />
               </LineChart>
             )}
-          </ResponsiveContainer>
+          </ChartContainer>
         )}
       </CardContent>
     </Card>
   );
 }
 
-
 export default RequestsStatusChart;
-

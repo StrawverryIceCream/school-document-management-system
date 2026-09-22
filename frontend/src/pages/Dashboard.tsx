@@ -1,7 +1,7 @@
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import RequestSearchToolbar from "@/components/dashboard/RequestSearchToolbar";
-import RequestsStatusChart from "@/components/dashboard/RequestStatusChart"; {/* ignore the error, since di mo pa nalalagay yung request status chart*/}
+import RequestsStatusChart from "@/components/dashboard/RequestStatusChart";
 import RequestTable from "@/components/dashboard/RequestTable";
 import { DashboardProvider } from "@/provider/DashboardProvider";
 
@@ -13,7 +13,7 @@ function Dashboard() {
           <DashboardHeader />
           <StatsOverview />
           <RequestSearchToolbar />
-           {/*put your request status chart here after fix */}
+          <RequestsStatusChart />
           <RequestTable />
         </div>
       </div>
