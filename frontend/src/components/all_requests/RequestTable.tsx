@@ -15,18 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Eye, FileText, UserRound } from "lucide-react";
+import type { RequestRow } from "@/types";
 
-export type RequestRow = {
-  id: string;
-  applicant: string;
-  document: string;
-  college?: string | null;
-  window?: string | null;
-  submittedAt?: string | null;
-  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
-  purpose?: string | null;
-  createdAt?: string | null;
-};
+export type { RequestRow } from "@/types";
 
 interface RequestTableProps {
   rows: RequestRow[];

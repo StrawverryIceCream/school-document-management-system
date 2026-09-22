@@ -19,14 +19,15 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import type { User } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-function NavUser({ user }: { user: User }) {
+function NavUser() {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  if (!user) return null;
 
   async function handleLogout() {
     try {

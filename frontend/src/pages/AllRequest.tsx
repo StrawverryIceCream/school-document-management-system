@@ -6,6 +6,7 @@ import RequestSummary from "@/components/all_requests/RequestSummary";
 import RequestTable, {
   type RequestRow,
 } from "@/components/all_requests/RequestTable";
+import { getAllRequests } from "@/api/requests";
 
 const collegeOptions = [
   "College of Science (COS)",
@@ -15,146 +16,6 @@ const collegeOptions = [
   "College of Architecture and Fine Arts (CAFA)",
   "College of Management and Multidisciplinary Studies (CMMS)",
 ] as const;
-
-const REQUEST_ENDPOINTS = [
-  "/api/requests",
-  "/api/document-requests",
-  "/api/documents/requests",
-  "/api/registrar/requests",
-] as const;
-
-function normalizeStatus(value: string | null | undefined): RequestRow["status"] {
-  const status = value?.toLowerCase();
-
-  switch (status) {
-    case "pending":
-      return "pending";
-    case "processing":
-    case "in-progress":
-      return "processing";
-    case "ready":
-      return "ready";
-    case "claimed":
-      return "claimed";
-    case "cancelled":
-    case "rejected":
-      return "cancelled";
-    default:
-      return "pending";
-  }
-}
-
-function normalizeRequestRow(raw: Record<string, unknown>): RequestRow | null {
-  if (!raw || typeof raw !== "object") return null;
-
-  const user = raw.user as Record<string, unknown> | undefined;
-  const documentType = raw.documentType as Record<string, unknown> | undefined;
-  const document = raw.document as Record<string, unknown> | undefined;
-  const documentTypeAlt = raw.document_type as Record<string, unknown> | undefined;
-  const windowData = raw.window as Record<string, unknown> | undefined;
-
-  const id = String(
-    raw.id ?? raw.requestId ?? raw.request_id ?? raw.requestNumber ?? "unknown",
-  );
-
-  const applicant =
-    String(
-      (user && typeof user.fullName === "string" && user.fullName) ||
-        (user && typeof user.full_name === "string" && user.full_name) ||
-        (typeof raw.applicantName === "string" && raw.applicantName) ||
-        (typeof raw.studentName === "string" && raw.studentName) ||
-        (user && typeof user.email === "string" && user.email) ||
-        "Unknown applicant",
-    ) || "Unknown applicant";
-
-  const documentName =
-    String(
-      (documentType && typeof documentType.name === "string" && documentType.name) ||
-        (document && typeof document.name === "string" && document.name) ||
-        (typeof raw.documentName === "string" && raw.documentName) ||
-        (documentTypeAlt && typeof documentTypeAlt.name === "string" && documentTypeAlt.name) ||
-        "Unknown document",
-    ) || "Unknown document";
-
-  const college =
-    typeof raw.college === "string"
-      ? raw.college
-      : typeof raw.collegeName === "string"
-        ? raw.collegeName
-        : user && typeof user.college === "string"
-          ? user.college
-          : user && typeof user.collegeName === "string"
-            ? user.collegeName
-            : null;
-
-  const window =
-    typeof raw.window === "string"
-      ? raw.window
-      : typeof raw.windowName === "string"
-        ? raw.windowName
-        : windowData && typeof windowData.name === "string"
-          ? windowData.name
-          : null;
-
-  const submittedAt =
-    typeof raw.createdAt === "string"
-      ? raw.createdAt
-      : typeof raw.submittedAt === "string"
-        ? raw.submittedAt
-        : typeof raw.requestedAt === "string"
-          ? raw.requestedAt
-          : null;
-
-  const purpose =
-    typeof raw.purpose === "string"
-      ? raw.purpose
-      : typeof raw.notes === "string"
-        ? raw.notes
-        : null;
-
-  return {
-    id,
-    applicant,
-    document: documentName,
-    college,
-    window,
-    submittedAt,
-    status: normalizeStatus(typeof raw.status === "string" ? raw.status : null),
-    purpose,
-    createdAt:
-      typeof raw.createdAt === "string" ? raw.createdAt : submittedAt,
-  };
-}
-
-async function loadRequestRows(): Promise<RequestRow[]> {
-  for (const endpoint of REQUEST_ENDPOINTS) {
-    try {
-      const response = await fetch(endpoint, { credentials: "include" });
-
-      if (response.status === 404) continue;
-      if (!response.ok) {
-        throw new Error(`${endpoint} responded ${response.status}`);
-      }
-
-      const payload = await response.json();
-      const rows = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.data)
-          ? payload.data
-          : Array.isArray(payload?.results)
-            ? payload.results
-            : [];
-
-      return rows
-        .map((item: unknown) => normalizeRequestRow(item as Record<string, unknown>))
-        .filter((item: RequestRow | null): item is RequestRow => Boolean(item));
-    } catch (error) {
-      console.warn(`Request endpoint unavailable: ${endpoint}`, error);
-    }
-  }
-
-  return [];
-}
 
 function AllRequest() {
   const [requests, setRequests] = useState<RequestRow[]>([]);
@@ -174,7 +35,7 @@ function AllRequest() {
     async function loadData() {
       setLoading(true);
       try {
-        const rows = await loadRequestRows();
+        const rows = await getAllRequests();
         if (!isMounted) return;
 
         setRequests(rows);
@@ -250,8 +111,8 @@ function AllRequest() {
   );
 
   return (
-    <div className="h-full overflow-auto p-6 sm:p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="h-full overflow-auto p-6 sm:p-10">
+      <div className="h-full">
         <RequestHeader
           search={search}
           onSearchChange={setSearch}

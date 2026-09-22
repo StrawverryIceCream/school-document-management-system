@@ -8,6 +8,18 @@ export const userRoles = [
 export type UserRole = "student" | "staff" | "admin" | "teacher"; 
 export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
 
+export type RequestRow = {
+  id: string;
+  applicant: string;
+  document: string;
+  college?: string | null;
+  window?: string | null;
+  submittedAt?: string | null;
+  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
+  purpose?: string | null;
+  createdAt?: string | null;
+};
+
 export interface Timestamps {
   createdAt: Date;
   updatedAt: Date;
