@@ -1,6 +1,5 @@
-import { Search } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type StatusFilter } from "@/context/RequestContext";
 import { useRequests } from "@/hooks/useRequests";
 
@@ -21,18 +20,16 @@ function RequestHeader() {
     <div className="mb-6 space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Request overview
+          <h1 className="text-3xl font-bold tracking-tight">All Request</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            All Request in the database
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            All Requests
-          </h1>
         </div>
         <Button variant="outline">Export report</Button>
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-2 xl:gap-12">
-        <div className="relative w-full xl:mt-6">
+      <div className="grid items-end gap-4 lg:grid-cols-3">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
@@ -42,39 +39,72 @@ function RequestHeader() {
           />
         </div>
 
-        <div className="w-full">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Window
-            </label>
-            <select
-              aria-label="Filter by window"
-              value={windowFilter}
-              onChange={(event) => setWindowFilter(event.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
-              disabled={windowOptions.length === 0}
-            >
-              <option value="all">All windows</option>
-              {windowOptions.map((window) => (
-                <option key={window} value={window}>
-                  {window}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <FilterSelect
+          label="Window"
+          ariaLabel="Filter by window"
+          value={windowFilter}
+          onChange={setWindowFilter}
+          disabled={windowOptions.length === 0}
+          options={[
+            { value: "all", label: "All windows" },
+            ...windowOptions.map((window) => ({ value: window, label: window })),
+          ]}
+        />
+        <FilterSelect
+          label="Status"
+          ariaLabel="Filter by status"
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value as StatusFilter)}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "pending", label: "Pending" },
+            { value: "processing", label: "Processing" },
+            { value: "ready", label: "Ready" },
+            { value: "claimed", label: "Claimed" },
+            { value: "cancelled", label: "Cancelled" },
+          ]}
+        />
       </div>
+    </div>
+  );
+}
 
-      <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
-        <TabsList className="h-10">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="processing">Processing</TabsTrigger>
-          <TabsTrigger value="ready">Ready</TabsTrigger>
-          <TabsTrigger value="claimed">Claimed</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-        </TabsList>
-      </Tabs>
+function FilterSelect({
+  label,
+  ariaLabel,
+  value,
+  onChange,
+  options,
+  disabled = false,
+}: {
+  label: string;
+  ariaLabel: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="w-full">
+      <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          aria-label={ariaLabel}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full appearance-none rounded-lg border border-border bg-background px-3 py-2.5 pr-9 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
+          disabled={disabled}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      </div>
     </div>
   );
 }
