@@ -1,5 +1,6 @@
 import type { DashboardStats, RequestType } from "@/types";
 import { mockRequests, mockStats } from "./mockData";
+import {USE_MOCK_DATA} from "@/config";
 
 export interface GetAllRequestsParams {
   search?: string;
@@ -22,7 +23,7 @@ export interface PaginatedRequestResponse {
 // UI without a running backend. Everything below this line is the only
 // thing that changed — DashboardProvider.tsx and every component that
 // calls these two functions stays exactly the same either way.
-const USE_MOCK_DATA = "true";
+
 
 // Simulates real network latency so loading states are actually visible
 // while testing with mock data.

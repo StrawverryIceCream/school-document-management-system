@@ -1,139 +1,210 @@
-import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
+  type ChartConfig,
 } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
 import type { RequestType } from "@/types";
 
-// kept as a `type` (not `interface`) on purpose: `keyof Pick<...>` is a
-// mapped/utility type and interfaces can't express that in TS.
-type ChartField = keyof Pick<
-  RequestType,
-  "status" | "documentType" | "college" | "paymentStatus"
->;
-
-interface ChartFieldConfig {
-  title: string;
-  chartType: "bar" | "line";
-  groupBy: ChartField | "claimedAtDate";
-}
-
-const chartConfigByStatus: Record<string, ChartFieldConfig> = {
-  all: { title: "Requests by status", chartType: "bar", groupBy: "status" },
-  pending: {
-    title: "Pending requests by document type",
-    chartType: "bar",
-    groupBy: "documentType",
-  },
-  processing: {
-    title: "In-process requests by college",
-    chartType: "bar",
-    groupBy: "college",
-  },
-  ready: {
-    title: "Ready-for-claim requests by document type",
-    chartType: "bar",
-    groupBy: "documentType",
-  },
-  claimed: {
-    title: "Claimed requests over time",
-    chartType: "line",
-    groupBy: "claimedAtDate",
-  },
-  rejected: {
-    title: "Rejected requests by college",
-    chartType: "bar",
-    groupBy: "college",
-  },
-};
-
-// Maps each dataKey drawn on the chart to a label/color. ChartContainer reads
-// this to expose --color-count as a CSS variable, so the color stays in sync
-// with the theme's chart palette instead of a hardcoded hex.
 const chartConfig = {
-  count: {
-    label: "Requests",
+  submitted: {
+    label: "Submitted",
     color: "var(--chart-1)",
   },
-};
+  claimed: {
+    label: "Claimed",
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig;
 
-function buildChartData(requests: RequestType[], config: ChartFieldConfig) {
-  const counts = new Map<string, number>();
+interface DailyCounts {
+  date: string; // "YYYY-MM-DD"
+  submitted: number;
+  claimed: number;
+}
+
+function toDateKey(value: string | Date) {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+// Buckets requests into per-day submitted/claimed counts. Unlike the shadcn
+// demo (which has one fake number per day already), we have to derive both
+// series from the raw request list ourselves.
+function buildDailyCounts(requests: RequestType[]): DailyCounts[] {
+  const counts = new Map<string, DailyCounts>();
+
+  const bump = (dateKey: string, field: "submitted" | "claimed") => {
+    const existing = counts.get(dateKey) ?? {
+      date: dateKey,
+      submitted: 0,
+      claimed: 0,
+    };
+    existing[field] += 1;
+    counts.set(dateKey, existing);
+  };
 
   for (const req of requests) {
-    let key: string;
-
-    if (config.groupBy === "claimedAtDate") {
-      if (!req.claimedAt) continue;
-      key = new Date(req.claimedAt).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      });
-    } else {
-      key = String(req[config.groupBy] ?? "Unknown");
-    }
-
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    if (req.submittedAt) bump(toDateKey(req.submittedAt), "submitted");
+    if (req.claimedAt) bump(toDateKey(req.claimedAt), "claimed");
   }
 
-  return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
+  return Array.from(counts.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function RequestsStatusChart() {
-  const { requests, status } = useDashboard();
-  const config = chartConfigByStatus[status ?? "all"] ?? chartConfigByStatus.all;
+  const { requests } = useDashboard();
+  const [timeRange, setTimeRange] = React.useState("90d");
 
-  const data = useMemo(() => buildChartData(requests, config), [requests, config]);
+  const dailyCounts = React.useMemo(() => buildDailyCounts(requests), [requests]);
+
+  const filteredData = React.useMemo(() => {
+    if (dailyCounts.length === 0) return [];
+
+    // Use the latest date actually present in the data as "today" so the
+    // filters work whether you're on mock data from last year or a live
+    // feed where the newest requests really are from today.
+    const referenceDate = new Date(dailyCounts[dailyCounts.length - 1].date);
+
+    let daysToSubtract = 90;
+    if (timeRange === "30d") daysToSubtract = 30;
+    else if (timeRange === "7d") daysToSubtract = 7;
+
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+
+    return dailyCounts.filter((item) => new Date(item.date) >= startDate);
+  }, [dailyCounts, timeRange]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-medium">{config.title}</CardTitle>
+    <Card className="pt-0">
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+        <div className="grid flex-1 gap-1">
+          <CardTitle>Requests over time</CardTitle>
+          <CardDescription>
+            Submitted vs. claimed requests for the selected period
+          </CardDescription>
+        </div>
+        <Select value={timeRange} onValueChange={setTimeRange}>
+          <SelectTrigger
+            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
+            aria-label="Select a value"
+          >
+            <SelectValue placeholder="Last 3 months" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="90d" className="rounded-lg">
+              Last 3 months
+            </SelectItem>
+            <SelectItem value="30d" className="rounded-lg">
+              Last 30 days
+            </SelectItem>
+            <SelectItem value="7d" className="rounded-lg">
+              Last 7 days
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </CardHeader>
-      <CardContent>
-        {data.length === 0 ? (
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        {filteredData.length === 0 ? (
           <p className="text-sm text-muted-foreground py-10 text-center">
-            No data for this view yet.
+            No data for this period yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="h-65 w-full">
-            {config.chartType === "bar" ? (
-              <BarChart data={data}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  fontSize={12}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
-              </BarChart>
-            ) : (
-              <LineChart data={data}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  fontSize={12}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="var(--color-count)"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            )}
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <AreaChart data={filteredData}>
+              <defs>
+                <linearGradient id="fillSubmitted" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-submitted)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-submitted)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+                <linearGradient id="fillClaimed" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-claimed)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-claimed)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    }
+                    indicator="dot"
+                  />
+                }
+              />
+              <Area
+                dataKey="claimed"
+                type="natural"
+                fill="url(#fillClaimed)"
+                stroke="var(--color-claimed)"
+                stackId="a"
+              />
+              <Area
+                dataKey="submitted"
+                type="natural"
+                fill="url(#fillSubmitted)"
+                stroke="var(--color-submitted)"
+                stackId="a"
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </AreaChart>
           </ChartContainer>
         )}
       </CardContent>
