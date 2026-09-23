@@ -4,6 +4,7 @@ import {
   FileInputIcon,
   FileSearchCorner,
   Gauge,
+  Logs,
   NotebookTabs,
   Search,
   Settings,
@@ -73,6 +74,12 @@ const navItems: NavItem[] = [
     icon: CircleDashedCheck,
     roles: ["admin", "staff"],
   },
+  {
+    title: "Logs",
+    url: "/logs",
+    icon: Logs,
+    roles: ["admin"],
+  },
 ];
 
 const navSecondary: NavItem[] = [
@@ -118,7 +125,7 @@ function AppSidebar() {
         <NavMain items={navMain} />
         {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
         <NavSecondary items={navSecondary} className="mt-auto" />
-      </SidebarContent> 
+      </SidebarContent>
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
