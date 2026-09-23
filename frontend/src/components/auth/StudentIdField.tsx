@@ -1,5 +1,6 @@
 import { Field, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
+import { formatStudentId } from "@/utils/student-id";
 
 function StudentIdField({
   studentId,
@@ -17,23 +18,7 @@ function StudentIdField({
         placeholder="TUPM-XX-XXXX"
         required
         value={studentId}
-        onChange={(e) => {
-          // Pull out only the digits the user typed, capped at 6 (2 + 4)
-          const digits = e.target.value
-            .replace(/^TUPM-?/, "") // strip prefix if present
-            .replace(/\D/g, "") // strip anything non-digit (including dashes)
-            .slice(0, 6);
-
-          let formatted = "TUPM-";
-          if (digits.length > 0) {
-            formatted += digits.slice(0, 2);
-          }
-          if (digits.length > 2) {
-            formatted += "-" + digits.slice(2, 6);
-          }
-
-          setStudentId(formatted);
-        }}
+        onChange={(e) => setStudentId(formatStudentId(e.target.value))}
         onFocus={() => {
           if (!studentId) setStudentId("TUPM-");
         }}
