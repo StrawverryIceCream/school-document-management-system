@@ -7,6 +7,7 @@ import AppLayout from "./components/layout/AppLayout";
 import Signup from "./pages/Signup";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { AuthProvider } from "./provider/AuthProvider";
+import { WindowViewProvider } from "./provider/WindowViewProvider";
 import RequireAuth from "./components/RequireAuth";
 import Accounts from "./pages/Accounts";
 import RequireRole from "./components/RequireRole";
@@ -65,7 +66,9 @@ export default function App() {
                   path="/windows"
                   element={
                     <RequireRole allowedRoles={["admin", "staff"]}>
-                      <Windows />
+                      <WindowViewProvider>
+                        <Windows />
+                      </WindowViewProvider>
                     </RequireRole>
                   }
                 />
