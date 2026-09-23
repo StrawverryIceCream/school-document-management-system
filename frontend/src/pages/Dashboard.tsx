@@ -17,13 +17,13 @@ function Dashboard() {
 
           {/* Left: Windows + Payment stacked. Right: overall trend, spanning
               the same height as the two stacked charts combined. */}
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="flex flex-col gap-4 lg:col-span-1">
-              <WindowsProcessedChart />
+          {/* Top: overall trend, full width. Below: Payments (left) and
+              Windows (right) side by side. */}
+          <div className="flex flex-col gap-4">
+            <RequestsStatusChart />
+            <div className="grid gap-4 lg:grid-cols-2">
               <PaymentMethodChart />
-            </div>
-            <div className="lg:col-span-2">
-              <RequestsStatusChart />
+              <WindowsProcessedChart />
             </div>
           </div>
 

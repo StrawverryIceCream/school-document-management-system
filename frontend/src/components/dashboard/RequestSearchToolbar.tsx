@@ -12,18 +12,18 @@ function RequestSearchToolbar() {
   const { search, setSearch, status, setStatus } = useDashboard();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-4">
       <Input
         placeholder="Search student name or ID..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="max-w-xs"
+        className="flex-1"
       />
       <Select
         value={status ?? "all"}
         onValueChange={(v) => setStatus(v === "all" ? undefined : v)}
       >
-        <SelectTrigger className="w-44">
+        <SelectTrigger className="w-44 shrink-0">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
