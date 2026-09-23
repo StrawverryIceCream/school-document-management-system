@@ -98,10 +98,12 @@ export interface RequestType {
   studentNumber: string;
   college: string;
   documentType: string;
+  window: string; // e.g. "Window 1" — which registrar window processed the request
   submittedAt: string;
   feeRequired: boolean;
   feeAmount?: number;
   paymentStatus: "none" | "awaiting_proof" | "pending_verification" | "verified";
+  paymentMethod?: "cash" | "online"; // only set when feeRequired is true
   status: RequestStatus;
   releaseDate?: string | null;
   proofUrl?: string | null;
