@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "cn";
 import type { WindowTile, WindowViewId } from "@/types/window";
 
@@ -48,7 +48,7 @@ type TileGridProps = {
 
 function TileGrid({ onSelect, activeId }: TileGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
       {TILES.map((tile) => (
         <Card
           key={tile.id}
@@ -58,20 +58,19 @@ function TileGrid({ onSelect, activeId }: TileGridProps) {
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") onSelect(tile.id);
           }}
-          className={cn(
-            "cursor-pointer transition-shadow hover:shadow-md",
-            activeId === tile.id && "ring-2 ring-primary"
-          )}
+          style={{ "--card-spacing": "0px" } as React.CSSProperties}
+          className={cn("cursor-pointer", activeId === tile.id && "ring-2 ring-primary")}
         >
-          <img
-            src={tile.imageSrc}
-            alt={tile.title}
-            className="w-full aspect-video object-cover"
-          />
-          <CardHeader>
-            <CardTitle>{tile.title}</CardTitle>
-            <CardDescription>{tile.description}</CardDescription>
-          </CardHeader>
+          <div className="relative w-full aspect-video">
+            <img
+              src={tile.imageSrc}
+              alt={tile.title}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute bottom-1 left-3 right-3 rounded-lg bg-black/60 px-3 py-1 backdrop-blur-sm">
+              <p className="text-sm font-medium text-white">{tile.description}</p>
+            </div>
+          </div>
         </Card>
       ))}
     </div>

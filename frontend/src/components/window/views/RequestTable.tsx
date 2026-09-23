@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -18,7 +17,6 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { SearchIcon } from "lucide-react";
 import { MOCK_REQUESTS } from "@/data/mockRequests";
 import type { RequestStatus } from "@/types/request";
 import type { WindowViewId } from "@/types/window";
@@ -48,20 +46,19 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
 
-  const collegeRequests = MOCK_REQUESTS
-    .filter((r) => r.college === collegeId)
+  const collegeRequests = MOCK_REQUESTS.filter((r) => r.college === collegeId)
     .map((r) => ({ ...r, status: statusOverrides[r.id] ?? r.status }))
     .sort((a, b) => b.dateRequested.localeCompare(a.dateRequested));
 
-    const visibleRequests = collegeRequests
+  const visibleRequests = collegeRequests
     .filter((r) => filter === "all" || r.status === filter)
     .filter((r) => {
-        const query = search.trim().toLowerCase();
-        if (!query) return true;
-        return (
+      const query = search.trim().toLowerCase();
+      if (!query) return true;
+      return (
         r.requesterName.toLowerCase().includes(query) ||
         r.documentType.toLowerCase().includes(query)
-        );
+      );
     });
 
   function handleStatusChange(id: string, status: RequestStatus) {
@@ -69,40 +66,43 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{collegeTitle} Requests</CardTitle>
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-      </CardHeader>
+    <div className="h-full overflow-hidden p-6 sm:p-10">
+      <div className="mx-auto h-full flex flex-col">
+        <div className="mb-8">
+          <Button variant="ghost" size="sm" onClick={onBack} className="mb-2 -ml-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <h1 className="text-3xl font-bold tracking-normal">
+            {collegeTitle} Requests
+          </h1>
+          <p className="text-sm mt-2">
+            All document requests submitted by {collegeTitle} students and professors
+          </p>
+        </div>
 
-    <div className="px-(--card-spacing) pb-2">
-    <div className="relative">
-        <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-        <Input
-        placeholder="Search by requester or document type"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="pl-8"
-        />
-    </div>
-    </div>
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              placeholder="Search requester or document"
+              className="w-full rounded-lg border pl-9 pr-3 py-2 text-sm outline-none focus:ring-2"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as StatusFilter)}>
+            <TabsList className="h-10">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="processing">Processing</TabsTrigger>
+              <TabsTrigger value="done">Done</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-      <div className="px-(--card-spacing)">
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as StatusFilter)}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="processing">Processing</TabsTrigger>
-            <TabsTrigger value="done">Done</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <div className="px-(--card-spacing) pb-(--card-spacing)">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10 bg-muted">
             <TableRow>
               <TableHead>Requester</TableHead>
               <TableHead>Role</TableHead>
@@ -114,7 +114,7 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
           <TableBody>
             {visibleRequests.map((request) => (
               <TableRow key={request.id}>
-                <TableCell>{request.requesterName}</TableCell>
+                <TableCell className="font-medium">{request.requesterName}</TableCell>
                 <TableCell className="capitalize">{request.requesterRole}</TableCell>
                 <TableCell>{request.documentType}</TableCell>
                 <TableCell>{request.dateRequested}</TableCell>
@@ -149,7 +149,7 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
           </TableBody>
         </Table>
       </div>
-    </Card>
+    </div>
   );
 }
 
