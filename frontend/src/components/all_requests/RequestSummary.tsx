@@ -1,19 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CheckCircle2, Clock3, Layers3 } from "lucide-react";
+import { useRequests } from "@/hooks/useRequests";
 
-interface RequestSummaryProps {
-  total: number;
-  pending: number;
-  processing: number;
-  ready: number;
-}
-
-function RequestSummary({ total, pending, processing, ready }: RequestSummaryProps) {
+function RequestSummary() {
+  const { summary } = useRequests();
   const summaryCards = [
-    { label: "Total requests", value: total, icon: Layers3 },
-    { label: "Pending", value: pending, icon: Clock3 },
-    { label: "Processing", value: processing, icon: Activity },
-    { label: "Ready", value: ready, icon: CheckCircle2 },
+    { label: "Total requests", value: summary.total, icon: Layers3 },
+    { label: "Pending", value: summary.pending, icon: Clock3 },
+    { label: "Processing", value: summary.processing, icon: Activity },
+    { label: "Ready", value: summary.ready, icon: CheckCircle2 },
   ];
 
   return (

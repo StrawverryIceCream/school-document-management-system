@@ -9,15 +9,6 @@ export type StatusFilter =
   | "claimed"
   | "cancelled";
 
-export const collegeOptions = [
-  "College of Science (COS)",
-  "College of Engineering (COE)",
-  "College of Industrial Technology (CIT)",
-  "College of Industrial Education (CIE)",
-  "College of Architecture and Fine Arts (CAFA)",
-  "College of Management and Multidisciplinary Studies (CMMS)",
-] as const;
-
 export interface RequestContextType {
   requests: RequestRow[];
   filteredRows: RequestRow[];
@@ -28,8 +19,6 @@ export interface RequestContextType {
   setSearch: (value: string) => void;
   statusFilter: StatusFilter;
   setStatusFilter: (value: StatusFilter) => void;
-  collegeFilter: string;
-  setCollegeFilter: (value: string) => void;
   windowFilter: string;
   setWindowFilter: (value: string) => void;
   windowOptions: string[];

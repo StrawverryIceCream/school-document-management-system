@@ -6,20 +6,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, FileText, UserRound } from "lucide-react";
 import type { RequestRow } from "@/types";
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
+import { useRequests } from "@/hooks/useRequests";
 
 export type { RequestRow } from "@/types";
-
-interface RequestTableProps {
-  rows: RequestRow[];
-  onViewRequest: (request: RequestRow) => void;
-  selectedRequest: RequestRow | null;
-  onCloseRequest: () => void;
-  emptyMessage?: string;
-}
 
 const statusTone: Record<RequestRow["status"], string> = {
   pending: "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300",
@@ -30,13 +24,14 @@ const statusTone: Record<RequestRow["status"], string> = {
   rejected: "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
 };
 
-function RequestTable({
-  rows,
-  onViewRequest,
-  selectedRequest,
-  onCloseRequest,
-  emptyMessage,
-}: RequestTableProps) {
+function RequestTable() {
+  const { filteredRows: rows, requests, error } = useRequests();
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
+  const emptyMessage = error
+    ? error
+    : requests.length === 0
+      ? "No request records are available from the current backend data source yet."
+      : "No requests match your current filters.";
 
   return (
     <>
@@ -47,7 +42,6 @@ function RequestTable({
               <TableHead className="w-24">ID</TableHead>
               <TableHead className="min-w-45">Applicant</TableHead>
               <TableHead className="min-w-45">Document</TableHead>
-              <TableHead className="min-w-37.5">College</TableHead>
               <TableHead className="min-w-35">Window</TableHead>
               <TableHead className="min-w-35">Submitted</TableHead>
               <TableHead className="w-32">Status</TableHead>
@@ -57,8 +51,8 @@ function RequestTable({
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
-                  {emptyMessage ?? "No requests match your current filters."}
+                <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
@@ -82,7 +76,6 @@ function RequestTable({
                       <span>{request.document}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{request.college ?? "Not available"}</TableCell>
                   <TableCell>{request.window ?? "Not available"}</TableCell>
                   <TableCell>{request.submittedAt ?? "Not available"}</TableCell>
                   <TableCell>
@@ -95,7 +88,7 @@ function RequestTable({
                       variant="ghost"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => onViewRequest(request)}
+                      onClick={() => setSelectedRequest(request)}
                     >
                       <Eye className="size-3.5" />
                       View
@@ -108,7 +101,7 @@ function RequestTable({
         </Table>
       </div>
 
-      <RequestDetailsDialog request={selectedRequest} onClose={onCloseRequest} />
+      <RequestDetailsDialog request={selectedRequest} onClose={() => setSelectedRequest(null)} />
     </>
   );
 }

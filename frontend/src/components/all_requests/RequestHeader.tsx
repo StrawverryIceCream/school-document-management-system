@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { collegeOptions, type StatusFilter } from "@/context/RequestContext";
+import { type StatusFilter } from "@/context/RequestContext";
 import { useRequests } from "@/hooks/useRequests";
 
 export type { StatusFilter } from "@/context/RequestContext";
@@ -12,8 +12,6 @@ function RequestHeader() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    collegeFilter,
-    setCollegeFilter,
     windowFilter,
     setWindowFilter,
     windowOptions,
@@ -33,8 +31,8 @@ function RequestHeader() {
         <Button variant="outline">Export report</Button>
       </div>
 
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="relative w-full max-w-xl">
+      <div className="grid gap-3 xl:grid-cols-2 xl:gap-12">
+        <div className="relative w-full xl:mt-6">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
@@ -44,27 +42,8 @@ function RequestHeader() {
           />
         </div>
 
-        <div className="flex w-full max-w-xl flex-col gap-3 md:flex-row">
-          <div className="min-w-[220px] flex-1">
-            <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              College
-            </label>
-            <select
-              aria-label="Filter by college"
-              value={collegeFilter}
-              onChange={(event) => setCollegeFilter(event.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
-            >
-              <option value="all">All colleges</option>
-              {collegeOptions.map((college) => (
-                <option key={college} value={college}>
-                  {college}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="min-w-[220px] flex-1">
+        <div className="w-full">
+          <div>
             <label className="mb-1 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Window
             </label>

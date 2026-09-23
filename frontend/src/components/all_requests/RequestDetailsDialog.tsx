@@ -42,10 +42,7 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <RequestDetailsField label="College" value={request.college ?? "Not available"} />
-              <RequestDetailsField label="Window" value={request.window ?? "Not available"} />
-            </div>
+            <RequestDetailsField label="Window" value={request.window ?? "Not available"} />
 
             {request.purpose && (
               <div>
