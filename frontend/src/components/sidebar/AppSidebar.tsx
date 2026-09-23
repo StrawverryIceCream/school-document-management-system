@@ -118,7 +118,7 @@ function AppSidebar() {
         <NavMain items={navMain} />
         {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
         <NavSecondary items={navSecondary} className="mt-auto" />
-      </SidebarContent>
+      </SidebarContent> 
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
