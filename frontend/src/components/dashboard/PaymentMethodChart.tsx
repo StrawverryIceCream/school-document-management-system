@@ -16,6 +16,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
+import { getMonthKey, monthLabel } from "@/lib/utils";
 import type { RequestType } from "@/types";
 
 const chartConfig = {
@@ -36,10 +37,6 @@ interface MonthlyPaymentCounts {
   online: number;
 }
 
-function monthLabel(date: Date) {
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
 // Only requests with feeRequired: true carry a paymentMethod, so anything
 // without one (free documents) is skipped here — it has no cash/online
 // distinction to plot.
@@ -50,7 +47,7 @@ function buildMonthlyPaymentData(requests: RequestType[]): MonthlyPaymentCounts[
     if (!req.paymentMethod) continue;
 
     const date = new Date(req.submittedAt);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const monthKey = getMonthKey(date);
 
     const existing = counts.get(monthKey) ?? {
       monthKey,

@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
+import { getDateKey } from "@/lib/utils";
 import type { RequestType } from "@/types";
 
 const chartConfig = {
@@ -43,10 +44,6 @@ interface DailyCounts {
   claimed: number;
 }
 
-function toDateKey(value: string | Date) {
-  return new Date(value).toISOString().slice(0, 10);
-}
-
 // Buckets requests into per-day submitted/claimed counts. Unlike the shadcn
 // demo (which has one fake number per day already), we have to derive both
 // series from the raw request list ourselves.
@@ -64,8 +61,8 @@ function buildDailyCounts(requests: RequestType[]): DailyCounts[] {
   };
 
   for (const req of requests) {
-    if (req.submittedAt) bump(toDateKey(req.submittedAt), "submitted");
-    if (req.claimedAt) bump(toDateKey(req.claimedAt), "claimed");
+    if (req.submittedAt) bump(getDateKey(req.submittedAt), "submitted");
+    if (req.claimedAt) bump(getDateKey(req.claimedAt), "claimed");
   }
 
   return Array.from(counts.values()).sort((a, b) => a.date.localeCompare(b.date));

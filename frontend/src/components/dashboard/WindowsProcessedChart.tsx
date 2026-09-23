@@ -14,6 +14,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
+import { getMonthKey, monthLabel } from "@/lib/utils";
 import type { RequestType } from "@/types";
 
 // `window` values in the data look like "Window 1" (with a space), but
@@ -39,10 +40,6 @@ interface MonthlyWindowCounts {
   [windowKey: string]: string | number;
 }
 
-function monthLabel(date: Date) {
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
 function buildMonthlyWindowData(requests: RequestType[]): MonthlyWindowCounts[] {
   const counts = new Map<string, MonthlyWindowCounts>();
 
@@ -51,7 +48,7 @@ function buildMonthlyWindowData(requests: RequestType[]): MonthlyWindowCounts[] 
     if (!windowEntry) continue; // unknown window value — skip rather than guess
 
     const date = new Date(req.submittedAt);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const monthKey = getMonthKey(date);
 
     const existing =
       counts.get(monthKey) ??
