@@ -73,6 +73,7 @@ export interface DocumentRequest extends Timestamps {
   releaseDate: string | null; // date columns come back as string ("YYYY-MM-DD")
   claimedAt: Date | null;
   staffNotes: string | null;
+  tags?: string[];
 }
 
 export interface Payment extends Timestamps {
