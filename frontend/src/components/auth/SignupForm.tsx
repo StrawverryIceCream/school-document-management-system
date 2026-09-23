@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import StudentIdField from "./StudentIdField";
 
 interface SignupFormProps extends React.ComponentProps<typeof Card> {
   error: string | null;
@@ -71,24 +72,7 @@ export function SignupForm({
                 onChange={(e) => setFullName(e.target.value)}
               />
             </Field>
-            <Field>
-              <FieldLabel htmlFor="studentId">Student Id</FieldLabel>
-                <Input
-                  id="studentId"
-                  type="text"
-                  placeholder="TUP-M-XXXX"
-                  required
-                  value={studentId}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.startsWith("TUP-M-")) {
-                      setStudentId(value);
-                    } else {
-                      setStudentId("TUP-M-");
-                    }
-                  }}
-                />
-            </Field>
+            <StudentIdField studentId={studentId} setStudentId={setStudentId} />
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input

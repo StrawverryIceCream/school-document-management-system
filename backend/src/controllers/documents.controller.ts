@@ -3,9 +3,12 @@ import { db } from "../db/db.js";
 import { documentTypes } from "../db/schema.js";
 import { and, count, eq, ilike, or } from "drizzle-orm";
 
+const CATEGORIES = ["student", "teacher", "staff"] as const;
+type DocumentCategory = (typeof CATEGORIES)[number];
+
 export async function getAllDocument(req: Request, res: Response) {
   try {
-    const { search, isActive, page = "1", limit = "20" } = req.query;
+    const { search, isActive, category, page = "1", limit = "20" } = req.query;
 
     const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
     const limitNum = Math.min(
@@ -27,6 +30,13 @@ export async function getAllDocument(req: Request, res: Response) {
 
     if (isActive !== undefined) {
       conditions.push(eq(documentTypes.isActive, isActive === "true"));
+    }
+    const rawCategory = typeof category === "string" ? category : undefined;
+
+    if (rawCategory && ["student", "teacher", "staff"].includes(rawCategory)) {
+      conditions.push(
+        eq(documentTypes.category, rawCategory as DocumentCategory),
+      );
     }
 
     const whereClause = conditions.length ? and(...conditions) : undefined;

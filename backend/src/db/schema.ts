@@ -21,6 +21,8 @@ const timestamps = {
 
 export const userRoleEnum = pgEnum("user_role", ["student", "teacher", "admin", "staff"]);
 
+export const userCategoryEnum = pgEnum("user_category", ["student", "teacher", "staff"]);
+
 export const requestStatusEnum = pgEnum("request_status", [
   "pending",
   "processing",
@@ -43,6 +45,7 @@ export const documentTypes = pgTable("document_types", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
+  category: userCategoryEnum("user_category").notNull().default("student"),
   description: text("description"),
   fee: numeric("fee", { precision: 10, scale: 2 }).notNull().default("0"),
   isActive: boolean("is_active").notNull().default(true),
