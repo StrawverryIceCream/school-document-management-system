@@ -37,6 +37,7 @@ function RequestTable({
   onCloseRequest,
   emptyMessage,
 }: RequestTableProps) {
+
   return (
     <>
       <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -44,11 +45,11 @@ function RequestTable({
           <TableHeader className="bg-muted/70">
             <TableRow>
               <TableHead className="w-24">ID</TableHead>
-              <TableHead className="min-w-[180px]">Applicant</TableHead>
-              <TableHead className="min-w-[180px]">Document</TableHead>
-              <TableHead className="min-w-[150px]">College</TableHead>
-              <TableHead className="min-w-[140px]">Window</TableHead>
-              <TableHead className="min-w-[140px]">Submitted</TableHead>
+              <TableHead className="min-w-45">Applicant</TableHead>
+              <TableHead className="min-w-45">Document</TableHead>
+              <TableHead className="min-w-37.5">College</TableHead>
+              <TableHead className="min-w-35">Window</TableHead>
+              <TableHead className="min-w-35">Submitted</TableHead>
               <TableHead className="w-32">Status</TableHead>
               <TableHead className="w-24 text-right">Action</TableHead>
             </TableRow>
