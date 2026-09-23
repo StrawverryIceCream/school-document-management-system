@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { DocumentRequest } from "@/types";
+import { useMyRequest } from "@/hooks/useMyRequest";
 import MyRequestDetails from "./MyRequestDetails";
 
 const getStatusBadgeClasses = (status: DocumentRequest["status"]) => {
@@ -32,59 +33,9 @@ const documentNames: Record<number, string> = {
   4: "Diploma",
 };
 
-const mockRequests: DocumentRequest[] = [
-  {
-    id: 101,
-    userId: 1,
-    documentTypeId: 1,
-    purpose: "For scholarship application",
-    formData: {
-      studentId: "2026-00123",
-      course: "BSIT",
-    },
-    status: "processing",
-    releaseDate: "2026-09-30",
-    createdAt: new Date("2026-09-22T09:00:00"),
-    updatedAt: new Date("2026-09-22T09:00:00"),
-    claimedAt: null,
-    staffNotes: "Request is currently being reviewed by the registrar office.",
-  },
-  {
-    id: 102,
-    userId: 1,
-    documentTypeId: 2,
-    purpose: "For enrollment and validation",
-    formData: {
-      studentId: "2026-00123",
-      semester: "1st Semester",
-      schoolYear: "2026-2027",
-    },
-    status: "pending",
-    releaseDate: null,
-    createdAt: new Date("2026-09-20T13:20:00"),
-    updatedAt: new Date("2026-09-20T13:20:00"),
-    claimedAt: null,
-    staffNotes: null,
-  },
-  {
-    id: 103,
-    userId: 1,
-    documentTypeId: 3,
-    purpose: "For overseas employment requirements",
-    formData: {
-      studentId: "2026-00123",
-      yearGraduated: "2026",
-    },
-    status: "ready",
-    releaseDate: "2026-09-25",
-    createdAt: new Date("2026-09-16T10:45:00"),
-    updatedAt: new Date("2026-09-16T10:45:00"),
-    claimedAt: null,
-    staffNotes: "Ready for release to student.",
-  },
-];
-
 function MyRequestTable() {
+  const { filteredRequests } = useMyRequest();
+
   return (
     <section className="space-y-4">
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -100,7 +51,7 @@ function MyRequestTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockRequests.map((request) => (
+              {filteredRequests.map((request) => (
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">
                     REQ-{request.id}
