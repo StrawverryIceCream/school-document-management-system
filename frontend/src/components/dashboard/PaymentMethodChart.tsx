@@ -41,23 +41,22 @@ interface MonthlyPaymentCounts {
 // without one (free documents) is skipped here — it has no cash/online
 // distinction to plot.
 function buildMonthlyPaymentData(requests: RequestType[]): MonthlyPaymentCounts[] {
-  const counts = new Map<string, MonthlyPaymentCounts>();
+  const counts = requests
+    .filter((req) => req.paymentMethod)
+    .reduce((map, req) => {
+      const date = new Date(req.submittedAt);
+      const monthKey = getMonthKey(date);
 
-  for (const req of requests) {
-    if (!req.paymentMethod) continue;
+      const existing = map.get(monthKey) ?? {
+        monthKey,
+        month: monthLabel(date),
+        cash: 0,
+        online: 0,
+      };
+      existing[req.paymentMethod!] += 1;
 
-    const date = new Date(req.submittedAt);
-    const monthKey = getMonthKey(date);
-
-    const existing = counts.get(monthKey) ?? {
-      monthKey,
-      month: monthLabel(date),
-      cash: 0,
-      online: 0,
-    };
-    existing[req.paymentMethod] += 1;
-    counts.set(monthKey, existing);
-  }
+      return map.set(monthKey, existing);
+    }, new Map<string, MonthlyPaymentCounts>());
 
   return Array.from(counts.values()).sort((a, b) =>
     a.monthKey.localeCompare(b.monthKey),
