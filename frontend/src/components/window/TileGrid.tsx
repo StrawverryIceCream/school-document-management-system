@@ -25,7 +25,7 @@ export const TILES: WindowTile[] = [
     id: "cmms",
     title: "CMMS",
     imageSrc: "/images/window/CMMS.png",
-    description: "College of Maritime, Marine, and other relevant field",
+    description: "College of Management & Multidisciplinary Studies",
   },
   {
     id: "cit",
