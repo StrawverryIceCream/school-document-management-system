@@ -49,7 +49,11 @@ type TileGridProps = {
 function TileGrid({ onSelect, activeId }: TileGridProps) {
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Windows</h1>
+        <p className="text-sm text-muted-foreground">Choose a college or department</p>
+      </div>
+      <div className="grid grid-cols-3 gap-10">
         {TILES.map((tile) => (
           <Card
             key={tile.id}
@@ -68,9 +72,12 @@ function TileGrid({ onSelect, activeId }: TileGridProps) {
                 alt={tile.title}
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute bottom-1 left-3 right-3 rounded-lg bg-black/60 px-3 py-1 backdrop-blur-sm">
-                <p className="text-sm font-medium text-white">{tile.description}</p>
-              </div>
+              <p
+                className="absolute bottom-2 left-3 right-3 text-2xl font-semibold text-white"
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}
+              >
+                {tile.description}
+              </p>
             </div>
           </Card>
         ))}
