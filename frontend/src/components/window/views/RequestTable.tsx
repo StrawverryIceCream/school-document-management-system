@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, EllipsisVertical, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableHeader,
@@ -42,11 +41,15 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
 };
 
 function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, RequestStatus>>({});
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, RequestStatus>>(
+    {}
+  );
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
 
-  const collegeRequests = MOCK_REQUESTS.filter((r) => r.college === collegeId)
+  const collegeRequests = MOCK_REQUESTS.filter(
+    (r) => r.college === collegeId
+  )
     .map((r) => ({ ...r, status: statusOverrides[r.id] ?? r.status }))
     .sort((a, b) => b.dateRequested.localeCompare(a.dateRequested));
 
@@ -109,6 +112,7 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
               <TableHead>Document Type</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,30 +122,41 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
                 <TableCell className="capitalize">{request.requesterRole}</TableCell>
                 <TableCell>{request.documentType}</TableCell>
                 <TableCell>{request.dateRequested}</TableCell>
+                <TableCell className={STATUS_COLORS[request.status]}>
+                  {STATUS_LABELS[request.status]}
+                </TableCell>
                 <TableCell>
-                  <Select
-                    value={request.status}
-                    onValueChange={(value) =>
-                      handleStatusChange(request.id, value as RequestStatus)
-                    }
-                  >
-                    <SelectTrigger size="sm" className={STATUS_COLORS[request.status]}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                          size="icon"
+                        >
+                          <EllipsisVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-36">
+                        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                          <DropdownMenuItem
+                            key={value}
+                            onClick={() =>
+                              handleStatusChange(request.id, value as RequestStatus)
+                            }
+                          >
+                            Mark as {label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
             {visibleRequests.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   No requests found.
                 </TableCell>
               </TableRow>
