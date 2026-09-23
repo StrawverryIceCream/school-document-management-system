@@ -1,11 +1,10 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import type { RequestRow } from "@/types";
+import RequestDetailsField from "@/components/all_requests/RequestDetailsField";
+import RequestDetailsHeader from "@/components/all_requests/RequestDetailsHeader";
 
 interface RequestDetailsDialogProps {
   request: RequestRow | null;
@@ -17,12 +16,7 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
     <Dialog open={Boolean(request)} onOpenChange={(isOpen) => !isOpen && onClose()}>
       {request && (
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Request details</DialogTitle>
-            <DialogDescription>
-              Review the selected request information from the live request data source.
-            </DialogDescription>
-          </DialogHeader>
+          <RequestDetailsHeader />
 
           <div className="space-y-4 pt-2 text-sm">
             <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/40 p-3">
@@ -31,10 +25,7 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Applicant</p>
-                <p className="mt-1 font-medium">{request.applicant}</p>
-              </div>
+              <RequestDetailsField label="Applicant" value={request.applicant} />
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Status</p>
                 <p className="mt-1 inline-flex rounded-full bg-muted px-2 py-1 text-xs font-medium capitalize">
@@ -44,25 +35,16 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Document</p>
-                <p className="mt-1 font-medium">{request.document}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Date submitted</p>
-                <p className="mt-1 font-medium">{request.submittedAt ?? "Not available"}</p>
-              </div>
+              <RequestDetailsField label="Document" value={request.document} />
+              <RequestDetailsField
+                label="Date submitted"
+                value={request.submittedAt ?? "Not available"}
+              />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">College</p>
-                <p className="mt-1 font-medium">{request.college ?? "Not available"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Window</p>
-                <p className="mt-1 font-medium">{request.window ?? "Not available"}</p>
-              </div>
+              <RequestDetailsField label="College" value={request.college ?? "Not available"} />
+              <RequestDetailsField label="Window" value={request.window ?? "Not available"} />
             </div>
 
             {request.purpose && (
