@@ -1,10 +1,4 @@
-import {
-  ArrowLeftRight,
-  CircleUser,
-  EllipsisVertical,
-  LogOut,
-  UserIcon,
-} from "lucide-react";
+import { ArrowLeftRight, EllipsisVertical, LogOut } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -21,6 +15,9 @@ import {
 } from "../ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Profile from "../profile/Profile";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 function NavUser() {
   const navigate = useNavigate();
@@ -32,10 +29,9 @@ function NavUser() {
   async function handleLogout() {
     try {
       await logout();
-    } catch(err){
-      console.log(err)
-    }
-    finally {
+    } catch (err) {
+      console.log(err);
+    } finally {
       navigate("/login");
     }
   }
@@ -49,7 +45,9 @@ function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <UserIcon className="h-8 w-8 rounded-lg" />
+              <Avatar>
+                <AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>
+              </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.fullName}</span>
                 <span className="truncate text-xs text-muted-foreground">
@@ -72,10 +70,8 @@ function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuItem>
-              <CircleUser />
-              Profile
-            </DropdownMenuItem>
+            <Profile />
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <ArrowLeftRight />

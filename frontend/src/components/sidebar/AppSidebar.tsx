@@ -3,8 +3,8 @@ import {
   CircleDashedCheck,
   FileInputIcon,
   FileSearchCorner,
-  FileText,
   Gauge,
+  NotebookTabs,
   Search,
   Settings,
   UserRound,
@@ -107,8 +107,8 @@ function AppSidebar() {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <NavLink to="/home">
-                <FileText className="size-5!" />
-                <span className="text-base font-semibold">Doc Manager.</span>
+                <NotebookTabs className="size-5!" />
+                <span className="text-base font-semibold">ARCH</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
