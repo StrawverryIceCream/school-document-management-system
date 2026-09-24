@@ -74,10 +74,9 @@ export function useCurrentRouteLabel() {
   return segment.charAt(0).toUpperCase() + segment.slice(1);
 }
 
-
-
-
-function normalizeStatus(value: string | null | undefined): RequestRow["status"] {
+function normalizeStatus(
+  value: string | null | undefined,
+): RequestRow["status"] {
   switch (value?.toLowerCase()) {
     case "pending":
       return "pending";
@@ -107,7 +106,11 @@ export function normalizeRequestRow(raw: unknown): RequestRow | null {
   const windowData = asRecord(record.window);
 
   const id = String(
-    record.id ?? record.requestId ?? record.request_id ?? record.requestNumber ?? "unknown",
+    record.id ??
+      record.requestId ??
+      record.request_id ??
+      record.requestNumber ??
+      "unknown",
   );
   const applicant =
     getString(user, "fullName") ??
@@ -145,7 +148,10 @@ export function normalizeRequestRow(raw: unknown): RequestRow | null {
       null,
     status: normalizeStatus(getString(record, "status")),
     purpose: getString(record, "purpose") ?? getString(record, "notes") ?? null,
-    createdAt: getString(record, "createdAt") ?? getString(record, "submittedAt") ?? null,
+    createdAt:
+      getString(record, "createdAt") ??
+      getString(record, "submittedAt") ??
+      null,
   };
 }
 
@@ -161,4 +167,74 @@ function getString(
 ): string | undefined {
   const value = record?.[key];
   return typeof value === "string" && value ? value : undefined;
+}
+
+
+
+export const TIME_RANGES = [
+  { value: "90d", label: "Last 3 months", days: 90 },
+  { value: "30d", label: "Last 30 days", days: 30 },
+  { value: "7d", label: "Last 7 days", days: 7 },
+] as const;
+
+export type TimeRange = (typeof TIME_RANGES)[number]["value"];
+
+export const DEFAULT_TIME_RANGE: TimeRange = "90d";
+
+export interface DailyCounts {
+  date: string; // "YYYY-MM-DD" in local time
+  submitted: number;
+  claimed: number;
+}
+
+export function isTimeRange(value: string): value is TimeRange {
+  return TIME_RANGES.some((range) => range.value === value);
+}
+
+
+export function formatChartDate(dateKey: string): string {
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function buildDailyCounts(requests: RequestRow[]): DailyCounts[] {
+  const counts = new Map<string, DailyCounts>();
+
+  const bump = (dateKey: string, field: "submitted" | "claimed") => {
+    const existing = counts.get(dateKey) ?? {
+      date: dateKey,
+      submitted: 0,
+      claimed: 0,
+    };
+    existing[field] += 1;
+    counts.set(dateKey, existing);
+  };
+
+  for (const req of requests) {
+    if (req.submittedAt) bump(getDateKey(req.submittedAt), "submitted");
+    //if (req.claimedAt) bump(getDateKey(req.claimedAt), "claimed");
+  }
+
+  return Array.from(counts.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export function filterByTimeRange(
+  dailyCounts: DailyCounts[],
+  timeRange: TimeRange,
+): DailyCounts[] {
+  if (dailyCounts.length === 0) return [];
+
+  const days =
+    TIME_RANGES.find((range) => range.value === timeRange)?.days ??
+    TIME_RANGES[0].days;
+
+  // Anchor to the latest data point so older or sparse datasets still render
+  const latest = dailyCounts[dailyCounts.length - 1].date;
+  const startDate = new Date(`${latest}T00:00:00`);
+  startDate.setDate(startDate.getDate() - days);
+  const startKey = getDateKey(startDate.toISOString());
+
+  return dailyCounts.filter((item) => item.date >= startKey);
 }

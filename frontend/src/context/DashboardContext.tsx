@@ -1,16 +1,21 @@
 import { createContext } from "react";
-import type { DashboardStats, RequestType } from "@/types";
+import type { DashboardStats, RequestRow } from "@/types";
+import type { DailyCounts, TimeRange } from "@/lib/utils";
 
-export interface DashboardContextType {
+interface DashboardContextType {
   stats: DashboardStats | null;
-  requests: RequestType[];
+  requests: RequestRow[];
+  total: number;
   loading: boolean;
   error: string | null;
   search: string;
-  setSearch: (value: string) => void;
+  setSearch: (search: string) => void;
   status: string | undefined;
-  setStatus: (value: string | undefined) => void;
-  refreshDashboard: () => Promise<void>;
+  setStatus: (status: string | undefined) => void;
+  chartData: DailyCounts[];
+  timeRange: TimeRange;
+  setTimeRange: (timeRange: TimeRange) => void;
+  refreshDashboard: () => void;
 }
 
 export const DashboardContext = createContext<DashboardContextType | undefined>(

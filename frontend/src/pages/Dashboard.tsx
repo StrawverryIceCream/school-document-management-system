@@ -14,11 +14,6 @@ function Dashboard() {
         <div className="mx-auto h-full flex flex-col gap-4">
           <DashboardHeader />
           <StatsOverview />
-
-          {/* Left: Windows + Payment stacked. Right: overall trend, spanning
-              the same height as the two stacked charts combined. */}
-          {/* Top: overall trend, full width. Below: Payments (left) and
-              Windows (right) side by side. */}
           <div className="flex flex-col gap-4">
             <RequestsStatusChart />
             <div className="grid gap-4 lg:grid-cols-2">
