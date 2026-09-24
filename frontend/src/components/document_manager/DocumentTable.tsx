@@ -43,12 +43,12 @@ function DocumentTable() {
         <TableRow>
           <TableHead className="w-30">ID</TableHead>
           <TableHead className="w-30">Code</TableHead>
-          <TableHead className="w-50">Name</TableHead>
+          <TableHead className="max-w-">Name</TableHead>
           <TableHead>Description</TableHead>
           <TableHead className="w-50">Required Fields</TableHead>
           <TableHead>Fee</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Action</TableHead>
+          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -65,7 +65,9 @@ function DocumentTable() {
             ) : (
               <>
                 <TableCell>{document.code}</TableCell>
-                <TableCell>{document.name}</TableCell>
+                <TableCell className="max-w-50 truncate">
+                  {document.name}
+                </TableCell>
                 <TableCell className="max-w-100 truncate">
                   {document.description}
                 </TableCell>

@@ -8,6 +8,18 @@ export const userRoles = [
 export type UserRole = "student" | "staff" | "admin" | "teacher"; 
 export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
 
+export type RequestRow = {
+  id: string;
+  applicant: string;
+  document: string;
+  college?: string | null;
+  window?: string | null;
+  submittedAt?: string | null;
+  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
+  purpose?: string | null;
+  createdAt?: string | null;
+};
+
 export interface Timestamps {
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +41,8 @@ export interface RequiredFieldDefinition {
   required: boolean;
   options?: string[]; // for "select" type
 }
+
+export type RequiredFieldValues = Record<string, string | number | boolean>;
 
 export interface DocumentType extends Timestamps {
   id: number;
@@ -59,6 +73,7 @@ export interface DocumentRequest extends Timestamps {
   releaseDate: string | null; // date columns come back as string ("YYYY-MM-DD")
   claimedAt: Date | null;
   staffNotes: string | null;
+  tags?: string[];
 }
 
 export interface Payment extends Timestamps {
