@@ -1,9 +1,8 @@
-export { cn } from "cn"
-
+export { cn } from "cn";
+import { useLocation } from "react-router-dom";
+import type { RequestRow } from "@/types";
 import type { RequestStatus } from "@/types";
 
-// Tailwind classes per request status, used for the colored status badge in
-// RequestTable. Adjust one status's colors here without affecting the others.
 export const statusStyles: Record<RequestStatus, string> = {
   pending:
     "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
@@ -17,26 +16,17 @@ export const statusStyles: Record<RequestStatus, string> = {
     "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
 };
 
-// Shared by any chart that buckets requests by month (PaymentMethodChart,
-// WindowsProcessedChart, etc.) so the format only has to be defined once.
-
-/** Sortable bucket key, e.g. "2025-09". */
 export function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
-/** Display label for a month, e.g. "Sep 2025". */
 export function monthLabel(date: Date) {
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
-/** Sortable day-level bucket key, e.g. "2025-09-23". Used by charts that
- * group requests per day rather than per month (e.g. RequestStatusChart). */
 export function getDateKey(value: string | Date) {
   return new Date(value).toISOString().slice(0, 10);
 }
-export { cn } from "cn";
-import { useLocation } from "react-router-dom";
 
 export function formatDate(dateString: string | Date) {
   const date = new Date(dateString);
@@ -50,6 +40,18 @@ export function formatDate(dateString: string | Date) {
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
   return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`;
+}
+
+export function formatStudentId(value: string): string {
+  const digits = value
+    .replace(/^TUPM-?/, "")
+    .replace(/\D/g, "")
+    .slice(0, 6);
+
+  let formatted = "TUPM-";
+  if (digits.length > 0) formatted += digits.slice(0, 2);
+  if (digits.length > 2) formatted += `-${digits.slice(2, 6)}`;
+  return formatted;
 }
 
 export function getInitials(name: string): string {
@@ -70,4 +72,93 @@ export function useCurrentRouteLabel() {
   const segment =
     location.pathname.split("/").filter(Boolean).pop() || "dashboard";
   return segment.charAt(0).toUpperCase() + segment.slice(1);
+}
+
+
+
+
+function normalizeStatus(value: string | null | undefined): RequestRow["status"] {
+  switch (value?.toLowerCase()) {
+    case "pending":
+      return "pending";
+    case "processing":
+    case "in-progress":
+      return "processing";
+    case "ready":
+      return "ready";
+    case "claimed":
+      return "claimed";
+    case "cancelled":
+    case "rejected":
+      return "cancelled";
+    default:
+      return "pending";
+  }
+}
+
+export function normalizeRequestRow(raw: unknown): RequestRow | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const record = raw as Record<string, unknown>;
+  const user = asRecord(record.user);
+  const documentType = asRecord(record.documentType);
+  const document = asRecord(record.document);
+  const documentTypeAlt = asRecord(record.document_type);
+  const windowData = asRecord(record.window);
+
+  const id = String(
+    record.id ?? record.requestId ?? record.request_id ?? record.requestNumber ?? "unknown",
+  );
+  const applicant =
+    getString(user, "fullName") ??
+    getString(user, "full_name") ??
+    getString(record, "applicantName") ??
+    getString(record, "studentName") ??
+    getString(user, "email") ??
+    "Unknown applicant";
+  const documentName =
+    getString(documentType, "name") ??
+    getString(document, "name") ??
+    getString(record, "documentName") ??
+    getString(documentTypeAlt, "name") ??
+    "Unknown document";
+
+  return {
+    id,
+    applicant,
+    document: documentName,
+    college:
+      getString(record, "college") ??
+      getString(record, "collegeName") ??
+      getString(user, "college") ??
+      getString(user, "collegeName") ??
+      null,
+    window:
+      getString(record, "window") ??
+      getString(record, "windowName") ??
+      getString(windowData, "name") ??
+      null,
+    submittedAt:
+      getString(record, "createdAt") ??
+      getString(record, "submittedAt") ??
+      getString(record, "requestedAt") ??
+      null,
+    status: normalizeStatus(getString(record, "status")),
+    purpose: getString(record, "purpose") ?? getString(record, "notes") ?? null,
+    createdAt: getString(record, "createdAt") ?? getString(record, "submittedAt") ?? null,
+  };
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function getString(
+  record: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  const value = record?.[key];
+  return typeof value === "string" && value ? value : undefined;
 }
