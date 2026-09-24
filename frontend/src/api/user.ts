@@ -51,8 +51,8 @@ export async function getAllUsers(
   return res.json();
 }
 
-export async function getUserById(id: string) {
-  const res = await fetch(`/api/users/${id}`, {
+export async function getUserById(id: number) {
+  const res = await fetch(`/api/users/${id.toString()}`, {
     credentials: "include",
   });
 

@@ -12,6 +12,7 @@ export type StatusFilter =
 export interface RequestContextType {
   requests: RequestRow[];
   filteredRows: RequestRow[];
+  total: number;
   loading: boolean;
   error: string | null;
   dataSourceNote: string;

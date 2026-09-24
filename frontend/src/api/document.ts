@@ -49,9 +49,8 @@ export async function getAllDocument(
   return handleResponse<PaginatedDocumentResponse>(res, url);
 }
 
-
-export async function getDocumentById(id: string): Promise<DocumentType> {
-  const res = await fetch(`/api/documents/${id}`, {
+export async function getDocumentById(id: number): Promise<DocumentType> {
+  const res = await fetch(`/api/documents/${id.toString()}`, {
     credentials: "include",
   });
 

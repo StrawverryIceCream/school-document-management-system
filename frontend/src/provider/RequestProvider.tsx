@@ -1,98 +1,48 @@
 import { getAllRequests } from "@/api/requests";
-import {
-  RequestContext,
-  type StatusFilter,
-} from "@/context/RequestContext";
-import type { DocumentRequest, RequestRow } from "@/types";
+import { RequestContext, type StatusFilter } from "@/context/RequestContext";
+import type { RequestRow } from "@/types";
+import { normalizeRequestRow } from "@/utils/requests";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-const mockRequests: DocumentRequest[] = [
-  {
-    id: 1001,
-    userId: 21,
-    documentTypeId: 1,
-    purpose: "Internship application",
-    formData: {
-      applicant: "Maria Santos",
-      document: "Certificate of Enrollment",
-      window: "Window 1",
-      submittedAt: "2026-09-18",
-    },
-    status: "pending",
-    releaseDate: null,
-    claimedAt: null,
-    staffNotes: null,
-    createdAt: new Date("2026-09-18T09:15:00Z"),
-    updatedAt: new Date("2026-09-18T09:15:00Z"),
-  },
-  {
-    id: 1002,
-    userId: 22,
-    documentTypeId: 2,
-    purpose: "Scholarship requirement",
-    formData: {
-      applicant: "Daniel Cruz",
-      document: "Transcript of Records",
-      window: "Window 2",
-      submittedAt: "2026-09-17",
-    },
-    status: "processing",
-    releaseDate: null,
-    claimedAt: null,
-    staffNotes: "Under verification",
-    createdAt: new Date("2026-09-17T13:40:00Z"),
-    updatedAt: new Date("2026-09-18T08:00:00Z"),
-  },
-];
-
-function mapMockRequest(request: DocumentRequest): RequestRow {
-  const formData = request.formData;
-  return {
-    id: String(request.id),
-    applicant: String(formData.applicant ?? "Unknown applicant"),
-    document: String(formData.document ?? "Unknown document"),
-    window: typeof formData.window === "string" ? formData.window : null,
-    submittedAt: typeof formData.submittedAt === "string"
-      ? formData.submittedAt
-      : request.createdAt.toISOString().slice(0, 10),
-    status: request.status,
-    purpose: request.purpose,
-    createdAt: request.createdAt.toISOString(),
-  };
-}
 
 export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [windowFilter, setWindowFilter] = useState("all");
   const [dataSourceNote, setDataSourceNote] = useState(
-    "No request records are available yet. The backend request API has not been exposed in the current project state.",
+    "Loading request records from the backend...",
   );
 
   const refreshRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const rows = await getAllRequests();
-      setRequests(rows.length > 0 ? rows : mockRequests.map(mapMockRequest));
+      const response = await getAllRequests();
+      const rows = response.data
+        .map((item) => normalizeRequestRow(item))
+        .filter((item): item is RequestRow => Boolean(item));
+
+      setRequests(rows);
+      setTotal(response.pagination.total);
       setError(null);
       setDataSourceNote(
-        rows.length > 0
-          ? "Live request data is active. Window filters are derived from the available request fields."
-          : "Showing sample request records until the request data source returns records.",
+        rows.length === 0
+          ? "No request records are available from the current backend data source yet."
+          : "Live request data is active. Window filters are derived from the available request fields.",
       );
     } catch (requestError) {
       console.error("Failed to load request rows:", requestError);
-      setRequests(mockRequests.map(mapMockRequest));
+      setRequests([]);
+      setTotal(0);
       setError(
         requestError instanceof Error
           ? requestError.message
           : "Failed to load requests",
       );
       setDataSourceNote(
-        "The request data source is not available yet. Showing sample request records until the backend exposes requests.",
+        "The request data source is not available yet. Check that the backend request routes are running.",
       );
     } finally {
       setLoading(false);
@@ -121,12 +71,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     return requests.filter((request) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        [
-          request.applicant,
-          request.document,
-          request.id,
-          request.window ?? "",
-        ]
+        [request.applicant, request.document, request.id, request.window ?? ""]
           .join(" ")
           .toLowerCase()
           .includes(normalizedSearch);
@@ -142,8 +87,10 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const summary = useMemo(
     () => ({
       total: requests.length,
-      pending: requests.filter((request) => request.status === "pending").length,
-      processing: requests.filter((request) => request.status === "processing").length,
+      pending: requests.filter((request) => request.status === "pending")
+        .length,
+      processing: requests.filter((request) => request.status === "processing")
+        .length,
       ready: requests.filter((request) => request.status === "ready").length,
     }),
     [requests],
@@ -154,6 +101,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
       value={{
         requests,
         filteredRows,
+        total,
         loading,
         error,
         dataSourceNote,

@@ -10,7 +10,9 @@ export function MyRequestProvider({
   requests: DocumentRequest[];
 }) {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | RequestStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | RequestStatus>(
+    "all",
+  );
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -42,7 +44,9 @@ export function MyRequestProvider({
   const activeCount = requests.filter((request) =>
     ["pending", "processing", "ready"].includes(request.status),
   ).length;
-  const readyCount = requests.filter((request) => request.status === "ready").length;
+  const readyCount = requests.filter(
+    (request) => request.status === "ready",
+  ).length;
 
   return (
     <MyRequestContext.Provider
