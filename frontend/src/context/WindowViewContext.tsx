@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import type { DocumentRequest } from "@/types";
+import type { WindowTile } from "@/pages/Windows";
 
 export type StatusFilter = "all" | DocumentRequest["status"];
 
@@ -26,6 +27,7 @@ interface WindowViewContextType {
   search: string;
   setSearch: (search: string) => void;
   updateRequestStatus: (id: number, status: DocumentRequest["status"]) => void;
+  TILES: WindowTile[]
 }
 
 export const WindowViewContext = createContext<WindowViewContextType | null>(

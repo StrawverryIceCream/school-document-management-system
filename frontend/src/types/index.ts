@@ -97,3 +97,31 @@ export interface DocumentRequestWithRelations extends DocumentRequest {
   documentType?: DocumentType;
   payment?: Payment;
 }
+
+export interface DashboardStats {
+  pending_payment: number;
+  processing: number;
+  ready: number;
+  claimed: number;
+  submitted?: number;
+  overdue?: number;
+}
+
+export interface RequestType {
+  id: string;
+  studentName: string;
+  studentNumber: string;
+  college: string;
+  documentType: string;
+  window: string; // e.g. "Window 1" — which registrar window processed the request
+  submittedAt: string;
+  feeRequired: boolean;
+  feeAmount?: number;
+  paymentStatus: "none" | "awaiting_proof" | "pending_verification" | "verified";
+  paymentMethod?: "cash" | "online"; // only set when feeRequired is true
+  status: RequestStatus;
+  releaseDate?: string | null;
+  proofUrl?: string | null;
+  claimedBy?: string | null;
+  claimedAt?: string | null;
+}

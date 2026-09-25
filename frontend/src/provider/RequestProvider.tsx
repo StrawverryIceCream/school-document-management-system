@@ -1,7 +1,7 @@
 import { getAllRequests } from "@/api/requests";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
 import type { RequestRow } from "@/types";
-import { normalizeRequestRow } from "@/utils/requests";
+import { normalizeRequestRow } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function RequestProvider({ children }: { children: React.ReactNode }) {

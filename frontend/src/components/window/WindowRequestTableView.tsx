@@ -15,28 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type {
-  RequestDocumentType,
-  RequestUser,
-  StatusFilter,
-} from "@/context/WindowViewContext";
+import type { StatusFilter } from "@/context/WindowViewContext";
 import type { DocumentRequest, RequestStatus } from "@/types";
-
-type RequestTableViewProps = {
-  collegeTitle: string;
-  onBack: () => void;
-  requests: DocumentRequest[];
-  usersById: Map<number, RequestUser>;
-  documentTypesById: Map<number, RequestDocumentType>;
-  loading: boolean;
-  error: string | null;
-  filter: StatusFilter;
-  onFilterChange: (filter: StatusFilter) => void;
-  search: string;
-  onSearchChange: (search: string) => void;
-  onStatusChange: (id: number, status: DocumentRequest["status"]) => void;
-};
-
+import { useWindowView } from "@/hooks/useWindowView";
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
   pending: "text-orange-500",
@@ -44,30 +25,35 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
   ready: "text-green-600",
   claimed: "text-green-600",
   rejected: "text-destructive",
-}
+};
 
-const STATUS_LABELS : Record<RequestStatus, string> = {
+const STATUS_LABELS: Record<RequestStatus, string> = {
   pending: "PENDING",
   processing: "PROCESSING",
   ready: "READY",
   claimed: "CLAIMED",
   rejected: "REJECTED",
-}
+};
 
-function RequestTableView({
-  collegeTitle,
-  onBack,
-  requests,
-  usersById,
-  documentTypesById,
-  loading,
-  error,
-  filter,
-  onFilterChange,
-  search,
-  onSearchChange,
-  onStatusChange,
-}: RequestTableViewProps) {
+function WindowRequestTableView() {
+  const {
+    activeView,
+    clearView,
+    visibleRequests,
+    usersById,
+    documentTypesById,
+    loading,
+    error,
+    filter,
+    setFilter,
+    search,
+    setSearch,
+    updateRequestStatus,
+    TILES,
+  } = useWindowView();
+
+  const college = TILES.find((tile) => tile.id === activeView);
+  const collegeTitle = college?.title ?? activeView;
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mx-auto h-full flex flex-col">
@@ -75,7 +61,7 @@ function RequestTableView({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onBack}
+            onClick={clearView}
             className="mb-2 -ml-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -97,12 +83,12 @@ function RequestTableView({
               placeholder="Search requester or document"
               className="w-full rounded-lg border pl-9 pr-3 py-2 text-sm outline-none focus:ring-2"
               value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <Tabs
             value={filter}
-            onValueChange={(v) => onFilterChange(v as StatusFilter)}
+            onValueChange={(v) => setFilter(v as StatusFilter)}
           >
             <TabsList className="h-10">
               <TabsTrigger value="all">All</TabsTrigger>
@@ -132,71 +118,71 @@ function RequestTableView({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requests.map((request) => {
+              {visibleRequests.map((request) => {
                 const user = usersById.get(request.userId);
                 const documentType = documentTypesById.get(
                   request.documentTypeId,
                 );
 
                 return (
-                <TableRow key={request.id}>
-                  <TableCell className="font-medium">
-                    {user?.fullName ?? "Unknown"}
-                  </TableCell>
-                  <TableCell className="capitalize">
-                    {user?.role ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    {documentType?.name ?? "Unknown document"}
-                  </TableCell>
-                  <TableCell>
-                    {request.createdAt
-                      ? new Date(request.createdAt).toLocaleDateString()
-                      : "—"}
-                  </TableCell>
-                  <TableCell
-                    className={
-                      STATUS_COLORS[request.status] ?? "text-muted-foreground"
-                    }
-                  >
-                    {STATUS_LABELS[request.status] ?? request.status}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-                            size="icon"
-                          >
-                            <EllipsisVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-36">
-                          {Object.entries(STATUS_LABELS).map(
-                            ([value, label]) => (
-                              <DropdownMenuItem
-                                key={value}
-                                onClick={() =>
-                                  onStatusChange(
-                                    request.id,
-                                    value as DocumentRequest["status"],
-                                  )
-                                }
-                              >
-                                Mark as {label}
-                              </DropdownMenuItem>
-                            ),
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">
+                      {user?.fullName ?? "Unknown"}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {user?.role ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      {documentType?.name ?? "Unknown document"}
+                    </TableCell>
+                    <TableCell>
+                      {request.createdAt
+                        ? new Date(request.createdAt).toLocaleDateString()
+                        : "—"}
+                    </TableCell>
+                    <TableCell
+                      className={
+                        STATUS_COLORS[request.status] ?? "text-muted-foreground"
+                      }
+                    >
+                      {STATUS_LABELS[request.status] ?? request.status}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                              size="icon"
+                            >
+                              <EllipsisVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-36">
+                            {Object.entries(STATUS_LABELS).map(
+                              ([value, label]) => (
+                                <DropdownMenuItem
+                                  key={value}
+                                  onClick={() =>
+                                    updateRequestStatus(
+                                      request.id,
+                                      value as DocumentRequest["status"],
+                                    )
+                                  }
+                                >
+                                  Mark as {label}
+                                </DropdownMenuItem>
+                              ),
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-              {requests.length === 0 && (
+              {visibleRequests.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -214,4 +200,4 @@ function RequestTableView({
   );
 }
 
-export default RequestTableView;
+export default WindowRequestTableView;

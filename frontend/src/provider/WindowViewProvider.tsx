@@ -9,8 +9,47 @@ import { getAllRequests } from "@/api/requests";
 import { getUserById } from "@/api/user";
 import { getDocumentById } from "@/api/document";
 import type { DocumentRequest } from "@/types";
+import type { WindowTile } from "@/pages/Windows";
 
-// One failed lookup (e.g. a deleted user) must not blank the whole table
+const TILES: WindowTile[] = [
+  {
+    id: "cos",
+    title: "COS",
+    imageSrc: "/images/window/COS.png",
+    description: "College of Science",
+  },
+  {
+    id: "coe",
+    title: "COE",
+    imageSrc: "/images/window/COE.png",
+    description: "College of Engineering",
+  },
+  {
+    id: "cafa",
+    title: "CAFA",
+    imageSrc: "/images/window/CAFA.png",
+    description: "College of Architecture and Fine Arts",
+  },
+  {
+    id: "cmms",
+    title: "CMMS",
+    imageSrc: "/images/window/CMMS.png",
+    description: "College of Management & Multidisciplinary Studies",
+  },
+  {
+    id: "cit",
+    title: "CIT",
+    imageSrc: "/images/window/CIT.png",
+    description: "College of Information Technology",
+  },
+  {
+    id: "cie",
+    title: "CIE",
+    imageSrc: "/images/window/CIE.png",
+    description: "College of Industrial Education",
+  },
+];
+
 async function loadLookup<T>(
   ids: number[],
   fetchById: (id: number) => Promise<T>,
@@ -128,6 +167,7 @@ export function WindowViewProvider({
   return (
     <WindowViewContext.Provider
       value={{
+        TILES,
         activeView,
         selectView,
         clearView,

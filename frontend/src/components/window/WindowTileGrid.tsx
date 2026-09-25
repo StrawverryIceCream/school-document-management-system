@@ -1,15 +1,10 @@
 import { Card } from "@/components/ui/card";
-import type { WindowTile } from "@/pages/Windows";
+import { useWindowView } from "@/hooks/useWindowView";
 
 import { cn } from "cn";
 
-type TileGridProps = {
-  onSelect: (id: string) => void;
-  activeId: string | null;
-  TILES: WindowTile[]
-};
-
-function TileGrid({ onSelect, activeId, TILES}: TileGridProps) {
+function WindowTileGrid() {
+  const { TILES, selectView, activeView } = useWindowView();
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mb-6">
@@ -24,14 +19,14 @@ function TileGrid({ onSelect, activeId, TILES}: TileGridProps) {
             key={tile.id}
             role="button"
             tabIndex={0}
-            onClick={() => onSelect(tile.id)}
+            onClick={() => selectView(tile.id)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") onSelect(tile.id);
+              if (e.key === "Enter" || e.key === " ") selectView(tile.id);
             }}
             style={{ "--card-spacing": "0px" } as React.CSSProperties}
             className={cn(
               "cursor-pointer",
-              activeId === tile.id && "ring-2 ring-primary",
+              activeView === tile.id && "ring-2 ring-primary",
             )}
           >
             <div className="relative w-full aspect-video">
@@ -54,4 +49,4 @@ function TileGrid({ onSelect, activeId, TILES}: TileGridProps) {
   );
 }
 
-export default TileGrid;
+export default WindowTileGrid;
