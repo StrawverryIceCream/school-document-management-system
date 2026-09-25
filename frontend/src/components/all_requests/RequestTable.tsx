@@ -16,17 +16,25 @@ import { useRequests } from "@/hooks/useRequests";
 export type { RequestRow } from "@/types";
 
 const statusTone: Record<RequestRow["status"], string> = {
-  pending: "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300",
-  processing: "bg-sky-500/15 text-sky-700 ring-1 ring-sky-500/30 dark:text-sky-300",
-  ready: "bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:text-emerald-300",
-  claimed: "bg-violet-500/15 text-violet-700 ring-1 ring-violet-500/30 dark:text-violet-300",
-  cancelled: "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
-  rejected: "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
+  pending:
+    "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300",
+  processing:
+    "bg-sky-500/15 text-sky-700 ring-1 ring-sky-500/30 dark:text-sky-300",
+  ready:
+    "bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:text-emerald-300",
+  claimed:
+    "bg-violet-500/15 text-violet-700 ring-1 ring-violet-500/30 dark:text-violet-300",
+  cancelled:
+    "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
+  rejected:
+    "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
 };
 
 function RequestTable() {
   const { filteredRows: rows, requests, error } = useRequests();
-  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(
+    null,
+  );
   const emptyMessage = error
     ? error
     : requests.length === 0
@@ -51,7 +59,10 @@ function RequestTable() {
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="py-12 text-center text-muted-foreground"
+                >
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -65,7 +76,9 @@ function RequestTable() {
                         <UserRound className="size-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{request.applicant}</p>
+                        <p className="font-medium text-foreground">
+                          {request.applicant}
+                        </p>
                         <p className="text-xs text-muted-foreground">Student</p>
                       </div>
                     </div>
@@ -77,9 +90,13 @@ function RequestTable() {
                     </div>
                   </TableCell>
                   <TableCell>{request.window ?? "Not available"}</TableCell>
-                  <TableCell>{request.submittedAt ?? "Not available"}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusTone[request.status]}`}>
+                    {request.submittedAt ?? "Not available"}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusTone[request.status]}`}
+                    >
                       {request.status}
                     </span>
                   </TableCell>
@@ -101,7 +118,10 @@ function RequestTable() {
         </Table>
       </div>
 
-      <RequestDetailsDialog request={selectedRequest} onClose={() => setSelectedRequest(null)} />
+      <RequestDetailsDialog
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+      />
     </>
   );
 }

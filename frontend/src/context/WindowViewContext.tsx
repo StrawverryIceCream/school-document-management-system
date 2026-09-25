@@ -1,10 +1,33 @@
 import { createContext } from "react";
-import type { WindowViewId } from "@/types/window";
+import type { DocumentRequest } from "@/types";
 
-interface WindowViewContextType {
-  activeView: WindowViewId | null;
-  selectView: (id: WindowViewId) => void;
-  clearView: () => void;
+export type StatusFilter = "all" | DocumentRequest["status"];
+
+export interface RequestUser {
+  fullName: string;
+  role: string;
 }
 
-export const WindowViewContext = createContext<WindowViewContextType | null>(null);
+export interface RequestDocumentType {
+  name: string;
+}
+
+interface WindowViewContextType {
+  activeView: string | null;
+  selectView: (id: string) => void;
+  clearView: () => void;
+  visibleRequests: DocumentRequest[];
+  usersById: Map<number, RequestUser>;
+  documentTypesById: Map<number, RequestDocumentType>;
+  loading: boolean;
+  error: string | null;
+  filter: StatusFilter;
+  setFilter: (filter: StatusFilter) => void;
+  search: string;
+  setSearch: (search: string) => void;
+  updateRequestStatus: (id: number, status: DocumentRequest["status"]) => void;
+}
+
+export const WindowViewContext = createContext<WindowViewContextType | null>(
+  null,
+);

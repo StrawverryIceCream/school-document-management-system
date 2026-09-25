@@ -4,6 +4,7 @@ import {
   FileInputIcon,
   FileSearchCorner,
   Gauge,
+  Logs,
   NotebookTabs,
   Search,
   Settings,
@@ -72,6 +73,12 @@ const navItems: NavItem[] = [
     url: "/all-request",
     icon: CircleDashedCheck,
     roles: ["admin", "staff"],
+  },
+  {
+    title: "Logs",
+    url: "/logs",
+    icon: Logs,
+    roles: ["admin"],
   },
 ];
 
