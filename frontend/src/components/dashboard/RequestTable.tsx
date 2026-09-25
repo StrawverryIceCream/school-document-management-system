@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { statusStyles } from "@/lib/utils";
+import { formatDate, statusStyles } from "@/lib/utils";
 import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
 import type { RequestType } from "@/types";
 
@@ -60,11 +60,11 @@ function RequestTable() {
               requests.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-mono text-xs">{r.id}</TableCell>
-                  <TableCell>{r.studentName}</TableCell>
-                  <TableCell>{r.documentType}</TableCell>
+                  <TableCell>{r.applicant}</TableCell>
+                  <TableCell>{r.document}</TableCell>
                   <TableCell>{r.college}</TableCell>
                   <TableCell>{r.window}</TableCell>
-                  <TableCell>{new Date(r.submittedAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(r?.submittedAt)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`capitalize ${statusStyles[r.status]}`}>
                       {r.status}

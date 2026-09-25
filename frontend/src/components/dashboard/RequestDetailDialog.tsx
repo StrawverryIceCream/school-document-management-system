@@ -17,7 +17,13 @@ interface RequestDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between py-2 border-b last:border-b-0">
       <span className="text-sm text-muted-foreground">{label}</span>
@@ -26,7 +32,11 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
   );
 }
 
-function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialogProps) {
+function RequestDetailDialog({
+  request,
+  open,
+  onOpenChange,
+}: RequestDetailDialogProps) {
   if (!request) return null;
 
   return (
@@ -34,7 +44,9 @@ function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialo
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Request Details</DialogTitle>
-          <DialogDescription>Review the selected request information.</DialogDescription>
+          <DialogDescription>
+            Review the selected request information.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-1">
@@ -54,7 +66,10 @@ function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialo
           <DetailRow
             label="Status"
             value={
-              <Badge variant="outline" className={`capitalize ${statusStyles[request.status]}`}>
+              <Badge
+                variant="outline"
+                className={`capitalize ${statusStyles[request.status]}`}
+              >
                 {request.status}
               </Badge>
             }
