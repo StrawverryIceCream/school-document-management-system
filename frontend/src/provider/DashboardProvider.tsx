@@ -10,6 +10,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [timeRange, setTimeRange] = useState("90d"); // 👈 new
   const [debounceSearch, setDebounceSearch] = useState(search);
 
   const loadDashboardData = useCallback(async (): Promise<{
@@ -72,6 +73,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         setSearch,
         status,
         setStatus,
+        timeRange, // 👈 new
+        setTimeRange, // 👈 new
         refreshDashboard,
       }}
     >

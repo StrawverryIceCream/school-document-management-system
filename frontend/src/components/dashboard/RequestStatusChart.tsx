@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
@@ -39,14 +39,11 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface DailyCounts {
-  date: string; // "YYYY-MM-DD"
+  date: string;
   submitted: number;
   claimed: number;
 }
 
-// Buckets requests into per-day submitted/claimed counts. Unlike the shadcn
-// demo (which has one fake number per day already), we have to derive both
-// series from the raw request list ourselves.
 function buildDailyCounts(requests: RequestType[]): DailyCounts[] {
   const counts = new Map<string, DailyCounts>();
 
@@ -69,17 +66,13 @@ function buildDailyCounts(requests: RequestType[]): DailyCounts[] {
 }
 
 function RequestsStatusChart() {
-  const { requests } = useDashboard();
-  const [timeRange, setTimeRange] = React.useState("90d");
+  const { requests, timeRange, setTimeRange } = useDashboard(); // 👈 changed
 
-  const dailyCounts = React.useMemo(() => buildDailyCounts(requests), [requests]);
+  const dailyCounts = useMemo(() => buildDailyCounts(requests), [requests]);
 
-  const filteredData = React.useMemo(() => {
+  const filteredData = useMemo(() => {
     if (dailyCounts.length === 0) return [];
 
-    // Use the latest date actually present in the data as "today" so the
-    // filters work whether you're on mock data from last year or a live
-    // feed where the newest requests really are from today.
     const referenceDate = new Date(dailyCounts[dailyCounts.length - 1].date);
 
     let daysToSubtract = 90;
@@ -109,15 +102,9 @@ function RequestsStatusChart() {
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
-            </SelectItem>
-            <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
-            </SelectItem>
-            <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
-            </SelectItem>
+            <SelectItem value="90d" className="rounded-lg">Last 3 months</SelectItem>
+            <SelectItem value="30d" className="rounded-lg">Last 30 days</SelectItem>
+            <SelectItem value="7d" className="rounded-lg">Last 7 days</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -127,35 +114,16 @@ function RequestsStatusChart() {
             No data for this period yet.
           </p>
         ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
-          >
+          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
             <AreaChart data={filteredData}>
               <defs>
                 <linearGradient id="fillSubmitted" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-submitted)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-submitted)"
-                    stopOpacity={0.1}
-                  />
+                  <stop offset="5%" stopColor="var(--color-submitted)" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="var(--color-submitted)" stopOpacity={0.1} />
                 </linearGradient>
                 <linearGradient id="fillClaimed" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-claimed)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-claimed)"
-                    stopOpacity={0.1}
-                  />
+                  <stop offset="5%" stopColor="var(--color-claimed)" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="var(--color-claimed)" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />
@@ -166,10 +134,7 @@ function RequestsStatusChart() {
                 tickMargin={8}
                 minTickGap={32}
                 tickFormatter={(value) =>
-                  new Date(value).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })
+                  new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                 }
               />
               <ChartTooltip
@@ -177,29 +142,14 @@ function RequestsStatusChart() {
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
+                      new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                     }
                     indicator="dot"
                   />
                 }
               />
-              <Area
-                dataKey="claimed"
-                type="natural"
-                fill="url(#fillClaimed)"
-                stroke="var(--color-claimed)"
-                stackId="a"
-              />
-              <Area
-                dataKey="submitted"
-                type="natural"
-                fill="url(#fillSubmitted)"
-                stroke="var(--color-submitted)"
-                stackId="a"
-              />
+              <Area dataKey="claimed" type="natural" fill="url(#fillClaimed)" stroke="var(--color-claimed)" stackId="a" />
+              <Area dataKey="submitted" type="natural" fill="url(#fillSubmitted)" stroke="var(--color-submitted)" stackId="a" />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>

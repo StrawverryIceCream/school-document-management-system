@@ -69,4 +69,4 @@ export function monthLabel(date: Date) {
  * group requests per day rather than per month (e.g. RequestStatusChart). */
 export function getDateKey(value: string | Date) {
   return new Date(value).toISOString().slice(0, 10);
-}
+}   

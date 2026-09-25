@@ -10,6 +10,8 @@ export interface DashboardContextType {
   setSearch: (value: string) => void;
   status: string | undefined;
   setStatus: (value: string | undefined) => void;
+  timeRange: string;
+  setTimeRange: (value: string) => void;
   refreshDashboard: () => Promise<void>;
 }
 
