@@ -1,17 +1,19 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useWindowView } from "@/hooks/useWindowView";
 
-type PlaceholderViewProps = {
+type WindowPlaceholderViewProps = {
   title: string;
-  onBack: () => void;
 };
 
-function PlaceholderView({ title, onBack }: PlaceholderViewProps) {
+function WindowPlaceholderView({ title }: WindowPlaceholderViewProps) {
+  const { clearView } = useWindowView();
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{title}</CardTitle>
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="outline" onClick={clearView}>
           Back
         </Button>
       </CardHeader>
@@ -22,4 +24,4 @@ function PlaceholderView({ title, onBack }: PlaceholderViewProps) {
   );
 }
 
-export default PlaceholderView;
+export default WindowPlaceholderView;

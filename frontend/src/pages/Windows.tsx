@@ -1,22 +1,15 @@
 import { useWindowView } from "@/hooks/useWindowView";
-import TileGrid, { TILES } from "@/components/window/TileGrid";
-import RequestTable from "@/components/window/views/RequestTable";
+import WindowTileGrid from "@/components/window/WindowTileGrid";
+import WindowRequestTable from "@/components/window/views/WindowRequestTable";
 
 function Windows() {
-  const { activeView, selectView, clearView } = useWindowView();
+  const { activeView } = useWindowView();
 
   if (activeView) {
-    const college = TILES.find((tile) => tile.id === activeView);
-    return (
-      <RequestTable
-        collegeId={activeView}
-        collegeTitle={college?.title ?? activeView}
-        onBack={clearView}
-      />
-    );
+    return <WindowRequestTable collegeId={activeView} />;
   }
 
-  return <TileGrid onSelect={selectView} activeId={activeView} />;
+  return <WindowTileGrid />;
 }
 
 export default Windows;

@@ -1,8 +1,15 @@
-import { useContext } from "react";
-import { WindowViewContext } from "@/context/WindowViewContext";
+import { useState } from "react";
+import type { WindowViewId } from "@/types/window";
 
 export function useWindowView() {
-  const ctx = useContext(WindowViewContext);
-  if (!ctx) throw new Error("useWindowView must be used within WindowViewProvider");
-  return ctx;
+  const [activeView, setActiveView] = useState<WindowViewId | null>(null);
+
+  const selectView = (view: WindowViewId) => setActiveView(view);
+  const clearView = () => setActiveView(null);
+
+  return {
+    activeView,
+    selectView,
+    clearView,
+  };
 }

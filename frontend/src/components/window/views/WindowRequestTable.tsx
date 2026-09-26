@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ArrowLeft, EllipsisVertical, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,17 +15,14 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { MOCK_REQUESTS } from "@/data/mockRequests";
+import { useWindowView } from "@/hooks/useWindowView";
+import { useWindowRequests } from "@/hooks/useWindowRequests";
 import type { RequestStatus } from "@/types/request";
 import type { WindowViewId } from "@/types/window";
 
-type RequestTableProps = {
+type WindowRequestTableProps = {
   collegeId: WindowViewId;
-  collegeTitle: string;
-  onBack: () => void;
 };
-
-type StatusFilter = "all" | RequestStatus;
 
 const STATUS_LABELS: Record<RequestStatus, string> = {
   processing: "Processing",
@@ -40,39 +36,23 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
   cancelled: "text-destructive",
 };
 
-function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, RequestStatus>>(
-    {}
-  );
-  const [filter, setFilter] = useState<StatusFilter>("all");
-  const [search, setSearch] = useState("");
-
-  const collegeRequests = MOCK_REQUESTS.filter(
-    (r) => r.college === collegeId
-  )
-    .map((r) => ({ ...r, status: statusOverrides[r.id] ?? r.status }))
-    .sort((a, b) => b.dateRequested.localeCompare(a.dateRequested));
-
-  const visibleRequests = collegeRequests
-    .filter((r) => filter === "all" || r.status === filter)
-    .filter((r) => {
-      const query = search.trim().toLowerCase();
-      if (!query) return true;
-      return (
-        r.requesterName.toLowerCase().includes(query) ||
-        r.documentType.toLowerCase().includes(query)
-      );
-    });
-
-  function handleStatusChange(id: string, status: RequestStatus) {
-    setStatusOverrides((prev) => ({ ...prev, [id]: status }));
-  }
+function WindowRequestTable({ collegeId }: WindowRequestTableProps) {
+  const { clearView } = useWindowView();
+  const {
+    collegeTitle,
+    filter,
+    setFilter,
+    search,
+    setSearch,
+    visibleRequests,
+    handleStatusChange,
+  } = useWindowRequests(collegeId);
 
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mx-auto h-full flex flex-col">
         <div className="mb-8">
-          <Button variant="ghost" size="sm" onClick={onBack} className="mb-2 -ml-2">
+          <Button variant="ghost" size="sm" onClick={clearView} className="mb-2 -ml-2">
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
@@ -94,7 +74,7 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as StatusFilter)}>
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
             <TabsList className="h-10">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="processing">Processing</TabsTrigger>
@@ -168,4 +148,4 @@ function RequestTable({ collegeId, collegeTitle, onBack }: RequestTableProps) {
   );
 }
 
-export default RequestTable;
+export default WindowRequestTable;
