@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -22,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
+import { getDateKey } from "@/lib/utils";
+import type { RequestRow } from "@/context/DashboardContext";   
 
 const chartConfig = {
   submitted: {
@@ -34,10 +38,54 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-function RequestsStatusChart() {
-  const { timeRange, setTimeRange, chartData, error } = useDashboard(); // 👈 added error
+interface DailyCounts {
+  date: string;
+  submitted: number;
+  claimed: number;
+}
 
-  if (error) return null; // 👈 walang API pa — wag magpakita ng anuman
+function buildDailyCounts(requests: RequestRow[]): DailyCounts[] { 
+  const counts = new Map<string, DailyCounts>();
+
+  const bump = (dateKey: string, field: "submitted" | "claimed") => {
+    const existing = counts.get(dateKey) ?? {
+      date: dateKey,
+      submitted: 0,
+      claimed: 0,
+    };
+    existing[field] += 1;
+    counts.set(dateKey, existing);
+  };
+
+  for (const req of requests) {
+    if (req.submittedAt) bump(getDateKey(req.submittedAt), "submitted");
+    if (req.claimedAt) bump(getDateKey(req.claimedAt), "claimed");
+  }
+
+  return Array.from(counts.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function RequestsStatusChart() {
+  const { requests, timeRange, setTimeRange, error } = useDashboard(); 
+
+  const dailyCounts = useMemo(() => buildDailyCounts(requests), [requests]);
+
+  const filteredData = useMemo(() => {
+    if (dailyCounts.length === 0) return [];
+
+    const referenceDate = new Date(dailyCounts[dailyCounts.length - 1].date);
+
+    let daysToSubtract = 90;
+    if (timeRange === "30d") daysToSubtract = 30;
+    else if (timeRange === "7d") daysToSubtract = 7;
+
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+
+    return dailyCounts.filter((item) => new Date(item.date) >= startDate);
+  }, [dailyCounts, timeRange]);
+
+  if (error) return null; // 👈 added
 
   return (
     <Card className="pt-0">
@@ -50,7 +98,7 @@ function RequestsStatusChart() {
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className="hidden w-40 rounded-lg sm:ml-auto sm:flex"
+            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
             aria-label="Select a value"
           >
             <SelectValue placeholder="Last 3 months" />
@@ -63,13 +111,13 @@ function RequestsStatusChart() {
         </Select>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        {chartData.length === 0 ? (
+        {filteredData.length === 0 ? (
           <p className="text-sm text-muted-foreground py-10 text-center">
             No data for this period yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="aspect-auto h-62.5 w-full">
-            <AreaChart data={chartData}>
+          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+            <AreaChart data={filteredData}>
               <defs>
                 <linearGradient id="fillSubmitted" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-submitted)" stopOpacity={0.8} />

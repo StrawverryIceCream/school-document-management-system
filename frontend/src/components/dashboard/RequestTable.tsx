@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { formatDate, statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/utils";
 import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
 import type { RequestRow } from "@/context/DashboardContext";
 
@@ -29,7 +29,7 @@ function RequestTable() {
     return <p className="text-sm text-muted-foreground">Loading requests...</p>;
   }
 
-  if (error) return null;
+  if (error) return null; // no API / fetch failed — show nothing
 
   return (
     <>
@@ -60,9 +60,11 @@ function RequestTable() {
                   <TableCell className="font-mono text-xs">{r.id}</TableCell>
                   <TableCell>{r.applicant}</TableCell>
                   <TableCell>{r.document}</TableCell>
-                  <TableCell>{r.college}</TableCell>
-                  <TableCell>{r.window}</TableCell>
-                  <TableCell>{formatDate(r.submittedAt)}</TableCell>
+                  <TableCell>{r.college ?? "—"}</TableCell>
+                  <TableCell>{r.window ?? "—"}</TableCell>
+                  <TableCell>
+                    {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "—"}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`capitalize ${statusStyles[r.status]}`}>
                       {r.status}

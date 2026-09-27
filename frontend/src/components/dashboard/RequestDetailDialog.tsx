@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/utils";
 import type { RequestRow } from "@/context/DashboardContext";
 
 interface RequestDetailDialogProps {
@@ -43,7 +43,18 @@ function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialo
           <DetailRow label="Document" value={request.document} />
           <DetailRow label="College" value={request.college} />
           <DetailRow label="Window" value={request.window} />
-          <DetailRow label="Date Submitted" value={formatDate(request.submittedAt)} />
+          <DetailRow
+            label="Date Submitted"
+            value={
+              request.submittedAt
+                ? new Date(request.submittedAt).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : null
+            }
+          />
           <DetailRow label="Purpose" value={request.purpose} />
           <DetailRow
             label="Status"

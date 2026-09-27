@@ -15,15 +15,8 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/utils";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/context/DashboardContext"; 
 
-// `window` values in the data look like "Window 1" (with a space), but
-// shadcn's ChartContainer turns each config key into a CSS variable
-// (--color-<key>), and CSS variable names can't contain spaces. So each
-// window gets a safe `key` for the chart, separate from its display `value`
-// (the actual string stored on each request) and `label` (what's shown to
-// the user). If a 4th window gets added later, add it to this list only —
-// nothing else in the file needs to change.
 const WINDOWS = [
   { key: "window1", value: "Window 1", label: "Window 1", color: "var(--chart-1)" },
   { key: "window2", value: "Window 2", label: "Window 2", color: "var(--chart-2)" },
@@ -35,17 +28,17 @@ const chartConfig = Object.fromEntries(
 ) satisfies ChartConfig;
 
 interface MonthlyWindowCounts {
-  monthKey: string; // "2025-09", used for sorting
-  month: string; // "Sep 2025", used for display
+  monthKey: string;
+  month: string;
   [windowKey: string]: string | number;
 }
 
-function buildMonthlyWindowData(requests: RequestType[]): MonthlyWindowCounts[] {
+function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] { 
   const counts = new Map<string, MonthlyWindowCounts>();
 
   for (const req of requests) {
     const windowEntry = WINDOWS.find((w) => w.value === req.window);
-    if (!windowEntry) continue; // unknown window value — skip rather than guess
+    if (!windowEntry || !req.submittedAt) continue; 
 
     const date = new Date(req.submittedAt);
     const monthKey = getMonthKey(date);
@@ -86,23 +79,10 @@ function WindowsProcessedChart() {
           <ChartContainer config={chartConfig}>
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="dashed" />}
-              />
+              <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
               {WINDOWS.map((w) => (
-                <Bar
-                  key={w.key}
-                  dataKey={w.key}
-                  fill={`var(--color-${w.key})`}
-                  radius={4}
-                />
+                <Bar key={w.key} dataKey={w.key} fill={`var(--color-${w.key})`} radius={4} />
               ))}
             </BarChart>
           </ChartContainer>

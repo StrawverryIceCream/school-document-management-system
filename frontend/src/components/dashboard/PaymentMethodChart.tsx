@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/utils";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/context/DashboardContext"; 
 
 const chartConfig = {
   cash: {
@@ -31,20 +31,17 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface MonthlyPaymentCounts {
-  monthKey: string; // "2025-09", used for sorting
-  month: string; // "Sep 2025", used for display
+  monthKey: string;
+  month: string;
   cash: number;
   online: number;
 }
 
-// Only requests with feeRequired: true carry a paymentMethod, so anything
-// without one (free documents) is skipped here — it has no cash/online
-// distinction to plot.
-function buildMonthlyPaymentData(requests: RequestType[]): MonthlyPaymentCounts[] {
+function buildMonthlyPaymentData(requests: RequestRow[]): MonthlyPaymentCounts[] { 
   const counts = requests
-    .filter((req) => req.paymentMethod)
+    .filter((req) => req.paymentMethod && req.submittedAt) 
     .reduce((map, req) => {
-      const date = new Date(req.submittedAt);
+      const date = new Date(req.submittedAt!);
       const monthKey = getMonthKey(date);
 
       const existing = map.get(monthKey) ?? {
@@ -82,26 +79,11 @@ function PaymentMethodChart() {
           <ChartContainer config={chartConfig}>
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
+              <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar
-                dataKey="cash"
-                stackId="a"
-                fill="var(--color-cash)"
-                radius={[0, 0, 4, 4]}
-              />
-              <Bar
-                dataKey="online"
-                stackId="a"
-                fill="var(--color-online)"
-                radius={[4, 4, 0, 0]}
-              />
+              <Bar dataKey="cash" stackId="a" fill="var(--color-cash)" radius={[0, 0, 4, 4]} />
+              <Bar dataKey="online" stackId="a" fill="var(--color-online)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>
         )}

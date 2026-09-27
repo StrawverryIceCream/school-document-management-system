@@ -1,17 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
-import { Clock, Loader, PackageCheck, Wallet } from "lucide-react";
+import { Ban, Clock, Loader, PackageCheck } from "lucide-react";
 
 const cards = [
-  { key: "submitted" as const, label: "Submitted", icon: Clock },
-  { key: "pending_payment" as const, label: "Pending Payment", icon: Wallet },
+  { key: "pending" as const, label: "Pending", icon: Clock },
   { key: "processing" as const, label: "In Process", icon: Loader },
   { key: "ready" as const, label: "Ready for Claim", icon: Clock },
   { key: "claimed" as const, label: "Claimed", icon: PackageCheck },
+  { key: "rejected" as const, label: "Rejected", icon: Ban },
 ];
 
 function StatsOverview() {
-  const { stats, loading } = useDashboard();
+  const { stats, loading, error } = useDashboard();
+
+  if (error) return null; // 👈 added
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">

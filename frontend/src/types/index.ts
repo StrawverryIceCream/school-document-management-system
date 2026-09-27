@@ -6,13 +6,7 @@ export const userRoles = [
 ] as const;
 
 export type UserRole = "student" | "staff" | "admin" | "teacher";
-export type RequestStatus =
-  | "pending"
-  | "processing"
-  | "ready"
-  | "claimed"
-  | "cancelled"
-  | "rejected";
+export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected";
 
 export interface Timestamps {
   createdAt: Date;
