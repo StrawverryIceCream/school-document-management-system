@@ -1,19 +1,15 @@
 export { cn } from "cn";
 import { useLocation } from "react-router-dom";
-import type { RequestRow } from "@/types";
+import type { RequestRow } from "@/context/DashboardContext"; 
 import type { RequestStatus } from "@/types";
 
 export const statusStyles: Record<RequestStatus, string> = {
-  pending:
-    "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
-  processing:
-    "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20",
-  ready:
-    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
-  claimed:
-    "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
-  rejected:
-    "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
+  pending: "text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-800",
+  processing: "text-blue-600 border-blue-300 dark:text-blue-400 dark:border-blue-800",
+  ready: "text-violet-600 border-violet-300 dark:text-violet-400 dark:border-violet-800",
+  claimed: "text-green-600 border-green-300 dark:text-green-400 dark:border-green-800",
+  cancelled: "text-muted-foreground border-muted-foreground/30",
+  rejected: "text-red-600 border-red-300 dark:text-red-400 dark:border-red-800",
 };
 
 export function getMonthKey(date: Date) {
@@ -28,7 +24,9 @@ export function getDateKey(value: string | Date) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
-export function formatDate(dateString: string | Date) {
+export function formatDate(dateString: string | Date | null | undefined) {
+  if (!dateString) return "—"; // 👈 fixed: handles null/undefined now
+
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -169,8 +167,6 @@ function getString(
   return typeof value === "string" && value ? value : undefined;
 }
 
-
-
 export const TIME_RANGES = [
   { value: "90d", label: "Last 3 months", days: 90 },
   { value: "30d", label: "Last 30 days", days: 30 },
@@ -182,7 +178,7 @@ export type TimeRange = (typeof TIME_RANGES)[number]["value"];
 export const DEFAULT_TIME_RANGE: TimeRange = "90d";
 
 export interface DailyCounts {
-  date: string; // "YYYY-MM-DD" in local time
+  date: string;
   submitted: number;
   claimed: number;
 }
@@ -190,7 +186,6 @@ export interface DailyCounts {
 export function isTimeRange(value: string): value is TimeRange {
   return TIME_RANGES.some((range) => range.value === value);
 }
-
 
 export function formatChartDate(dateKey: string): string {
   return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-US", {
@@ -214,7 +209,6 @@ export function buildDailyCounts(requests: RequestRow[]): DailyCounts[] {
 
   for (const req of requests) {
     if (req.submittedAt) bump(getDateKey(req.submittedAt), "submitted");
-    //if (req.claimedAt) bump(getDateKey(req.claimedAt), "claimed");
   }
 
   return Array.from(counts.values()).sort((a, b) => a.date.localeCompare(b.date));
@@ -230,7 +224,6 @@ export function filterByTimeRange(
     TIME_RANGES.find((range) => range.value === timeRange)?.days ??
     TIME_RANGES[0].days;
 
-  // Anchor to the latest data point so older or sparse datasets still render
   const latest = dailyCounts[dailyCounts.length - 1].date;
   const startDate = new Date(`${latest}T00:00:00`);
   startDate.setDate(startDate.getDate() - days);

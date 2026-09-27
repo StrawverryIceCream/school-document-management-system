@@ -13,14 +13,14 @@ import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
 import { formatDate, statusStyles } from "@/lib/utils";
 import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/context/DashboardContext";
 
 function RequestTable() {
   const { requests, loading, error } = useDashboard();
-  const [selectedRequest, setSelectedRequest] = useState<RequestType | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  function handleViewClick(request: RequestType) {
+  function handleViewClick(request: RequestRow) {
     setSelectedRequest(request);
     setDetailOpen(true);
   }
@@ -29,9 +29,7 @@ function RequestTable() {
     return <p className="text-sm text-muted-foreground">Loading requests...</p>;
   }
 
-  if (error) {
-    return <p className="text-sm text-destructive">{error}</p>;
-  }
+  if (error) return null;
 
   return (
     <>
@@ -64,7 +62,7 @@ function RequestTable() {
                   <TableCell>{r.document}</TableCell>
                   <TableCell>{r.college}</TableCell>
                   <TableCell>{r.window}</TableCell>
-                  <TableCell>{formatDate(r?.submittedAt)}</TableCell>
+                  <TableCell>{formatDate(r.submittedAt)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`capitalize ${statusStyles[r.status]}`}>
                       {r.status}

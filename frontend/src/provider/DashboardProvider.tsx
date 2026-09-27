@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardContext } from "@/context/DashboardContext";
+import type { DashboardStats, RequestRow } from "@/context/DashboardContext";
 import { getDashboardStats } from "@/api/dashboard";
 import { getAllRequests } from "@/api/requests";
-import { normalizeRequestRow } from "@/lib/utils";
 import {
+  normalizeRequestRow,
   DEFAULT_TIME_RANGE,
   buildDailyCounts,
   filterByTimeRange,
   type TimeRange,
 } from "@/lib/utils";
-import type { DashboardStats, RequestRow } from "@/types";
 
 const SEARCH_DEBOUNCE_MS = 250;
 const DASHBOARD_LOAD_ERROR = "Failed to load dashboard data";
-// Stable reference so the memoized chart data does not recompute on every render
 const EMPTY_REQUESTS: RequestRow[] = [];
 
 interface DashboardData {
@@ -28,13 +27,15 @@ interface DashboardResult {
   error: string | null;
 }
 
-async function loadDashboardData(search: string): Promise<DashboardData> {
+async function loadDashboardData(
+  search: string,
+  status: string | undefined,
+): Promise<DashboardData> {
   const [stats, response] = await Promise.all([
     getDashboardStats(),
-    getAllRequests({ search }),
+    getAllRequests({ search, status }),
   ]);
 
-  // Backend rows can be malformed; drop anything that fails normalization
   const requests = response.data
     .map((item) => normalizeRequestRow(item))
     .filter((item): item is RequestRow => Boolean(item));
@@ -50,8 +51,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
 
-  // Loading is derived: it stays true until a result exists for the current inputs
-  const requestKey = `${debouncedSearch}|${refreshToken}`;
+  const requestKey = `${debouncedSearch}|${status ?? "all"}|${refreshToken}`;
   const loading = result?.requestKey !== requestKey;
 
   const stats = result?.data?.stats ?? null;
@@ -69,7 +69,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setRefreshToken((token) => token + 1);
   }, []);
 
-  // Avoid firing a request on every keystroke
   useEffect(() => {
     const timeout = setTimeout(
       () => setDebouncedSearch(search),
@@ -83,7 +82,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
     async function fetchDashboard() {
       try {
-        const data = await loadDashboardData(debouncedSearch);
+        const data = await loadDashboardData(debouncedSearch, status);
         if (!cancelled) setResult({ requestKey, data, error: null });
       } catch (err) {
         if (cancelled) return;
@@ -101,7 +100,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, requestKey]);
+  }, [debouncedSearch, status, requestKey]);
 
   return (
     <DashboardContext.Provider

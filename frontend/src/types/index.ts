@@ -5,20 +5,14 @@ export const userRoles = [
   "teacher",
 ] as const;
 
-export type UserRole = "student" | "staff" | "admin" | "teacher"; 
-export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
-
-export type RequestRow = {
-  id: string;
-  applicant: string;
-  document: string;
-  college?: string | null;
-  window?: string | null;
-  submittedAt?: string | null;
-  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
-  purpose?: string | null;
-  createdAt?: string | null;
-};
+export type UserRole = "student" | "staff" | "admin" | "teacher";
+export type RequestStatus =
+  | "pending"
+  | "processing"
+  | "ready"
+  | "claimed"
+  | "cancelled"
+  | "rejected";
 
 export interface Timestamps {
   createdAt: Date;
@@ -37,9 +31,9 @@ export interface User extends Timestamps {
 export interface RequiredFieldDefinition {
   key: string;
   label: string;
-  type: "text" | "number" | "date" | "select" | "checkbox"; // adjust to your actual field types
+  type: "text" | "number" | "date" | "select" | "checkbox";
   required: boolean;
-  options?: string[]; // for "select" type
+  options?: string[];
 }
 
 export type RequiredFieldValues = Record<string, string | number | boolean>;
@@ -61,16 +55,16 @@ export interface NewDocument {
   fee: string;
   isActive: boolean;
   requiredFields: RequiredFieldDefinition[];
-};
+}
 
 export interface DocumentRequest extends Timestamps {
   id: number;
   userId: number;
   documentTypeId: number;
   purpose: string | null;
-  formData: Record<string, unknown>; // shape depends on the document type's requiredFields
+  formData: Record<string, unknown>;
   status: RequestStatus;
-  releaseDate: string | null; // date columns come back as string ("YYYY-MM-DD")
+  releaseDate: string | null;
   claimedAt: Date | null;
   staffNotes: string | null;
   tags?: string[];
@@ -79,7 +73,7 @@ export interface DocumentRequest extends Timestamps {
 export interface Payment extends Timestamps {
   id: number;
   requestId: number;
-  amount: string; // numeric -> string
+  amount: string;
   method: string;
   receiptNumber: string;
   paidAt: Date;
@@ -92,36 +86,9 @@ export interface Notification extends Timestamps {
   message: string;
   isRead: boolean;
 }
+
 export interface DocumentRequestWithRelations extends DocumentRequest {
   user?: User;
   documentType?: DocumentType;
   payment?: Payment;
-}
-
-export interface DashboardStats {
-  pending_payment: number;
-  processing: number;
-  ready: number;
-  claimed: number;
-  submitted?: number;
-  overdue?: number;
-}
-
-export interface RequestType {
-  id: string;
-  studentName: string;
-  studentNumber: string;
-  college: string;
-  documentType: string;
-  window: string; // e.g. "Window 1" — which registrar window processed the request
-  submittedAt: string;
-  feeRequired: boolean;
-  feeAmount?: number;
-  paymentStatus: "none" | "awaiting_proof" | "pending_verification" | "verified";
-  paymentMethod?: "cash" | "online"; // only set when feeRequired is true
-  status: RequestStatus;
-  releaseDate?: string | null;
-  proofUrl?: string | null;
-  claimedBy?: string | null;
-  claimedAt?: string | null;
 }

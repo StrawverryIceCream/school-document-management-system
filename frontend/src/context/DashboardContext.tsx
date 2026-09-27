@@ -1,6 +1,26 @@
 import { createContext } from "react";
-import type { DashboardStats, RequestRow } from "@/types";
 import type { DailyCounts, TimeRange } from "@/lib/utils";
+
+export interface DashboardStats {
+  pending_payment: number;
+  processing: number;
+  ready: number;
+  claimed: number;
+  submitted?: number;
+  overdue?: number;
+}
+
+export interface RequestRow {
+  id: string;
+  applicant: string;
+  document: string;
+  college?: string | null;
+  window?: string | null;
+  submittedAt?: string | null;
+  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
+  purpose?: string | null;
+  createdAt?: string | null;
+}
 
 interface DashboardContextType {
   stats: DashboardStats | null;
