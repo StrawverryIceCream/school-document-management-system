@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/utils";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/types";
 
 // `window` values in the data look like "Window 1" (with a space), but
 // shadcn's ChartContainer turns each config key into a CSS variable
@@ -40,14 +40,15 @@ interface MonthlyWindowCounts {
   [windowKey: string]: string | number;
 }
 
-function buildMonthlyWindowData(requests: RequestType[]): MonthlyWindowCounts[] {
+function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] {
   const counts = new Map<string, MonthlyWindowCounts>();
 
   for (const req of requests) {
     const windowEntry = WINDOWS.find((w) => w.value === req.window);
     if (!windowEntry) continue; // unknown window value — skip rather than guess
 
-    const date = new Date(req.submittedAt);
+    const submittedAt = req.submittedAt ?? new Date().toISOString();
+    const date = new Date(submittedAt);
     const monthKey = getMonthKey(date);
 
     const existing =

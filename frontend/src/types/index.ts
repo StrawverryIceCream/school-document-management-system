@@ -5,19 +5,35 @@ export const userRoles = [
   "teacher",
 ] as const;
 
-export type UserRole = "student" | "staff" | "admin" | "teacher"; 
-export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected"; // 
+export type UserRole = "student" | "staff" | "admin" | "teacher";
+export type RequestStatus =
+  | "pending"
+  | "processing"
+  | "ready"
+  | "claimed"
+  | "cancelled"
+  | "rejected";
 
 export type RequestRow = {
   id: string;
   applicant: string;
+  studentName?: string;
+  studentNumber?: string;
   document: string;
+  documentType?: string;
   college?: string | null;
   window?: string | null;
   submittedAt?: string | null;
-  status: "pending" | "processing" | "ready" | "claimed" | "cancelled" | "rejected";
+  status: RequestStatus;
   purpose?: string | null;
   createdAt?: string | null;
+  feeRequired?: boolean;
+  feeAmount?: number;
+  paymentMethod?: "cash" | "online";
+  paymentStatus?: "none" | "awaiting_proof" | "pending_verification" | "verified";
+  releaseDate?: string | null;
+  claimedBy?: string | null;
+  claimedAt?: string | null;
 };
 
 export interface Timestamps {
@@ -107,18 +123,20 @@ export interface DashboardStats {
   overdue?: number;
 }
 
-export interface RequestType {
+export interface RequestType extends Partial<RequestRow> {
   id: string;
-  studentName: string;
-  studentNumber: string;
-  college: string;
-  documentType: string;
-  window: string; // e.g. "Window 1" — which registrar window processed the request
-  submittedAt: string;
-  feeRequired: boolean;
+  applicant?: string;
+  document?: string;
+  studentName?: string;
+  studentNumber?: string;
+  college?: string;
+  documentType?: string;
+  window?: string;
+  submittedAt?: string;
+  feeRequired?: boolean;
   feeAmount?: number;
-  paymentStatus: "none" | "awaiting_proof" | "pending_verification" | "verified";
-  paymentMethod?: "cash" | "online"; // only set when feeRequired is true
+  paymentStatus?: "none" | "awaiting_proof" | "pending_verification" | "verified";
+  paymentMethod?: "cash" | "online";
   status: RequestStatus;
   releaseDate?: string | null;
   proofUrl?: string | null;

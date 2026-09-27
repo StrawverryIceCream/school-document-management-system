@@ -9,10 +9,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { statusStyles } from "@/lib/utils";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/types";
 
 interface RequestDetailDialogProps {
-  request: RequestType | null;
+  request: RequestRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -51,13 +51,13 @@ function RequestDetailDialog({
 
         <div className="space-y-1">
           <DetailRow label="Request ID" value={request.id} />
-          <DetailRow label="Applicant" value={request.studentName} />
-          <DetailRow label="Document" value={request.documentType} />
-          <DetailRow label="College" value={request.college} />
-          <DetailRow label="Window" value={request.window} />
+          <DetailRow label="Applicant" value={request.applicant ?? request.studentName ?? "Unknown"} />
+          <DetailRow label="Document" value={request.document ?? request.documentType ?? "Unknown document"} />
+          <DetailRow label="College" value={request.college ?? "—"} />
+          <DetailRow label="Window" value={request.window ?? "—"} />
           <DetailRow
             label="Date Submitted"
-            value={new Date(request.submittedAt).toLocaleDateString(undefined, {
+            value={new Date(request.submittedAt ?? new Date().toISOString()).toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",
               year: "numeric",

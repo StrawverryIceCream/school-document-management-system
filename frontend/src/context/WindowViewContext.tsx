@@ -1,35 +1,34 @@
 import { createContext } from "react";
-import type { DocumentRequest } from "@/types";
-import type { WindowTile } from "@/pages/Windows";
+import type { WindowTile, WindowViewId } from "@/pages/Windows";
+import type { RequestRow, RequestStatus } from "@/types";
 
-export type StatusFilter = "all" | DocumentRequest["status"];
+export type StatusFilter =
+  | "all"
+  | "pending"
+  | "processing"
+  | "ready"
+  | "claimed"
+  | "cancelled"
+  | "rejected";
 
-export interface RequestUser {
-  fullName: string;
-  role: string;
-}
+export type WindowViewRequestStatus = RequestStatus | "cancelled";
 
-export interface RequestDocumentType {
-  name: string;
-}
-
-interface WindowViewContextType {
-  activeView: string | null;
-  selectView: (id: string) => void;
+export interface WindowViewContextType {
+  activeView: WindowViewId | null;
+  selectView: (id: WindowViewId) => void;
   clearView: () => void;
-  visibleRequests: DocumentRequest[];
-  usersById: Map<number, RequestUser>;
-  documentTypesById: Map<number, RequestDocumentType>;
+  visibleRequests: RequestRow[];
   loading: boolean;
   error: string | null;
   filter: StatusFilter;
-  setFilter: (filter: StatusFilter) => void;
+  setFilter: (value: StatusFilter) => void;
   search: string;
-  setSearch: (search: string) => void;
-  updateRequestStatus: (id: number, status: DocumentRequest["status"]) => void;
-  TILES: WindowTile[]
+  setSearch: (value: string) => void;
+  updateRequestStatus: (
+    requestId: string,
+    status: WindowViewRequestStatus,
+  ) => void;
+  TILES: WindowTile[];
 }
 
-export const WindowViewContext = createContext<WindowViewContextType | null>(
-  null,
-);
+export const WindowViewContext = createContext<WindowViewContextType | null>(null);

@@ -16,23 +16,27 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { StatusFilter } from "@/context/WindowViewContext";
-import type { DocumentRequest, RequestStatus } from "@/types";
+import type { RequestStatus } from "@/types";
 import { useWindowView } from "@/hooks/useWindowView";
 
-const STATUS_COLORS: Record<RequestStatus, string> = {
+type WindowRequestStatus = RequestStatus | "cancelled";
+
+const STATUS_COLORS: Record<WindowRequestStatus, string> = {
   pending: "text-orange-500",
   processing: "text-orange-500",
   ready: "text-green-600",
   claimed: "text-green-600",
   rejected: "text-destructive",
+  cancelled: "text-destructive",
 };
 
-const STATUS_LABELS: Record<RequestStatus, string> = {
+const STATUS_LABELS: Record<WindowRequestStatus, string> = {
   pending: "PENDING",
   processing: "PROCESSING",
   ready: "READY",
   claimed: "CLAIMED",
   rejected: "REJECTED",
+  cancelled: "CANCELLED",
 };
 
 function WindowRequestTableView() {
@@ -40,8 +44,6 @@ function WindowRequestTableView() {
     activeView,
     clearView,
     visibleRequests,
-    usersById,
-    documentTypesById,
     loading,
     error,
     filter,
@@ -53,7 +55,8 @@ function WindowRequestTableView() {
   } = useWindowView();
 
   const college = TILES.find((tile) => tile.id === activeView);
-  const collegeTitle = college?.title ?? activeView;
+  const collegeTitle = college?.title ?? activeView ?? "Window";
+
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mx-auto h-full flex flex-col">
@@ -118,70 +121,61 @@ function WindowRequestTableView() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visibleRequests.map((request) => {
-                const user = usersById.get(request.userId);
-                const documentType = documentTypesById.get(
-                  request.documentTypeId,
-                );
-
-                return (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">
-                      {user?.fullName ?? "Unknown"}
-                    </TableCell>
-                    <TableCell className="capitalize">
-                      {user?.role ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      {documentType?.name ?? "Unknown document"}
-                    </TableCell>
-                    <TableCell>
-                      {request.createdAt
-                        ? new Date(request.createdAt).toLocaleDateString()
-                        : "—"}
-                    </TableCell>
-                    <TableCell
-                      className={
-                        STATUS_COLORS[request.status] ?? "text-muted-foreground"
-                      }
-                    >
-                      {STATUS_LABELS[request.status] ?? request.status}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-                              size="icon"
+              {visibleRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell className="font-medium">
+                    {request.applicant}
+                  </TableCell>
+                  <TableCell className="capitalize">
+                    Student
+                  </TableCell>
+                  <TableCell>{request.document}</TableCell>
+                  <TableCell>
+                    {request.submittedAt
+                      ? new Date(request.submittedAt).toLocaleDateString()
+                      : "—"}
+                  </TableCell>
+                  <TableCell
+                    className={
+                      STATUS_COLORS[request.status as WindowRequestStatus] ??
+                      "text-muted-foreground"
+                    }
+                  >
+                    {STATUS_LABELS[request.status as WindowRequestStatus] ??
+                      request.status}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                            size="icon"
+                          >
+                            <EllipsisVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36">
+                          {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                            <DropdownMenuItem
+                              key={value}
+                              onClick={() =>
+                                updateRequestStatus(
+                                  request.id,
+                                  value as WindowRequestStatus,
+                                )
+                              }
                             >
-                              <EllipsisVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-36">
-                            {Object.entries(STATUS_LABELS).map(
-                              ([value, label]) => (
-                                <DropdownMenuItem
-                                  key={value}
-                                  onClick={() =>
-                                    updateRequestStatus(
-                                      request.id,
-                                      value as DocumentRequest["status"],
-                                    )
-                                  }
-                                >
-                                  Mark as {label}
-                                </DropdownMenuItem>
-                              ),
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                              Mark as {label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
               {visibleRequests.length === 0 && (
                 <TableRow>
                   <TableCell

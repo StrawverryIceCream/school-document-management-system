@@ -81,11 +81,15 @@ function buildMockResponse(
 
   if (params.search) {
     const q = params.search.toLowerCase();
-    filtered = filtered.filter(
-      (req) =>
-        req.studentName.toLowerCase().includes(q) ||
-        req.studentNumber.toLowerCase().includes(q),
-    );
+    filtered = filtered.filter((req) => {
+      const studentName = req.studentName ?? "";
+      const studentNumber = req.studentNumber ?? "";
+
+      return (
+        studentName.toLowerCase().includes(q) ||
+        studentNumber.toLowerCase().includes(q)
+      );
+    });
   }
 
   const page = params.page ?? 1;

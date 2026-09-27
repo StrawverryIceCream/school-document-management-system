@@ -64,3 +64,19 @@ export async function getRequestById(
 
   return res.json() as Promise<DocumentRequestWithRelations>;
 }
+
+export async function updateRequestStatus(
+  id: string,
+  status: RequestStatus,
+): Promise<DocumentRequest> {
+  const url = `/api/requests/${id}`;
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+
+  return handleResponse<DocumentRequest>(res, url);
+}

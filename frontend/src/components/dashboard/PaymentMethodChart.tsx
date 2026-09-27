@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/utils";
-import type { RequestType } from "@/types";
+import type { RequestRow } from "@/types";
 
 const chartConfig = {
   cash: {
@@ -40,11 +40,12 @@ interface MonthlyPaymentCounts {
 // Only requests with feeRequired: true carry a paymentMethod, so anything
 // without one (free documents) is skipped here — it has no cash/online
 // distinction to plot.
-function buildMonthlyPaymentData(requests: RequestType[]): MonthlyPaymentCounts[] {
+function buildMonthlyPaymentData(requests: RequestRow[]): MonthlyPaymentCounts[] {
   const counts = requests
     .filter((req) => req.paymentMethod)
     .reduce((map, req) => {
-      const date = new Date(req.submittedAt);
+      const submittedAt = req.submittedAt ?? new Date().toISOString();
+      const date = new Date(submittedAt);
       const monthKey = getMonthKey(date);
 
       const existing = map.get(monthKey) ?? {
@@ -53,7 +54,8 @@ function buildMonthlyPaymentData(requests: RequestType[]): MonthlyPaymentCounts[
         cash: 0,
         online: 0,
       };
-      existing[req.paymentMethod!] += 1;
+      const paymentMethod = req.paymentMethod ?? "cash";
+      existing[paymentMethod] += 1;
 
       return map.set(monthKey, existing);
     }, new Map<string, MonthlyPaymentCounts>());

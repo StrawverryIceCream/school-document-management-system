@@ -110,7 +110,7 @@ function RequestsStatusChart() {
                 axisLine={false}
                 tickMargin={8}
                 minTickGap={32}
-                tickFormatter={(value) =>
+                tickFormatter={(value: string | number) =>
                   new Date(value).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -121,12 +121,19 @@ function RequestsStatusChart() {
                 cursor={false}
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString("en-US", {
+                    labelFormatter={(value) => {
+                      const labelValue =
+                        typeof value === "string" || typeof value === "number"
+                          ? String(value)
+                          : "";
+
+                      if (!labelValue) return "";
+
+                      return new Date(labelValue).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
-                      })
-                    }
+                      });
+                    }}
                     indicator="dot"
                   />
                 }

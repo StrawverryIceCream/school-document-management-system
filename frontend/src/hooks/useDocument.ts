@@ -17,7 +17,7 @@ export function useDocument(id: string | undefined) {
   });
 
   const fetchDocument = useCallback((targetId: string, signal: { cancelled: boolean }) => {
-    getDocumentById(targetId).then(
+    getDocumentById(Number(targetId)).then(
       (data) => {
         if (signal.cancelled) return;
         setState({ id: targetId, document: data, error: null });
