@@ -1,25 +1,13 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-type PlaceholderViewProps = {
+interface WindowPlaceholderViewProps {
   title: string;
-  onBack: () => void;
-};
+}
 
-function PlaceholderView({ title, onBack }: PlaceholderViewProps) {
+function WindowPlaceholderView({ title }: WindowPlaceholderViewProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{title}</CardTitle>
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-      </CardHeader>
-      <div className="px-(--card-spacing) pb-(--card-spacing) text-sm text-muted-foreground">
-        Content for this view isn't built yet.
-      </div>
-    </Card>
+    <div style={{ padding: "2.5rem", fontSize: "0.875rem", color: "var(--muted-foreground)" }}>
+      {title}
+    </div>
   );
 }
 
-export default PlaceholderView;
+export default WindowPlaceholderView;

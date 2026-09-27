@@ -1,8 +1,9 @@
 import { useWindowView } from "@/hooks/useWindowView";
 import { WindowViewProvider } from "@/provider/WindowViewProvider";
-import WindowTileGrid from "@/components/window/WindowTileGrid";
-import WindowRequestTableView from "@/components/window/WindowRequestTableView";
 import { TILES } from "@/pages/Windows";
+import WindowTileGrid from "@/components/window/WindowTileGrid";
+import WindowPlaceholderView from "@/components/window/WindowPlaceholderView";
+import WindowRequestTableView from "@/components/window/WindowRequestTableView";
 
 function WindowExplorer() {
   return (
@@ -22,7 +23,7 @@ function WindowExplorerContent() {
   const tile = TILES.find((t) => t.id === activeView);
 
   if (!tile) {
-    return <div className="p-6 text-sm text-muted-foreground">Unknown view</div>;
+    return <WindowPlaceholderView title="Unknown view" />;
   }
 
   return <WindowRequestTableView />;

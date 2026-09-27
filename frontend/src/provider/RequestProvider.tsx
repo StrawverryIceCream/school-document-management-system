@@ -15,7 +15,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [dataSourceNote, setDataSourceNote] = useState(
     "Loading request records from the backend...",
   );
-
+  
   const refreshRequests = useCallback(async () => {
     setLoading(true);
     try {
@@ -23,7 +23,8 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
       const rows = response.data
         .map((item) => normalizeRequestRow(item))
         .filter((item): item is RequestRow => Boolean(item));
-
+      
+      console.log("First raw item:", JSON.stringify(response.data[0], null, 2));    
       setRequests(rows);
       setTotal(response.pagination.total);
       setError(null);
