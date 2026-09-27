@@ -1,4 +1,5 @@
 import { useDocuments } from "@/hooks/useDocuments";
+import { CheckCircle2, FileText, Slash } from "lucide-react";
 
 function DocumentCards() {
   const { documents, loading, error } = useDocuments();
@@ -8,12 +9,20 @@ function DocumentCards() {
   const inactiveDocuments = documents.filter((document) => !document.isActive).length;
 
   const summaryCards = [
-    { label: "Total Documents", value: totalDocuments },
-    { label: "Active Documents", value: activeDocuments },
-    { label: "Inactive Documents", value: inactiveDocuments },
+    { label: "Total Documents", value: totalDocuments, icon: FileText },
+    { label: "Active Documents", value: activeDocuments, icon: CheckCircle2 },
+    { label: "Inactive Documents", value: inactiveDocuments, icon: Slash },
   ];
 
-  if (error) return null;
+  if (error) {
+    return (
+      <div className="mb-6 flex h-full w-full items-center justify-center">
+        <p className="text-lg text-muted-foreground">
+          Something went wrong: {error}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -27,15 +36,19 @@ function DocumentCards() {
               <div className="mt-3 h-9 w-16 rounded bg-muted" />
             </div>
           ))
-        : summaryCards.map((card) => (
+        : summaryCards.map(({ label, value, icon: Icon }) => (
             <div
-              key={card.label}
-              className="rounded-xl border bg-card p-4 shadow-sm"
+              key={label}
+              className="relative rounded-xl border bg-card p-4 shadow-sm"
             >
-              <p className="text-sm text-muted-foreground">{card.label}</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight">
-                {card.value}
-              </p>
+              <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground">
+                <Icon className="h-4 w-4" />
+              </div>
+
+              <div className="pr-10">
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
+              </div>
             </div>
           ))}
     </section>
