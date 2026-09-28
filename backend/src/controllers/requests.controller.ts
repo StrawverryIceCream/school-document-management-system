@@ -332,7 +332,10 @@ export async function updateRequestStatus(
 
     const request = await db.query.documentRequests.findFirst({
       where: eq(documentRequests.id, id),
-      with: { documentType: { columns: { name: true } } },
+      with: {
+        documentType: { columns: { name: true, fee: true } },
+        payments: { columns: { id: true } },
+      },
     });
 
     if (!request) {
@@ -345,17 +348,25 @@ export async function updateRequestStatus(
       });
     }
 
+    if (
+      status === "processing" &&
+      Number(request.documentType.fee) > 0 &&
+      request.payments.length === 0
+    ) {
+      return res
+        .status(409)
+        .json({ error: "Payment is required before processing" });
+    }
+
     const effectiveReleaseDate =
       (typeof releaseDate === "string" ? releaseDate : null) ??
       request.releaseDate;
 
     // The system promises students an official release date before pickup
     if (status === "ready" && !effectiveReleaseDate) {
-      return res
-        .status(400)
-        .json({
-          error: "releaseDate is required when marking a request ready",
-        });
+      return res.status(400).json({
+        error: "releaseDate is required when marking a request ready",
+      });
     }
 
     const updates: Partial<typeof documentRequests.$inferInsert> = { status };
@@ -584,6 +595,7 @@ export async function cancelMyRequest(
         eq(documentRequests.userId, userId),
       ),
       columns: { id: true, status: true },
+      with: { payments: { columns: { id: true } } },
     });
 
     if (!request) {
@@ -595,7 +607,11 @@ export async function cancelMyRequest(
         .status(409)
         .json({ error: "Only pending requests can be cancelled" });
     }
-
+    if (request.payments.length > 0) {
+      return res.status(409).json({
+        error: "Paid requests can't be cancelled here, contact the registrar",
+      });
+    }
     // Re-checking pending in the WHERE closes the gap if staff picked it up meanwhile
     const [updated] = await db
       .update(documentRequests)
