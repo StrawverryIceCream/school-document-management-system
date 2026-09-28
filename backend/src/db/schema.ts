@@ -8,7 +8,10 @@ import {
   numeric,
   pgEnum,
   jsonb,
+  check,
+  index,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 
 const timestamps = {
@@ -19,9 +22,18 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
-export const userRoleEnum = pgEnum("user_role", ["student", "teacher", "admin", "staff"]);
+export const userRoleEnum = pgEnum("user_role", [
+  "student",
+  "teacher",
+  "admin",
+  "staff",
+]);
 
-export const userCategoryEnum = pgEnum("user_category", ["student", "teacher", "staff"]);
+export const userCategoryEnum = pgEnum("user_category", [
+  "student",
+  "teacher",
+  "staff",
+]);
 
 export const requestStatusEnum = pgEnum("request_status", [
   "pending",
@@ -31,15 +43,37 @@ export const requestStatusEnum = pgEnum("request_status", [
   "cancelled",
 ]);
 
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(), 
-  studentId: text("student_id").unique(),
-  fullName: text("full_name").notNull(),
-  email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  role: userRoleEnum("role").notNull().default("student"),
-  ...timestamps,
-});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    studentId: text("student_id").unique(),
+    fullName: text("full_name").notNull(),
+    email: text("email").notNull().unique(),
+    passwordHash: text("password_hash").notNull(),
+    role: userRoleEnum("role").notNull().default("student"),
+    course: text("course"),
+    section: text("section"),
+    ...timestamps,
+  },
+  (table) => [
+    // Staff-type roles never have an academic placement
+    check(
+      "users_course_allowed_roles",
+      sql`${table.course} IS NULL OR ${table.role} IN ('student', 'admin')`,
+    ),
+    // A section only makes sense inside a course
+    check(
+      "users_section_requires_course",
+      sql`${table.section} IS NULL OR ${table.course} IS NOT NULL`,
+    ),
+    // Section follows the same role rule as course
+    check(
+      "users_section_allowed_roles",
+      sql`${table.section} IS NULL OR ${table.role} IN ('student', 'admin')`,
+    ),
+  ],
+);
 
 export const documentTypes = pgTable("document_types", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -55,7 +89,7 @@ export const documentTypes = pgTable("document_types", {
 
 export const documentRequests = pgTable("document_requests", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")            // FK type must match referenced PK type
+  userId: uuid("user_id") // FK type must match referenced PK type
     .references(() => users.id)
     .notNull(),
   documentTypeId: uuid("document_type_id")
@@ -82,20 +116,37 @@ export const payments = pgTable("payments", {
   ...timestamps,
 });
 
-export const notifications = pgTable("notifications", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .references(() => users.id)
-    .notNull(),
-  requestId: uuid("request_id").references(() => documentRequests.id),
-  message: text("message").notNull(),
-  isRead: boolean("is_read").notNull().default(false),
-  ...timestamps,
-});
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    // NULL means the system sent it (e.g. automatic status updates)
+    senderId: uuid("sender_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    requestId: uuid("request_id").references(() => documentRequests.id),
+    title: text("title").notNull().default("Notification"),
+    message: text("message").notNull(),
+    isRead: boolean("is_read").notNull().default(false),
+    ...timestamps,
+  },
+  (table) => [
+    // Notification lists are always fetched per recipient
+    index("notifications_user_id_idx").on(table.userId),
+  ],
+);
 
 export const usersRelations = relations(users, ({ many }) => ({
   documentRequests: many(documentRequests),
-  notifications: many(notifications),
+  receivedNotifications: many(notifications, {
+    relationName: "notification_recipient",
+  }),
+  sentNotifications: many(notifications, {
+    relationName: "notification_sender",
+  }),
 }));
 
 export const documentTypesRelations = relations(documentTypes, ({ many }) => ({
@@ -129,6 +180,12 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
     references: [users.id],
+    relationName: "notification_recipient",
+  }),
+  sender: one(users, {
+    fields: [notifications.senderId],
+    references: [users.id],
+    relationName: "notification_sender",
   }),
   request: one(documentRequests, {
     fields: [notifications.requestId],

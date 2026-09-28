@@ -18,8 +18,9 @@ export interface User extends Timestamps {
   studentId: string | null;
   fullName: string;
   email: string;
-  passwordHash: string;
   role: UserRole;
+  course: string | null;
+  section: string | null;
 }
 
 export interface RequiredFieldDefinition {
@@ -73,12 +74,21 @@ export interface Payment extends Timestamps {
   paidAt: Date;
 }
 
+export interface NotificationSender {
+  id: string;
+  fullName: string;
+  role: UserRole;
+}
+
 export interface Notification extends Timestamps {
-  id: number;
-  userId: number;
-  requestId: number | null;
+  id: string;
+  userId: string;
+  senderId: string | null;
+  requestId: string | null;
+  title: string;
   message: string;
   isRead: boolean;
+  sender?: NotificationSender | null;
 }
 
 export interface DocumentRequestWithRelations extends DocumentRequest {

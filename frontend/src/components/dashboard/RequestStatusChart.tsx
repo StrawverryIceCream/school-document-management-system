@@ -98,7 +98,7 @@ function RequestsStatusChart() {
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
+            className="hidden w-40 rounded-lg sm:ml-auto sm:flex"
             aria-label="Select a value"
           >
             <SelectValue placeholder="Last 3 months" />
@@ -116,7 +116,7 @@ function RequestsStatusChart() {
             No data for this period yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+          <ChartContainer config={chartConfig} className="aspect-auto h-62.5 w-full">
             <AreaChart data={filteredData}>
               <defs>
                 <linearGradient id="fillSubmitted" x1="0" y1="0" x2="0" y2="1">
