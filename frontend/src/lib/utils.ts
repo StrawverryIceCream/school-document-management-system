@@ -96,7 +96,8 @@ export function normalizeRequestRow(raw: DocumentRequestWithRelations): RequestR
     purpose: raw.purpose,
     paymentMethod,
     college: undefined, // not in the current schema
-    window: undefined, // not in the current schema
+    course: undefined, 
+    section: undefined, 
     feeRequired: raw.documentType ? Number(raw.documentType.fee) > 0 : undefined,
   };
 }

@@ -37,7 +37,7 @@ function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] {
   const counts = new Map<string, MonthlyWindowCounts>();
 
   for (const req of requests) {
-    const windowEntry = WINDOWS.find((w) => w.value === req.window);
+    const windowEntry = WINDOWS.find((w) => w.value === req.course);
     if (!windowEntry || !req.submittedAt) continue; 
 
     const date = new Date(req.submittedAt);

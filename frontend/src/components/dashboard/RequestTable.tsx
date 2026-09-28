@@ -61,7 +61,7 @@ function RequestTable() {
                   <TableCell>{r.applicant}</TableCell>
                   <TableCell>{r.document}</TableCell>
                   <TableCell>{r.college ?? "—"}</TableCell>
-                  <TableCell>{r.window ?? "—"}</TableCell>
+                  <TableCell>{r.course ?? "—"}</TableCell>
                   <TableCell>
                     {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "—"}
                   </TableCell>

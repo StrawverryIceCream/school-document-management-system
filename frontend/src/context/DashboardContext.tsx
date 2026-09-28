@@ -18,11 +18,10 @@ export interface RequestRow {
   releaseDate: string | null;
   claimedAt: string | null;
   purpose: string | null;
-  // Not available from the backend yet — always undefined until the schema
-  // or API response includes them. Charts that key off these will correctly
-  // show their "no data" state until then.
+
   college?: string | null;
-  window?: string | null;
+  course?: string | null;
+  section?: string | null;
   paymentMethod?: "cash" | "online";
   feeRequired?: boolean;
 }

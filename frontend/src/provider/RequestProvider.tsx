@@ -1,6 +1,7 @@
 import { getAllRequests } from "@/api/requests";
+import type { RequestRow } from "@/context/DashboardContext";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
-import type { RequestRow } from "@/types";
+
 import { normalizeRequestRow } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -58,7 +59,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
       Array.from(
         new Set(
           requests
-            .map((request) => request.window)
+            .map((request) => request.course)
             .filter((value): value is string => Boolean(value && value.trim())),
         ),
       ).sort((left, right) => left.localeCompare(right)),
@@ -71,14 +72,14 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     return requests.filter((request) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        [request.applicant, request.document, request.id, request.window ?? ""]
+        [request.applicant, request.document, request.id, request.course ?? ""]
           .join(" ")
           .toLowerCase()
           .includes(normalizedSearch);
       const matchesStatus =
         statusFilter === "all" || request.status === statusFilter;
       const matchesWindow =
-        windowFilter === "all" || request.window === windowFilter;
+        windowFilter === "all" || request.course === windowFilter;
 
       return matchesSearch && matchesStatus && matchesWindow;
     });

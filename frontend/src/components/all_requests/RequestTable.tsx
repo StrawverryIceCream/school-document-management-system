@@ -9,11 +9,11 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, FileText, UserRound } from "lucide-react";
-import type { RequestRow } from "@/types";
+
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
 import { useRequests } from "@/hooks/useRequests";
+import type { RequestRow } from "@/context/DashboardContext";
 
-export type { RequestRow } from "@/types";
 
 const statusTone: Record<RequestRow["status"], string> = {
   pending:
@@ -24,8 +24,6 @@ const statusTone: Record<RequestRow["status"], string> = {
     "bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:text-emerald-300",
   claimed:
     "bg-violet-500/15 text-violet-700 ring-1 ring-violet-500/30 dark:text-violet-300",
-  cancelled:
-    "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
   rejected:
     "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
 };
@@ -89,7 +87,7 @@ function RequestTable() {
                       <span>{request.document}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{request.window ?? "Not available"}</TableCell>
+                  <TableCell>{request.course ?? "Not available"}</TableCell>
                   <TableCell>
                     {request.submittedAt ?? "Not available"}
                   </TableCell>

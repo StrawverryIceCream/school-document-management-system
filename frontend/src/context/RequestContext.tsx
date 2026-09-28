@@ -1,5 +1,6 @@
-import type { RequestRow } from "@/types";
+
 import { createContext } from "react";
+import type { RequestRow } from "./DashboardContext";
 
 export type StatusFilter =
   | "all"

@@ -28,17 +28,32 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   }, [search]);
 
   useEffect(() => {
-    setLoading(true);
-    loadRequests()
-      .then((data) => {
+    let isMounted = true;
+
+    const fetchDashboard = async () => {
+      setLoading(true);
+
+      try {
+        const data = await loadRequests();
+        if (!isMounted) return;
         setRequests(data);
         setError(null);
-      })
-      .catch((err) => {
+      } catch (err) {
+        if (!isMounted) return;
         console.error("Failed to load requests:", err);
         setError(err instanceof Error ? err.message : "Failed to load requests");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadRequests]);
 
   async function refreshDashboard() {
