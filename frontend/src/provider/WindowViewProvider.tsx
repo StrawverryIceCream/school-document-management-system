@@ -1,15 +1,19 @@
+// provider/WindowViewProvider.tsx
 import { useEffect, useMemo, useState } from "react";
 import {
   WindowViewContext,
-  type RequestDocumentType,
-  type RequestUser,
   type StatusFilter,
 } from "@/context/WindowViewContext";
-import { getAllRequests } from "@/api/requests";
-import { getUserById } from "@/api/users";
-import { getDocumentById } from "@/api/documents";
-import type { DocumentRequest } from "@/types";
+import {
+  getAllRequests,
+  updateRequestStatus as apiUpdateRequestStatus,
+  type UpdateRequestStatusPayload,
+} from "@/api/requests";
+import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
 import type { WindowTile } from "@/pages/Windows";
+
+// Matches the backend's MAX_LIMIT; one page can never return more than this
+const REQUESTS_PAGE_SIZE = 100;
 
 const TILES: WindowTile[] = [
   {
@@ -50,22 +54,23 @@ const TILES: WindowTile[] = [
   },
 ];
 
-async function loadLookup<T>(
-  ids: number[],
-  fetchById: (id: number) => Promise<T>,
-): Promise<Map<number, T>> {
-  const settled = await Promise.allSettled(ids.map((id) => fetchById(id)));
-  const lookup = new Map<number, T>();
-
-  settled.forEach((result, index) => {
-    if (result.status === "fulfilled") {
-      lookup.set(ids[index], result.value);
-    } else {
-      console.error(`Lookup failed for id ${ids[index]}:`, result.reason);
-    }
+// The first page reports totalPages, so the remaining pages can load in parallel
+async function fetchAllRequests(): Promise<DocumentRequestWithRelations[]> {
+  const first = await getAllRequests({
+    page: 1,
+    limit: REQUESTS_PAGE_SIZE,
   });
+  const { totalPages } = first.pagination;
 
-  return lookup;
+  if (totalPages <= 1) return first.data;
+
+  const rest = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      getAllRequests({ page: index + 2, limit: REQUESTS_PAGE_SIZE }),
+    ),
+  );
+
+  return [...first.data, ...rest.flatMap((page) => page.data)];
 }
 
 export function WindowViewProvider({
@@ -74,13 +79,7 @@ export function WindowViewProvider({
   children: React.ReactNode;
 }) {
   const [activeView, setActiveView] = useState<string | null>(null);
-  const [requests, setRequests] = useState<DocumentRequest[]>([]);
-  const [usersById, setUsersById] = useState<Map<number, RequestUser>>(
-    new Map(),
-  );
-  const [documentTypesById, setDocumentTypesById] = useState<
-    Map<number, RequestDocumentType>
-  >(new Map());
+  const [requests, setRequests] = useState<DocumentRequestWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<StatusFilter>("all");
@@ -100,25 +99,9 @@ export function WindowViewProvider({
 
     async function loadRequests() {
       try {
-        const response = await getAllRequests();
-        const rows = response.data;
-
-        // Dedupe ids so each user and document type is fetched once, not once per request
-        const userIds = Array.from(new Set(rows.map((row) => row.userId)));
-        const documentTypeIds = Array.from(
-          new Set(rows.map((row) => row.documentTypeId)),
-        );
-
-        const [users, documentTypes] = await Promise.all([
-          loadLookup<RequestUser>(userIds, (id) => getUserById(String(id))),
-          loadLookup<RequestDocumentType>(documentTypeIds, getDocumentById),
-        ]);
-
+        const rows = await fetchAllRequests();
         if (cancelled) return;
-
         setRequests(rows);
-        setUsersById(users);
-        setDocumentTypesById(documentTypes);
       } catch (err) {
         if (cancelled) return;
         setError(
@@ -137,7 +120,7 @@ export function WindowViewProvider({
     };
   }, []);
 
-  // The API has no college filter yet, so status and search are applied client-side
+  // Colleges aren't populated yet, so every request shows; status and search are applied client-side
   const visibleRequests = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -145,21 +128,25 @@ export function WindowViewProvider({
       if (filter !== "all" && request.status !== filter) return false;
       if (!term) return true;
 
-      const requester = (
-        usersById.get(request.userId)?.fullName ?? ""
-      ).toLowerCase();
-      const document = (
-        documentTypesById.get(request.documentTypeId)?.name ?? ""
-      ).toLowerCase();
-      return requester.includes(term) || document.includes(term);
+      return (
+        request.user?.fullName.toLowerCase().includes(term) ||
+        request.documentType?.name.toLowerCase().includes(term)
+      );
     });
-  }, [requests, usersById, documentTypesById, filter, search]);
+  }, [requests, filter, search]);
 
-  // No update endpoint exists yet, so this only changes local state and resets on reload
-  function updateRequestStatus(id: number, status: DocumentRequest["status"]) {
+  // Errors propagate so the caller can show a toast (invalid transition, missing release date)
+  async function updateRequestStatus(
+    id: string,
+    status: RequestStatus,
+    extra: Omit<UpdateRequestStatusPayload, "status"> = {},
+  ) {
+    const updated = await apiUpdateRequestStatus(id, { status, ...extra });
+
+    // The response is the bare row, so merge it to keep the loaded user and document type
     setRequests((prev) =>
       prev.map((request) =>
-        request.id === id ? { ...request, status } : request,
+        String(request.id) === id ? { ...request, ...updated } : request,
       ),
     );
   }
@@ -172,8 +159,6 @@ export function WindowViewProvider({
         selectView,
         clearView,
         visibleRequests,
-        usersById,
-        documentTypesById,
         loading,
         error,
         filter,

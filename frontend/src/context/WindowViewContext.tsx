@@ -1,6 +1,8 @@
 import { createContext } from "react";
 import type { DocumentRequest } from "@/types";
 import type { WindowTile } from "@/pages/Windows";
+import type { UpdateRequestStatusPayload } from "@/api/requests";
+import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
 
 export type StatusFilter = "all" | DocumentRequest["status"];
 
@@ -14,20 +16,22 @@ export interface RequestDocumentType {
 }
 
 interface WindowViewContextType {
+  TILES: WindowTile[];
   activeView: string | null;
   selectView: (id: string) => void;
   clearView: () => void;
-  visibleRequests: DocumentRequest[];
-  usersById: Map<number, RequestUser>;
-  documentTypesById: Map<number, RequestDocumentType>;
+  visibleRequests: DocumentRequestWithRelations[];
   loading: boolean;
   error: string | null;
   filter: StatusFilter;
   setFilter: (filter: StatusFilter) => void;
   search: string;
   setSearch: (search: string) => void;
-  updateRequestStatus: (id: number, status: DocumentRequest["status"]) => void;
-  TILES: WindowTile[]
+  updateRequestStatus: (
+    id: string,
+    status: RequestStatus,
+    extra?: Omit<UpdateRequestStatusPayload, "status">,
+  ) => Promise<void>;
 }
 
 export const WindowViewContext = createContext<WindowViewContextType | null>(

@@ -40,8 +40,6 @@ function WindowRequestTableView() {
     activeView,
     clearView,
     visibleRequests,
-    usersById,
-    documentTypesById,
     loading,
     error,
     filter,
@@ -119,21 +117,16 @@ function WindowRequestTableView() {
             </TableHeader>
             <TableBody>
               {visibleRequests.map((request) => {
-                const user = usersById.get(request.userId);
-                const documentType = documentTypesById.get(
-                  request.documentTypeId,
-                );
-
                 return (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium">
-                      {user?.fullName ?? "Unknown"}
+                      {request.user?.fullName ?? "Unknown"}
                     </TableCell>
                     <TableCell className="capitalize">
-                      {user?.role ?? "—"}
+                      {request.user?.role ?? "—"}
                     </TableCell>
                     <TableCell>
-                      {documentType?.name ?? "Unknown document"}
+                      {request.documentType?.name ?? "Unknown document"}
                     </TableCell>
                     <TableCell>
                       {request.createdAt
@@ -166,7 +159,7 @@ function WindowRequestTableView() {
                                   key={value}
                                   onClick={() =>
                                     updateRequestStatus(
-                                      request.id,
+                                      String(request.id),
                                       value as DocumentRequest["status"],
                                     )
                                   }
