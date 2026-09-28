@@ -10,12 +10,15 @@ function Signup() {
   const { login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("TUP-M-")
+  const [studentId, setStudentId] = useState("TUP-M-");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const [college, setCollege] = useState("");
+  const [course, setCourse] = useState("");
+  const [section, setSection] = useState("");
+  const [department, setDepartment] = useState("");
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -31,10 +34,18 @@ function Signup() {
 
     setLoading(true);
     try {
-      await signup(email, password, fullName, studentId);
+      await signup({
+        email,
+        password,
+        fullName,
+        college,
+        course,
+        section,
+        department,
+        studentId,
+      });
       await login(email, password);
       navigate("/home");
-
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {

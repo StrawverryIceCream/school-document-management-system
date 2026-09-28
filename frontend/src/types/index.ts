@@ -13,6 +13,8 @@ export interface Timestamps {
   updatedAt: Date;
 }
 
+export type AuthUser = Omit<User, "createdAt" | "updatedAt">;
+
 export interface User extends Timestamps {
   id: string;
   studentId: string | null;

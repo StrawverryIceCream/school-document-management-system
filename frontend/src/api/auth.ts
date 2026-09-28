@@ -1,59 +1,80 @@
-export async function login(email: string, password: string) {
+
+import type { AuthUser } from "@/types";
+
+
+
+export interface SignupPayload {
+  email: string;
+  password: string;
+  fullName: string;
+  department: string;
+  college: string;
+  course: string;
+  section?: string;
+  studentId?: string;
+}
+
+// Backend errors look like { "error": "..." }, so show that message when there is one
+async function getErrorMessage(
+  res: Response,
+  fallback: string,
+): Promise<string> {
+  const data: { error?: unknown } | null = await res.json().catch(() => null);
+  return typeof data?.error === "string" ? data.error : fallback;
+}
+
+export async function login(
+  email: string,
+  password: string,
+): Promise<AuthUser> {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error("Login failed");
+
+  if (!res.ok) throw new Error(await getErrorMessage(res, "Login failed"));
   return res.json();
 }
 
-export async function logout() {
+export async function logout(): Promise<void> {
   const res = await fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include",
   });
+
   if (!res.ok) throw new Error("Logout failed");
 }
 
-export async function getCurrentUser() {
-  const res = await fetch("/api/auth/me", {
-    credentials: "include",
-  });
+export async function getCurrentUser(): Promise<AuthUser> {
+  const res = await fetch("/api/auth/me", { credentials: "include" });
+
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
     throw new Error(
-      `/api/auth/me responded ${res.status}${text ? `: ${text}` : ""}`,
+      await getErrorMessage(res, `/api/auth/me responded ${res.status}`),
     );
   }
   return res.json();
 }
 
-export async function signup(
-  email: string,
-  password: string,
-  fullName: string,
-  studentId?: string,
-) {
-  const userData = {
-    email,
-    password,
-    fullName,
+export async function signup(payload: SignupPayload): Promise<AuthUser> {
+  const { studentId, section, ...required } = payload;
+
+  // Optional fields are only sent when they have a value
+  const body = {
+    ...required,
     ...(studentId?.trim() ? { studentId: studentId.trim() } : {}),
+    ...(section?.trim() ? { section: section.trim() } : {}),
   };
 
   const res = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(userData),
+    body: JSON.stringify(body),
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => null);
-    throw new Error(data?.error ?? "Signup failed");
-  }
-
+  if (!res.ok) throw new Error(await getErrorMessage(res, "Signup failed"));
   return res.json();
 }

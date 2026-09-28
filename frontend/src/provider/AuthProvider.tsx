@@ -1,14 +1,15 @@
+// provider/AuthProvider.tsx
+import { useEffect, useState } from "react";
+import { AuthContext } from "@/context/AuthContext";
 import {
   getCurrentUser,
   login as apiLogin,
   logout as apiLogout,
 } from "@/api/auth";
-import { AuthContext } from "@/context/AuthContext";
-import type { User } from "@/types";
-import { useEffect, useState } from "react";
+import type { AuthUser } from "@/types";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,8 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function login(email: string, password: string) {
-    await apiLogin(email, password);
-    const userData = await getCurrentUser();
+    // The login response is already the full auth user, so no second /me request
+    const userData = await apiLogin(email, password);
     setUser(userData);
   }
 
