@@ -1,114 +1,68 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DashboardContext } from "@/context/DashboardContext";
-import { getDashboardStats } from "@/api/dashboard";
+import type { DashboardStats, RequestRow } from "@/context/DashboardContext";
 import { getAllRequests } from "@/api/requests";
-import { normalizeRequestRow } from "@/lib/utils";
-import {
-  DEFAULT_TIME_RANGE,
-  buildDailyCounts,
-  filterByTimeRange,
-  type TimeRange,
-} from "@/lib/utils";
-import type { DashboardStats, RequestRow } from "@/types";
-
-const SEARCH_DEBOUNCE_MS = 250;
-const DASHBOARD_LOAD_ERROR = "Failed to load dashboard data";
-// Stable reference so the memoized chart data does not recompute on every render
-const EMPTY_REQUESTS: RequestRow[] = [];
-
-interface DashboardData {
-  stats: DashboardStats;
-  requests: RequestRow[];
-  total: number;
-}
-
-interface DashboardResult {
-  requestKey: string;
-  data: DashboardData | null;
-  error: string | null;
-}
-
-async function loadDashboardData(search: string): Promise<DashboardData> {
-  const [stats, response] = await Promise.all([
-    getDashboardStats(),
-    getAllRequests({ search }),
-  ]);
-
-  // Backend rows can be malformed; drop anything that fails normalization
-  const requests = response.data
-    .map((item) => normalizeRequestRow(item))
-    .filter((item): item is RequestRow => Boolean(item));
-
-  return { stats, requests, total: response.pagination.total };
-}
+import { normalizeRequestRow, buildStatsFromRequests } from "@/lib/utils";
+import type { RequestStatus } from "@/types";
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
-  const [result, setResult] = useState<DashboardResult | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
-  const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const [timeRange, setTimeRange] = useState("90d");
+  const [debounceSearch, setDebounceSearch] = useState(search);
 
-  // Loading is derived: it stays true until a result exists for the current inputs
-  const requestKey = `${debouncedSearch}|${refreshToken}`;
-  const loading = result?.requestKey !== requestKey;
+  const loadRequests = useCallback(async (): Promise<RequestRow[]> => {
+    const response = await getAllRequests({
+      search: debounceSearch,
+      status: status as RequestStatus | undefined,
+    });
+    return response.data.map(normalizeRequestRow);
+  }, [debounceSearch, status]);
 
-  const stats = result?.data?.stats ?? null;
-  const requests = result?.data?.requests ?? EMPTY_REQUESTS;
-  const total = result?.data?.total ?? 0;
-  const error = loading ? null : (result?.error ?? null);
-
-  const dailyCounts = useMemo(() => buildDailyCounts(requests), [requests]);
-  const chartData = useMemo(
-    () => filterByTimeRange(dailyCounts, timeRange),
-    [dailyCounts, timeRange],
-  );
-
-  const refreshDashboard = useCallback(() => {
-    setRefreshToken((token) => token + 1);
-  }, []);
-
-  // Avoid firing a request on every keystroke
   useEffect(() => {
-    const timeout = setTimeout(
-      () => setDebouncedSearch(search),
-      SEARCH_DEBOUNCE_MS,
-    );
+    const timeout = setTimeout(() => setDebounceSearch(search), 250);
     return () => clearTimeout(timeout);
   }, [search]);
 
   useEffect(() => {
-    let cancelled = false;
+    setLoading(true);
+    loadRequests()
+      .then((data) => {
+        setRequests(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error("Failed to load requests:", err);
+        setError(err instanceof Error ? err.message : "Failed to load requests");
+      })
+      .finally(() => setLoading(false));
+  }, [loadRequests]);
 
-    async function fetchDashboard() {
-      try {
-        const data = await loadDashboardData(debouncedSearch);
-        if (!cancelled) setResult({ requestKey, data, error: null });
-      } catch (err) {
-        if (cancelled) return;
-        console.error("Failed to load dashboard data:", err);
-        setResult({
-          requestKey,
-          data: null,
-          error: err instanceof Error ? err.message : DASHBOARD_LOAD_ERROR,
-        });
-      }
+  async function refreshDashboard() {
+    setLoading(true);
+    try {
+      const data = await loadRequests();
+      setRequests(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load requests");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    void fetchDashboard();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [debouncedSearch, requestKey]);
+  // No separate stats endpoint exists — derive counts from whatever
+  // requests we already fetched instead.
+  const stats: DashboardStats | null = error ? null : buildStatsFromRequests(requests);
 
   return (
     <DashboardContext.Provider
       value={{
         stats,
         requests,
-        total,
         loading,
         error,
         search,
@@ -117,7 +71,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         setStatus,
         timeRange,
         setTimeRange,
-        chartData,
         refreshDashboard,
       }}
     >

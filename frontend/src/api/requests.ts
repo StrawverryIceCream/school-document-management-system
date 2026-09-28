@@ -1,6 +1,5 @@
 import type {
-  DocumentRequest,
-  DocumentRequestWithRelations,
+  DocumentRequestWithRelations, 
   RequestStatus,
 } from "@/types";
 
@@ -13,7 +12,7 @@ export interface GetAllRequestsParams {
 }
 
 export interface PaginatedRequestsResponse {
-  data: DocumentRequest[];
+  data: DocumentRequestWithRelations[]; 
   pagination: {
     page: number;
     limit: number;

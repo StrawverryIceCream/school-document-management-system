@@ -1,21 +1,44 @@
 import { createContext } from "react";
-import type { DashboardStats, RequestRow } from "@/types";
-import type { DailyCounts, TimeRange } from "@/lib/utils";
+import type { RequestStatus } from "@/types";
 
-interface DashboardContextType {
+export interface DashboardStats {
+  pending: number;
+  processing: number;
+  ready: number;
+  claimed: number;
+  rejected: number;
+}
+
+export interface RequestRow {
+  id: string;
+  applicant: string;
+  document: string;
+  status: RequestStatus;
+  submittedAt: string | null;
+  releaseDate: string | null;
+  claimedAt: string | null;
+  purpose: string | null;
+  // Not available from the backend yet — always undefined until the schema
+  // or API response includes them. Charts that key off these will correctly
+  // show their "no data" state until then.
+  college?: string | null;
+  window?: string | null;
+  paymentMethod?: "cash" | "online";
+  feeRequired?: boolean;
+}
+
+export interface DashboardContextType {
   stats: DashboardStats | null;
   requests: RequestRow[];
-  total: number;
   loading: boolean;
   error: string | null;
   search: string;
-  setSearch: (search: string) => void;
+  setSearch: (value: string) => void;
   status: string | undefined;
-  setStatus: (status: string | undefined) => void;
-  chartData: DailyCounts[];
-  timeRange: TimeRange;
-  setTimeRange: (timeRange: TimeRange) => void;
-  refreshDashboard: () => void;
+  setStatus: (value: string | undefined) => void;
+  timeRange: string;
+  setTimeRange: (value: string) => void;
+  refreshDashboard: () => Promise<void>;
 }
 
 export const DashboardContext = createContext<DashboardContextType | undefined>(
