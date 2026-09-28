@@ -1,12 +1,12 @@
-export const userRoles = [
-  "student",
-  "staff",
-  "admin",
-  "teacher",
-] as const;
+export const userRoles = ["student", "staff", "admin", "teacher"] as const;
 
 export type UserRole = "student" | "staff" | "admin" | "teacher";
-export type RequestStatus = "pending" | "processing" | "ready" | "claimed" | "rejected";
+export type RequestStatus =
+  | "pending"
+  | "processing"
+  | "ready"
+  | "claimed"
+  | "rejected";
 
 export interface Timestamps {
   createdAt: Date;
@@ -19,6 +19,8 @@ export interface User extends Timestamps {
   fullName: string;
   email: string;
   role: UserRole;
+  department: string | null;
+  college: string | null;
   course: string | null;
   section: string | null;
 }

@@ -52,12 +52,18 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     passwordHash: text("password_hash").notNull(),
     role: userRoleEnum("role").notNull().default("student"),
+    college: text("college"),
     course: text("course"),
     section: text("section"),
+    department: text("department"),
     ...timestamps,
   },
   (table) => [
-    // Staff-type roles never have an academic placement
+    // College and course placement only apply to students and admins
+    check(
+      "users_college_allowed_roles",
+      sql`${table.college} IS NULL OR ${table.role} IN ('student', 'admin')`,
+    ),
     check(
       "users_course_allowed_roles",
       sql`${table.course} IS NULL OR ${table.role} IN ('student', 'admin')`,
@@ -67,10 +73,14 @@ export const users = pgTable(
       "users_section_requires_course",
       sql`${table.section} IS NULL OR ${table.course} IS NOT NULL`,
     ),
-    // Section follows the same role rule as course
     check(
       "users_section_allowed_roles",
       sql`${table.section} IS NULL OR ${table.role} IN ('student', 'admin')`,
+    ),
+    // Departments belong to teachers and admins
+    check(
+      "users_department_allowed_roles",
+      sql`${table.department} IS NULL OR ${table.role} IN ('teacher', 'admin')`,
     ),
   ],
 );
