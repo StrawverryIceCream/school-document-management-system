@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 import { TableCell } from "../ui/table";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { updateUserById } from "@/api/user";
+import { updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
 
 function EditRow({

@@ -6,8 +6,8 @@ import {
   type StatusFilter,
 } from "@/context/WindowViewContext";
 import { getAllRequests } from "@/api/requests";
-import { getUserById } from "@/api/user";
-import { getDocumentById } from "@/api/document";
+import { getUserById } from "@/api/users";
+import { getDocumentById } from "@/api/documents";
 import type { DocumentRequest } from "@/types";
 import type { WindowTile } from "@/pages/Windows";
 
@@ -110,7 +110,7 @@ export function WindowViewProvider({
         );
 
         const [users, documentTypes] = await Promise.all([
-          loadLookup<RequestUser>(userIds, getUserById),
+          loadLookup<RequestUser>(userIds, (id) => getUserById(String(id))),
           loadLookup<RequestDocumentType>(documentTypeIds, getDocumentById),
         ]);
 

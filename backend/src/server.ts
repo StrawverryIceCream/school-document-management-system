@@ -5,7 +5,10 @@ import session from "express-session";
 import authRouter from "./routes/auth.routes.js";
 import usersRouter from "./routes/users.routes.js";
 import documentRouter from "./routes/document.routes.js";
-import requestsRouter from "./routes/requests.routes.js"
+import requestsRouter from "./routes/requests.routes.js";
+import notificationsRouter from "./routes/notifications.routes.js";
+import paymentsRouter from "./routes/payments.routes.js";
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +45,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/documents", documentRouter);
 app.use("/api/requests", requestsRouter);
+app.use("/api/payments", paymentsRouter);
+app.use("/api/notifications", notificationsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not Found" });

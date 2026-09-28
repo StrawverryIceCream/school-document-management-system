@@ -9,7 +9,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Dialog, DialogContent } from "../ui/dialog";
 import type { DocumentType } from "@/types";
-import { deleteDocumentById, updateDocument } from "@/api/document";
+import { deleteDocumentById, updateDocument } from "@/api/documents";
 import { useDocuments } from "@/hooks/useDocuments";
 import DocumentDeleteAlert from "./DocumentDeleteAlert";
 import EditRequiredFieldsDialog from "./EditRequiredFieldsDialog";
@@ -84,7 +84,7 @@ function EditDocument({
 
       <Dialog open={editFieldsOpen} onOpenChange={setEditFieldsOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
-          <DocumentDialogHeader type="Edit"/>
+          <DocumentDialogHeader type="Edit" />
           <EditRequiredFieldsDialog
             documentId={document.id}
             initialFields={document.requiredFields}

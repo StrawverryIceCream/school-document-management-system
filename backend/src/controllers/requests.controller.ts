@@ -37,6 +37,8 @@ const REQUESTER_COLUMNS = {
   fullName: true,
   email: true,
   role: true,
+  college: true,
+  department: true,
   course: true,
   section: true,
 } as const;

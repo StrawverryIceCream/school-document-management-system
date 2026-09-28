@@ -12,7 +12,7 @@ import {
   DropdownMenuSubContent,
 } from "../ui/dropdown-menu";
 import { userRoles, type User, type UserRole } from "@/types";
-import { deleteUserById, updateUserById } from "@/api/user";
+import { deleteUserById, updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
 import { useAuth } from "@/hooks/useAuth";
 

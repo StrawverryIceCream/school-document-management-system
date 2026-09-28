@@ -1,4 +1,4 @@
-import { getAllDocument } from "@/api/document";
+import { getAllDocument } from "@/api/documents";
 import { DocumentContext } from "@/context/DocumentContext";
 import type { DocumentType } from "@/types";
 import { useCallback, useEffect, useState } from "react";
@@ -44,7 +44,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       setError(null);
     } catch (error) {
       console.log(error);
-      setError(error instanceof Error ? error.message : "Failed to load documents");
+      setError(
+        error instanceof Error ? error.message : "Failed to load documents",
+      );
     } finally {
       setLoading(false);
     }
@@ -60,7 +62,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         setSearch,
         isActive,
         setIsActive,
-        refreshDocument
+        refreshDocument,
       }}
     >
       {children}

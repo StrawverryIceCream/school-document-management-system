@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { FieldGroup } from "../ui/field";
 import RequiredFieldsDialog from "./RequiredFieldsDialog";
 import DocumentFieldsDialog from "./DocumentFieldsDialog";
-import { createDocument } from "@/api/document";
+import { createDocument } from "@/api/documents";
 import type { NewDocument } from "@/types";
 import { useState } from "react";
 import DocumentDialogHeader from "./DocumentDialogHeader";

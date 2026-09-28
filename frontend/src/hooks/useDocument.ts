@@ -1,6 +1,6 @@
 // hooks/useDocument.ts
 import { useState, useEffect, useCallback } from "react";
-import { getDocumentById } from "@/api/document";
+import { getDocumentById } from "@/api/documents";
 import type { DocumentType } from "@/types";
 
 interface DocumentState {
@@ -16,22 +16,26 @@ export function useDocument(id: string | undefined) {
     error: null,
   });
 
-  const fetchDocument = useCallback((targetId: string, signal: { cancelled: boolean }) => {
-    getDocumentById(targetId).then(
-      (data) => {
-        if (signal.cancelled) return;
-        setState({ id: targetId, document: data, error: null });
-      },
-      (err) => {
-        if (signal.cancelled) return;
-        setState({
-          id: targetId,
-          document: null,
-          error: err instanceof Error ? err.message : "Failed to load document",
-        });
-      },
-    );
-  }, []);
+  const fetchDocument = useCallback(
+    (targetId: string, signal: { cancelled: boolean }) => {
+      getDocumentById(targetId).then(
+        (data) => {
+          if (signal.cancelled) return;
+          setState({ id: targetId, document: data, error: null });
+        },
+        (err) => {
+          if (signal.cancelled) return;
+          setState({
+            id: targetId,
+            document: null,
+            error:
+              err instanceof Error ? err.message : "Failed to load document",
+          });
+        },
+      );
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!id) return; // nothing to fetch, nothing to setState

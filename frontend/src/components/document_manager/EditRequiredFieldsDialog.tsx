@@ -13,13 +13,17 @@ import {
 import { Switch } from "../ui/switch";
 import { useState } from "react";
 import type { RequiredFieldDefinition } from "@/types";
-import { updateDocument } from "@/api/document";
+import { updateDocument } from "@/api/documents";
 import { toast } from "sonner";
 import { DialogFooter } from "../ui/dialog";
 
 const STUDENT_INFO_FIELDS = [
   { key: "student-name", label: "Name", type: "text" as const },
-  { key: "student-course-section", label: "Course and Section", type: "text" as const },
+  {
+    key: "student-course-section",
+    label: "Course and Section",
+    type: "text" as const,
+  },
   { key: "student-id", label: "Student ID", type: "text" as const },
 ];
 
@@ -36,11 +40,12 @@ function EditRequiredFieldsDialog({
   onSaveSuccess,
   onCancel,
 }: EditRequiredFieldsDialogProps) {
-  const [fields, setFields] = useState<RequiredFieldDefinition[]>(initialFields);
+  const [fields, setFields] =
+    useState<RequiredFieldDefinition[]>(initialFields);
   const [askStudentInfo, setAskStudentInfo] = useState(() =>
     STUDENT_INFO_FIELDS.some((f) =>
-      initialFields.some((ifield) => ifield.key === f.key)
-    )
+      initialFields.some((ifield) => ifield.key === f.key),
+    ),
   );
   const [saving, setSaving] = useState(false);
 
@@ -53,11 +58,13 @@ function EditRequiredFieldsDialog({
       }));
       // Avoid adding duplicates if some already exist
       const otherFields = fields.filter(
-        (f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key)
+        (f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key),
       );
       setFields([...studentFields, ...otherFields]);
     } else {
-      setFields(fields.filter((f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key)));
+      setFields(
+        fields.filter((f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key)),
+      );
     }
   }
 
@@ -71,7 +78,10 @@ function EditRequiredFieldsDialog({
     setFields([...fields, field]);
   }
 
-  function handleUpdateField(key: string, updates: Partial<RequiredFieldDefinition>) {
+  function handleUpdateField(
+    key: string,
+    updates: Partial<RequiredFieldDefinition>,
+  ) {
     setFields(fields.map((f) => (f.key === key ? { ...f, ...updates } : f)));
   }
 
@@ -136,12 +146,20 @@ function EditRequiredFieldsDialog({
                 <Input value="Name" disabled className="h-9 text-sm" />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Student ID</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Student ID
+                </Label>
                 <Input value="Student ID" disabled className="h-9 text-sm" />
               </div>
               <div className="col-span-2">
-                <Label className="text-xs text-muted-foreground">Course and Section</Label>
-                <Input value="Course and Section" disabled className="h-9 text-sm" />
+                <Label className="text-xs text-muted-foreground">
+                  Course and Section
+                </Label>
+                <Input
+                  value="Course and Section"
+                  disabled
+                  className="h-9 text-sm"
+                />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -153,12 +171,17 @@ function EditRequiredFieldsDialog({
         {fields
           .filter((f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key))
           .map((field) => (
-            <div key={field.key} className="flex items-start gap-2 rounded-lg border p-2.5 mt-2">
+            <div
+              key={field.key}
+              className="flex items-start gap-2 rounded-lg border p-2.5 mt-2"
+            >
               <div className="flex-1 space-y-2">
                 <Input
                   placeholder="Field label (e.g. School Year)"
                   value={field.label}
-                  onChange={(e) => handleUpdateField(field.key, { label: e.target.value })}
+                  onChange={(e) =>
+                    handleUpdateField(field.key, { label: e.target.value })
+                  }
                 />
 
                 <div className="flex items-center gap-3">
@@ -185,9 +208,13 @@ function EditRequiredFieldsDialog({
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={field.required}
-                      onCheckedChange={(checked) => handleUpdateField(field.key, { required: checked })}
+                      onCheckedChange={(checked) =>
+                        handleUpdateField(field.key, { required: checked })
+                      }
                     />
-                    <span className="text-sm text-muted-foreground">Required</span>
+                    <span className="text-sm text-muted-foreground">
+                      Required
+                    </span>
                   </div>
                 </div>
               </div>
@@ -203,10 +230,11 @@ function EditRequiredFieldsDialog({
             </div>
           ))}
 
-        {fields.filter((f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key)).length === 0 && (
+        {fields.filter((f) => !STUDENT_INFO_FIELDS.some((s) => s.key === f.key))
+          .length === 0 && (
           <p className="text-sm text-muted-foreground mt-2">
-            No custom fields yet — add one if requesters need to provide extra info (e.g.
-            school year, purpose).
+            No custom fields yet — add one if requesters need to provide extra
+            info (e.g. school year, purpose).
           </p>
         )}
       </Field>

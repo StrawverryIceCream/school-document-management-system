@@ -14,7 +14,7 @@ router.use(requireAuth);
 
 router.get("/", requireRoles("admin"), getAllUsers);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getUserById);
-router.patch("/:id", requireRoles("admin"), updateUserById);
+router.patch("/:id", requireRoles("admin"), validateId, updateUserById);
 router.delete("/:id", requireRoles("admin"), validateId, deleteUserById);
 
 export default router;

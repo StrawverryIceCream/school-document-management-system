@@ -1,4 +1,4 @@
-import { getAllUsers } from "@/api/user";
+import { getAllUsers } from "@/api/users";
 import { UsersContext } from "@/context/UsersContext";
 import type { User, UserRole } from "@/types";
 import { useCallback, useEffect, useState } from "react";
@@ -12,7 +12,10 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
   const [debounceSearch, setDebounceSearch] = useState(search);
 
   const loadUsers = useCallback(async (): Promise<User[]> => {
-    const response = await getAllUsers({ role, search: debounceSearch });
+    const response = await getAllUsers({
+      role: role === "" ? undefined : role,
+      search: debounceSearch,
+    });
     return response.data;
   }, [role, debounceSearch]);
 

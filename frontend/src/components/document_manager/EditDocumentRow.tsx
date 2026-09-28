@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 import { TableCell } from "../ui/table";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { updateDocument } from "@/api/document";
+import { updateDocument } from "@/api/documents";
 import { useDocuments } from "@/hooks/useDocuments";
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 
