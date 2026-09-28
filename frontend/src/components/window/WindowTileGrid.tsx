@@ -1,9 +1,8 @@
 import { useWindowView } from "@/hooks/useWindowView";
-import { TILES } from "@/pages/Windows";
 import WindowTileCard from "@/components/window/WindowTileCard";
 
 function WindowTileGrid() {
-  const { activeView, selectView } = useWindowView();
+  const { activeView, selectView, TILES } = useWindowView();
 
   return (
     <div style={{ minHeight: "100%", padding: "2.5rem" }}>

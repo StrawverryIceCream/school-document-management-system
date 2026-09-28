@@ -2,13 +2,12 @@ import { useContext, useMemo } from "react";
 import { RequestContext } from "@/context/RequestContext";
 import type { RequestStatus } from "@/types";
 import { useWindowView } from "@/hooks/useWindowView";
-import { TILES } from "@/pages/Windows";
 import WindowRequestHeader from "@/components/window/WindowRequestHeader";
 import WindowRequestFilters from "@/components/window/WindowRequestFilters";
 import WindowRequestTable from "@/components/window/WindowRequestTable";
 
 function WindowRequestTableView() {
-  const { activeView, clearView } = useWindowView();
+  const { activeView, clearView, TILES } = useWindowView();
   const requestCtx = useContext(RequestContext);
 
   if (!requestCtx) {

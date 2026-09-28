@@ -1,6 +1,5 @@
 import { useWindowView } from "@/hooks/useWindowView";
 import { WindowViewProvider } from "@/provider/WindowViewProvider";
-import { TILES } from "@/pages/Windows";
 import WindowTileGrid from "@/components/window/WindowTileGrid";
 import WindowPlaceholderView from "@/components/window/WindowPlaceholderView";
 import WindowRequestTableView from "@/components/window/WindowRequestTableView";
@@ -14,7 +13,7 @@ function WindowExplorer() {
 }
 
 function WindowExplorerContent() {
-  const { activeView } = useWindowView();
+  const { activeView, TILES } = useWindowView();
 
   if (!activeView) {
     return <WindowTileGrid />;
