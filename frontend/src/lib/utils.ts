@@ -121,3 +121,4 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
 
   return stats;
 }
+
