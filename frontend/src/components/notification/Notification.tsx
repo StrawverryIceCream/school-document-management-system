@@ -45,7 +45,7 @@ function Notification() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="h-[min(600px,calc(100dvh-2rem))] w-[min(600px,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
+        className="h-[min(600px,calc(100dvh-2rem))] w-[min(520px,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
         align="end"
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3">

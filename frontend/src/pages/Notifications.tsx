@@ -17,8 +17,8 @@ export default function Notifications() {
   return (
     <div className="h-full overflow-auto p-6 sm:p-10">
       <div className="w-full space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
             <h1 className="text-3xl font-bold tracking-normal">
               Notifications
             </h1>
@@ -36,6 +36,7 @@ export default function Notifications() {
               type="button"
               variant="outline"
               size="sm"
+              className="ml-auto shrink-0"
               onClick={() => void markAllAsRead()}
             >
               <CheckCheck aria-hidden="true" />
@@ -50,7 +51,7 @@ export default function Notifications() {
           </p>
         )}
 
-        <section className="rounded-xl border bg-card p-2 sm:p-3">
+        <section className="mx-auto max-w-[980px] rounded-xl border bg-card p-2 sm:p-3">
           {loading ? (
             <p className="px-3 py-10 text-center text-sm text-muted-foreground">
               Loading notifications...

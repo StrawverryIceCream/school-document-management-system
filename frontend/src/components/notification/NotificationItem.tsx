@@ -36,6 +36,23 @@ const notificationStyles: Record<
   },
 };
 
+function getNotificationKind(
+  type: NotificationKind | undefined,
+  title: string,
+  message: string,
+): NotificationKind | undefined {
+  if (type) return type;
+
+  const content = `${title} ${message}`.toLowerCase();
+  if (/\b(approved|accepted)\b/.test(content)) return "approved";
+  if (/\b(ready|pickup|claimed|collected)\b/.test(content)) return "ready";
+  if (/\b(processing|being processed)\b/.test(content)) return "processing";
+  if (/\b(rejected|cancelled|canceled|denied)\b/.test(content)) {
+    return "rejected";
+  }
+  if (/\b(submitted|new request)\b/.test(content)) return "submitted";
+}
+
 export function NotificationItems() {
   const { notifications, markAsRead } = useNotifications();
   const { pathname } = useLocation();
@@ -45,8 +62,13 @@ export function NotificationItems() {
   return (
     <div className="space-y-1">
       {visibleNotifications.map((notification) => {
-        const style = notification.type
-          ? notificationStyles[notification.type]
+        const kind = getNotificationKind(
+          notification.type,
+          notification.title,
+          notification.message,
+        );
+        const style = kind
+          ? notificationStyles[kind]
           : { icon: Bell, className: "bg-muted text-muted-foreground" };
         const Icon = style.icon;
         const timestamp = new Date(notification.createdAt);
