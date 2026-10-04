@@ -84,6 +84,13 @@ export interface NotificationSender {
   role: UserRole;
 }
 
+export type NotificationKind =
+  | "approved"
+  | "ready"
+  | "processing"
+  | "rejected"
+  | "submitted";
+
 export interface Notification extends Timestamps {
   id: string;
   userId: string;
@@ -92,6 +99,7 @@ export interface Notification extends Timestamps {
   title: string;
   message: string;
   isRead: boolean;
+  type?: NotificationKind;
   sender?: NotificationSender | null;
 }
 
