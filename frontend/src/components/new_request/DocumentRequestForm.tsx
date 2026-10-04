@@ -21,6 +21,11 @@ type DocumentRequestFormProps = {
 function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
   const [values, setValues] = useState<RequiredFieldValues>({});
   const [submitting, setSubmitting] = useState(false);
+  const feeAmount = Number(document.fee);
+  const feeLabel =
+    Number.isFinite(feeAmount) && feeAmount > 0
+      ? `$${document.fee}`
+      : "To be confirmed";
 
   function setField(key: string, value: string | number | boolean) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -50,7 +55,7 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
               </p>
             )}
           </div>
-          <span className="text-lg font-medium">${document.fee}</span>
+          <span className="text-lg font-medium">{feeLabel}</span>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
