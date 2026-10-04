@@ -45,7 +45,7 @@ function Notification() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[min(26rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
+        className="h-[min(600px,calc(100dvh-2rem))] w-[min(600px,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
         align="end"
       >
         <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -86,7 +86,7 @@ function Notification() {
             {error}
           </p>
         )}
-        <div className="max-h-[min(26rem,calc(100dvh-10rem))] overflow-y-auto p-2">
+        <div className="min-h-0 flex-1 overflow-y-auto p-2">
           {loading ? (
             <p className="px-3 py-8 text-center text-sm text-muted-foreground">
               Loading notifications...

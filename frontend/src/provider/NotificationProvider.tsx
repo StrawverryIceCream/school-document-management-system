@@ -5,10 +5,78 @@ import {
   NotificationApiError,
 } from "@/api/notifications";
 import { NotificationContext } from "@/context/NotificationContext";
-import { notificationMockData } from "@/data/notification.mock";
+import type { Notification } from "@/context/NotificationContext";
 import { useAuth } from "@/hooks/useAuth";
-import type { Notification } from "@/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+const now = Date.now();
+const minutesAgo = (minutes: number) => new Date(now - minutes * 60_000);
+
+const notificationMockData: Notification[] = [
+  {
+    id: "sample-approved",
+    userId: "sample-user",
+    senderId: null,
+    requestId: null,
+    title: "Request approved",
+    message: "Your document request has been approved.",
+    createdAt: minutesAgo(12),
+    updatedAt: minutesAgo(12),
+    isRead: false,
+    type: "approved",
+  },
+  {
+    id: "sample-ready",
+    userId: "sample-user",
+    senderId: null,
+    requestId: null,
+    title: "Document ready for collection",
+    message:
+      "Your requested document is ready for collection at the Registrar's Office.",
+    createdAt: minutesAgo(95),
+    updatedAt: minutesAgo(95),
+    isRead: false,
+    type: "ready",
+  },
+  {
+    id: "sample-processing",
+    userId: "sample-user",
+    senderId: null,
+    requestId: null,
+    title: "Request being processed",
+    message:
+      "Your document request is being processed by the Registrar's Office.",
+    createdAt: minutesAgo(60 * 8),
+    updatedAt: minutesAgo(60 * 8),
+    isRead: true,
+    type: "processing",
+  },
+  {
+    id: "sample-rejected",
+    userId: "sample-user",
+    senderId: null,
+    requestId: null,
+    title: "Request update",
+    message:
+      "Your document request has been rejected. Please check the request details for more information.",
+    createdAt: minutesAgo(60 * 27),
+    updatedAt: minutesAgo(60 * 27),
+    isRead: true,
+    type: "rejected",
+  },
+  {
+    id: "sample-submitted",
+    userId: "sample-user",
+    senderId: null,
+    requestId: null,
+    title: "New request submitted",
+    message: "Your document request was submitted successfully.",
+    createdAt: minutesAgo(60 * 48),
+    updatedAt: minutesAgo(60 * 48),
+    isRead: true,
+    type: "submitted",
+  },
+];
 
 export function NotificationProvider({
   children,

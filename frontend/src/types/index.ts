@@ -78,31 +78,6 @@ export interface Payment extends Timestamps {
   paidAt: Date;
 }
 
-export interface NotificationSender {
-  id: string;
-  fullName: string;
-  role: UserRole;
-}
-
-export type NotificationKind =
-  | "approved"
-  | "ready"
-  | "processing"
-  | "rejected"
-  | "submitted";
-
-export interface Notification extends Timestamps {
-  id: string;
-  userId: string;
-  senderId: string | null;
-  requestId: string | null;
-  title: string;
-  message: string;
-  isRead: boolean;
-  type?: NotificationKind;
-  sender?: NotificationSender | null;
-}
-
 export interface DocumentRequestWithRelations extends DocumentRequest {
   user?: User;
   documentType?: DocumentType;

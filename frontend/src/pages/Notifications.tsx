@@ -16,10 +16,12 @@ export default function Notifications() {
 
   return (
     <div className="h-full overflow-auto p-6 sm:p-10">
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="w-full space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">Notifications</h1>
+            <h1 className="text-3xl font-bold tracking-normal">
+              Notifications
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {unreadCount > 0
                 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`

@@ -1,4 +1,4 @@
-import type { NotificationKind } from "@/types";
+import type { NotificationKind } from "@/context/NotificationContext";
 import {
   Bell,
   CheckCircle2,

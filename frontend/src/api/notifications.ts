@@ -1,4 +1,4 @@
-import type { Notification } from "@/types";
+import type { Notification } from "@/context/NotificationContext";
 
 export interface GetMyNotificationsParams {
   isRead?: boolean;
