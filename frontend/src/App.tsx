@@ -19,6 +19,7 @@ import { Toaster } from "sonner";
 import { DocumentProvider } from "./provider/DocumentProvider";
 import { RequestProvider } from "./provider/RequestProvider";
 import Logs from "./pages/Logs";
+import Notifications from "./pages/Notifications";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/new-request/:id?" element={<NewRequest />} />
                   <Route path="/my-request" element={<MyRequest />} />
+                  <Route path="/notifications" element={<Notifications />} />
                   <Route
                     path="/dashboard"
                     element={
