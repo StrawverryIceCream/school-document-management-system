@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -41,10 +40,7 @@ function CashPayment({
           <li>Keep the official receipt.</li>
           <li>Take a photo or attach the receipt below.</li>
         </ol>
-        <PaymentProof onSubmit={onSubmitProof} />
-        <Button type="button" variant="outline" onClick={onBack}>
-          Back to payment methods
-        </Button>
+        <PaymentProof onSubmit={onSubmitProof} onBack={onBack} />
       </CardContent>
     </Card>
   );

@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 
 interface OnlinePaymentProps {
   documentName: string;
@@ -83,49 +84,14 @@ function OnlinePayment({
           automatically.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p className="text-sm font-medium">Attach Payment Receipt</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm hover:bg-muted">
-              <span className="font-medium">Take Photo</span>
-              <span className="text-muted-foreground">
-                Use your device camera if available.
-              </span>
-              <input
-                className="sr-only"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={(event) =>
-                  handleReceiptChange(event.currentTarget.files?.[0])
-                }
-              />
-            </label>
-            <label className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm hover:bg-muted">
-              <span className="font-medium">Attach Receipt</span>
-              <span className="text-muted-foreground">
-                Choose an image or PDF.
-              </span>
-              <input
-                className="sr-only"
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(event) =>
-                  handleReceiptChange(event.currentTarget.files?.[0])
-                }
-              />
-            </label>
-          </div>
-          {receipt && (
-            <p className="break-all text-sm text-muted-foreground">
-              Selected proof: {receipt.name}
-            </p>
-          )}
-          {receiptError && (
-            <p role="alert" className="text-sm text-destructive">
-              {receiptError}
-            </p>
-          )}
+          <PaymentReceiptAttachment
+            id="online-payment-receipt"
+            file={receipt}
+            error={receiptError}
+            onSelect={handleReceiptChange}
+          />
         </div>
 
         <div className="flex flex-wrap gap-3">

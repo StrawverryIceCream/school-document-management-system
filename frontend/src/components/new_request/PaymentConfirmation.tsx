@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,10 @@ function PaymentConfirmation() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pending Payment Verification</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Clock3 className="size-5 text-amber-500" aria-hidden="true" />
+          Pending Payment Verification
+        </CardTitle>
         <CardDescription>
           Your payment has been submitted for verification. You can check your
           request status in My Requests.
