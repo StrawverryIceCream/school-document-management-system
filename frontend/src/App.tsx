@@ -6,6 +6,7 @@ import AppLayout from "./components/layout/AppLayout";
 import Signup from "./pages/Signup";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { AuthProvider } from "./provider/AuthProvider";
+import { ProfileProvider } from "./provider/ProfileProvider";
 import { WindowViewProvider } from "./provider/WindowViewProvider";
 import RequireAuth from "./components/RequireAuth";
 import Accounts from "./pages/Accounts";
@@ -27,77 +28,79 @@ export default function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <DocumentProvider>
           <RequestProvider>
-            <Toaster />
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  element={
-                    <RequireAuth>
-                      <AppLayout />
-                    </RequireAuth>
-                  }
-                >
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/" element={<Home />} />
-                  <Route path="/new-request/:id?" element={<NewRequest />} />
-                  <Route path="/my-request" element={<MyRequest />} />
-                  <Route path="/notifications" element={<Notifications />} />
+            <ProfileProvider>
+              <Toaster />
+              <BrowserRouter>
+                <Routes>
                   <Route
-                    path="/dashboard"
                     element={
-                      <RequireRole allowedRoles={["admin", "staff"]}>
-                        <Dashboard />
-                      </RequireRole>
+                      <RequireAuth>
+                        <AppLayout />
+                      </RequireAuth>
                     }
-                  />
-                  <Route
-                    path="/accounts"
-                    element={
-                      <RequireRole allowedRoles={["admin"]}>
-                        <Accounts />
-                      </RequireRole>
-                    }
-                  />
-                  <Route
-                    path="/document-manager"
-                    element={
-                      <RequireRole allowedRoles={["admin", "staff"]}>
-                        <DocumentManager />
-                      </RequireRole>
-                    }
-                  />
-                  <Route
-                    path="/windows"
-                    element={
-                      <RequireRole allowedRoles={["admin", "staff"]}>
-                        <WindowViewProvider>
-                          <Windows />
-                        </WindowViewProvider>
-                      </RequireRole>
-                    }
-                  />
-                  <Route
-                    path="/all-request"
-                    element={
-                      <RequireRole allowedRoles={["admin", "staff"]}>
-                        <AllRequest />
-                      </RequireRole>
-                    }
-                  />
+                  >
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/" element={<Home />} />
+                    <Route path="/new-request/:id?" element={<NewRequest />} />
+                    <Route path="/my-request" element={<MyRequest />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <Dashboard />
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/accounts"
+                      element={
+                        <RequireRole allowedRoles={["admin"]}>
+                          <Accounts />
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/document-manager"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <DocumentManager />
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/windows"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <WindowViewProvider>
+                            <Windows />
+                          </WindowViewProvider>
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/all-request"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <AllRequest />
+                        </RequireRole>
+                      }
+                    />
 
-                  <Route
-                    path="/logs"
-                    element={
-                      <RequireRole allowedRoles={["admin"]}>
-                        <Logs />
-                      </RequireRole>
-                    }
-                  />
-                </Route>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-              </Routes>
-            </BrowserRouter>
+                    <Route
+                      path="/logs"
+                      element={
+                        <RequireRole allowedRoles={["admin"]}>
+                          <Logs />
+                        </RequireRole>
+                      }
+                    />
+                  </Route>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                </Routes>
+              </BrowserRouter>
+            </ProfileProvider>
           </RequestProvider>
         </DocumentProvider>
       </ThemeProvider>
