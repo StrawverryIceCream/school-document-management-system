@@ -1,29 +1,27 @@
 import { createContext } from "react";
-import type { User } from "@/types";
 
 export interface ActivityLog {
   id: string;
+  userId: string;
   type: "request" | "payment" | "account" | "document";
   message: string;
   createdAt: string;
 }
 
+export interface LogEntry extends ActivityLog {
+  accountName: string;
+  accountRole: string;
+}
+
 export interface LogsContextType {
-  accounts: User[];
+  logs: LogEntry[];
   loading: boolean;
   error: string | null;
   search: string;
   setSearch: (value: string) => void;
-
-  selectedAccount: User | null;
-  accountLogs: ActivityLog[];
-  logsLoading: boolean;
-  logsError: string | null;
-  openAccountLogs: (account: User) => void;
-  closeAccountLogs: () => void;
-
-  refreshAccounts: () => Promise<void>;
-  refreshAccountLogs: () => Promise<void>;
+  typeFilter: "all" | ActivityLog["type"];
+  setTypeFilter: (value: "all" | ActivityLog["type"]) => void;
+  refreshLogs: () => Promise<void>;
 }
 
 export const LogsContext = createContext<LogsContextType | undefined>(undefined);

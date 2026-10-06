@@ -1,7 +1,6 @@
 import LogsHeader from "@/components/logs_page/LogsHeader";
 import LogsSearchToolbar from "@/components/logs_page/LogsSearchToolbar";
 import LogsTable from "@/components/logs_page/LogsTable";
-import AccountLogsDialog from "@/components/logs_page/AccountLogsDialog";
 import { LogsProvider } from "@/provider/LogsProvider";
 
 function Logs() {
@@ -12,7 +11,6 @@ function Logs() {
           <LogsHeader />
           <LogsSearchToolbar />
           <LogsTable />
-          <AccountLogsDialog />
         </div>
       </div>
     </LogsProvider>
