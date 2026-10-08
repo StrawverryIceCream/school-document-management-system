@@ -7,12 +7,15 @@ function WindowTileGrid() {
   const { TILES, selectView, activeView } = useWindowView();
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Windows</h1>
-        <p className="text-sm text-muted-foreground">
-          Choose a college or department
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-5">
+        <div>
+          <h1 className="text-3xl font-bold tracking-normal">Windows</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Choose a college or department
+          </p>
+        </div>
       </div>
+
       <div className="grid grid-cols-3 gap-10">
         {TILES.map((tile) => (
           <Card

@@ -5,8 +5,12 @@ function DocumentCards() {
   const { documents, loading, error } = useDocuments();
 
   const totalDocuments = documents.length;
-  const activeDocuments = documents.filter((document) => document.isActive).length;
-  const inactiveDocuments = documents.filter((document) => !document.isActive).length;
+  const activeDocuments = documents.filter(
+    (document) => document.isActive,
+  ).length;
+  const inactiveDocuments = documents.filter(
+    (document) => !document.isActive,
+  ).length;
 
   const summaryCards = [
     { label: "Total Documents", value: totalDocuments, icon: FileText },

@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CheckCircle2, Clock3, Layers3 } from "lucide-react";
 import { useRequests } from "@/hooks/useRequests";
 
@@ -16,15 +15,15 @@ function RequestSummary() {
       {summaryCards.map(({ label, value, icon: Icon }) => (
         <div
           key={label}
-          className="relative rounded-xl border bg-card p-4 shadow-sm"
+          className="relative rounded-xl border bg-card p-4 shadow-sm h-28"
         >
           <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground">
             <Icon className="h-4 w-4" />
           </div>
 
-          <div className="pr-10">
+          <div className="pr-10 flex flex-col justify-between h-full">
             <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
+            <p className="text-3xl font-semibold tracking-tight">{value}</p>
           </div>
         </div>
       ))}
