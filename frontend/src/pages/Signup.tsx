@@ -43,7 +43,6 @@ function Signup() {
         course,
         section,
         department,
-        // A field left at the bare prefix is sent empty so it is omitted instead of stored as an ID
         studentId: studentId === STUDENT_ID_PREFIX ? "" : studentId,
       });
       await login(email, password);

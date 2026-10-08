@@ -86,7 +86,7 @@ export function getDateKey(value: string | Date) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
-export const STUDENT_ID_PREFIX = "TUP-M-";
+export const STUDENT_ID_PREFIX = "TUPM-";
 
 const NO_TUP_ID_LABEL = "No TUP ID";
 
@@ -129,7 +129,9 @@ export function formatStudentId(value: string): string {
 // the dashboard UI understands. Fields the current backend doesn't provide
 // (college, window) are left undefined on purpose — components that rely on
 // them will fall back to their own "no data yet" states.
-export function normalizeRequestRow(raw: DocumentRequestWithRelations): RequestRow {
+export function normalizeRequestRow(
+  raw: DocumentRequestWithRelations,
+): RequestRow {
   const paymentMethod =
     raw.payment?.method === "cash" || raw.payment?.method === "online"
       ? raw.payment.method
@@ -147,9 +149,11 @@ export function normalizeRequestRow(raw: DocumentRequestWithRelations): RequestR
     purpose: raw.purpose,
     paymentMethod,
     college: undefined, // not in the current schema
-    course: undefined, 
-    section: undefined, 
-    feeRequired: raw.documentType ? Number(raw.documentType.fee) > 0 : undefined,
+    course: undefined,
+    section: undefined,
+    feeRequired: raw.documentType
+      ? Number(raw.documentType.fee) > 0
+      : undefined,
   };
 }
 
