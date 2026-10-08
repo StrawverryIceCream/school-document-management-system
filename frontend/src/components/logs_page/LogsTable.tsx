@@ -18,19 +18,23 @@ const LOG_TYPE_META: Record<
 > = {
   request: {
     icon: FileClock,
-    className: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+    className:
+      "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
   },
   payment: {
     icon: CreditCard,
-    className: "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
+    className:
+      "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
   },
   account: {
     icon: UserCog,
-    className: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
+    className:
+      "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
   },
   document: {
     icon: FileText,
-    className: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+    className:
+      "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
   },
 };
 
@@ -58,7 +62,10 @@ function LogsTable() {
         <TableBody>
           {logs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell
+                colSpan={5}
+                className="text-center text-muted-foreground"
+              >
                 No activity found.
               </TableCell>
             </TableRow>
@@ -68,19 +75,24 @@ function LogsTable() {
               const Icon = meta.icon;
               return (
                 <TableRow key={log.id}>
-                  <TableCell className="font-medium">{log.accountName}</TableCell>
+                  <TableCell className="font-medium">
+                    {log.accountName}
+                  </TableCell>
                   <TableCell className="capitalize text-muted-foreground">
                     {log.accountRole}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`capitalize gap-1 ${meta.className}`}>
+                    <Badge
+                      variant="outline"
+                      className={`capitalize gap-1 ${meta.className}`}
+                    >
                       <Icon className="h-3 w-3" />
                       {log.type}
                     </Badge>
                   </TableCell>
                   <TableCell>{log.message}</TableCell>
                   <TableCell className="text-right text-sm text-muted-foreground">
-                    <div>{(log.createdAt)}</div>
+                    <div>{log.createdAt}</div>
                     <div className="text-xs">{formatDate(log.createdAt)}</div>
                   </TableCell>
                 </TableRow>
