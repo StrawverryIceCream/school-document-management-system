@@ -33,7 +33,6 @@ export interface NotificationContextType {
   unreadCount: number;
   loading: boolean;
   error: string | null;
-  usingMockData: boolean;
   refreshNotifications: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;

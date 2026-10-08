@@ -18,7 +18,7 @@ function Notification() {
     unreadCount,
     loading,
     error,
-    usingMockData,
+
     refreshNotifications,
     markAllAsRead,
   } = useNotifications();
@@ -58,11 +58,6 @@ function Notification() {
             </p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            {usingMockData && (
-              <span className="text-[10px] text-muted-foreground">
-                Sample notifications
-              </span>
-            )}
             {unreadCount > 0 && (
               <Button
                 type="button"
@@ -78,11 +73,8 @@ function Notification() {
           </div>
         </div>
         <Separator />
-        {error && !usingMockData && (
-          <p
-            role="status"
-            className="px-4 py-2 text-xs text-destructive"
-          >
+        {error && (
+          <p role="status" className="px-4 py-2 text-xs text-destructive">
             {error}
           </p>
         )}
@@ -91,7 +83,7 @@ function Notification() {
             <p className="px-3 py-8 text-center text-sm text-muted-foreground">
               Loading notifications...
             </p>
-          ) : error && !usingMockData && notifications.length === 0 ? (
+          ) : error && notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-3 px-3 py-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Notifications could not be loaded.
@@ -108,7 +100,10 @@ function Notification() {
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-3 py-10 text-center">
-              <Inbox className="size-8 text-muted-foreground/60" aria-hidden="true" />
+              <Inbox
+                className="size-8 text-muted-foreground/60"
+                aria-hidden="true"
+              />
               <p className="text-sm font-medium">No notifications</p>
               <p className="text-xs text-muted-foreground">
                 Updates about your document requests will appear here.
