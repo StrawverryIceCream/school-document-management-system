@@ -12,21 +12,23 @@ function RequestSummary() {
   ];
 
   return (
-    <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {summaryCards.map(({ label, value, icon: Icon }) => (
-        <Card key={label} className="border-border/80 bg-card/80">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-            <div className="rounded-md bg-muted p-2">
-              <Icon className="size-4 text-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold tracking-tight">{value}</div>
-          </CardContent>
-        </Card>
+        <div
+          key={label}
+          className="relative rounded-xl border bg-card p-4 shadow-sm"
+        >
+          <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground">
+            <Icon className="h-4 w-4" />
+          </div>
+
+          <div className="pr-10">
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
+          </div>
+        </div>
       ))}
-    </div>
+    </section>
   );
 }
 

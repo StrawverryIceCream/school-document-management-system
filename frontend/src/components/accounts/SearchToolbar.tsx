@@ -5,9 +5,8 @@ import { useUsers } from "@/hooks/useUsers";
 function SearchToolbar() {
   const { setRole, setSearch, search } = useUsers();
 
-
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+    <div className="flex flex-col gap-3 sm:flex-row">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input

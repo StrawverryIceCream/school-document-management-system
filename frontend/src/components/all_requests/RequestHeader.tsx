@@ -17,11 +17,11 @@ function RequestHeader() {
   } = useRequests();
 
   return (
-    <div className="mb-6 space-y-5">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="mb-8 space-y-5">
+      <div className="flex items-start justify-between gap-5">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">All Request</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-normal">All Request</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             All Request in the database
           </p>
         </div>
