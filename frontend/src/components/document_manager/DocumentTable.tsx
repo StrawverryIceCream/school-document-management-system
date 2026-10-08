@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 import { useState } from "react";
 import EditDocumentRow from "./EditDocumentRow";
@@ -68,12 +69,12 @@ function DocumentTable() {
                 <TableRow
                   key={document.id}
                   className={
-                    !document.isActive ? "text-muted-foreground" : "align-middle"
+                    !document.isActive
+                      ? "text-muted-foreground"
+                      : "align-middle"
                   }
                 >
-                  <TableCell className="font-medium">
-                    {document.id}
-                  </TableCell>
+                  <TableCell className="font-medium">{document.id}</TableCell>
                   {editingDocument === document.id ? (
                     <EditDocumentRow document={document} setEdit={setEdit} />
                   ) : (
@@ -90,7 +91,9 @@ function DocumentTable() {
                           requiredFields={document.requiredFields}
                         />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">₱{document.fee}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        ₱{document.fee}
+                      </TableCell>
                       <TableCell
                         className={
                           document.isActive ? "text-green-600" : "text-red-600"

@@ -2,6 +2,7 @@ import SearchToolbar from "@/components/document_manager/SearchToolbar";
 import DocumentHeader from "@/components/document_manager/DocumentHeader";
 import DocumentCards from "@/components/document_manager/DocumentCards";
 import DocumentTable from "@/components/document_manager/DocumentTable";
+import DocumentNavPage from "@/components/document_manager/DocumentNavPage";
 
 function DocumentManager() {
   return (
@@ -11,6 +12,7 @@ function DocumentManager() {
         <DocumentCards />
         <SearchToolbar />
         <DocumentTable />
+        <DocumentNavPage />
       </div>
     </div>
   );
