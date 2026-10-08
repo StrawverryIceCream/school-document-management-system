@@ -131,3 +131,20 @@ export async function getPaymentById(id: string): Promise<PaymentWithDetails> {
   const res = await fetch(url, { credentials: "include" });
   return handleResponse<PaymentWithDetails>(res, url);
 }
+
+export async function uploadPaymentProof(requestId: string, file: File) {
+  const formData = new FormData();
+  formData.append("paymentProof", file);
+
+  // No Content-Type header: the browser sets the multipart boundary itself
+  const res = await fetch(`/api/payments/${requestId}/proof`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error ?? "Failed to upload payment proof");
+  }
+  return (await res.json()) as { paymentProofUrl: string };
+}

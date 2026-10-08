@@ -10,6 +10,7 @@ import {
   payments,
   users,
 } from "../db/schema.js";
+import { uploadPaymentProof } from "../services/storage.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -243,7 +244,7 @@ export async function getMyPayments(
       db.query.payments.findMany({
         where: whereClause,
         with: { request: { with: { documentType: true } } },
-        orderBy: [desc(payments.paidAt)],
+        orderBy: [desc(payments.createdAt)],
         limit: limitNum,
         offset,
       }),
@@ -356,7 +357,7 @@ export async function getAllPayments(
             },
           },
         },
-        orderBy: [desc(payments.paidAt)],
+        orderBy: [desc(payments.createdAt)],
         limit: limitNum,
         offset,
       }),
@@ -407,5 +408,55 @@ export async function getPaymentById(
   } catch (err) {
     console.error("[getPaymentById] error:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function uploadPaymentProofHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const userId = getSessionUserId(req);
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id: paymentId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Payment proof image is required" });
+    }
+
+    // Join through the request so students can only upload to their own payments
+    const [payment] = await db
+      .select({ id: payments.id, status: payments.status })
+      .from(payments)
+      .innerJoin(documentRequests, eq(payments.requestId, documentRequests.id))
+      .where(
+        and(
+          eq(payments.id, paymentId),
+          eq(documentRequests.userId, userId),
+        ),
+      );
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    // A verified payment is final; replacing its proof would invalidate the receipt
+    if (payment.status === "verified") {
+      return res
+        .status(409)
+        .json({ error: "Cannot replace proof of a verified payment" });
+    }
+
+    const url = await uploadPaymentProof(req.file.buffer, paymentId);
+    await db
+      .update(payments)
+      .set({ paymentProofUrl: url })
+      .where(eq(payments.id, paymentId));
+
+    return res.json({ paymentProofUrl: url });
+  } catch (err) {
+    console.error("[uploadPaymentProof] error:", err);
+    return res.status(500).json({ error: "Failed to upload payment proof" });
   }
 }
