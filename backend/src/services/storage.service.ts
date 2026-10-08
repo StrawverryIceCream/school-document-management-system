@@ -12,18 +12,22 @@ const cloudinaryConfig = {
 
 cloudinary.config(cloudinaryConfig);
 
-export function uploadPaymentProof(buffer: Buffer, paymentId: string): Promise<string> {
+export function uploadPaymentProof(
+  buffer: Buffer,
+  paymentId: string,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "registrar/payment-proofs",
+        folder: "student-document-manegement-system/payment-proofs",
         public_id: `payment-${paymentId}-${Date.now()}`,
         resource_type: "image",
       },
       (error, result) => {
-        if (error || !result) return reject(error ?? new Error("Upload failed"));
+        if (error || !result)
+          return reject(error ?? new Error("Upload failed"));
         resolve(result.secure_url);
-      }
+      },
     );
     stream.end(buffer);
   });
