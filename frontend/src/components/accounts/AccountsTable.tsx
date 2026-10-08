@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "../ui/table";
 import EditUser from "./EditUser";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { useState } from "react";
 import EditRow from "./EditRow";
 import { useUsers } from "@/hooks/useUsers";
@@ -57,7 +58,13 @@ function AccountsTable() {
               <EditRow user={user} setEdit={setEdit} />
             ) : (
               <>
-                <TableCell>{user.fullName}</TableCell>
+                <TableCell>
+                  <ProfileTrigger userId={user.id}>
+                    <button type="button" className="text-left hover:underline">
+                      {user.fullName}
+                    </button>
+                  </ProfileTrigger>
+                </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>{user.studentId}</TableCell>

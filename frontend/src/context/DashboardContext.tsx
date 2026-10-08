@@ -11,6 +11,7 @@ export interface DashboardStats {
 
 export interface RequestRow {
   id: string;
+  userId?: string;
   applicant: string;
   document: string;
   status: RequestStatus;

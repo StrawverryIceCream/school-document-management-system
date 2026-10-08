@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Eye, FileText, UserRound } from "lucide-react";
 
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
@@ -74,9 +75,20 @@ function RequestTable() {
                         <UserRound className="size-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">
-                          {request.applicant}
-                        </p>
+                        {request.userId ? (
+                          <ProfileTrigger userId={request.userId}>
+                            <button
+                              type="button"
+                              className="text-left font-medium text-foreground hover:underline"
+                            >
+                              {request.applicant}
+                            </button>
+                          </ProfileTrigger>
+                        ) : (
+                          <p className="font-medium text-foreground">
+                            {request.applicant}
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground">Student</p>
                       </div>
                     </div>

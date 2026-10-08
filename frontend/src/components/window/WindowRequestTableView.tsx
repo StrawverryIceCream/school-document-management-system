@@ -1,4 +1,5 @@
 import { ArrowLeft, EllipsisVertical, Search } from "lucide-react";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -120,7 +121,18 @@ function WindowRequestTableView() {
                 return (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium">
-                      {request.user?.fullName ?? "Unknown"}
+                      {request.user ? (
+                        <ProfileTrigger userId={request.user.id}>
+                          <button
+                            type="button"
+                            className="text-left hover:underline"
+                          >
+                            {request.user.fullName}
+                          </button>
+                        </ProfileTrigger>
+                      ) : (
+                        "Unknown"
+                      )}
                     </TableCell>
                     <TableCell className="capitalize">
                       {request.user?.role ?? "—"}

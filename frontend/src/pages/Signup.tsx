@@ -4,13 +4,14 @@ import { signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { STUDENT_ID_PREFIX } from "@/lib/utils";
 
 function Signup() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("TUP-M-");
+  const [studentId, setStudentId] = useState(STUDENT_ID_PREFIX);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ function Signup() {
         course,
         section,
         department,
-        studentId,
+        studentId: studentId === STUDENT_ID_PREFIX ? "" : studentId,
       });
       await login(email, password);
       navigate("/home");

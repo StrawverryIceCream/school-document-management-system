@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -58,7 +59,20 @@ function RequestTable() {
               requests.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-mono text-xs">{r.id}</TableCell>
-                  <TableCell>{r.applicant}</TableCell>
+                  <TableCell>
+                    {r.userId ? (
+                      <ProfileTrigger userId={r.userId}>
+                        <button
+                          type="button"
+                          className="text-left hover:underline"
+                        >
+                          {r.applicant}
+                        </button>
+                      </ProfileTrigger>
+                    ) : (
+                      r.applicant
+                    )}
+                  </TableCell>
                   <TableCell>{r.document}</TableCell>
                   <TableCell>{r.college ?? "—"}</TableCell>
                   <TableCell>{r.course ?? "—"}</TableCell>
