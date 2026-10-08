@@ -10,11 +10,16 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PG_UNIQUE_VIOLATION = "23505";
 
 type DbUser = typeof users.$inferSelect;
+type UserRole = DbUser["role"];
+
+const USER_ROLES = ["student", "teacher", "admin", "staff"] as const satisfies
+  readonly UserRole[];
 
 interface SignupBody {
   email: string;
   password: string;
   fullName: string;
+  role: UserRole;
   studentId?: string;
   college?: string;
   course?: string;
@@ -38,6 +43,10 @@ function toAuthUser(user: DbUser) {
 
 function cleanText(value: unknown): string | null {
   return typeof value === "string" ? value.trim() || null : null;
+}
+
+function isUserRole(value: unknown): value is UserRole {
+  return USER_ROLES.some((role) => role === value);
 }
 
 // Drizzle may wrap the driver error, so check the cause chain too
@@ -74,7 +83,7 @@ export const signup = async (
 ) => {
   try {
     const body: Partial<SignupBody> = req.body ?? {};
-    const { email, password } = body;
+    const { email, password, role } = body;
     const fullName = cleanText(body.fullName);
     const studentId = cleanText(body.studentId);
     const college = cleanText(body.college);
@@ -93,11 +102,15 @@ export const signup = async (
         .json({ error: "Email, password, and name are required" });
     }
 
+    if (!isUserRole(role)) {
+      return res.status(400).json({ error: "A valid role is required" });
+    }
+
     if (!EMAIL_REGEX.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
 
-    // Public signup only creates students, so placement is required here
+    // Public signup requires placement details.
     if (!college || !course) {
       return res.status(400).json({ error: "College and course are required" });
     }
@@ -140,6 +153,7 @@ export const signup = async (
         email,
         passwordHash,
         fullName,
+        role,
         college,
         course,
         ...(studentId ? { studentId } : {}),
