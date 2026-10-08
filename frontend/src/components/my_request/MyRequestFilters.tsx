@@ -23,7 +23,12 @@ function MyRequestFilters({ statusFilterOptions }: MyRequestFiltersProps) {
         />
       </div>
 
-      <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | RequestStatus)}>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) =>
+          setStatusFilter(value as "all" | RequestStatus)
+        }
+      >
         <TabsList className="h-10">
           {statusFilterOptions.map((option) => (
             <TabsTrigger key={option.value} value={option.value}>

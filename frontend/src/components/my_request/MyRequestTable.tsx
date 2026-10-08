@@ -6,19 +6,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { DocumentRequest } from "@/types";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import MyRequestDetails from "./MyRequestDetails";
+import { Badge } from "../ui/badge";
+import { statusStyles } from "@/lib/utils";
 
-type MyRequestTableProps = {
-  documentNames: Record<number, string>;
-  getStatusBadgeClasses: (status: DocumentRequest["status"]) => string;
-};
 
-function MyRequestTable({
-  documentNames,
-  getStatusBadgeClasses,
-}: MyRequestTableProps) {
+
+function MyRequestTable() {
   const { filteredRequests } = useMyRequest();
 
   return (
@@ -47,11 +42,10 @@ function MyRequestTable({
             filteredRequests.map((request) => (
               <TableRow key={request.id} className="align-middle">
                 <TableCell className="font-medium">
-                  REQ-{request.id}
+                  {request.id}
                 </TableCell>
                 <TableCell>
-                  {documentNames[request.documentTypeId] ??
-                    `Document #${request.documentTypeId}`}
+                  {request.documentName}
                 </TableCell>
                 <TableCell>
                   {new Date(request.createdAt).toLocaleDateString("en-US", {
@@ -61,11 +55,12 @@ function MyRequestTable({
                   })}
                 </TableCell>
                 <TableCell>
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${getStatusBadgeClasses(request.status)}`}
-                  >
-                    {request.status}
-                  </span>
+                    <Badge
+                      variant="outline"
+                      className={`capitalize ${statusStyles[request.status]}`}
+                    >
+                      {request.status}
+                    </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <MyRequestDetails request={request} />
