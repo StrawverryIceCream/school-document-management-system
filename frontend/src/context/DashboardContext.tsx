@@ -6,7 +6,7 @@ export interface DashboardStats {
   processing: number;
   ready: number;
   claimed: number;
-  rejected: number;
+  cancelled: number;
 }
 
 export interface RequestRow {

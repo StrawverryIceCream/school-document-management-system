@@ -19,21 +19,16 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { StatusFilter } from "@/context/WindowViewContext";
 import type { DocumentRequest, RequestStatus } from "@/types";
 import { useWindowView } from "@/hooks/useWindowView";
+import { statusStyles } from "@/lib/utils";
+import { Badge } from "../ui/badge";
 
-const STATUS_COLORS: Record<RequestStatus, string> = {
-  pending: "text-orange-500",
-  processing: "text-orange-500",
-  ready: "text-green-600",
-  claimed: "text-green-600",
-  rejected: "text-destructive",
-};
 
 const STATUS_LABELS: Record<RequestStatus, string> = {
   pending: "PENDING",
   processing: "PROCESSING",
   ready: "READY",
   claimed: "CLAIMED",
-  rejected: "REJECTED",
+  cancelled: "CANCELLED",
 };
 
 function WindowRequestTableView() {
@@ -161,12 +156,13 @@ function WindowRequestTableView() {
                           ? new Date(request.createdAt).toLocaleDateString()
                           : "—"}
                       </TableCell>
-                      <TableCell
-                        className={
-                          STATUS_COLORS[request.status] ?? "text-muted-foreground"
-                        }
-                      >
-                        {STATUS_LABELS[request.status] ?? request.status}
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`capitalize ${statusStyles[request.status]}`}
+                        >
+                          {request.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end">

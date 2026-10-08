@@ -6,7 +6,7 @@ const cards = [
   { key: "processing" as const, label: "In Process", icon: Loader },
   { key: "ready" as const, label: "Ready for Claim", icon: Clock },
   { key: "claimed" as const, label: "Claimed", icon: PackageCheck },
-  { key: "rejected" as const, label: "Rejected", icon: Ban },
+  { key: "cancelled" as const, label: "Cancelled", icon: Ban },
 ];
 
 function StatsOverview() {

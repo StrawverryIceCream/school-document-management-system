@@ -19,7 +19,7 @@ const getStatusBadgeClasses = (status: DocumentRequest["status"]) => {
     case "ready":
     case "claimed":
       return "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300";
-    case "rejected":
+    case "cancelled":
       return "border border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300";
     default:
       return "border border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300";

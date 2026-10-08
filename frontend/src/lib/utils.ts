@@ -52,7 +52,7 @@ export const statusStyles: Record<RequestStatus, string> = {
     "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
   claimed:
     "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
-  rejected:
+  cancelled:
     "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20",
 };
 
@@ -165,7 +165,7 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
     processing: 0,
     ready: 0,
     claimed: 0,
-    rejected: 0,
+    cancelled: 0,
   };
 
   for (const req of requests) {

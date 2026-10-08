@@ -1,12 +1,12 @@
-export const userRoles = ["student", "staff", "admin", "teacher"] as const;
+export const userRoles = ["student", "teacher", "admin", "staff"] as const;
 
-export type UserRole = "student" | "staff" | "admin" | "teacher";
+export type UserRole = "student" | "teacher" | "admin" | "staff";
 export type RequestStatus =
   | "pending"
   | "processing"
   | "ready"
   | "claimed"
-  | "rejected";
+  | "cancelled";
 
 export interface Timestamps {
   createdAt: Date;
@@ -57,9 +57,9 @@ export interface NewDocument {
 }
 
 export interface DocumentRequest extends Timestamps {
-  id: number;
-  userId: number;
-  documentTypeId: number;
+  id: string;
+  userId: string;
+  documentTypeId: string;
   purpose: string | null;
   formData: Record<string, unknown>;
   status: RequestStatus;

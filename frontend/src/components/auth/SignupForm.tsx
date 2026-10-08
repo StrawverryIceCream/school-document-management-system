@@ -34,24 +34,6 @@ interface SignupFormProps extends React.ComponentProps<typeof Card> {
   setRole: (value: UserRole) => void;
   studentId: string;
   setStudentId: (value: string) => void;
-  email: string;
-  setEmail: (value: string) => void;
-  password: string;
-  setPassword: (value: string) => void;
-  confirmPassword: string;
-  setConfirmPassword: (value: string) => void;
-}
-
-interface SignupFormProps extends React.ComponentProps<typeof Card> {
-  error: string | null;
-  loading: boolean;
-  handleSubmit: (e: React.FormEvent) => void;
-  fullName: string;
-  setFullName: (value: string) => void;
-  role: UserRole;
-  setRole: (value: UserRole) => void;
-  studentId: string;
-  setStudentId: (value: string) => void;
   college: string;
   setCollege: (value: string) => void;
   course: string;

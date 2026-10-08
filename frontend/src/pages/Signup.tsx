@@ -81,7 +81,7 @@ function Signup() {
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-xl">
         <SignupForm
           error={error}
           loading={loading}

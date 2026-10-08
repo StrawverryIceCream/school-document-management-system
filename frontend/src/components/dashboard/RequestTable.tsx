@@ -18,7 +18,9 @@ import type { RequestRow } from "@/context/DashboardContext";
 
 function RequestTable() {
   const { requests, loading, error } = useDashboard();
-  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(
+    null,
+  );
   const [detailOpen, setDetailOpen] = useState(false);
 
   function handleViewClick(request: RequestRow) {
@@ -51,7 +53,10 @@ function RequestTable() {
           <TableBody>
             {requests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={8}
+                  className="text-center text-muted-foreground"
+                >
                   No requests found.
                 </TableCell>
               </TableRow>
@@ -77,10 +82,15 @@ function RequestTable() {
                   <TableCell>{r.college ?? "—"}</TableCell>
                   <TableCell>{r.course ?? "—"}</TableCell>
                   <TableCell>
-                    {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "—"}
+                    {r.submittedAt
+                      ? new Date(r.submittedAt).toLocaleDateString()
+                      : "—"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`capitalize ${statusStyles[r.status]}`}>
+                    <Badge
+                      variant="outline"
+                      className={`capitalize ${statusStyles[r.status]}`}
+                    >
                       {r.status}
                     </Badge>
                   </TableCell>

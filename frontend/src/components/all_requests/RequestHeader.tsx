@@ -1,11 +1,9 @@
-
 import { Button } from "@/components/ui/button";
-
+import { SquareArrowRightExit } from "lucide-react";
 
 export type { StatusFilter } from "@/context/RequestContext";
 
 function RequestHeader() {
-
   return (
     <div className="mb-8 space-y-5">
       <div className="flex items-start justify-between gap-5">
@@ -15,14 +13,16 @@ function RequestHeader() {
             All Request in the database
           </p>
         </div>
-        <Button variant="outline">Export report</Button>
+        <Button
+          className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors"
+          variant="default"
+        >
+          <SquareArrowRightExit />
+          Export Report
+        </Button>
       </div>
-
-
     </div>
   );
 }
-
-
 
 export default RequestHeader;
