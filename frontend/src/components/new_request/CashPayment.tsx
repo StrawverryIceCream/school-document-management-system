@@ -10,7 +10,7 @@ import PaymentProof from "./PaymentProof";
 interface CashPaymentProps {
   documentName: string;
   feeLabel: string;
-  onSubmitProof: () => void;
+  onSubmitProof: (proof: File) => void | Promise<void>;
   onBack: () => void;
 }
 

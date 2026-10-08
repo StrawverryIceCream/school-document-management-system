@@ -70,12 +70,16 @@ export interface DocumentRequest extends Timestamps {
 }
 
 export interface Payment extends Timestamps {
-  id: number;
-  requestId: number;
+  id: string;
+  requestId: string;
   amount: string;
   method: string;
-  receiptNumber: string;
-  paidAt: Date;
+  paymentProofUrl: string | null;
+  status: "pending" | "verified" | "rejected";
+  rejectionReason: string | null;
+  verifiedBy: string | null;
+  verifiedAt: Date | null;
+  receiptNumber: string | null;
 }
 
 export interface DocumentRequestWithRelations extends DocumentRequest {

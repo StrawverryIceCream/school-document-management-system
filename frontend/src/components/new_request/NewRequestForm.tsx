@@ -1,7 +1,9 @@
 import { useDocument } from "@/hooks/useDocument";
 import type { FormDataValue } from "@/api/requests";
 import type { RequiredFieldValues } from "@/types";
+import type { PaymentMethod } from "@/api/payments";
 import { createRequest } from "@/api/requests";
+import { createPayment, uploadPaymentProof } from "@/api/payments";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +21,7 @@ function NewRequestForm() {
   const [step, setStep] = useState<PaymentStep>("form");
   const [formData, setFormData] =
     useState<Record<string, FormDataValue> | null>(null);
+  const [receiptNumber, setReceiptNumber] = useState<string | null>(null);
 
   async function handleSubmit(values: RequiredFieldValues) {
     if (!document) return;
@@ -34,20 +37,35 @@ function NewRequestForm() {
     setStep("method");
   }
 
-  async function submitPaymentForVerification() {
+  async function submitPayment(method: PaymentMethod, proofFile?: File) {
     if (!document || !formData) return;
 
     try {
-      await createRequest({
+      // 1. Create the document request
+      const request = await createRequest({
         documentTypeId: String(document.id),
         formData,
       });
+
+      // 2. Create the payment record
+      const payment = await createPayment({
+        requestId: String(request.id),
+        method,
+      });
+
+      setReceiptNumber(payment.receiptNumber);
+
+      // 3. Upload proof if provided
+      if (proofFile) {
+        await uploadPaymentProof(payment.id, proofFile);
+      }
+
       setStep("confirmation");
     } catch (submitError) {
       toast.error(
         submitError instanceof Error
           ? submitError.message
-          : "Failed to submit request",
+          : "Failed to submit payment",
       );
     }
   }
@@ -92,7 +110,7 @@ function NewRequestForm() {
           <CashPayment
             documentName={document.name}
             feeLabel={feeLabel}
-            onSubmitProof={submitPaymentForVerification}
+            onSubmitProof={(proofFile) => submitPayment("cash", proofFile)}
             onBack={() => setStep("method")}
           />
         )}
@@ -100,14 +118,19 @@ function NewRequestForm() {
           <OnlinePayment
             documentName={document.name}
             feeLabel={feeLabel}
-            onConfirm={submitPaymentForVerification}
+            onConfirm={(method, proofFile) => submitPayment(method, proofFile)}
             onBack={() => setStep("method")}
           />
         )}
-        {step === "confirmation" && <PaymentConfirmation />}
+        {step === "confirmation" && (
+          <PaymentConfirmation
+            receiptNumber={receiptNumber}
+            amount={document.fee}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-export default NewRequestForm
+export default NewRequestForm;

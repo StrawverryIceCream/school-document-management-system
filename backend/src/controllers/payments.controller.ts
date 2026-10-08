@@ -20,7 +20,7 @@ const RECEIPT_RANDOM_BYTES = 4;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const PAYMENT_METHODS = ["card", "e_wallet", "bank_transfer"] as const;
+const PAYMENT_METHODS = ["cash", "card", "e_wallet", "bank_transfer"] as const;
 type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 // Never expose passwordHash through the payer relation
