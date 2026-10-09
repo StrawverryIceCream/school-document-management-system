@@ -15,14 +15,14 @@ function LogsSearchToolbar() {
   const { search, setSearch, typeFilter, setTypeFilter } = useLogs();
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-6">
       <Input
-        placeholder="Search by account name or action..."
+        placeholder="Search by ID, account name, or action..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="sm:max-w-xs"
+        className="flex-1"
       />
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1.5 shrink-0">
         {FILTERS.map((filter) => (
           <Button
             key={filter.value}

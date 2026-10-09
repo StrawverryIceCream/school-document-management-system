@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { LogsContext } from "@/context/LogsContext";
-import type { ActivityLog, LogEntry } from "@/context/LogsContext";
+import type { ActivityLog, LogEntry, LogStats } from "@/context/LogsContext";
 import type { User } from "@/types";
+
 
 // TEMPORARY MOCK DATA
 const MOCK_ACCOUNTS: User[] = [
@@ -443,9 +444,6 @@ function delay<T>(value: T, ms = 400): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
 }
 
-// Joins each raw log with its account's name/role, then applies search and
-// type filtering, newest first — this is what a real backend's
-// GET /api/logs?search=&type= would already return pre-joined.
 async function fetchMockLogs(
   search: string,
   typeFilter: "all" | ActivityLog["type"],
@@ -458,6 +456,7 @@ async function fetchMockLogs(
       ...log,
       accountName: account?.fullName ?? "Unknown account",
       accountRole: account?.role ?? "unknown",
+      accountStudentId: account?.studentId ?? null,
     };
   });
 
@@ -470,6 +469,7 @@ async function fetchMockLogs(
     joined = joined.filter(
       (log) =>
         log.accountName.toLowerCase().includes(q) ||
+        (log.accountStudentId ?? "").toLowerCase().includes(q) ||
         log.message.toLowerCase().includes(q),
     );
   }
@@ -481,35 +481,53 @@ async function fetchMockLogs(
   return delay(joined);
 }
 
+// Always computed from the full, unfiltered list so the cards stay
+// stable while the user searches or filters the table.
+async function fetchMockLogStats(): Promise<LogStats> {
+  const latest = MOCK_LOGS.reduce<string | null>(
+    (max, log) => (!max || log.createdAt > max ? log.createdAt : max),
+    null,
+  );
+
+  return delay({
+    total: MOCK_LOGS.length,
+    activeAccounts: new Set(MOCK_LOGS.map((log) => log.userId)).size,
+    lastActivityAt: latest,
+  });
+}
+
+// 🧪 END TEMPORARY MOCK DATA
+
 const SEARCH_DEBOUNCE_MS = 250;
 
 export function LogsProvider({ children }: { children: React.ReactNode }) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [stats, setStats] = useState<LogStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const [typeFilter, setTypeFilter] = useState<"all" | ActivityLog["type"]>(
-    "all",
-  );
+  const [typeFilter, setTypeFilter] = useState<"all" | ActivityLog["type"]>("all");
 
   const loadLogs = useCallback(async () => {
-    return fetchMockLogs(debouncedSearch, typeFilter); // 👈 swap for a real API call later
+    const [logsData, statsData] = await Promise.all([
+      fetchMockLogs(debouncedSearch, typeFilter), // 👈 swap for real API calls later
+      fetchMockLogStats(),
+    ]);
+    return { logsData, statsData };
   }, [debouncedSearch, typeFilter]);
 
   useEffect(() => {
-    const timeout = setTimeout(
-      () => setDebouncedSearch(search),
-      SEARCH_DEBOUNCE_MS,
-    );
+    const timeout = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timeout);
   }, [search]);
 
   useEffect(() => {
     setLoading(true);
     loadLogs()
-      .then((data) => {
-        setLogs(data);
+      .then(({ logsData, statsData }) => {
+        setLogs(logsData);
+        setStats(statsData);
         setError(null);
       })
       .catch((err) => {
@@ -522,8 +540,9 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   async function refreshLogs() {
     setLoading(true);
     try {
-      const data = await loadLogs();
-      setLogs(data);
+      const { logsData, statsData } = await loadLogs();
+      setLogs(logsData);
+      setStats(statsData);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load logs");
@@ -536,6 +555,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
     <LogsContext.Provider
       value={{
         logs,
+        stats,
         loading,
         error,
         search,
