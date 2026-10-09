@@ -1,5 +1,6 @@
 import { getAllDocument } from "@/api/documents";
 import { DocumentContext } from "@/context/DocumentContext";
+import { useAuth } from "@/hooks/useAuth";
 import type { DocumentType } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -13,6 +14,7 @@ interface LoadedDocuments {
 }
 
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,22 +54,47 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   }, [search]);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      setDocuments([]);
+      setTotalPages(FIRST_PAGE);
+      setTotalCount(0);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
     loadDocuments()
       .then(({ data, totalPages, totalCount }) => {
+        if (cancelled) return;
         setDocuments(data);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
       })
       .catch((error) => {
+        if (cancelled) return;
         console.error("Failed to load documents:", error);
         setError(
           error instanceof Error ? error.message : "Failed to load documents",
         );
       })
-      .finally(() => setLoading(false));
-  }, [loadDocuments]);
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user, loadDocuments]);
 
   async function refreshDocument() {
+    if (authLoading || !user) return;
+
     setLoading(true);
     try {
       const { data, totalPages, totalCount } = await loadDocuments();

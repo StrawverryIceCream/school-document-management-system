@@ -23,6 +23,7 @@ import Logs from "./pages/Logs";
 import Notifications from "./pages/Notifications";
 import HumanResource from "./pages/HumanResource";
 import Administration from "./pages/Administration";
+import { MyRequestProvider } from "./provider/MyRequestProvider";
 
 export default function App() {
   return (
@@ -31,93 +32,101 @@ export default function App() {
         <DocumentProvider>
           <RequestProvider>
             <ProfileProvider>
-              <Toaster />
-              <BrowserRouter>
-                <Routes>
-                  <Route
-                    element={
-                      <RequireAuth>
-                        <AppLayout />
-                      </RequireAuth>
-                    }
-                  >
-                    <Route path="/home" element={<Home />} />
-                    <Route path="/" element={<Home />} />
-                    <Route path="/new-request/:id?" element={<NewRequest />} />
-                    <Route path="/my-request" element={<MyRequest />} />
-                    <Route path="/notifications" element={<Notifications />} />
+              <MyRequestProvider>
+                <Toaster />
+                <BrowserRouter>
+                  <Routes>
                     <Route
-                      path="/dashboard"
                       element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <Dashboard />
-                        </RequireRole>
+                        <RequireAuth>
+                          <AppLayout />
+                        </RequireAuth>
                       }
-                    />
-                    <Route
-                      path="/accounts"
-                      element={
-                        <RequireRole allowedRoles={["admin"]}>
-                          <Accounts />
-                        </RequireRole>
-                      }
-                    />
-                    <Route
-                      path="/document-manager"
-                      element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <DocumentManager />
-                        </RequireRole>
-                      }
-                    />
-                    <Route
-                      path="/windows"
-                      element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <WindowViewProvider>
-                            <Windows />
-                          </WindowViewProvider>
-                        </RequireRole>
-                      }
-                    />
-                    <Route
-                      path="/administration"
-                      element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <Administration />
-                        </RequireRole>
-                      }
-                    />
-                    <Route
-                      path="/human-resource"
-                      element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <HumanResource />
-                        </RequireRole>
-                      }
-                    />
-                    <Route
-                      path="/all-request"
-                      element={
-                        <RequireRole allowedRoles={["admin", "staff"]}>
-                          <AllRequest />
-                        </RequireRole>
-                      }
-                    />
+                    >
+                      <Route path="/home" element={<Home />} />
+                      <Route path="/" element={<Home />} />
+                      <Route
+                        path="/new-request/:id?"
+                        element={<NewRequest />}
+                      />
+                      <Route path="/my-request" element={<MyRequest />} />
+                      <Route
+                        path="/notifications"
+                        element={<Notifications />}
+                      />
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <Dashboard />
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/accounts"
+                        element={
+                          <RequireRole allowedRoles={["admin"]}>
+                            <Accounts />
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/document-manager"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <DocumentManager />
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/windows"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <WindowViewProvider>
+                              <Windows />
+                            </WindowViewProvider>
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/administration"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <Administration />
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/human-resource"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <HumanResource />
+                          </RequireRole>
+                        }
+                      />
+                      <Route
+                        path="/all-request"
+                        element={
+                          <RequireRole allowedRoles={["admin", "staff"]}>
+                            <AllRequest />
+                          </RequireRole>
+                        }
+                      />
 
-                    <Route
-                      path="/logs"
-                      element={
-                        <RequireRole allowedRoles={["admin"]}>
-                          <Logs />
-                        </RequireRole>
-                      }
-                    />
-                  </Route>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                </Routes>
-              </BrowserRouter>
+                      <Route
+                        path="/logs"
+                        element={
+                          <RequireRole allowedRoles={["admin"]}>
+                            <Logs />
+                          </RequireRole>
+                        }
+                      />
+                    </Route>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                  </Routes>
+                </BrowserRouter>
+              </MyRequestProvider>
             </ProfileProvider>
           </RequestProvider>
         </DocumentProvider>

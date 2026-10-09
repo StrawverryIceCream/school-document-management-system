@@ -3,11 +3,19 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import type { RequestStatus } from "@/types";
 
-type MyRequestFiltersProps = {
-  statusFilterOptions: Array<{ value: "all" | RequestStatus; label: string }>;
-};
+const statusFilterOptions: Array<{
+  value: "all" | RequestStatus;
+  label: string;
+}> = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "ready", label: "Ready" },
+  { value: "claimed", label: "Claimed" },
+  { value: "cancelled", label: "Cancelled" },
+];
 
-function MyRequestFilters({ statusFilterOptions }: MyRequestFiltersProps) {
+function MyRequestFilters() {
   const { search, setSearch, statusFilter, setStatusFilter } = useMyRequest();
 
   return (

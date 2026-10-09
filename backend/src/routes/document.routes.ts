@@ -12,7 +12,7 @@ import validateId from "../middleware/validateId.js";
 const router = Router();
 
 router.use(requireAuth);
-router.get("/", requireRoles("admin", "staff"), getAllDocument);
+router.get("/", getAllDocument);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getDocumentById);
 router.post("/", requireRoles("admin"), createDocument);
 router.patch("/:id", requireRoles("admin"), validateId, updateDocumentType);
