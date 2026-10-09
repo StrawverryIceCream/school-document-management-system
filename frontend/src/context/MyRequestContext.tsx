@@ -18,6 +18,7 @@ interface MyRequestContextType {
   readyCount: number;
   loading: boolean;
   error: string | null;
+  refreshMyRequests: () => Promise<void>;
 }
 
 export const MyRequestContext = createContext<MyRequestContextType | null>(

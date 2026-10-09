@@ -5,7 +5,7 @@ import {
 import { getMyRequests } from "@/api/requests";
 import { getAllDocument } from "@/api/documents";
 import type { RequestStatus } from "@/types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 
 const MY_REQUESTS_FETCH_LIMIT = 200;
@@ -24,51 +24,43 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
     "all",
   );
 
-  useEffect(() => {
-    let isMounted = true;
+  const refreshMyRequests = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [requestsRes, documentsRes] = await Promise.all([
+        getMyRequests({ limit: MY_REQUESTS_FETCH_LIMIT }),
+        getAllDocument({ limit: DOCUMENT_TYPES_FETCH_LIMIT }),
+      ]);
 
-    async function loadMyRequests() {
-      setLoading(true);
-      setError(null);
-      try {
-        const [requestsRes, documentsRes] = await Promise.all([
-          getMyRequests({ limit: MY_REQUESTS_FETCH_LIMIT }),
-          getAllDocument({ limit: DOCUMENT_TYPES_FETCH_LIMIT }),
-        ]);
+      const documentNameById = new Map(
+        documentsRes.data.map((document) => [
+          String(document.id),
+          document.name,
+        ]),
+      );
 
-        const documentNameById = new Map(
-          documentsRes.data.map((document) => [
-            String(document.id),
-            document.name,
-          ]),
-        );
+      const enrichedRequests = requestsRes.data.map((request) => ({
+        ...request,
+        documentName:
+          documentNameById.get(String(request.documentTypeId)) ??
+          UNKNOWN_DOCUMENT_NAME,
+      }));
 
-        const enrichedRequests = requestsRes.data.map((request) => ({
-          ...request,
-          documentName:
-            documentNameById.get(String(request.documentTypeId)) ??
-            UNKNOWN_DOCUMENT_NAME,
-        }));
-
-        if (isMounted) setRequests(enrichedRequests);
-      } catch (err) {
-        if (isMounted) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load your requests",
-          );
-          console.error("Failed to load my requests:", err);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+      setRequests(enrichedRequests);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load your requests",
+      );
+      console.error("Failed to load my requests:", err);
+    } finally {
+      setLoading(false);
     }
-
-    loadMyRequests();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    void refreshMyRequests();
+  }, [refreshMyRequests]);
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -117,6 +109,7 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
         readyCount,
         loading,
         error,
+        refreshMyRequests,
       }}
     >
       {children}

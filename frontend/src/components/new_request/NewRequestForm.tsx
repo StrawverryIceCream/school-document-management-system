@@ -4,6 +4,7 @@ import type { RequiredFieldValues } from "@/types";
 import type { PaymentMethod } from "@/api/payments";
 import { createRequest } from "@/api/requests";
 import { createPayment, uploadPaymentProof } from "@/api/payments";
+import { useMyRequest } from "@/hooks/useMyRequest";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ type PaymentStep = "form" | "method" | "cash" | "online" | "confirmation";
 function NewRequestForm() {
   const { id } = useParams<{ id?: string }>();
   const { document, loading, error } = useDocument(id);
+  const { refreshMyRequests } = useMyRequest();
   const [step, setStep] = useState<PaymentStep>("form");
   const [formData, setFormData] =
     useState<Record<string, FormDataValue> | null>(null);
@@ -60,6 +62,7 @@ function NewRequestForm() {
         await uploadPaymentProof(payment.id, proofFile);
       }
 
+      await refreshMyRequests();
       setStep("confirmation");
     } catch (submitError) {
       toast.error(

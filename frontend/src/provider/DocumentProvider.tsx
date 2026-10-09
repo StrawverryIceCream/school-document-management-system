@@ -56,18 +56,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!user) {
-      setDocuments([]);
-      setTotalPages(FIRST_PAGE);
-      setTotalCount(0);
-      setError(null);
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     loadDocuments()
       .then(({ data, totalPages, totalCount }) => {
@@ -75,6 +66,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         setDocuments(data);
         setTotalPages(totalPages);
         setTotalCount(totalCount);
+        setError(null);
       })
       .catch((error) => {
         if (cancelled) return;
@@ -115,9 +107,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   return (
     <DocumentContext.Provider
       value={{
-        documents,
-        loading,
-        error,
+        documents: user ? documents : [],
+        loading: authLoading || (user ? loading : false),
+        error: user ? error : null,
         search,
         setSearch: updateSearch,
         isActive,
@@ -125,8 +117,8 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         refreshDocument,
         page,
         setPage,
-        totalPages,
-        totalCount,
+        totalPages: user ? totalPages : FIRST_PAGE,
+        totalCount: user ? totalCount : 0,
       }}
     >
       {children}

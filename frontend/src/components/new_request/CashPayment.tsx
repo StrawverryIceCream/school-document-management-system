@@ -25,15 +25,14 @@ function CashPayment({
       <CardHeader>
         <CardTitle>Cash Payment</CardTitle>
         <CardDescription>
-          Pay at the school cashier, then submit a photo or scan of your receipt.
+          Pay at the school cashier, then submit a photo or scan of your
+          receipt.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="rounded-lg border p-4 text-sm">
           <p className="font-medium">{documentName}</p>
-          <p className="mt-1 text-muted-foreground">
-            Document fee: {feeLabel}
-          </p>
+          <p className="mt-1 text-muted-foreground">Document fee: {feeLabel}</p>
         </div>
         <ol className="list-decimal space-y-1 pl-5 text-sm">
           <li>Pay the fee at the school cashier.</li>
