@@ -21,6 +21,8 @@ import { DocumentProvider } from "./provider/DocumentProvider";
 import { RequestProvider } from "./provider/RequestProvider";
 import Logs from "./pages/Logs";
 import Notifications from "./pages/Notifications";
+import HumanResource from "./pages/HumanResource";
+import Administration from "./pages/Administration";
 
 export default function App() {
   return (
@@ -75,6 +77,22 @@ export default function App() {
                           <WindowViewProvider>
                             <Windows />
                           </WindowViewProvider>
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/administration"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <Administration />
+                        </RequireRole>
+                      }
+                    />
+                    <Route
+                      path="/human-resource"
+                      element={
+                        <RequireRole allowedRoles={["admin", "staff"]}>
+                          <HumanResource />
                         </RequireRole>
                       }
                     />

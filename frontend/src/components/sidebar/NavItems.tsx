@@ -20,7 +20,7 @@ function NavItems({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Config</SidebarGroupLabel>
+      <SidebarGroupLabel>Requests</SidebarGroupLabel>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           {items.map((item) => (

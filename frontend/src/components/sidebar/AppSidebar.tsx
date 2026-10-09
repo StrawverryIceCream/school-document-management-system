@@ -4,11 +4,13 @@ import {
   FileInputIcon,
   FileSearchCorner,
   Gauge,
+  Handshake,
+  HouseCog,
   Logs,
   NotebookTabs,
   Search,
   Settings,
-  UserRound,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -27,6 +29,7 @@ import NavMain from "./NavMain";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/types";
 import { NavLink } from "react-router-dom";
+import NavConfig from "./NavConfig";
 
 type NavItem = {
   title: string;
@@ -51,21 +54,21 @@ const navItems: NavItem[] = [
     roles: ["admin", "staff"],
   },
   {
-    title: "Accounts",
-    url: "/accounts",
-    icon: UserRound,
-    roles: ["admin"],
-  },
-  {
-    title: "Document Manager",
-    url: "/document-manager",
-    icon: FileSearchCorner,
-    roles: ["admin", "staff"],
-  },
-  {
     title: "Windows",
     url: "/windows",
     icon: AppWindow,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Administration",
+    url: "/administration",
+    icon: HouseCog,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Human Resource",
+    url: "/human-resource",
+    icon: Handshake,
     roles: ["admin", "staff"],
   },
   {
@@ -73,6 +76,21 @@ const navItems: NavItem[] = [
     url: "/all-request",
     icon: CircleDashedCheck,
     roles: ["admin", "staff"],
+  },
+];
+
+const navConfig: NavItem[] = [
+  {
+    title: "Document Manager",
+    url: "/document-manager",
+    icon: FileSearchCorner,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Accounts",
+    url: "/accounts",
+    icon: Users,
+    roles: ["admin"],
   },
   {
     title: "Logs",
@@ -104,6 +122,10 @@ function AppSidebar() {
   const permittedNavItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(user.role),
   );
+  const permittedNavConfigs = navConfig.filter(
+    (item) => !item.roles || item.roles.includes(user.role),
+  );
+
   return (
     <Sidebar collapsible="icon" variant="inset" className="transition-[width] ">
       <SidebarHeader>
@@ -124,6 +146,9 @@ function AppSidebar() {
       <SidebarContent>
         <NavMain items={navMain} />
         {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
+        {permittedNavConfigs.length > 0 && (
+          <NavConfig items={permittedNavConfigs} />
+        )}
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
