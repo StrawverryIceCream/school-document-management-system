@@ -1,12 +1,12 @@
-export const userRoles = ["student", "staff", "admin", "teacher"] as const;
+export const userRoles = ["student", "teacher", "admin", "staff"] as const;
 
-export type UserRole = "student" | "staff" | "admin" | "teacher";
+export type UserRole = "student" | "teacher" | "admin" | "staff";
 export type RequestStatus =
   | "pending"
   | "processing"
   | "ready"
   | "claimed"
-  | "rejected";
+  | "cancelled";
 
 export interface Timestamps {
   createdAt: Date;
@@ -57,9 +57,9 @@ export interface NewDocument {
 }
 
 export interface DocumentRequest extends Timestamps {
-  id: number;
-  userId: number;
-  documentTypeId: number;
+  id: string;
+  userId: string;
+  documentTypeId: string;
   purpose: string | null;
   formData: Record<string, unknown>;
   status: RequestStatus;
@@ -70,29 +70,16 @@ export interface DocumentRequest extends Timestamps {
 }
 
 export interface Payment extends Timestamps {
-  id: number;
-  requestId: number;
+  id: string;
+  requestId: string;
   amount: string;
   method: string;
-  receiptNumber: string;
-  paidAt: Date;
-}
-
-export interface NotificationSender {
-  id: string;
-  fullName: string;
-  role: UserRole;
-}
-
-export interface Notification extends Timestamps {
-  id: string;
-  userId: string;
-  senderId: string | null;
-  requestId: string | null;
-  title: string;
-  message: string;
-  isRead: boolean;
-  sender?: NotificationSender | null;
+  paymentProofUrl: string | null;
+  status: "pending" | "verified" | "rejected";
+  rejectionReason: string | null;
+  verifiedBy: string | null;
+  verifiedAt: Date | null;
+  receiptNumber: string | null;
 }
 
 export interface DocumentRequestWithRelations extends DocumentRequest {

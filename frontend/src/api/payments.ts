@@ -2,7 +2,7 @@
 import type { DocumentRequestRow } from "@/api/requests";
 import type { DocumentType, Payment, User } from "@/types";
 
-export type PaymentMethod = "card" | "e_wallet" | "bank_transfer";
+export type PaymentMethod = "cash" | "card" | "e_wallet" | "bank_transfer";
 
 export type PaymentPayer = Pick<
   User,
@@ -105,6 +105,24 @@ export async function getMyPaymentById(id: string): Promise<MyPayment> {
   return handleResponse<MyPayment>(res, url);
 }
 
+export async function uploadPaymentProof(
+  paymentId: string,
+  proofFile: File,
+): Promise<{ paymentProofUrl: string }> {
+  const url = `/api/payments/${paymentId}/proof`;
+
+  const formData = new FormData();
+  formData.append("paymentProof", proofFile);
+
+  const res = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  return handleResponse<{ paymentProofUrl: string }>(res, url);
+}
+
 // ---------- Staff / admin ----------
 
 export async function getAllPayments(
@@ -131,3 +149,4 @@ export async function getPaymentById(id: string): Promise<PaymentWithDetails> {
   const res = await fetch(url, { credentials: "include" });
   return handleResponse<PaymentWithDetails>(res, url);
 }
+

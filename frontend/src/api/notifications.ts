@@ -1,4 +1,4 @@
-import type { Notification } from "@/types";
+import type { Notification } from "@/context/NotificationContext";
 
 export interface GetMyNotificationsParams {
   isRead?: boolean;
@@ -26,9 +26,22 @@ export interface SendNotificationPayload {
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`${url} responded ${res.status}${text ? `: ${text}` : ""}`);
+    throw new NotificationApiError(
+      res.status,
+      `${url} responded ${res.status}${text ? `: ${text}` : ""}`,
+    );
   }
   return res.json();
+}
+
+export class NotificationApiError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "NotificationApiError";
+    this.status = status;
+  }
 }
 
 export async function getMyNotifications(

@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 import { useState } from "react";
 import EditDocumentRow from "./EditDocumentRow";
@@ -38,63 +39,82 @@ function DocumentTable() {
     );
   }
   return (
-    <Table>
-      <TableHeader className="sticky top-0 z-10 bg-muted">
-        <TableRow>
-          <TableHead className="w-30">ID</TableHead>
-          <TableHead className="w-30">Code</TableHead>
-          <TableHead className="max-w-">Name</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead className="w-50">Required Fields</TableHead>
-          <TableHead>Fee</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {documents.map((document) => (
-          <TableRow
-            key={document.id}
-            className={!document.isActive ? "text-muted-foreground" : ""}
-          >
-            <TableCell className="font-medium max-w-25 truncate">
-              {document.id}
-            </TableCell>
-            {editingDocument === document.id ? (
-              <EditDocumentRow document={document} setEdit={setEdit} />
-            ) : (
-              <>
-                <TableCell>{document.code}</TableCell>
-                <TableCell className="max-w-50 truncate">
-                  {document.name}
-                </TableCell>
-                <TableCell className="max-w-100 truncate">
-                  {document.description}
-                </TableCell>
-                <TableCell>
-                  <DocumentRequiredFieldDialog
-                    requiredFields={document.requiredFields}
-                  />
-                </TableCell>
-                <TableCell>₱{document.fee}</TableCell>
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/70">
+            <TableRow>
+              <TableHead className="w-24">ID</TableHead>
+              <TableHead className="w-32">Code</TableHead>
+              <TableHead className="min-w-48">Name</TableHead>
+              <TableHead className="min-w-64">Description</TableHead>
+              <TableHead className="w-40">Required Fields</TableHead>
+              <TableHead className="w-24">Fee</TableHead>
+              <TableHead className="w-28">Status</TableHead>
+              <TableHead className="w-24 text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {documents.length === 0 ? (
+              <TableRow>
                 <TableCell
+                  colSpan={8}
+                  className="py-12 text-center text-muted-foreground"
+                >
+                  No documents match your current filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              documents.map((document) => (
+                <TableRow
+                  key={document.id}
                   className={
-                    document.isActive ? "text-green-600" : "text-red-600"
+                    !document.isActive
+                      ? "text-muted-foreground"
+                      : "align-middle"
                   }
                 >
-                  {document.isActive ? "Active" : "Inactive"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-end">
-                    <EditDocument document={document} setEdit={setEdit} />
-                  </div>
-                </TableCell>
-              </>
+                  <TableCell className="font-medium">{document.id}</TableCell>
+                  {editingDocument === document.id ? (
+                    <EditDocumentRow document={document} setEdit={setEdit} />
+                  ) : (
+                    <>
+                      <TableCell>{document.code}</TableCell>
+                      <TableCell className="max-w-48 truncate">
+                        {document.name}
+                      </TableCell>
+                      <TableCell className="max-w-64 truncate">
+                        {document.description || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <DocumentRequiredFieldDialog
+                          requiredFields={document.requiredFields}
+                        />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        ₱{document.fee}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          document.isActive ? "text-green-600" : "text-red-600"
+                        }
+                      >
+                        {document.isActive ? "Active" : "Inactive"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end">
+                          <EditDocument document={document} setEdit={setEdit} />
+                        </div>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))
             )}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }
 

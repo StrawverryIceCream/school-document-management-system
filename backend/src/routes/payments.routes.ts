@@ -9,7 +9,9 @@ import {
   getMyPaymentById,
   getMyPayments,
   getPaymentById,
+  uploadPaymentProofHandler,
 } from "../controllers/payments.controller.js";
+import { handleUpload } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -18,6 +20,11 @@ router.use(requireAuth);
 router.post("/", createPayment);
 router.get("/me", getMyPayments);
 router.get("/me/:id", validateId, getMyPaymentById);
+router.post(
+  "/:id/proof",
+  handleUpload("paymentProof"),
+  uploadPaymentProofHandler,
+);
 
 router.get("/", requireRoles("admin", "staff"), getAllPayments);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getPaymentById);

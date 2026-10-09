@@ -6,11 +6,12 @@ export interface DashboardStats {
   processing: number;
   ready: number;
   claimed: number;
-  rejected: number;
+  cancelled: number;
 }
 
 export interface RequestRow {
   id: string;
+  userId?: string;
   applicant: string;
   document: string;
   status: RequestStatus;

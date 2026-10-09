@@ -8,25 +8,13 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Eye, FileText, UserRound } from "lucide-react";
-
+import { Badge } from "@/components/ui/badge";
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
 import { useRequests } from "@/hooks/useRequests";
 import type { RequestRow } from "@/context/DashboardContext";
-
-
-const statusTone: Record<RequestRow["status"], string> = {
-  pending:
-    "bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300",
-  processing:
-    "bg-sky-500/15 text-sky-700 ring-1 ring-sky-500/30 dark:text-sky-300",
-  ready:
-    "bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:text-emerald-300",
-  claimed:
-    "bg-violet-500/15 text-violet-700 ring-1 ring-violet-500/30 dark:text-violet-300",
-  rejected:
-    "bg-red-500/15 text-red-700 ring-1 ring-red-500/30 dark:text-red-300",
-};
+import { statusStyles } from "@/lib/utils";
 
 function RequestTable() {
   const { filteredRows: rows, requests, error } = useRequests();
@@ -74,9 +62,20 @@ function RequestTable() {
                         <UserRound className="size-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">
-                          {request.applicant}
-                        </p>
+                        {request.userId ? (
+                          <ProfileTrigger userId={request.userId}>
+                            <button
+                              type="button"
+                              className="text-left font-medium text-foreground hover:underline"
+                            >
+                              {request.applicant}
+                            </button>
+                          </ProfileTrigger>
+                        ) : (
+                          <p className="font-medium text-foreground">
+                            {request.applicant}
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground">Student</p>
                       </div>
                     </div>
@@ -92,11 +91,12 @@ function RequestTable() {
                     {request.submittedAt ?? "Not available"}
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusTone[request.status]}`}
+                    <Badge
+                      variant="outline"
+                      className={`capitalize ${statusStyles[request.status]}`}
                     >
                       {request.status}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button

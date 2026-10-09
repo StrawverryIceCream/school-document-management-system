@@ -32,7 +32,7 @@ function RequestSearchToolbar() {
           <SelectItem value="processing">Processing</SelectItem>
           <SelectItem value="ready">Ready</SelectItem>
           <SelectItem value="claimed">Claimed</SelectItem>
-          <SelectItem value="rejected">Rejected</SelectItem>
+          <SelectItem value="cancelled">Cancelled</SelectItem>
         </SelectContent>
       </Select>
     </div>

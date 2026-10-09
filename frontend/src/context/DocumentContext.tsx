@@ -6,10 +6,16 @@ interface DocumentContextType {
   loading: boolean;
   error: string | null;
   search: string;
-  setSearch: (search: string) => void;
+  setSearch: (value: string) => void;
   isActive: boolean | undefined;
-  setIsActive: (isActive: boolean | undefined) => void;
+  setIsActive: (value: boolean | undefined) => void;
   refreshDocument: () => Promise<void>;
+  page: number;
+  setPage: (page: number) => void;
+  totalPages: number;
+  totalCount: number;
 }
 
-export const DocumentContext = createContext<DocumentContextType | null>(null);
+export const DocumentContext = createContext<DocumentContextType | null>(
+  null,
+);

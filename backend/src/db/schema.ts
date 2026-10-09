@@ -114,17 +114,36 @@ export const documentRequests = pgTable("document_requests", {
   ...timestamps,
 });
 
-export const payments = pgTable("payments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  requestId: uuid("request_id")
-    .references(() => documentRequests.id)
-    .notNull(),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  method: text("method").notNull(),
-  receiptNumber: text("receipt_number").notNull().unique(),
-  paidAt: timestamp("paid_at").notNull().defaultNow(),
-  ...timestamps,
-});
+export const paymentStatus = pgEnum("payment_status", [
+  "pending",
+  "verified",
+  "rejected",
+]);
+
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .references(() => documentRequests.id)
+      .notNull(),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    method: text("method").notNull(),
+    paymentProofUrl: text("payment_proof_url"),
+    status: paymentStatus("status").notNull().default("pending"),
+    rejectionReason: text("rejection_reason"),
+    verifiedBy: uuid("verified_by_id").references(() => users.id),
+    verifiedAt: timestamp("verified_at"),
+    receiptNumber: text("receipt_number").unique(),
+    ...timestamps,
+  },
+  (table) => [
+    check(
+      "payments_verified_requires_verifier",
+      sql`${table.status} <> 'verified' OR (${table.verifiedBy} IS NOT NULL AND ${table.verifiedAt} IS NOT NULL)`,
+    ),
+  ],
+);
 
 export const notifications = pgTable(
   "notifications",

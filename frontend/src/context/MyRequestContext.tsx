@@ -1,9 +1,14 @@
-import type { DocumentRequest, RequestStatus } from "@/types";
+import type { MyRequest } from "@/api/requests";
+import type { RequestStatus } from "@/types";
 import { createContext } from "react";
 
+export interface MyRequestWithDocumentName extends MyRequest {
+  documentName: string;
+}
+
 interface MyRequestContextType {
-  requests: DocumentRequest[];
-  filteredRequests: DocumentRequest[];
+  requests: MyRequestWithDocumentName[];
+  filteredRequests: MyRequestWithDocumentName[];
   search: string;
   setSearch: (value: string) => void;
   statusFilter: "all" | RequestStatus;
@@ -11,6 +16,10 @@ interface MyRequestContextType {
   totalCount: number;
   activeCount: number;
   readyCount: number;
+  loading: boolean;
+  error: string | null;
 }
 
-export const MyRequestContext = createContext<MyRequestContextType | null>(null);
+export const MyRequestContext = createContext<MyRequestContextType | null>(
+  null,
+);

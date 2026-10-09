@@ -14,6 +14,15 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import StudentIdField from "./StudentIdField";
+import RoleField from "./RoleField";
+import type { UserRole } from "@/types";
+
+const ROLES = {
+  STUDENT: "student",
+  ADMIN: "admin",
+  TEACHER: "teacher",
+  STAFF: "staff",
+} as const;
 
 interface SignupFormProps extends React.ComponentProps<typeof Card> {
   error: string | null;
@@ -21,8 +30,18 @@ interface SignupFormProps extends React.ComponentProps<typeof Card> {
   handleSubmit: (e: React.FormEvent) => void;
   fullName: string;
   setFullName: (value: string) => void;
+  role: UserRole;
+  setRole: (value: UserRole) => void;
   studentId: string;
   setStudentId: (value: string) => void;
+  college: string;
+  setCollege: (value: string) => void;
+  course: string;
+  setCourse: (value: string) => void;
+  section: string;
+  setSection: (value: string) => void;
+  department: string;
+  setDepartment: (value: string) => void;
   email: string;
   setEmail: (value: string) => void;
   password: string;
@@ -37,8 +56,18 @@ export function SignupForm({
   handleSubmit,
   fullName,
   setFullName,
+  role,
+  setRole,
   studentId,
   setStudentId,
+  college,
+  setCollege,
+  course,
+  setCourse,
+  section,
+  setSection,
+  department,
+  setDepartment,
   email,
   setEmail,
   password,
@@ -47,6 +76,9 @@ export function SignupForm({
   setConfirmPassword,
   ...props
 }: SignupFormProps) {
+  const showCollegeFields = role === ROLES.STUDENT || role === ROLES.ADMIN;
+  const showDepartmentField = role === ROLES.TEACHER || role === ROLES.ADMIN;
+
   return (
     <Card {...props}>
       <CardHeader>
@@ -66,13 +98,69 @@ export function SignupForm({
               <Input
                 id="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Juan Delac Cruz"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
             </Field>
-            <StudentIdField studentId={studentId} setStudentId={setStudentId} />
+            <RoleField role={role} setRole={setRole} />
+            {role === ROLES.STUDENT && (
+              <StudentIdField
+                studentId={studentId}
+                setStudentId={setStudentId}
+              />
+            )}
+            {showCollegeFields && (
+              <>
+                <Field>
+                  <FieldLabel htmlFor="college">College</FieldLabel>
+                  <Input
+                    id="college"
+                    type="text"
+                    placeholder="College of Computer Studies"
+                    required
+                    value={college}
+                    onChange={(e) => setCollege(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="course">Course</FieldLabel>
+                  <Input
+                    id="course"
+                    type="text"
+                    placeholder="BS Computer Science"
+                    required
+                    value={course}
+                    onChange={(e) => setCourse(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="section">Section</FieldLabel>
+                  <Input
+                    id="section"
+                    type="text"
+                    placeholder="BSCS-3A"
+                    required
+                    value={section}
+                    onChange={(e) => setSection(e.target.value)}
+                  />
+                </Field>
+              </>
+            )}
+            {showDepartmentField && (
+              <Field>
+                <FieldLabel htmlFor="department">Department</FieldLabel>
+                <Input
+                  id="department"
+                  type="text"
+                  placeholder="Computer Science Department"
+                  required
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                />
+              </Field>
+            )}
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input

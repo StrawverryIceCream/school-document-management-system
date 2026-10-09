@@ -4,13 +4,23 @@ import { signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { STUDENT_ID_PREFIX } from "@/lib/utils";
+import type { UserRole } from "@/types";
+
+const ROLES = {
+  STUDENT: "student",
+  ADMIN: "admin",
+  TEACHER: "teacher",
+  STAFF: "staff",
+} as const;
 
 function Signup() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("TUP-M-");
+  const [role, setRole] = useState<UserRole>(ROLES.STUDENT);
+  const [studentId, setStudentId] = useState(STUDENT_ID_PREFIX);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +29,10 @@ function Signup() {
   const [course, setCourse] = useState("");
   const [section, setSection] = useState("");
   const [department, setDepartment] = useState("");
+
+  const needsCollegeFields = role === ROLES.STUDENT || role === ROLES.ADMIN;
+  const needsDepartment = role === ROLES.TEACHER || role === ROLES.ADMIN;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -31,6 +45,10 @@ function Signup() {
       setError("Password must be at least 8 characters long");
       return;
     }
+    if (role === ROLES.STUDENT && studentId === STUDENT_ID_PREFIX) {
+      setError("Student ID is required for students");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -38,11 +56,15 @@ function Signup() {
         email,
         password,
         fullName,
-        college,
-        course,
-        section,
-        department,
-        studentId,
+        role,
+        college: needsCollegeFields ? college : "",
+        course: needsCollegeFields ? course : "",
+        section: needsCollegeFields ? section : "",
+        department: needsDepartment ? department : "",
+        studentId:
+          role === ROLES.STUDENT && studentId !== STUDENT_ID_PREFIX
+            ? studentId
+            : "",
       });
       await login(email, password);
       navigate("/home");
@@ -59,15 +81,25 @@ function Signup() {
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-xl">
         <SignupForm
           error={error}
           loading={loading}
           handleSubmit={handleSubmit}
           fullName={fullName}
           setFullName={setFullName}
+          role={role}
+          setRole={setRole}
           studentId={studentId}
           setStudentId={setStudentId}
+          college={college}
+          setCollege={setCollege}
+          course={course}
+          setCourse={setCourse}
+          section={section}
+          setSection={setSection}
+          department={department}
+          setDepartment={setDepartment}
           email={email}
           setEmail={setEmail}
           password={password}

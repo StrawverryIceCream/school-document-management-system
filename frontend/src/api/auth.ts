@@ -1,5 +1,5 @@
 
-import type { AuthUser } from "@/types";
+import type { AuthUser, UserRole } from "@/types";
 
 
 
@@ -12,6 +12,7 @@ export interface SignupPayload {
   course: string;
   section?: string;
   studentId?: string;
+  role: UserRole;
 }
 
 // Backend errors look like { "error": "..." }, so show that message when there is one
