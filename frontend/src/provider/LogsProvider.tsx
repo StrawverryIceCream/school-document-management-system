@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo} from "react";
 import { LogsContext } from "@/context/LogsContext";
 import type { ActivityLog, LogEntry, LogStats } from "@/context/LogsContext";
 import type { User } from "@/types";
+
 
 
 // TEMPORARY MOCK DATA
@@ -499,15 +500,25 @@ async function fetchMockLogStats(): Promise<LogStats> {
 // 🧪 END TEMPORARY MOCK DATA
 
 const SEARCH_DEBOUNCE_MS = 250;
+const PAGE_SIZE = 8;
 
 export function LogsProvider({ children }: { children: React.ReactNode }) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [stats, setStats] = useState<LogStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [typeFilter, setTypeFilter] = useState<"all" | ActivityLog["type"]>("all");
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
+
+  // Only the current page is exposed to the table
+  const logs = useMemo(
+    () => filteredLogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredLogs, page],
+  );
 
   const loadLogs = useCallback(async () => {
     const [logsData, statsData] = await Promise.all([
@@ -522,11 +533,21 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timeout);
   }, [search]);
 
+  // Back to page 1 whenever the search or type filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, typeFilter]);
+
+  // If a refresh shrinks the list, don't stay on a page that no longer exists
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   useEffect(() => {
     setLoading(true);
     loadLogs()
       .then(({ logsData, statsData }) => {
-        setLogs(logsData);
+        setFilteredLogs(logsData);
         setStats(statsData);
         setError(null);
       })
@@ -541,7 +562,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const { logsData, statsData } = await loadLogs();
-      setLogs(logsData);
+      setFilteredLogs(logsData);
       setStats(statsData);
       setError(null);
     } catch (err) {
@@ -563,6 +584,9 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
         typeFilter,
         setTypeFilter,
         refreshLogs,
+        page,
+        setPage,
+        totalPages,
       }}
     >
       {children}

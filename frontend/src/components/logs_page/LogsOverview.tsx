@@ -1,14 +1,13 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { useLogs } from "@/hooks/useLogs";
 import { formatDate } from "@/lib/utils";
 import { Activity, Clock, Users } from "lucide-react";
 
 function LogsOverview() {
-  const { stats, error } = useLogs();
+  const { stats, loading, error } = useLogs();
 
   if (error) return null; // no API / fetch failed — show nothing
 
-  const cards = [
+  const summaryCards = [
     {
       label: "Total Logs",
       value: stats ? stats.total : "—",
@@ -27,21 +26,33 @@ function LogsOverview() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-      {cards.map(({ label, value, icon: Icon }) => (
-        <Card key={label} className="py-0">
-          <CardContent className="flex items-start justify-between p-5">
-            <div>
-              <p className="text-sm">{label}</p>
-              <p className="mt-2 text-3xl font-bold">{value}</p>
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 mb-8">
+      {loading
+        ? Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="rounded-xl border bg-card p-4 shadow-sm h-28 animate-pulse"
+            >
+              <div className="h-4 w-28 rounded bg-muted" />
+              <div className="mt-3 h-9 w-16 rounded bg-muted" />
             </div>
-            <div className="rounded-md border p-2">
-              <Icon className="h-4 w-4" />
+          ))
+        : summaryCards.map(({ label, value, icon: Icon }) => (
+            <div
+              key={label}
+              className="relative rounded-xl border bg-card p-4 shadow-sm h-28"
+            >
+              <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground">
+                <Icon className="h-4 w-4" />
+              </div>
+
+              <div className="pr-10 flex flex-col justify-between h-full">
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="text-3xl font-semibold tracking-tight">{value}</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+          ))}
+    </section>
   );
 }
 

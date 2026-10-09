@@ -24,8 +24,8 @@ export interface LogStats {
 }
 
 export interface LogsContextType {
-  logs: LogEntry[];
-  stats: LogStats | null; // 👈 new
+  logs: LogEntry[]; // current page only
+  stats: LogStats | null;
   loading: boolean;
   error: string | null;
   search: string;
@@ -33,6 +33,10 @@ export interface LogsContextType {
   typeFilter: "all" | ActivityLog["type"];
   setTypeFilter: (value: "all" | ActivityLog["type"]) => void;
   refreshLogs: () => Promise<void>;
+  page: number;
+  setPage: (value: number) => void;
+  totalPages: number;
 }
 
 export const LogsContext = createContext<LogsContextType | undefined>(undefined);
+

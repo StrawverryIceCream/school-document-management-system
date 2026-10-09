@@ -1,4 +1,5 @@
 import LogsHeader from "@/components/logs_page/LogsHeader";
+import LogsNavPage from "@/components/logs_page/LogsNavPage";
 import LogsOverview from "@/components/logs_page/LogsOverview";
 import LogsSearchToolbar from "@/components/logs_page/LogsSearchToolbar";
 import LogsTable from "@/components/logs_page/LogsTable";
@@ -13,6 +14,7 @@ function Logs() {
           <LogsOverview />
           <LogsSearchToolbar />
           <LogsTable />
+          <LogsNavPage />
         </div>
       </div>
     </LogsProvider>

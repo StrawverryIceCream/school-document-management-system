@@ -1,9 +1,11 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLogs } from "@/hooks/useLogs";
 import type { ActivityLog } from "@/context/LogsContext";
 
-const FILTERS: Array<{ value: "all" | ActivityLog["type"]; label: string }> = [
+type TypeFilter = "all" | ActivityLog["type"];
+
+const FILTERS: Array<{ value: TypeFilter; label: string }> = [
   { value: "all", label: "All" },
   { value: "request", label: "Request" },
   { value: "payment", label: "Payment" },
@@ -15,26 +17,29 @@ function LogsSearchToolbar() {
   const { search, setSearch, typeFilter, setTypeFilter } = useLogs();
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-6">
-      <Input
-        placeholder="Search by ID, account name, or action..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="flex-1"
-      />
-      <div className="flex flex-wrap gap-1.5 shrink-0">
-        {FILTERS.map((filter) => (
-          <Button
-            key={filter.value}
-            size="sm"
-            variant={typeFilter === filter.value ? "default" : "outline"}
-            className="h-8 px-3 text-xs"
-            onClick={() => setTypeFilter(filter.value)}
-          >
-            {filter.label}
-          </Button>
-        ))}
+    <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          placeholder="Search by code, name or description"
+          className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
+
+      <Tabs
+        value={typeFilter}
+        onValueChange={(value) => setTypeFilter(value as TypeFilter)}
+      >
+        <TabsList className="h-10">
+          {FILTERS.map((filter) => (
+            <TabsTrigger key={filter.value} value={filter.value}>
+              {filter.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }
