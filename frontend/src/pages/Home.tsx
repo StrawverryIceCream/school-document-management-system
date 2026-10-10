@@ -1,28 +1,93 @@
-import MyRequestCards from "@/components/my_request/MyRequestCards";
-import MyRequestFilters from "@/components/my_request/MyRequestFilters";
-import MyRequestTable from "@/components/my_request/MyRequestTable";
-import CreateRequest from "@/components/new_request/CreateRequest";
+import HomeHero from "@/components/home/HomeHero";
+import type { DocumentTypeItem } from "@/components/home/HomeNewRequest";
+import DocumentTypesSection from "@/components/home/HomeNewRequest";
+
+import { useAuth } from "@/hooks/useAuth";
+import { useSearchShortcut } from "@/hooks/useSearchShortcut";
+import { getGreeting } from "@/lib/home.";
+import { BadgeCheck, Award, FileText, Star } from "lucide-react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const FEATURED_DOCUMENTS: DocumentTypeItem[] = [
+  {
+    id: "tor",
+    title: "Transcript of Records",
+    description: "Comprehensive academic transcript with certified grades.",
+    price: 150,
+    turnaround: "3–5 working days",
+    isExpress: false,
+    icon: FileText,
+    tone: "rose",
+  },
+  {
+    id: "coe",
+    title: "Cert. of Enrollment (COE)",
+    description: "Affirmation of active student matriculation for scholarship.",
+    price: 50,
+    turnaround: "1–2 working days",
+    isExpress: true,
+    icon: BadgeCheck,
+    tone: "slate",
+  },
+  {
+    id: "tcg",
+    title: "True Copy of Grades (TCG)",
+    description: "Official per-semester academic assessment and grades.",
+    price: 50,
+    turnaround: "1–2 working days",
+    isExpress: false,
+    icon: Star,
+    tone: "orange",
+  },
+  {
+    id: "gmc",
+    title: "Certificate of Good Moral",
+    description:
+      "Office of Student Affairs certification confirming ethical conduct.",
+    price: 50,
+    turnaround: "2 working days",
+    isExpress: false,
+    icon: Award,
+    tone: "sky",
+  },
+];
 
 function Home() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useSearchShortcut(searchInputRef);
+
+  function handleSearchSubmit() {
+    const query = searchQuery.trim();
+    if (!query) return;
+    console.log(`/requests?search=${encodeURIComponent(query)}`);
+  }
+
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="mx-auto h-full flex flex-col">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-normal">Home</h1>
-            <p className="text-sm mt-2">
-              Request and track your important document
-            </p>
-          </div>
-        </div>
-        <CreateRequest />
-
-        <div className="flex items-start justify-between mb-8 mt-8">
-          <h1 className="text-2xl font-bold tracking-normal">Your Request</h1>
-        </div>
-        <MyRequestCards />
-        <MyRequestFilters />
-        <MyRequestTable />
+      <div className="mx-auto h-full flex flex-col gap-8">
+        <HomeHero
+          greeting={getGreeting()}
+          userName={user?.fullName ?? ""}
+          portalLabel="Administrative Records and Coordination Hub"
+          academicYear="AY 2026–2027"
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          onSearchSubmit={handleSearchSubmit}
+          searchInputRef={searchInputRef}
+        />
+        <DocumentTypesSection
+          documents={FEATURED_DOCUMENTS}
+          totalCount={8}
+          exploreHref="/documents"
+          onApply={(documentId) =>
+            navigate(`/requests/new?document=${documentId}`)
+          }
+        />
       </div>
     </div>
   );

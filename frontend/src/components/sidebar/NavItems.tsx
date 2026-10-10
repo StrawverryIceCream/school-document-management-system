@@ -20,12 +20,12 @@ function NavItems({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Requests</SidebarGroupLabel>
-      <SidebarGroupContent className="flex flex-col gap-2">
+      <SidebarGroupLabel className="font-mono">REQUEST</SidebarGroupLabel>
+      <SidebarGroupContent className="flex flex-col">
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton className="text-base font-medium" asChild>
                 <NavLink to={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
