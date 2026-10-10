@@ -16,71 +16,67 @@ import {
   formatFilingTime,
   formatRequestReference,
 } from "@/lib/format";
-import { NO_PURPOSE_LABEL, REQUEST_STATUS_CONFIG } from "@/lib/request";
+import {
+  NO_PURPOSE_LABEL,
+  REQUEST_STATUS_CONFIG,
+  REQUESTS_PAGE_SIZE,
+} from "@/lib/request";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { useMyRequest } from "@/hooks/useMyRequest";
 
 const COLUMN_COUNT = 5;
 
 const HEAD_CLASS_NAME =
-  "h-12 text-xs font-semibold uppercase tracking-wide text-muted-foreground";
+  "h-12 text-xl font-semibold uppercase tracking-wide text-muted-foreground";
 
 const MESSAGE_CELL_CLASS_NAME =
-  "px-6 py-10 text-center text-sm text-muted-foreground";
+  "px-6 py-10 text-center text-base text-muted-foreground";
 
-export type RequestsTableProps = Omit<React.ComponentProps<"div">, "children"> & {
-  // The current page only; the page slices the filtered list
+export type RequestsTableProps = {
   requests: MyRequestWithDocumentName[];
-  // Filtered total across all pages, so the footer can say "Showing X of Y"
-  totalCount: number;
   page: number;
-  pageCount: number;
   onPageChange: (page: number) => void;
-  onTrackTimeline: (requestId: string) => void;
-  onClaimSlip: (requestId: string) => void;
-  loading: boolean;
-  error: string | null;
-  onRetry: () => void;
 };
 
-function RequestsTable({
-  className,
-  requests,
-  totalCount,
-  page,
-  pageCount,
-  onPageChange,
-  onTrackTimeline,
-  onClaimSlip,
-  loading,
-  error,
-  onRetry,
-  ...props
-}: RequestsTableProps) {
+function RequestsTable({ requests, page, onPageChange }: RequestsTableProps) {
+  const { filteredRequests, loading, error, refreshMyRequests } =
+    useMyRequest();
+  const navigate = useNavigate();
+
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredRequests.length / REQUESTS_PAGE_SIZE),
+  );
+
   const isFirstPage = page <= 1;
   const isLastPage = page >= pageCount;
 
-
-  
-
   return (
-    <div
-      className={cn("overflow-hidden rounded-2xl bg-card shadow-sm", className)}
-      {...props}
-    >
+    <div className={cn("overflow-hidden rounded-2xl bg-card shadow-sm")}>
       <Table>
         <TableHeader className="bg-muted/60">
           <TableRow className="hover:bg-transparent">
-            <TableHead className={cn(HEAD_CLASS_NAME, "px-6")}>Request Reference</TableHead>
-            <TableHead className={HEAD_CLASS_NAME}>Document Requested</TableHead>
+            <TableHead className={cn(HEAD_CLASS_NAME, "px-6")}>
+              Request Reference
+            </TableHead>
+            <TableHead className={HEAD_CLASS_NAME}>
+              Document Requested
+            </TableHead>
             <TableHead className={HEAD_CLASS_NAME}>Filing Date</TableHead>
             <TableHead className={HEAD_CLASS_NAME}>Current Status</TableHead>
-            <TableHead className={cn(HEAD_CLASS_NAME, "px-6 text-right")}>Action</TableHead>
+            <TableHead className={cn(HEAD_CLASS_NAME, "px-6 text-right")}>
+              Action
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={COLUMN_COUNT} className={MESSAGE_CELL_CLASS_NAME}>
+              <TableCell
+                colSpan={COLUMN_COUNT}
+                className={MESSAGE_CELL_CLASS_NAME}
+              >
                 <span className="inline-flex items-center gap-2" role="status">
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                   Loading your requests...
@@ -89,10 +85,17 @@ function RequestsTable({
             </TableRow>
           ) : error ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={COLUMN_COUNT} className={MESSAGE_CELL_CLASS_NAME}>
+              <TableCell
+                colSpan={COLUMN_COUNT}
+                className={MESSAGE_CELL_CLASS_NAME}
+              >
                 <div className="flex flex-col items-center gap-3" role="alert">
                   <p className="text-destructive">{error}</p>
-                  <Button size="sm" variant="secondary" onClick={onRetry}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => void refreshMyRequests()}
+                  >
                     Try again
                   </Button>
                 </div>
@@ -100,7 +103,10 @@ function RequestsTable({
             </TableRow>
           ) : requests.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={COLUMN_COUNT} className={MESSAGE_CELL_CLASS_NAME}>
+              <TableCell
+                colSpan={COLUMN_COUNT}
+                className={MESSAGE_CELL_CLASS_NAME}
+              >
                 No requests match your search or filter.
               </TableCell>
             </TableRow>
@@ -146,8 +152,10 @@ function RequestsTable({
                   <TableCell className="px-6 py-4 text-right">
                     <RequestActionButton
                       request={request}
-                      onTrackTimeline={onTrackTimeline}
-                      onClaimSlip={onClaimSlip}
+                      onTrackTimeline={(id) =>
+                        navigate(`/requests/${id}/timeline`)
+                      }
+                      onClaimSlip={(id) => navigate(`/requests/${id}/timeline`)}
                     />
                   </TableCell>
                 </TableRow>
@@ -159,9 +167,12 @@ function RequestsTable({
 
       <div className="flex flex-col gap-3 bg-muted/60 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {requests.length} of {totalCount} requests
+          Showing {requests.length} of {filteredRequests.length} requests
         </p>
-        <nav aria-label="Requests pagination" className="flex items-center gap-3">
+        <nav
+          aria-label="Requests pagination"
+          className="flex items-center gap-3"
+        >
           <Button
             variant="ghost"
             size="icon"

@@ -8,20 +8,11 @@ import {
   type RequestFilter,
 } from "@/lib/request";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 function RequestsSection() {
-  const {
-    requests,
-    filteredRequests,
-    statusFilter,
-    setStatusFilter,
-    loading,
-    error,
-    refreshMyRequests,
-  } = useMyRequest();
+  const { requests, filteredRequests, statusFilter, setStatusFilter } =
+    useMyRequest();
 
-  const navigate = useNavigate();
   const [page, setPage] = useState(1);
 
   // Counts ignore the search box so the tabs always show the full picture
@@ -88,15 +79,8 @@ function RequestsSection() {
 
       <RequestsTable
         requests={pageRequests}
-        totalCount={filteredRequests.length}
         page={page}
-        pageCount={pageCount}
         onPageChange={setPage}
-        onTrackTimeline={(id) => navigate(`/requests/${id}/timeline`)}
-        onClaimSlip={(id) => navigate(`/requests/${id}/timeline`)}
-        loading={loading}
-        error={error}
-        onRetry={() => void refreshMyRequests()}
       />
     </section>
   );
