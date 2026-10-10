@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import HomeDocumentCard from "@/components/home/SmallDocumentCard";
+import SmallDocumentCard from "@/components/home/SmallDocumentCard";
 import { cn } from "@/lib/utils";
 import type { DocumentTypeItem } from "@/lib/document";
 
@@ -50,7 +50,7 @@ function AvailableDocuments({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {documents.map((document) => (
-            <HomeDocumentCard
+            <SmallDocumentCard
               key={document.id}
               document={document}
               onApply={onApply}

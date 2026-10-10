@@ -12,7 +12,7 @@ import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/request";
 import RequestDetailDialog from "@/components/dashboard_page/RequestDetailDialog";
 import type { RequestRow } from "@/context/DashboardContext";
 

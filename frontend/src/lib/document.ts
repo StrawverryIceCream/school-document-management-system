@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-
-export type DocumentTone = "rose" | "slate" | "orange" | "sky";
+import type { IconTone } from "./icon-tones";
 
 export type DocumentTypeItem = {
   id: string;
@@ -12,5 +11,5 @@ export type DocumentTypeItem = {
   // Express documents get a lightning icon instead of a clock
   isExpress: boolean;
   icon: LucideIcon;
-  tone: DocumentTone;
+  tone: IconTone;
 };

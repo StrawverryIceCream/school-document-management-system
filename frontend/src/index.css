@@ -9,7 +9,7 @@
 
 :root {
   --header-height: 3.5rem;
-  --background: ##fdfbf7;
+  --background: #fdfbf7;
   --foreground: #1c1c18;
   --card: #ffffff;
   --card-foreground: #1c1c18;
@@ -85,7 +85,7 @@
   --accent-foreground: #ffcdcc;
   --destructive: #ffb4ab;
   --destructive-foreground: #690005;
-  --border: #2D2A30;
+  --border: #2d2a30;
   --input: #594141;
   --ring: #ffb3b3;
   --chart-1: #b32638;

@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProfileDetail from "@/components/profile/ProfileDetail";
+import { cn } from "@/lib/utils";
 import {
-  cn,
   getContactNumber,
   getInitials,
   getTupIdLabel,
   ROLE_META,
-} from "@/lib/utils";
+} from "@/lib/profile";
 import type { AuthUser } from "@/types";
 
 type ProfileCardProps = React.ComponentProps<"div"> & {

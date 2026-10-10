@@ -4,19 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type {
-  DocumentTone,
-  DocumentTypeItem,
-} from "@/lib/document";
+import type { DocumentTypeItem } from "@/lib/document";
+import { ICON_BOX_BASE, ICON_TONES } from "@/lib/icon-tones";
 
-const TONE_STYLES: Record<DocumentTone, string> = {
-  rose: "bg-rose-100 text-rose-800",
-  slate: "bg-slate-200 text-slate-700",
-  orange: "bg-orange-100 text-orange-700",
-  sky: "bg-sky-100 text-sky-700",
-};
 
-type HomeDocumentCardProps = Omit<
+
+type SmallDocumentCardProps = Omit<
   React.ComponentProps<typeof Card>,
   "children"
 > & {
@@ -24,12 +17,11 @@ type HomeDocumentCardProps = Omit<
   onApply: (documentId: string) => void;
 };
 
-function HomeDocumentCard({
+function SmallDocumentCard({
   className,
   document,
   onApply,
-  ...props
-}: HomeDocumentCardProps) {
+}: SmallDocumentCardProps) {
   const {
     id,
     title,
@@ -43,17 +35,9 @@ function HomeDocumentCard({
   const TurnaroundIcon = isExpress ? Zap : Clock;
 
   return (
-    <Card
-      className={cn("gap-4 rounded-2xl border-0 p-5 shadow-sm", className)}
-      {...props}
-    >
+    <Card className={cn("gap-4 rounded-2xl border-0 p-5 shadow-sm", className)}>
       <div className="flex items-start justify-between gap-3">
-        <div
-          className={cn(
-            "flex size-14 shrink-0 items-center justify-center rounded-xl",
-            TONE_STYLES[tone],
-          )}
-        >
+        <div className={cn(ICON_BOX_BASE, "size-14 ", ICON_TONES[tone])}>
           <Icon className="size-6" aria-hidden="true" />
         </div>
         <Badge
@@ -91,4 +75,4 @@ function HomeDocumentCard({
   );
 }
 
-export default HomeDocumentCard;
+export default SmallDocumentCard;

@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import Profile from "../profile/Profile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/profile";
 
 function NavUser() {
   const navigate = useNavigate();

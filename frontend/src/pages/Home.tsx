@@ -31,7 +31,7 @@ const FEATURED_DOCUMENTS: DocumentTypeItem[] = [
     turnaround: "1–2 working days",
     isExpress: true,
     icon: BadgeCheck,
-    tone: "slate",
+    tone: "stone",
   },
   {
     id: "tcg",

@@ -1,6 +1,6 @@
 import { Field, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
-import { formatStudentId } from "@/lib/utils";
+import { formatStudentId } from "@/lib/auth";
 
 function StudentIdField({
   studentId,

@@ -18,7 +18,7 @@ import {
   getInitials,
   getTupIdLabel,
   ROLE_META,
-} from "@/lib/utils";
+} from "@/lib/profile";
 
 function Profile() {
   const { user } = useAuth();

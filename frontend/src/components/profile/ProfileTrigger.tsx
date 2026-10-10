@@ -3,7 +3,7 @@ import ProfileCard from "@/components/profile/Profilecard";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { PROFILE_VIEWER_ROLES } from "@/lib/utils";
+import { PROFILE_VIEWER_ROLES } from "@/lib/profile";
 
 type ProfileTriggerProps = {
   userId: string;

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/request";
 import type { RequestRow } from "@/context/DashboardContext";
 
 interface RequestDetailDialogProps {

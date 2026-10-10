@@ -9,7 +9,6 @@ export default function Notifications() {
     unreadCount,
     loading,
     error,
-    usingMockData,
     refreshNotifications,
     markAllAsRead,
   } = useNotifications();
@@ -26,9 +25,6 @@ export default function Notifications() {
               {unreadCount > 0
                 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`
                 : "You're all caught up"}
-              {usingMockData && (
-                <span className="ml-2 text-xs">· Sample notifications</span>
-              )}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -45,7 +41,7 @@ export default function Notifications() {
           )}
         </header>
 
-        {error && !usingMockData && (
+        {error && (
           <p role="status" className="text-sm text-destructive">
             {error}
           </p>
@@ -56,7 +52,7 @@ export default function Notifications() {
             <p className="px-3 py-10 text-center text-sm text-muted-foreground">
               Loading notifications...
             </p>
-          ) : error && !usingMockData && notifications.length === 0 ? (
+          ) : error && notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-3 px-3 py-10 text-center">
               <p className="text-sm text-muted-foreground">
                 Notifications could not be loaded.

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
-import { getDateKey } from "@/lib/utils";
+import { getDateKey } from "@/lib/dashboard";
 import type { RequestRow } from "@/context/DashboardContext";   
 
 const chartConfig = {
@@ -144,7 +144,9 @@ function RequestsStatusChart() {
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                      typeof value === "string" || typeof value === "number"
+                        ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                        : ""
                     }
                     indicator="dot"
                   />

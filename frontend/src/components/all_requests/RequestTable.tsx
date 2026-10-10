@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
 import { useRequests } from "@/hooks/useRequests";
 import type { RequestRow } from "@/context/DashboardContext";
-import { statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/request";
 
 function RequestTable() {
   const { filteredRows: rows, requests, error } = useRequests();
