@@ -1,8 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import HomeDocumentCard from "@/components/home/HomeDocumentCard";
+import HomeDocumentCard from "@/components/home/SmallDocumentCard";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
+import type { DocumentTypeItem } from "@/lib/document";
+
 type DocumentTypesSectionProps = Omit<
   React.ComponentProps<"section">,
   "children"
@@ -13,22 +14,7 @@ type DocumentTypesSectionProps = Omit<
   onApply: (documentId: string) => void;
 };
 
-export type DocumentTone = "rose" | "slate" | "orange" | "sky";
-
-export type DocumentTypeItem = {
-  id: string;
-  title: string;
-  description: string;
-  // Peso amount; formatted at render time so the API stays currency-agnostic
-  price: number;
-  turnaround: string;
-  // Express documents get a lightning icon instead of a clock
-  isExpress: boolean;
-  icon: LucideIcon;
-  tone: DocumentTone;
-};
-
-function DocumentTypesSection({
+function AvailableDocuments({
   className,
   documents,
   totalCount,
@@ -76,4 +62,4 @@ function DocumentTypesSection({
   );
 }
 
-export default DocumentTypesSection;
+export default AvailableDocuments;

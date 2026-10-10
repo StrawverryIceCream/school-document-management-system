@@ -1,5 +1,12 @@
-import { Banknote, Check, ListChecks, type LucideIcon } from "lucide-react";
-import type { FilingType, RequestFilter, RequestStatus } from "@/types/request";
+import {
+  Ban,
+  Check,
+  Clock,
+  ListChecks,
+  PackageCheck,
+  type LucideIcon,
+} from "lucide-react";
+import type { RequestStatus } from "@/types";
 
 type RequestStatusConfig = {
   label: string;
@@ -8,41 +15,67 @@ type RequestStatusConfig = {
   dotClassName: string;
 };
 
+export const REQUESTS_PAGE_SIZE = 5;
+
 export const REQUEST_STATUS_CONFIG: Record<RequestStatus, RequestStatusConfig> = {
-  in_review: {
-    label: "In Review",
+  pending: {
+    label: "Pending",
+    icon: Clock,
+    badgeClassName: "bg-sky-100 text-sky-900",
+    dotClassName: "bg-sky-600",
+  },
+  processing: {
+    label: "Processing",
     icon: ListChecks,
     badgeClassName: "bg-amber-100 text-amber-900",
     dotClassName: "bg-amber-700",
   },
-  ready_for_pickup: {
+  ready: {
     label: "Ready for Pickup",
     icon: Check,
     badgeClassName: "bg-emerald-100 text-emerald-900",
     dotClassName: "bg-emerald-600",
   },
-  awaiting_payment: {
-    label: "Awaiting Payment",
-    icon: Banknote,
-    badgeClassName: "bg-sky-100 text-sky-900",
-    dotClassName: "bg-sky-600",
+  claimed: {
+    label: "Claimed",
+    icon: PackageCheck,
+    badgeClassName: "bg-stone-200 text-stone-800",
+    dotClassName: "bg-stone-500",
+  },
+  cancelled: {
+    label: "Cancelled",
+    icon: Ban,
+    badgeClassName: "bg-red-100 text-red-900",
+    dotClassName: "bg-red-600",
   },
 };
 
-export const FILING_TYPE_LABELS: Record<FilingType, string> = {
-  standard: "Standard Filing",
-  express: "Express Priority",
-};
-
-export const REQUEST_FILTERS: RequestFilter[] = ["all", "in_progress", "ready_to_claim"];
+// Remove entries here to hide a tab; "all" still lists every request
+export const REQUEST_FILTERS: RequestFilter[] = [
+  "all",
+  "pending",
+  "processing",
+  "ready",
+  "claimed",
+  "cancelled",
+];
 
 export const REQUEST_FILTER_LABELS: Record<RequestFilter, string> = {
   all: "All",
-  in_progress: "In Progress",
-  ready_to_claim: "Ready to Claim",
+  pending: "Pending",
+  processing: "Processing",
+  ready: "Ready to Claim",
+  claimed: "Claimed",
+  cancelled: "Cancelled",
 };
+
+export const NO_PURPOSE_LABEL = "No purpose provided";
 
 // Radix Tabs hands back a plain string, so narrow it before it reaches state
 export function isRequestFilter(value: string): value is RequestFilter {
   return REQUEST_FILTERS.some((filter) => filter === value);
 }
+ 
+// Mirrors the provider's statusFilter so the tabs can drive it directly
+export type RequestFilter = "all" | RequestStatus;
+ 

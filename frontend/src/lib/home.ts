@@ -7,3 +7,4 @@ export function getGreeting(date: Date = new Date()): string {
   if (hour < EVENING_HOUR) return "Good afternoon";
   return "Good evening";
 }
+

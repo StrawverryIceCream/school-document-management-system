@@ -1,11 +1,13 @@
 import DashboardHero from "@/components/dashboard/DashboardHero";
-import type { DocumentTypeItem } from "@/components/home/HomeNewRequest";
-import DocumentTypesSection from "@/components/home/HomeNewRequest";
+
+import AvailableDocuments from "@/components/home/AvailableDocuments";
 import MyRequestCards from "@/components/my_request/MyRequestCards";
+import RequestsSection from "@/components/my_request/RequestSection";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchShortcut } from "@/hooks/useSearchShortcut";
-import { getGreeting } from "@/lib/home.";
+import type { DocumentTypeItem } from "@/lib/document";
+import { getGreeting } from "@/lib/home";
 import { BadgeCheck, Award, FileText, Star } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -81,7 +83,7 @@ function Home() {
           onSearchSubmit={handleSearchSubmit}
           searchInputRef={searchInputRef}
         />
-        <DocumentTypesSection
+        <AvailableDocuments
           documents={FEATURED_DOCUMENTS}
           totalCount={8}
           exploreHref="/documents"
@@ -91,6 +93,7 @@ function Home() {
         />
 
         <MyRequestCards />
+        <RequestsSection />
       </div>
     </div>
   );

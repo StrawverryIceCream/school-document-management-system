@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type {
   DocumentTone,
   DocumentTypeItem,
-} from "@/components/home/HomeNewRequest";
+} from "@/lib/document";
 
 const TONE_STYLES: Record<DocumentTone, string> = {
   rose: "bg-rose-100 text-rose-800",
