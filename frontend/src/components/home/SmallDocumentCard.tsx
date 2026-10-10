@@ -68,7 +68,7 @@ function SmallDocumentCard({ document, onApply }: SmallDocumentCardProps) {
           size="lg"
           onClick={() => onApply(id)}
           aria-label={`Apply for ${title}`}
-          className="text-base"
+          className="ml-auto text-base"
         >
           Apply
           <ArrowUpRight className="size-3.5" aria-hidden="true" />

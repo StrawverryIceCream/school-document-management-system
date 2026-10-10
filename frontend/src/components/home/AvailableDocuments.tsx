@@ -14,7 +14,7 @@ function AvailableDocuments({
   onApply,
 }: DocumentTypesSectionProps) {
   const { documents, totalCount, loading, error } = useDocuments();
-  const documentItems = documents.map((document) =>
+  const documentItems = documents.slice(0, 4).map((document) =>
     initializeDocumentTypeItem({
       id: String(document.id),
       title: document.name,
