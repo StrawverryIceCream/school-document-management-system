@@ -16,7 +16,7 @@ type DashboardHeroProps = Omit<React.ComponentProps<"section">, "children"> & {
   searchInputRef?: React.Ref<HTMLInputElement>;
 };
 
-function HomeHero({
+function DashboardHero({
   className,
   greeting,
   userName,
@@ -90,4 +90,4 @@ function HomeHero({
   );
 }
 
-export default HomeHero;
+export default DashboardHero;

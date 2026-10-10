@@ -1,6 +1,7 @@
-import HomeHero from "@/components/home/HomeHero";
+import DashboardHero from "@/components/dashboard/DashboardHero";
 import type { DocumentTypeItem } from "@/components/home/HomeNewRequest";
 import DocumentTypesSection from "@/components/home/HomeNewRequest";
+import MyRequestCards from "@/components/my_request/MyRequestCards";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchShortcut } from "@/hooks/useSearchShortcut";
@@ -70,7 +71,7 @@ function Home() {
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
       <div className="mx-auto h-full flex flex-col gap-8">
-        <HomeHero
+        <DashboardHero
           greeting={getGreeting()}
           userName={user?.fullName ?? ""}
           portalLabel="Administrative Records and Coordination Hub"
@@ -88,6 +89,8 @@ function Home() {
             navigate(`/requests/new?document=${documentId}`)
           }
         />
+
+        <MyRequestCards />
       </div>
     </div>
   );
