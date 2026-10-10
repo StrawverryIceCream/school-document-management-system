@@ -1,4 +1,3 @@
-
 import { useMyRequest } from "@/hooks/useMyRequest";
 import { Layers3, Clock3, CheckCircle2 } from "lucide-react";
 import StatCard from "../dashboard/StatCard";
@@ -15,14 +14,14 @@ function MyRequestCards() {
   return (
     <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {summaryCards.map(({ label, value, icon: Icon }) => (
-                  <StatCard
-            label={label}
-            value={value}
-            caption="Claim Slip validated & stamped"
-            icon={Icon}
-            tone="emerald"
-            tag={{ label: "Claim Window 3", tone: "emerald" }}
-          />
+        <StatCard
+          label={label}
+          value={value}
+          caption="Claim Slip validated & stamped"
+          icon={Icon}
+          tone="emerald"
+          tag={{ label: "Claim Window 3", tone: "emerald" }}
+        />
       ))}
     </div>
   );

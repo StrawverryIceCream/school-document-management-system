@@ -1,8 +1,9 @@
-import { Command, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Card } from "../ui/card";
+import { Kbd } from "../ui/kbd";
 
 type DashboardHeroProps = Omit<React.ComponentProps<"section">, "children"> & {
   greeting: string;
@@ -84,12 +85,9 @@ function DashboardHero({
               aria-label="Search documents and requests"
               className="h-12 rounded-xl border-0 bg-card pl-11 pr-20 shadow-sm "
             />
-            <kbd
-              className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground sm:flex"
-              aria-hidden="true"
-            >
-              <Command className="size-3" />K
-            </kbd>
+            <Kbd className="absolute right-3 top-1/2 -translate-y-1/2">
+              ⌘ + K
+            </Kbd>
           </div>
         </form>
       </section>

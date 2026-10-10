@@ -138,7 +138,7 @@ function RequestsTable({ requests, page, onPageChange }: RequestsTableProps) {
                   </TableCell>
                   <TableCell className="py-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-foreground">
+                     <span className="text-base font-semibold text-foreground">
                         {formatFilingDate(request.createdAt)}
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground">

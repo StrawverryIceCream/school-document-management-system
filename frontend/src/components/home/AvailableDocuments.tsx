@@ -1,29 +1,30 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
-import { cn } from "@/lib/utils";
-import type { DocumentTypeItem } from "@/lib/document";
+import { useDocuments } from "@/hooks/useDocuments";
+import { initializeDocumentTypeItem } from "@/lib/document";
 
-type DocumentTypesSectionProps = Omit<
-  React.ComponentProps<"section">,
-  "children"
-> & {
-  documents: DocumentTypeItem[];
-  totalCount: number;
+type DocumentTypesSectionProps = {
   exploreHref: string;
   onApply: (documentId: string) => void;
 };
 
 function AvailableDocuments({
-  className,
-  documents,
-  totalCount,
   exploreHref,
   onApply,
-  ...props
 }: DocumentTypesSectionProps) {
+  const { documents, totalCount, loading, error } = useDocuments();
+  const documentItems = documents.map((document) =>
+    initializeDocumentTypeItem({
+      id: String(document.id),
+      title: document.name,
+      description: document.description ?? "",
+      price: Number(document.fee),
+    }),
+  );
+
   return (
-    <section className={cn("flex flex-col gap-5", className)} {...props}>
+    <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
@@ -43,13 +44,27 @@ function AvailableDocuments({
         </Link>
       </div>
 
-      {documents.length === 0 ? (
+      {error ? (
+        <p
+          role="alert"
+          className="rounded-2xl bg-muted p-6 text-sm text-destructive"
+        >
+          Could not load available documents: {error}
+        </p>
+      ) : loading ? (
+        <p
+          role="status"
+          className="rounded-2xl bg-muted p-6 text-sm text-muted-foreground"
+        >
+          Loading available documents...
+        </p>
+      ) : documents.length === 0 ? (
         <p className="rounded-2xl bg-muted p-6 text-sm text-muted-foreground">
           No documents are available to request right now.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {documents.map((document) => (
+          {documentItems.map((document) => (
             <SmallDocumentCard
               key={document.id}
               document={document}

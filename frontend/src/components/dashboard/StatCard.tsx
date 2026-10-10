@@ -2,20 +2,16 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import {
-  ICON_BOX_STYLES,
-  TAG_BADGE_STYLES,
-  VALUE_STYLES,
-  type StatTag,
-  type StatTone,
-} from "@/lib/statcard";
+
+import { BADGE_BASE, TONES, VALUE_BASE, type Tone } from "@/lib/tones";
+import type { StatTag } from "@/lib/statcard";
 
 type StatCardProps = Omit<React.ComponentProps<typeof Card>, "children"> & {
   label: string;
   value: number | string;
   caption: string;
   icon: LucideIcon;
-  tone?: StatTone;
+  tone?: Tone;
   tag?: StatTag;
 };
 
@@ -25,9 +21,8 @@ function StatCard({
   value,
   caption,
   icon: Icon,
-  tone = "neutral",
+  tone = "brand",
   tag,
-  ...props
 }: StatCardProps) {
   const TagIcon = tag?.icon;
 
@@ -37,19 +32,13 @@ function StatCard({
         "flex-row items-start justify-between gap-4 rounded-2xl border-0 px-6 py-5 shadow-sm",
         className,
       )}
-      {...props}
     >
       <div className="flex flex-col gap-1.5">
         <span className="text-base font-medium uppercase tracking-wide text-muted-foreground font-mono">
           {label}
         </span>
         <div className="flex items-center gap-2.5">
-          <span
-            className={cn(
-              "text-5xl font-bold leading-none tracking-tight ",
-              VALUE_STYLES[tone],
-            )}
-          >
+          <span className={cn(VALUE_BASE, "text-5xl", TONES[tone].value)}>
             {value}
           </span>
           {tag &&
@@ -62,8 +51,9 @@ function StatCard({
               <Badge
                 variant="secondary"
                 className={cn(
-                  "gap-1 rounded-md px-2 py-0.5 text-xs font-semibold",
-                  TAG_BADGE_STYLES[tag.tone],
+                  BADGE_BASE,
+                  " text-base font-medium",
+                  TONES[tag.tone].badge,
                 )}
               >
                 {TagIcon && <TagIcon className="size-3.5" aria-hidden="true" />}
@@ -77,7 +67,7 @@ function StatCard({
       <div
         className={cn(
           "flex size-14 shrink-0 items-center justify-center rounded-xl",
-          ICON_BOX_STYLES[tone],
+          TONES[tone].icon,
         )}
       >
         <Icon className="size-6" aria-hidden="true" />

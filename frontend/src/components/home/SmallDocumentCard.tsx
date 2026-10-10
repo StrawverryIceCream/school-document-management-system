@@ -3,25 +3,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatPeso } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import type { DocumentTypeItem } from "@/lib/document";
-import { ICON_BOX_BASE, ICON_TONES } from "@/lib/icon-tones";
+import { CARD_HOVER_LIFT, cn } from "@/lib/utils";
+import {
+  initializeDocumentTypeItem,
+  type DocumentTypeItem,
+} from "@/lib/document";
+import { ICON_BOX_BASE, TONES } from "@/lib/tones";
 
-
-
-type SmallDocumentCardProps = Omit<
-  React.ComponentProps<typeof Card>,
-  "children"
-> & {
+type SmallDocumentCardProps = {
   document: DocumentTypeItem;
   onApply: (documentId: string) => void;
 };
 
-function SmallDocumentCard({
-  className,
-  document,
-  onApply,
-}: SmallDocumentCardProps) {
+function SmallDocumentCard({ document, onApply }: SmallDocumentCardProps) {
+  const initializedDocument = initializeDocumentTypeItem(document);
   const {
     id,
     title,
@@ -31,13 +26,18 @@ function SmallDocumentCard({
     isExpress,
     icon: Icon,
     tone,
-  } = document;
+  } = initializedDocument;
   const TurnaroundIcon = isExpress ? Zap : Clock;
 
   return (
-    <Card className={cn("gap-4 rounded-2xl border-0 p-5 shadow-sm", className)}>
+    <Card
+      className={cn(
+        "gap-4 rounded-2xl border-0 p-5 shadow-sm",
+        CARD_HOVER_LIFT,
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
-        <div className={cn(ICON_BOX_BASE, "size-14 ", ICON_TONES[tone])}>
+        <div className={cn(ICON_BOX_BASE, "size-14 ", TONES[tone].icon)}>
           <Icon className="size-6" aria-hidden="true" />
         </div>
         <Badge
@@ -58,14 +58,17 @@ function SmallDocumentCard({
       </div>
 
       <div className="mt-auto flex items-center justify-between gap-3 pt-4">
-        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-          <TurnaroundIcon className="size-4 shrink-0" aria-hidden="true" />
-          <span className="max-w-24">{turnaround}</span>
-        </span>
+        {turnaround && (
+          <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <TurnaroundIcon className="size-4 shrink-0" aria-hidden="true" />
+            <span className="max-w-24">{turnaround}</span>
+          </span>
+        )}
         <Button
-          size="default"
+          size="lg"
           onClick={() => onApply(id)}
           aria-label={`Apply for ${title}`}
+          className="text-base"
         >
           Apply
           <ArrowUpRight className="size-3.5" aria-hidden="true" />

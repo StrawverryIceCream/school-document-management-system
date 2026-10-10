@@ -1,15 +1,36 @@
 import type { LucideIcon } from "lucide-react";
-import type { IconTone } from "./icon-tones";
+import { FileText } from "lucide-react";
+import type { Tone } from "./tones";
 
-export type DocumentTypeItem = {
+export interface DocumentTypeItem {
   id: string;
   title: string;
   description: string;
-  // Peso amount; formatted at render time so the API stays currency-agnostic
   price: number;
-  turnaround: string;
-  // Express documents get a lightning icon instead of a clock
-  isExpress: boolean;
+  turnaround?: string;
+  isExpress?: boolean;
+  icon?: LucideIcon;
+  tone?: Tone;
+}
+
+export type InitializedDocumentTypeItem = Omit<
+  DocumentTypeItem,
+  "icon" | "tone"
+> & {
   icon: LucideIcon;
-  tone: IconTone;
+  tone: Tone;
 };
+
+type DocumentTypeItemInput = Omit<DocumentTypeItem, "icon" | "tone"> &
+  Partial<Pick<DocumentTypeItem, "icon" | "tone">>;
+
+export function initializeDocumentTypeItem(
+  document: DocumentTypeItemInput,
+): InitializedDocumentTypeItem {
+  return {
+    ...document,
+    isExpress: document.isExpress ?? false,
+    icon: document.icon ?? FileText,
+    tone: document.tone ?? "neutral",
+  };
+}
