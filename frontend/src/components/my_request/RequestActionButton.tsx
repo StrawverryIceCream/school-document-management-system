@@ -16,7 +16,7 @@ function RequestActionButton({
   if (request.status === "ready") {
     return (
       <Button
-        size="sm"
+        size="lg"
         className="bg-teal-900 text-white hover:bg-teal-900/90"
         onClick={() => onClaimSlip(request.id)}
         aria-label={`Download claim slip for ${request.documentName}`}
@@ -29,10 +29,11 @@ function RequestActionButton({
 
   return (
     <Button
-      size="sm"
-      variant="secondary"
+      size="lg"
+      variant="default"
       onClick={() => onTrackTimeline(request.id)}
       aria-label={`Track timeline for ${request.documentName}`}
+      className="text-base"
     >
       Track Timeline
       <TrendingUp className="size-4" aria-hidden="true" />

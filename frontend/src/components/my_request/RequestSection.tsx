@@ -15,7 +15,6 @@ function RequestsSection() {
 
   const [page, setPage] = useState(1);
 
-  // Counts ignore the search box so the tabs always show the full picture
   const filterCounts = useMemo(() => {
     const counts: Record<RequestFilter, number> = {
       all: requests.length,
@@ -33,7 +32,7 @@ function RequestsSection() {
     1,
     Math.ceil(filteredRequests.length / REQUESTS_PAGE_SIZE),
   );
-  // Search can shrink the result set while the user sits on a later page
+
   const currentPage = Math.min(page, pageCount);
   const pageRequests = filteredRequests.slice(
     (currentPage - 1) * REQUESTS_PAGE_SIZE,
@@ -49,7 +48,7 @@ function RequestsSection() {
     <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
             Your Requests
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -60,7 +59,7 @@ function RequestsSection() {
 
         <Tabs
           value={statusFilter}
-          onValueChange={() => handleFilterChange}
+          onValueChange={(value) => handleFilterChange(value as RequestFilter)}
           className="max-w-full overflow-x-auto"
         >
           <TabsList className="h-auto justify-start rounded-full bg-muted p-1">

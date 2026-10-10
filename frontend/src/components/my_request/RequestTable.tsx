@@ -28,7 +28,7 @@ import { useMyRequest } from "@/hooks/useMyRequest";
 const COLUMN_COUNT = 5;
 
 const HEAD_CLASS_NAME =
-  "h-12 text-xl font-semibold uppercase tracking-wide text-muted-foreground";
+  "h-12 text-base font-semibold uppercase text-mono tracking-wide text-muted-foreground";
 
 const MESSAGE_CELL_CLASS_NAME =
   "px-6 py-10 text-center text-base text-muted-foreground";
@@ -121,14 +121,14 @@ function RequestsTable({ requests, page, onPageChange }: RequestsTableProps) {
                       <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <StatusIcon className="size-4" aria-hidden="true" />
                       </div>
-                      <span className="font-mono text-xs font-semibold text-foreground">
+                      <span className="font-mono text-sm font-semibold text-foreground">
                         {formatRequestReference(request.id)}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="py-4">
                     <div className="flex flex-col">
-                      <span className="text-base font-semibold text-foreground">
+                      <span className="text-lg font-semibold text-foreground">
                         {request.documentName}
                       </span>
                       <span className="text-sm text-muted-foreground">

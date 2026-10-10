@@ -14,7 +14,7 @@ function RequestStatusBadge({ className, status, ...props }: RequestStatusBadgeP
     <Badge
       variant="secondary"
       className={cn(
-        "gap-2 rounded-full px-3 py-1 text-xs font-semibold",
+        "gap-2 rounded-full px-3 py-1 text-base font-semibold",
         badgeClassName,
         className,
       )}
