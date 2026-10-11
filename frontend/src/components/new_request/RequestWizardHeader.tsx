@@ -36,7 +36,7 @@ export default function RequestWizardHeader() {
               </span>
             )}
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-4xl">
             Request an Official Document
           </h1>
           <p className="text-lg text-muted-foreground">
