@@ -17,7 +17,7 @@ function NavSecondary({
     title: string;
     url: string;
     icon: LucideIcon;
-  }[]
+  }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
@@ -25,7 +25,7 @@ function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton className="text-base font-medium"  asChild>
                 <NavLink to={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
