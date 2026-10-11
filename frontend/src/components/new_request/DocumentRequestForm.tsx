@@ -1,5 +1,5 @@
 // components/documents/DocumentRequestForm.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DocumentType, RequiredFieldValues } from "@/types";
+import RequestWizardHeader from "./RequestWizardHeader";
+import { useRequestWizard } from "@/hooks/useRequestWizard";
 
 type DocumentRequestFormProps = {
   document: DocumentType;
@@ -41,9 +43,17 @@ function DocumentRequestForm({ document, onSubmit }: DocumentRequestFormProps) {
     }
   }
 
+  const { setCurrentStep } = useRequestWizard();
+
+  useEffect(() => {
+    setCurrentStep("details");
+  }, [setCurrentStep]);
+
   return (
     <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="mx-auto h-full flex flex-col max-w-2xl">
+      <div className="mx-auto h-full flex flex-col">
+        <RequestWizardHeader />
+
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-normal">

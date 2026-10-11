@@ -124,3 +124,21 @@ export function normalizeRequestRow(
       : undefined,
   };
 }
+
+
+export type RequestWizardStep = "select" | "details" | "payment";
+ 
+type RequestWizardStepConfig = {
+  key: RequestWizardStep;
+  label: string;
+};
+ 
+export const INITIAL_REQUEST_WIZARD_STEP: RequestWizardStep = "select";
+ 
+export const PROGRESS_MAX_PERCENT = 100;
+ 
+export const REQUEST_WIZARD_STEPS: RequestWizardStepConfig[] = [
+  { key: "select", label: "Select Document" },
+  { key: "details", label: "Fill Required Details" },
+  { key: "payment", label: "Payment & Verification" },
+];
