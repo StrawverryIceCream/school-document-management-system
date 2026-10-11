@@ -137,7 +137,7 @@ function AppSidebar() {
                 className="h-12 gap-3 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center! group-data-[collapsible=icon]:p-0! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <div className="flex aspect-square size-11 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:size-7">
-                  <Notebook className="size-6 group-data-[collapsible=icon]:size-4" />
+                  <Notebook className="size-8 group-data-[collapsible=icon]:size-4" />
                 </div>
                 <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate text-2xl font-bold">ARCH</span>

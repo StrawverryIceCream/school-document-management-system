@@ -1,7 +1,7 @@
 import MyRequestCards from "@/components/my_request/MyRequestCards";
 import MyRequestFilters from "@/components/my_request/MyRequestFilters";
 import MyRequestHeader from "@/components/my_request/MyRequestHeader";
-import RequestsSection from "@/components/my_request/RequestSection";
+import MyRequestList from "@/components/my_request/MyRequestList";
 
 function MyRequest() {
   return (
@@ -10,8 +10,7 @@ function MyRequest() {
         <MyRequestHeader />
         <MyRequestCards />
         <MyRequestFilters />
-
-        <RequestsSection />
+        <MyRequestList />
       </div>
     </div>
   );
