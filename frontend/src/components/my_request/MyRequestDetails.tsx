@@ -26,7 +26,7 @@ const getStatusBadgeClasses = (status: DocumentRequest["status"]) => {
   }
 };
 
-const documentNames: Record<number, string> = {
+const documentNames: Record<string, string> = {
   1: "Transcript of Records",
   2: "Certificate of Registration",
   3: "True Copy of Grades",
@@ -41,7 +41,8 @@ function MyRequestDetails({
   onOpen?: () => void;
 }) {
   const documentName =
-    documentNames[request.documentTypeId] ?? `Document #${request.documentTypeId}`;
+    documentNames[request.documentTypeId] ??
+    `Document #${request.documentTypeId}`;
 
   const formatDate = (value: Date | string | null) => {
     if (!value) return "—";

@@ -1,4 +1,4 @@
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import EditDocumentRow from "./EditDocumentRow";
 import EditDocument from "./EditDocument";
 
 function DocumentTable() {
-  const { documents, loading, error } = useDocuments();
+  const { documents, loading, error } = useDocument();
   const [editingDocument, setEditingDocument] = useState<number | null>(null);
 
   function setEdit(isEditing: boolean, documentId: number) {

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useLogs } from "@/hooks/useLogs";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/logs";
 import { Activity, Clock, Users } from "lucide-react";
 
 function LogsOverview() {

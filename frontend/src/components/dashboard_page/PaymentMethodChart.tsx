@@ -16,7 +16,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
-import { getMonthKey, monthLabel } from "@/lib/utils";
+import { getMonthKey, monthLabel } from "@/lib/dashboard";
 import type { RequestRow } from "@/context/DashboardContext"; 
 
 const chartConfig = {

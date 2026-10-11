@@ -4,7 +4,7 @@ import { TableCell } from "../ui/table";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { updateDocument } from "@/api/documents";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 
 function EditDocumentRow({
@@ -14,7 +14,7 @@ function EditDocumentRow({
   document: DocumentType;
   setEdit: (isEditing: boolean, documentId: number) => void;
 }) {
-  const { refreshDocument } = useDocuments();
+  const { refreshDocument } = useDocument();
   const [code, setCode] = useState(document.code);
   const [name, setName] = useState(document.name);
   const [description, setDescription] = useState(document.description || "");

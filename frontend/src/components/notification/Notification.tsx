@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/useNotification";
 import { NotificationItems } from "./NotificationItem";
 
 function Notification() {

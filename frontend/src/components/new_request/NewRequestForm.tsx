@@ -5,25 +5,34 @@ import type { PaymentMethod } from "@/api/payments";
 import { createRequest } from "@/api/requests";
 import { createPayment, uploadPaymentProof } from "@/api/payments";
 import { useMyRequest } from "@/hooks/useMyRequest";
+import { useRequestWizard } from "@/hooks/useRequestWizard";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import CashPayment from "./CashPayment";
 import DocumentRequestForm from "./DocumentRequestForm";
 import OnlinePayment from "./OnlinePayment";
 import PaymentConfirmation from "./PaymentConfirmation";
 import PaymentRequired from "./PaymentRequired";
+import RequestWizardHeader from "./RequestWizardHeader";
 
 type PaymentStep = "form" | "method" | "cash" | "online" | "confirmation";
 
 function NewRequestForm() {
   const { id } = useParams<{ id?: string }>();
-  const { document, loading, error } = useDocument(id);
+  const { document, documentLoading, documentError } = useDocument(id);
   const { refreshMyRequests } = useMyRequest();
+  const { setCurrentStep } = useRequestWizard();
   const [step, setStep] = useState<PaymentStep>("form");
-  const [formData, setFormData] =
-    useState<Record<string, FormDataValue> | null>(null);
+  const [formData, setFormData] = useState<Record<
+    string,
+    FormDataValue
+  > | null>(null);
   const [receiptNumber, setReceiptNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentStep(step === "form" ? "details" : "payment");
+  }, [setCurrentStep, step]);
 
   async function handleSubmit(values: RequiredFieldValues) {
     if (!document) return;
@@ -77,12 +86,12 @@ function NewRequestForm() {
     return <p className="p-6 text-destructive">No document specified.</p>;
   }
 
-  if (loading) {
+  if (documentLoading) {
     return <p className="p-6 text-muted-foreground">Loading document...</p>;
   }
 
-  if (error) {
-    return <p className="p-6 text-destructive">{error}</p>;
+  if (documentError) {
+    return <p className="p-6 text-destructive">{documentError}</p>;
   }
 
   if (!document) {
@@ -99,38 +108,42 @@ function NewRequestForm() {
   }
 
   return (
-    <div className="min-h-full overflow-y-auto p-6 sm:p-10">
-      <div className="mx-auto max-w-2xl">
-        {step === "method" && (
-          <PaymentRequired
-            documentName={document.name}
-            feeLabel={feeLabel}
-            onCash={() => setStep("cash")}
-            onOnline={() => setStep("online")}
-          />
-        )}
-        {step === "cash" && (
-          <CashPayment
-            documentName={document.name}
-            feeLabel={feeLabel}
-            onSubmitProof={(proofFile) => submitPayment("cash", proofFile)}
-            onBack={() => setStep("method")}
-          />
-        )}
-        {step === "online" && (
-          <OnlinePayment
-            documentName={document.name}
-            feeLabel={feeLabel}
-            onConfirm={(method, proofFile) => submitPayment(method, proofFile)}
-            onBack={() => setStep("method")}
-          />
-        )}
-        {step === "confirmation" && (
-          <PaymentConfirmation
-            receiptNumber={receiptNumber}
-            amount={document.fee}
-          />
-        )}
+    <div className="h-full overflow-hidden p-6 sm:p-10">
+      <div className="mx-auto h-full flex flex-col">
+        <RequestWizardHeader />
+
+        <div className="mx-auto mt-8 w-full max-w-2xl">
+          {step === "method" && (
+            <PaymentRequired
+              documentName={document.name}
+              feeLabel={feeLabel}
+              onCash={() => setStep("cash")}
+              onOnline={() => setStep("online")}
+            />
+          )}
+          {step === "cash" && (
+            <CashPayment
+              documentName={document.name}
+              feeLabel={feeLabel}
+              onSubmitProof={(proofFile) => submitPayment("cash", proofFile)}
+              onBack={() => setStep("method")}
+            />
+          )}
+          {step === "online" && (
+            <OnlinePayment
+              documentName={document.name}
+              feeLabel={feeLabel}
+              onConfirm={(method, proofFile) => submitPayment(method, proofFile)}
+              onBack={() => setStep("method")}
+            />
+          )}
+          {step === "confirmation" && (
+            <PaymentConfirmation
+              receiptNumber={receiptNumber}
+              amount={document.fee}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

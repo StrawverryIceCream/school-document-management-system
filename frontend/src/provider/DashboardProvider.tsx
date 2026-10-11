@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { DashboardContext } from "@/context/DashboardContext";
 import type { DashboardStats, RequestRow } from "@/context/DashboardContext";
 import { getAllRequests } from "@/api/requests";
-import { normalizeRequestRow, buildStatsFromRequests } from "@/lib/utils";
+import { normalizeRequestRow } from "@/lib/request";
+import { buildStatsFromRequests } from "@/lib/dashboard";
 import type { RequestStatus } from "@/types";
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {

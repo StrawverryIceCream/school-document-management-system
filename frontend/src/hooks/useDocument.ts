@@ -1,7 +1,7 @@
-// hooks/useDocument.ts
-import { useState, useEffect, useCallback } from "react";
+import { DocumentContext } from "@/context/DocumentContext";
 import { getDocumentById } from "@/api/documents";
 import type { DocumentType } from "@/types";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 interface DocumentState {
   id: string | undefined;
@@ -9,7 +9,12 @@ interface DocumentState {
   error: string | null;
 }
 
-export function useDocument(id: string | undefined) {
+export function useDocument(id?: string) {
+  const context = useContext(DocumentContext);
+  if (!context) {
+    throw new Error("useDocument must be used within DocumentProvider");
+  }
+
   const [state, setState] = useState<DocumentState>({
     id: undefined,
     document: null,
@@ -38,7 +43,7 @@ export function useDocument(id: string | undefined) {
   );
 
   useEffect(() => {
-    if (!id) return; // nothing to fetch, nothing to setState
+    if (!id) return;
     const signal = { cancelled: false };
     fetchDocument(id, signal);
     return () => {
@@ -46,16 +51,20 @@ export function useDocument(id: string | undefined) {
     };
   }, [id, fetchDocument]);
 
-  // Derived, not reset via effect: stale data from a previous id
-  // is simply not shown, without any setState needed to "clear" it.
   const document = state.id === id ? state.document : null;
-  const error = state.id === id ? state.error : null;
-  const loading = id !== undefined && state.id !== id;
+  const documentError = state.id === id ? state.error : null;
+  const documentLoading = Boolean(id) && state.id !== id;
 
-  const refresh = useCallback(() => {
+  const refreshDocumentById = useCallback(() => {
     if (!id) return;
     fetchDocument(id, { cancelled: false });
   }, [id, fetchDocument]);
 
-  return { document, loading, error, refresh };
+  return {
+    ...context,
+    document,
+    documentLoading,
+    documentError,
+    refreshDocumentById,
+  };
 }

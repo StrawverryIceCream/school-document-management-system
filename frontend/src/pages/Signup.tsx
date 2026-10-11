@@ -4,7 +4,7 @@ import { signup } from "@/api/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { STUDENT_ID_PREFIX } from "@/lib/utils";
+import { STUDENT_ID_PREFIX } from "@/lib/auth";
 import type { UserRole } from "@/types";
 
 const ROLES = {

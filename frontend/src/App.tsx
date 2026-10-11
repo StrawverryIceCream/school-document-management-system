@@ -24,6 +24,7 @@ import Notifications from "./pages/Notifications";
 import HumanResource from "./pages/HumanResource";
 import Administration from "./pages/Administration";
 import { MyRequestProvider } from "./provider/MyRequestProvider";
+import { RequestWizardProvider } from "./provider/WixardRequestProvider";
 
 export default function App() {
   return (
@@ -47,7 +48,11 @@ export default function App() {
                       <Route path="/" element={<Home />} />
                       <Route
                         path="/new-request/:id?"
-                        element={<NewRequest />}
+                        element={
+                          <RequestWizardProvider>
+                            <NewRequest />
+                          </RequestWizardProvider>
+                        }
                       />
                       <Route path="/my-request" element={<MyRequest />} />
                       <Route

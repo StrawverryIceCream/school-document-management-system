@@ -1,8 +1,8 @@
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import { CheckCircle2, FileText, Slash } from "lucide-react";
 
 function DocumentCards() {
-  const { documents, loading, error } = useDocuments();
+  const { documents, loading, error } = useDocument();
 
   const totalDocuments = documents.length;
   const activeDocuments = documents.filter(

@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { StatusFilter } from "@/context/WindowViewContext";
 import type { DocumentRequest, RequestStatus } from "@/types";
 import { useWindowView } from "@/hooks/useWindowView";
-import { statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/request";
 import { Badge } from "../ui/badge";
 
 

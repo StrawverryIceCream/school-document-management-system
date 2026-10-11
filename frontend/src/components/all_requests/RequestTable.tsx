@@ -12,9 +12,9 @@ import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Eye, FileText, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
-import { useRequests } from "@/hooks/useRequests";
+import { useRequests } from "@/hooks/useRequest";
 import type { RequestRow } from "@/context/DashboardContext";
-import { statusStyles } from "@/lib/utils";
+import { statusStyles } from "@/lib/request";
 
 function RequestTable() {
   const { filteredRows: rows, requests, error } = useRequests();

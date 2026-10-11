@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useLogs } from "@/hooks/useLogs";
-import { formatDate, formatExactTime, getLogTypeMeta } from "@/lib/utils";
+import { formatDate, formatExactTime, getLogTypeMeta } from "@/lib/logs";
 
 function LogsTable() {
   const { logs, loading, error } = useLogs();

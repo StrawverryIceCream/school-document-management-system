@@ -2,7 +2,7 @@ import { getAllRequests } from "@/api/requests";
 import type { RequestRow } from "@/context/DashboardContext";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
 
-import { normalizeRequestRow } from "@/lib/utils";
+import { normalizeRequestRow } from "@/lib/request";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function RequestProvider({ children }: { children: React.ReactNode }) {

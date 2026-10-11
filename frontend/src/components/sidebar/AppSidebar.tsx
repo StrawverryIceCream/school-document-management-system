@@ -1,16 +1,16 @@
 import {
   AppWindow,
-  CircleDashedCheck,
+  Archive,
+  BuildingComplex,
   FileInputIcon,
-  FileSearchCorner,
-  Gauge,
-  Handshake,
-  HouseCog,
+  FolderCog,
+  IdCard,
+  LayoutDashboard,
   Logs,
-  NotebookTabs,
+  Notebook,
   Search,
   Settings,
-  Users,
+  UserCog,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -50,7 +50,7 @@ const navItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: Gauge,
+    icon: LayoutDashboard,
     roles: ["admin", "staff"],
   },
   {
@@ -62,19 +62,19 @@ const navItems: NavItem[] = [
   {
     title: "Administration",
     url: "/administration",
-    icon: HouseCog,
+    icon: BuildingComplex,
     roles: ["admin", "staff"],
   },
   {
     title: "Human Resource",
     url: "/human-resource",
-    icon: Handshake,
+    icon: IdCard,
     roles: ["admin", "staff"],
   },
   {
     title: "All Request",
     url: "/all-request",
-    icon: CircleDashedCheck,
+    icon: Archive,
     roles: ["admin", "staff"],
   },
 ];
@@ -83,13 +83,13 @@ const navConfig: NavItem[] = [
   {
     title: "Document Manager",
     url: "/document-manager",
-    icon: FileSearchCorner,
+    icon: FolderCog,
     roles: ["admin", "staff"],
   },
   {
     title: "Accounts",
     url: "/accounts",
-    icon: Users,
+    icon: UserCog,
     roles: ["admin"],
   },
   {
@@ -131,15 +131,22 @@ function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-            >
-              <NavLink to="/home">
-                <NotebookTabs className="size-5!" />
-                <span className="text-base font-semibold">ARCH</span>
-              </NavLink>
-            </SidebarMenuButton>
+            <NavLink to="/home">
+              <SidebarMenuButton
+                size="lg"
+                className="h-12 gap-3 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center! group-data-[collapsible=icon]:p-0! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <div className="flex aspect-square size-11 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:size-7">
+                  <Notebook className="size-6 group-data-[collapsible=icon]:size-4" />
+                </div>
+                <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+                  <span className="truncate text-2xl font-bold">ARCH</span>
+                  <span className="truncate text-xs font-mono">
+                    SCHOOL DOCS
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            </NavLink>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
