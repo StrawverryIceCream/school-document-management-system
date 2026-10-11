@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { NotificationItems } from "@/components/notification/NotificationItem";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/useNotification";
 import { CheckCheck, Inbox, RefreshCw } from "lucide-react";
 
 export default function Notifications() {
@@ -47,7 +47,7 @@ export default function Notifications() {
           </p>
         )}
 
-        <section className="mx-auto max-w-[980px] rounded-xl border bg-card p-2 sm:p-3">
+        <section className="mx-auto max-w-245 rounded-xl border bg-card p-2 sm:p-3">
           {loading ? (
             <p className="px-3 py-10 text-center text-sm text-muted-foreground">
               Loading notifications...

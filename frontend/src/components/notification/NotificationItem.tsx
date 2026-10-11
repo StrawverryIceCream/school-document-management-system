@@ -7,7 +7,7 @@ import {
   FileText,
   XCircle,
 } from "lucide-react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/useNotification";
 import { useLocation } from "react-router-dom";
 
 const notificationStyles: Record<
@@ -99,7 +99,9 @@ export function NotificationItems() {
               <span className="flex items-start justify-between gap-2">
                 <span
                   className={`text-sm font-semibold ${
-                    notification.isRead ? "text-foreground/80" : "text-foreground"
+                    notification.isRead
+                      ? "text-foreground/80"
+                      : "text-foreground"
                   }`}
                 >
                   {notification.title}

@@ -1,5 +1,5 @@
 import { type StatusFilter } from "@/context/RequestContext";
-import { useRequests } from "@/hooks/useRequests";
+import { useRequests } from "@/hooks/useRequest";
 import { ChevronDown, Search } from "lucide-react";
 
 function RequestFilter() {

@@ -18,11 +18,13 @@ type PaymentStep = "form" | "method" | "cash" | "online" | "confirmation";
 
 function NewRequestForm() {
   const { id } = useParams<{ id?: string }>();
-  const { document, loading, error } = useDocument(id);
+  const { document, documentLoading, documentError } = useDocument(id);
   const { refreshMyRequests } = useMyRequest();
   const [step, setStep] = useState<PaymentStep>("form");
-  const [formData, setFormData] =
-    useState<Record<string, FormDataValue> | null>(null);
+  const [formData, setFormData] = useState<Record<
+    string,
+    FormDataValue
+  > | null>(null);
   const [receiptNumber, setReceiptNumber] = useState<string | null>(null);
 
   async function handleSubmit(values: RequiredFieldValues) {
@@ -77,12 +79,12 @@ function NewRequestForm() {
     return <p className="p-6 text-destructive">No document specified.</p>;
   }
 
-  if (loading) {
+  if (documentLoading) {
     return <p className="p-6 text-muted-foreground">Loading document...</p>;
   }
 
-  if (error) {
-    return <p className="p-6 text-destructive">{error}</p>;
+  if (documentError) {
+    return <p className="p-6 text-destructive">{documentError}</p>;
   }
 
   if (!document) {

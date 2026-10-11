@@ -1,10 +1,10 @@
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import { Button } from "../ui/button";
 
 const FIRST_PAGE = 1;
 
 function DocumentNavPage() {
-  const { page, setPage, totalPages } = useDocuments();
+  const { page, setPage, totalPages } = useDocument();
   return (
     <div className="flex items-center justify-between px-4 ">
       <p className="text-sm text-muted-foreground">

@@ -8,12 +8,12 @@ import { createDocument } from "@/api/documents";
 import type { NewDocument } from "@/types";
 import { useState } from "react";
 import DocumentDialogHeader from "./DocumentDialogHeader";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import { DialogFooter } from "../ui/dialog";
 import { toast } from "sonner";
 
 function DocumentDialog() {
-  const { refreshDocument } = useDocuments();
+  const { refreshDocument } = useDocument();
   const [newDocument, setNewDocument] = useState<NewDocument | null>(null);
   const [currentPage, setCurrentPage] = useState<1 | 2>(1);
   const [open, setOpen] = useState(false);

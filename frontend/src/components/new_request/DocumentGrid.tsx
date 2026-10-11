@@ -1,8 +1,8 @@
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import DocumentCard from "./DocumentCard";
 
 function DocumentGrid() {
-  const { documents, loading, error } = useDocuments();
+  const { documents, loading, error } = useDocument();
   if (error) {
     return (
       <div className="flex h-full w-full items-center justify-center">

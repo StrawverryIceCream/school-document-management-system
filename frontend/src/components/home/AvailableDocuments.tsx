@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import { initializeDocumentTypeItem } from "@/lib/document";
 
 type DocumentTypesSectionProps = {
@@ -13,7 +13,7 @@ function AvailableDocuments({
   exploreHref,
   onApply,
 }: DocumentTypesSectionProps) {
-  const { documents, totalCount, loading, error } = useDocuments();
+  const { documents, totalCount, loading, error } = useDocument();
   const documentItems = documents.slice(0, 4).map((document) =>
     initializeDocumentTypeItem({
       id: String(document.id),

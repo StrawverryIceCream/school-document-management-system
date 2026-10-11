@@ -2,7 +2,7 @@ import RequestFilter from "@/components/all_requests/RequestFilter";
 import RequestHeader from "@/components/all_requests/RequestHeader";
 import RequestSummary from "@/components/all_requests/RequestSummary";
 import RequestTable from "@/components/all_requests/RequestTable";
-import { useRequests } from "@/hooks/useRequests";
+import { useRequests } from "@/hooks/useRequest";
 
 function AllRequest() {
   const { loading } = useRequests();

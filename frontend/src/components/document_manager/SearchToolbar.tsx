@@ -1,9 +1,9 @@
 import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 
 function SearchToolbar() {
-  const { setIsActive, setSearch, search } = useDocuments();
+  const { setIsActive, setSearch, search } = useDocument();
 
   return (
     <div className="flex flex-col sm:flex-row gap-3">

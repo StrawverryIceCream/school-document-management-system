@@ -10,7 +10,7 @@ import {
 import { Dialog, DialogContent } from "../ui/dialog";
 import type { DocumentType } from "@/types";
 import { deleteDocumentById, updateDocument } from "@/api/documents";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import DocumentDeleteAlert from "./DocumentDeleteAlert";
 import EditRequiredFieldsDialog from "./EditRequiredFieldsDialog";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ function EditDocument({
   document: DocumentType;
   setEdit: (isEditing: boolean, documentId: number) => void;
 }) {
-  const { refreshDocument } = useDocuments();
+  const { refreshDocument } = useDocument();
   const [editFieldsOpen, setEditFieldsOpen] = useState(false);
 
   async function handleToggleActive() {

@@ -1,4 +1,4 @@
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocument } from "@/hooks/useDocument";
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 
 function DocumentList() {
-  const { documents, loading, error } = useDocuments();
+  const { documents, loading, error } = useDocument();
   if (error) {
     return (
       <div className="flex h-full w-full items-center justify-center">
