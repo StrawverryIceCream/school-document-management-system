@@ -155,6 +155,7 @@ export function WindowViewProvider({
     <WindowViewContext.Provider
       value={{
         TILES,
+        requests,
         activeView,
         selectView,
         clearView,

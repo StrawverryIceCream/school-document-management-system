@@ -1,6 +1,7 @@
 import { useWindowView } from "@/hooks/useWindowView";
-import WindowTileGrid from "@/components/window/WindowTileGrid";
 import WindowRequestTableView from "@/components/window/WindowRequestTableView";
+import WindowsHeader from "@/components/window/WindowsHeader";
+import  CollegeWindowCards  from "@/components/window/CollegeWindowCards";
 
 export interface WindowTile {
   id: string;
@@ -11,11 +12,19 @@ export interface WindowTile {
 
 function Windows() {
   const { activeView } = useWindowView();
+
   if (activeView) {
     return <WindowRequestTableView />;
   }
 
-  return <WindowTileGrid />;
+  return (
+    <div className="h-full overflow-auto p-6 sm:p-10">
+      <div className="mx-auto flex flex-col gap-8">
+        <WindowsHeader />
+        <CollegeWindowCards />
+      </div>
+    </div>
+  );
 }
 
 export default Windows;
