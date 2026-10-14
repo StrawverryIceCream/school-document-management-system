@@ -46,7 +46,7 @@ export default function App() {
                       }
                     >
                       <Route path="/home" element={<Home />} />
-                      <Route path="/" element={<Home />} />
+
                       <Route
                         path="/new-request/:id?"
                         element={
@@ -131,6 +131,7 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/" element={<LandingPage />} />
                   </Routes>
                 </BrowserRouter>
               </MyRequestProvider>
