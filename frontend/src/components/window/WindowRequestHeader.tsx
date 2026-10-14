@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   CircleAlert,
-  ChevronRight,
   LoaderCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,22 +27,7 @@ export function WindowRequestHeader() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-muted-foreground"
-        >
-          <span className="font-semibold text-primary">ARCH</span>
-          <ChevronRight className="size-4" aria-hidden="true" />
-          <button
-            type="button"
-            onClick={clearView}
-            className="hover:text-foreground"
-          >
-            Windows
-          </button>
-          <ChevronRight className="size-4" aria-hidden="true" />
-          <span className="font-medium text-foreground">{collegeDescription}</span>
-        </nav>
+
         <Button
           variant="ghost"
           size="sm"
