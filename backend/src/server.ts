@@ -11,6 +11,7 @@ import paymentsRouter from "./routes/payments.routes.js";
 import coursesRouter from "./routes/courses.routes.js";
 import collegesRouter from "./routes/colleges.routes.js";
 import appointmentsRouter from "./routes/appointments.routes.js";
+import announcementsRouter from "./routes/announcements.routes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +52,7 @@ app.use("/api/documents", documentRouter);
 app.use("/api/requests", requestsRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/appointments", appointmentsRouter);
+app.use("/api/announcements", announcementsRouter);
 app.use("/api/notifications", notificationsRouter);
 
 app.use((req, res) => {

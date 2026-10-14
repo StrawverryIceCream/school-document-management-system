@@ -1,6 +1,4 @@
-import {
-  Button,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useWindowView } from "@/hooks/useWindowView";
-import {
-  REQUEST_STATUS_OPTIONS,
-  REQUEST_WINDOWS,
-} from "@/lib/window-requests";
+import { REQUEST_STATUS_OPTIONS, REQUEST_WINDOWS } from "@/lib/windowRequests";
 
 export function WindowRequestDialogs() {
   const {
@@ -46,7 +41,8 @@ export function WindowRequestDialogs() {
             <DialogHeader>
               <DialogTitle>Review Request</DialogTitle>
               <DialogDescription>
-                Check the requester and document details before updating this request.
+                Check the requester and document details before updating this
+                request.
               </DialogDescription>
             </DialogHeader>
             <div className="divide-y rounded-lg border px-4">
@@ -60,7 +56,9 @@ export function WindowRequestDialogs() {
                 ],
                 [
                   "Submitted",
-                  new Date(selectedRequest.createdAt).toLocaleDateString("en-US"),
+                  new Date(selectedRequest.createdAt).toLocaleDateString(
+                    "en-US",
+                  ),
                 ],
                 ["Purpose", selectedRequest.purpose ?? "—"],
                 [
@@ -73,7 +71,8 @@ export function WindowRequestDialogs() {
                   "Routing",
                   REQUEST_WINDOWS.find(
                     (window) =>
-                      window.id === requestWindowsById[String(selectedRequest.id)],
+                      window.id ===
+                      requestWindowsById[String(selectedRequest.id)],
                   )?.label ?? "Window 1 (Registrar)",
                 ],
               ].map(([label, value]) => (
@@ -82,7 +81,9 @@ export function WindowRequestDialogs() {
                   className="flex flex-wrap justify-between gap-2 py-3 text-sm"
                 >
                   <span className="text-muted-foreground">{label}</span>
-                  <span className="max-w-[65%] text-right font-medium">{value}</span>
+                  <span className="max-w-[65%] text-right font-medium">
+                    {value}
+                  </span>
                 </div>
               ))}
             </div>
@@ -108,15 +109,16 @@ export function WindowRequestDialogs() {
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <p>
-              Verify the requester&apos;s identity and student details against the student database.
+              Verify the requester&apos;s identity and student details against
+              the student database.
             </p>
             <p>
-              Confirm the document type and required information before marking a request ready for
-              release.
+              Confirm the document type and required information before marking
+              a request ready for release.
             </p>
             <p>
-              Keep request statuses current. Unclaimed requests automatically re-route after 5
-              calendar days.
+              Keep request statuses current. Unclaimed requests automatically
+              re-route after 5 calendar days.
             </p>
           </div>
           <DialogFooter>

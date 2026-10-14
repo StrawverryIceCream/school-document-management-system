@@ -3,7 +3,7 @@ import type { DocumentRequest } from "@/types";
 import type { WindowTile } from "@/pages/Windows";
 import type { UpdateRequestStatusPayload } from "@/api/requests";
 import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
-import type { RequestWindow } from "@/lib/window-requests";
+import type { RequestWindow } from "@/lib/windowRequests";
 import type { Dispatch, SetStateAction } from "react";
 
 export type StatusFilter = "all" | DocumentRequest["status"];
