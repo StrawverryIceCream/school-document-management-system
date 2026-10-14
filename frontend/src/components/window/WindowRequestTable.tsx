@@ -277,9 +277,7 @@ export function WindowRequestTable() {
                               }
                             >
                               <span>Review</span>
-                              <span>
-                                Details <span aria-hidden="true">→</span>
-                              </span>
+                              <span>Details</span>
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
