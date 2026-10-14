@@ -1,60 +1,68 @@
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUsers } from "@/hooks/useUsers";
 import {
-  GraduationCap,
-  ShieldCheck,
-  UserCog,
-  UsersRound,
-  BriefcaseBusiness,
-} from "lucide-react";
+  COUNT_PLACEHOLDER,
+  OVERVIEW_ARIA_LABEL,
+  STAT_CONFIGS,
+} from "@/lib/accounts-overview";
+import { ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
+import { cn } from "cn";
 
-function AccountsOverview() {
-  const { users, loading } = useUsers();
-
-  const summaryCards = [
-    { label: "Total Accounts", value: users.length, icon: UsersRound },
-    {
-      label: "Students",
-      value: users.filter((user) => user.role === "student").length,
-      icon: GraduationCap,
-    },
-    {
-      label: "Teachers",
-      value: users.filter((user) => user.role === "teacher").length,
-      icon: BriefcaseBusiness,
-    },
-    {
-      label: "Staff",
-      value: users.filter((user) => user.role === "staff").length,
-      icon: UserCog,
-    },
-    {
-      label: "Admins",
-      value: users.filter((user) => user.role === "admin").length,
-      icon: ShieldCheck,
-    },
-  ];
+export default function AccountsOverview() {
+  const { counts, loading, error } = useUsers();
 
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      {summaryCards.map(({ label, value, icon: Icon }) => (
-        <div
-          key={label}
-          className="relative rounded-xl border bg-card p-4 shadow-sm h-28"
-        >
-          <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground">
-            <Icon className="h-4 w-4" />
-          </div>
-
-          <div className="pr-10 flex flex-col justify-between h-full">
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-3xl font-semibold tracking-tight">
-              {loading ? "—" : value}
-            </p>
-          </div>
-        </div>
-      ))}
+    <section
+      aria-label={OVERVIEW_ARIA_LABEL}
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+    >
+      {STAT_CONFIGS.map(
+        ({
+          key,
+          label,
+          caption,
+          captionIcon: CaptionIcon,
+          captionTone,
+          icon: Icon,
+          tone,
+        }) => (
+          <Card key={key} className="gap-4 rounded-2xl px-5 py-5 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-base font-medium text-muted-foreground">
+                {label}
+              </span>
+              <div className={cn(ICON_BOX_BASE, "size-11", TONES[tone].icon)}>
+                <Icon className="size-5" aria-hidden="true" />
+              </div>
+            </div>
+            <div className="flex items-end justify-between gap-3">
+              {loading ? (
+                <Skeleton className="h-10 w-16" />
+              ) : (
+                <span
+                  className={cn(VALUE_BASE, "text-4xl", TONES.neutral.value)}
+                >
+                  {error ? COUNT_PLACEHOLDER : counts[key]}
+                </span>
+              )}
+              <span
+                className={cn(
+                  "flex items-center gap-1.5 text-sm font-medium",
+                  captionTone
+                    ? TONES[captionTone].value
+                    : "text-muted-foreground",
+                )}
+              >
+                {CaptionIcon && (
+                  <CaptionIcon className="size-4" aria-hidden="true" />
+                )}
+                {caption}
+              </span>
+            </div>
+          </Card>
+        ),
+      )}
     </section>
   );
 }
-
-export default AccountsOverview;

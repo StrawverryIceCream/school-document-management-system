@@ -1,32 +1,62 @@
 import { Search } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUsers } from "@/hooks/useUsers";
+import {
+  ALL_TAB_VALUE,
+  ROLE_TABS,
+  SEARCH_ARIA_LABEL,
+  SEARCH_PLACEHOLDER,
+  TABS_ARIA_LABEL,
+} from "@/lib/search-toolbar";
 
-function SearchToolbar() {
-  const { setRole, setSearch, search } = useUsers();
+export default function SearchToolbar() {
+  const { search, setSearch, role, setRole, counts } = useUsers();
+  const activeTab =
+    ROLE_TABS.find((tab) => tab.role === role)?.value ?? ALL_TAB_VALUE;
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Search by name, email or student Id"
-          className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
+    <Card className="gap-4 rounded-2xl px-4 py-4 shadow-sm sm:flex-row sm:items-center">
+      <div role="search" className="relative flex-1">
+        <Search
+          className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <Input
+          aria-label={SEARCH_ARIA_LABEL}
+          placeholder={SEARCH_PLACEHOLDER}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="h-12 pl-11 text-base md:text-base"
         />
       </div>
-      <Tabs defaultValue="All">
-        <TabsList className="h-10">
-          <TabsTrigger onClick={() => {setRole("")}} value="All">All</TabsTrigger>
-          <TabsTrigger onClick={() => {setRole("student")}} value="Students">Students</TabsTrigger>
-          <TabsTrigger onClick={() => {setRole("teacher")}} value="Teachers">Teachers</TabsTrigger>
-          <TabsTrigger onClick={() => {setRole("staff")}} value="Staff">Staff</TabsTrigger>
-          <TabsTrigger onClick={() => {setRole("admin")}} value="Admin">Admin</TabsTrigger>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          const tab = ROLE_TABS.find((item) => item.value === value);
+          if (tab) setRole(tab.role);
+        }}
+      >
+        <TabsList
+          aria-label={TABS_ARIA_LABEL}
+          className="group-data-horizontal/tabs:h-12"
+        >
+          {ROLE_TABS.map(({ value, label, countKey }) => (
+            <TabsTrigger key={value} value={value} className="gap-2 px-4 text-base">
+              {label}
+              <Badge
+                variant="secondary"
+                className="h-auto px-2 py-0.5 text-sm"
+              >
+                {counts[countKey]}
+              </Badge>
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
-    </div>
+    </Card>
   );
 }
-
-export default SearchToolbar;

@@ -1,6 +1,6 @@
-
 import AccountsHeader from "@/components/accounts/AccountsHeader";
 import AccountsOverview from "@/components/accounts/AccountsOverview";
+import AccountsPagination from "@/components/accounts/AccountsPagination";
 import AccountsTable from "@/components/accounts/AccountsTable";
 import SearchToolbar from "@/components/accounts/SearchToolbar";
 
@@ -14,7 +14,10 @@ function Accounts() {
           <AccountsHeader />
           <AccountsOverview />
           <SearchToolbar />
-          <AccountsTable />
+          <div>
+            <AccountsTable />
+            <AccountsPagination />
+          </div>
         </div>
       </div>
     </UsersProvider>
