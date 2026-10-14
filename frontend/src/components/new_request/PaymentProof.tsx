@@ -1,25 +1,35 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  PAYMENT_PROOF_MAX_SIZE_LABEL,
+  validatePaymentProof,
+} from "@/lib/payment-proof";
 import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 
 interface PaymentProofProps {
+  isRetry: boolean;
   onSubmit: (proof: File) => void | Promise<void>;
   onBack: () => void;
 }
 
-function PaymentProof({ onSubmit, onBack }: PaymentProofProps) {
+function PaymentProof({ isRetry, onSubmit, onBack }: PaymentProofProps) {
   const [proof, setProof] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   function selectProof(file: File | undefined) {
     if (!file) return;
-    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
-      setError("Choose an image or PDF proof of payment.");
+    const validationError = validatePaymentProof(file);
+    if (validationError) {
+      setError(validationError);
+      setSubmitError(null);
+      setProof(null);
       return;
     }
 
     setError(null);
+    setSubmitError(null);
     setProof(file);
   }
 
@@ -28,6 +38,11 @@ function PaymentProof({ onSubmit, onBack }: PaymentProofProps) {
     setSubmitting(true);
     try {
       await onSubmit(proof);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Payment submission failed",
+      );
+      console.error("Cash payment submission error:", err);
     } finally {
       setSubmitting(false);
     }
@@ -43,18 +58,38 @@ function PaymentProof({ onSubmit, onBack }: PaymentProofProps) {
       />
 
       <p className="text-sm text-muted-foreground">
-        Proof is only selected in this browser. The current system does not
-        upload or save payment attachments.
+        Upload a JPG, PNG, WebP, or AVIF receipt image up to{" "}
+        {PAYMENT_PROOF_MAX_SIZE_LABEL} for staff verification.
       </p>
+      {isRetry && (
+        <p className="text-sm text-muted-foreground">
+          Your request and payment are already recorded. Retrying will upload
+          the receipt to the existing payment.
+        </p>
+      )}
+      {submitError && (
+        <p role="alert" className="text-sm text-destructive">
+          {submitError}
+        </p>
+      )}
       <div className="flex flex-wrap gap-3">
         <Button
           type="button"
           disabled={!proof || submitting}
           onClick={() => void submitProof()}
         >
-          {submitting ? "Submitting..." : "Submit Proof of Payment"}
+          {submitting
+            ? "Submitting..."
+            : isRetry || submitError
+              ? "Retry Receipt Upload"
+              : "Submit Proof of Payment"}
         </Button>
-        <Button type="button" variant="outline" onClick={onBack}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          disabled={submitting || isRetry}
+        >
           Back to payment methods
         </Button>
       </div>

@@ -10,6 +10,7 @@ import PaymentProof from "./PaymentProof";
 interface CashPaymentProps {
   documentName: string;
   feeLabel: string;
+  isRetry: boolean;
   onSubmitProof: (proof: File) => void | Promise<void>;
   onBack: () => void;
 }
@@ -17,6 +18,7 @@ interface CashPaymentProps {
 function CashPayment({
   documentName,
   feeLabel,
+  isRetry,
   onSubmitProof,
   onBack,
 }: CashPaymentProps) {
@@ -39,7 +41,11 @@ function CashPayment({
           <li>Keep the official receipt.</li>
           <li>Take a photo or attach the receipt below.</li>
         </ol>
-        <PaymentProof onSubmit={onSubmitProof} onBack={onBack} />
+        <PaymentProof
+          onSubmit={onSubmitProof}
+          onBack={onBack}
+          isRetry={isRetry}
+        />
       </CardContent>
     </Card>
   );

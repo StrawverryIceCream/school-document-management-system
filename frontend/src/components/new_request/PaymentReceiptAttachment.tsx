@@ -1,5 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, type ChangeEvent } from "react";
 import { FileText } from "lucide-react";
+import {
+  PAYMENT_PROOF_ACCEPT,
+  PAYMENT_PROOF_MAX_SIZE_LABEL,
+} from "@/lib/payment-proof";
 
 interface PaymentReceiptAttachmentProps {
   id: string;
@@ -14,6 +18,11 @@ function PaymentReceiptAttachment({
   error,
   onSelect,
 }: PaymentReceiptAttachmentProps) {
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    onSelect(event.currentTarget.files?.[0]);
+    event.currentTarget.value = "";
+  }
+
   const previewUrl = useMemo(
     () =>
       file?.type.startsWith("image/") ? URL.createObjectURL(file) : null,
@@ -46,6 +55,34 @@ function PaymentReceiptAttachment({
           <p className="break-all text-sm text-muted-foreground">
             Selected proof: {file.name}
           </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm hover:bg-muted">
+              <span className="font-medium">Take a Different Photo</span>
+              <span className="text-muted-foreground">
+                Use your device camera if available.
+              </span>
+              <input
+                className="sr-only"
+                type="file"
+                accept={PAYMENT_PROOF_ACCEPT}
+                capture="environment"
+                onChange={handleFileChange}
+              />
+            </label>
+            <label className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm hover:bg-muted">
+              <span className="font-medium">Choose a Different Receipt</span>
+              <span className="text-muted-foreground">
+                Select another supported image.
+              </span>
+              <input
+                className="sr-only"
+                id={id}
+                type="file"
+                accept={PAYMENT_PROOF_ACCEPT}
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -57,22 +94,23 @@ function PaymentReceiptAttachment({
             <input
               className="sr-only"
               type="file"
-              accept="image/*"
+              accept={PAYMENT_PROOF_ACCEPT}
               capture="environment"
-              onChange={(event) => onSelect(event.currentTarget.files?.[0])}
+              onChange={handleFileChange}
             />
           </label>
           <label className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm hover:bg-muted">
             <span className="font-medium">Attach Receipt</span>
             <span className="text-muted-foreground">
-              Choose an image or PDF.
+              Choose a JPG, PNG, WebP, or AVIF image up to{" "}
+              {PAYMENT_PROOF_MAX_SIZE_LABEL}.
             </span>
             <input
               className="sr-only"
               id={id}
               type="file"
-              accept="image/*,.pdf"
-              onChange={(event) => onSelect(event.currentTarget.files?.[0])}
+              accept={PAYMENT_PROOF_ACCEPT}
+              onChange={handleFileChange}
             />
           </label>
         </div>

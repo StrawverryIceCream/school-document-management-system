@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatPeso } from "@/lib/format";
+import { TONES } from "@/lib/tones";
 
 interface PaymentConfirmationProps {
   receiptNumber: string | null;
@@ -19,7 +21,10 @@ function PaymentConfirmation({ receiptNumber, amount }: PaymentConfirmationProps
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CheckCircle2 className="size-5 text-green-500" aria-hidden="true" />
+          <CheckCircle2
+            className={`size-5 ${TONES.emerald.value}`}
+            aria-hidden="true"
+          />
           Payment Submitted
         </CardTitle>
         <CardDescription>
@@ -35,7 +40,9 @@ function PaymentConfirmation({ receiptNumber, amount }: PaymentConfirmationProps
               {receiptNumber}
             </p>
             <p className="mt-3 font-medium">Amount</p>
-            <p className="mt-1 text-muted-foreground">${amount}</p>
+            <p className="mt-1 text-muted-foreground">
+              {formatPeso(Number(amount))}
+            </p>
           </div>
         )}
         <p className="text-sm text-muted-foreground">
