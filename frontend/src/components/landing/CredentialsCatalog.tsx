@@ -54,7 +54,8 @@ export default function CredentialsCatalog() {
               key={credential.code}
               className={cn(
                 "gap-5 transition-shadow hover:shadow-md",
-                credential.featured && "border-primary/30 ring-2 ring-primary/10",
+                credential.featured &&
+                  "border-primary/30 ring-2 ring-primary/10",
               )}
             >
               <CardHeader className="gap-4">
@@ -88,7 +89,10 @@ export default function CredentialsCatalog() {
                         TONES.brand.value,
                       )}
                     >
-                      <Star className="size-4 fill-current" aria-hidden="true" />
+                      <Star
+                        className="size-4 fill-current"
+                        aria-hidden="true"
+                      />
                       {FEATURED_LABEL}
                     </p>
                   )}
@@ -161,9 +165,7 @@ export default function CredentialsCatalog() {
         <Card>
           <CardContent className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-3">
-              <div
-                className={cn(ICON_BOX_BASE, "size-11", TONES.brand.icon)}
-              >
+              <div className={cn(ICON_BOX_BASE, "size-11", TONES.brand.icon)}>
                 <Info className="size-6" aria-hidden="true" />
               </div>
               <div className="space-y-1">

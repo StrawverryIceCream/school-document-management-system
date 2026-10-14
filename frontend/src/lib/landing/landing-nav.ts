@@ -29,5 +29,5 @@ export const CHECK_STATUS_ACTION: NavLink = {
 
 export const ACCESS_PORTAL_ACTION: NavLink = {
   label: "Access Portal",
-  href: "#login",
+  href: "/login",
 };

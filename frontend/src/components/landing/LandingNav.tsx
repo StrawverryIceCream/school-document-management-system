@@ -14,6 +14,7 @@ import {
 } from "@/lib/landing/landing-nav";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import { ModeToggle } from "../ModeToggle";
 
 export default function LandingNav() {
   return (
@@ -83,6 +84,9 @@ export default function LandingNav() {
             />
             {ACCESS_PORTAL_ACTION.label}
           </a>
+          <div className="pl-2">
+            <ModeToggle />
+          </div>
         </div>
       </div>
     </nav>

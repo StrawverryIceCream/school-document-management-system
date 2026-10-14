@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
+  HERO_BACKGROUND,
   HERO_DESCRIPTION,
   HERO_HEADING_ID,
   HERO_PILL,
@@ -43,9 +44,19 @@ export default function LandingHero() {
   return (
     <section
       aria-labelledby={HERO_HEADING_ID}
-      className="relative overflow-hidden border-b border-border bg-linear-to-br from-background via-background to-primary/5 pb-20 pt-14 sm:pb-28 sm:pt-20"
+      className="relative isolate overflow-hidden border-b border-border bg-background pb-20 pt-14 sm:pb-28 sm:pt-20"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-8">
+      <img
+        src={HERO_BACKGROUND.src}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 -z-20 size-full object-cover"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-linear-to-r from-background/10 via-background/80 to-background/90"
+      />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
           <div className="space-y-6 lg:col-span-7">
             <Badge

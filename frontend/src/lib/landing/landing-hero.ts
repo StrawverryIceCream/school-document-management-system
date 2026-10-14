@@ -1,4 +1,4 @@
-import type { Tone } from "../tones";
+import type { Tone } from "@/lib/tones";
 
 export type HeroLink = {
   label: string;
@@ -36,6 +36,12 @@ type SampleTicket = {
 const PERCENT_MAX = 100;
 
 export const HERO_HEADING_ID = "landing-hero-heading";
+
+// File lives in public/image/landing/, so it is served from /image/landing/
+// Change the file name here to match your image
+export const HERO_BACKGROUND = {
+  src: "/images/landing/hero.jpeg",
+};
 
 export const HERO_PILL: { label: string; dotTone: Tone } = {
   label: "Digital Document Gateway for Students, Faculty & Alumni",
