@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import session from "express-session";
 import authRouter from "./routes/auth.routes.js";
 import usersRouter from "./routes/users.routes.js";
-import documentRouter from "./routes/document.routes.js";
+import documentRouter from "./routes/documents.routes.js";
 import requestsRouter from "./routes/requests.routes.js";
 import notificationsRouter from "./routes/notifications.routes.js";
 import paymentsRouter from "./routes/payments.routes.js";
