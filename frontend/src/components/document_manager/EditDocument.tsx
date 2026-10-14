@@ -62,7 +62,7 @@ function EditDocument({
       <DropdownMenuContent align="end" className="w-32">
         <DropdownMenuItem
           onClick={() => {
-            setEdit(true, document.id);
+            setEdit(true, Number(document.id));
           }}
         >
           Edit
@@ -86,7 +86,7 @@ function EditDocument({
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DocumentDialogHeader type="Edit" />
           <EditRequiredFieldsDialog
-            documentId={document.id}
+            documentId={Number(document.id)}
             initialFields={document.requiredFields}
             onSaveSuccess={() => {
               setEditFieldsOpen(false);
