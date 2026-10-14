@@ -1,0 +1,196 @@
+import { useState } from "react";
+import { Calendar, RefreshCw, Search, ShieldCheck, Store } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  PIPELINE_LABEL,
+  STAGES,
+  STAGE_TONES,
+  TRACK_RESULT,
+  TRACK_SEARCH,
+  TRACK_SECTION,
+} from "@/lib/landing/track-request";
+import { BADGE_BASE, TONES, VALUE_BASE } from "@/lib/tones";
+import { cn } from "@/lib/utils";
+
+export default function TrackRequest() {
+  const [reference, setReference] = useState(TRACK_SEARCH.defaultReference);
+
+  return (
+    <section
+      id={TRACK_SECTION.id}
+      aria-labelledby={TRACK_SECTION.headingId}
+      className="border-b border-border bg-card py-20"
+    >
+      <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-8">
+        <div className="space-y-3 text-center">
+          <Badge
+            className={cn(
+              BADGE_BASE,
+              "border-transparent",
+              TONES.emerald.badge,
+            )}
+          >
+            <ShieldCheck className="size-4" aria-hidden="true" />
+            {TRACK_SECTION.eyebrow}
+          </Badge>
+          <h2
+            id={TRACK_SECTION.headingId}
+            className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
+          >
+            {TRACK_SECTION.title}
+          </h2>
+          <p className="mx-auto max-w-xl text-lg text-muted-foreground">
+            {TRACK_SECTION.description}
+          </p>
+        </div>
+
+        <Card className="gap-6 rounded-2xl bg-muted/40 py-6 shadow-sm sm:py-8">
+          <CardContent className="space-y-6 sm:px-8">
+            <form
+              role="search"
+              aria-label={TRACK_SEARCH.ariaLabel}
+              className="flex flex-col gap-3 sm:flex-row"
+              onSubmit={(event) => event.preventDefault()}
+            >
+              <div className="relative flex-1">
+                <Label htmlFor={TRACK_SEARCH.inputId} className="sr-only">
+                  {TRACK_SEARCH.inputLabel}
+                </Label>
+                <Search
+                  className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  id={TRACK_SEARCH.inputId}
+                  type="text"
+                  value={reference}
+                  onChange={(event) => setReference(event.target.value)}
+                  className="h-12 rounded-xl bg-card pl-12 text-base font-medium md:text-base"
+                />
+              </div>
+              <Button
+                type="submit"
+                size="lg"
+                className="h-12 gap-2 rounded-xl px-7 text-base font-bold shadow-sm"
+              >
+                <RefreshCw className="size-5" aria-hidden="true" />
+                {TRACK_SEARCH.submitLabel}
+              </Button>
+            </form>
+
+            <Card className="gap-6 py-5 sm:py-6">
+              <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                      {`#${TRACK_RESULT.reference}`}
+                    </span>
+                    <Badge
+                      className={cn(
+                        BADGE_BASE,
+                        "border-transparent font-bold",
+                        TONES[TRACK_RESULT.statusTone].badge,
+                      )}
+                    >
+                      {TRACK_RESULT.status}
+                    </Badge>
+                  </div>
+                  <CardTitle
+                    role="heading"
+                    aria-level={3}
+                    className="text-xl font-bold"
+                  >
+                    {TRACK_RESULT.title}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {TRACK_RESULT.requester}
+                  </CardDescription>
+                </div>
+                <div className="text-left sm:text-right">
+                  <span className="block text-sm text-muted-foreground">
+                    {TRACK_RESULT.counterLabel}
+                  </span>
+                  <span
+                    className={cn(
+                      VALUE_BASE,
+                      "mt-1.5 flex items-center gap-1.5 text-base leading-snug sm:justify-end",
+                      TONES.brand.value,
+                    )}
+                  >
+                    <Store className="size-5" aria-hidden="true" />
+                    {TRACK_RESULT.counter}
+                  </span>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-base font-bold text-foreground">
+                    {PIPELINE_LABEL}
+                  </p>
+                  <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {STAGES.map(
+                      ({ id, label, note, icon: Icon, status }, index) => (
+                        <li
+                          key={id}
+                          aria-current={
+                            status === "active" ? "step" : undefined
+                          }
+                          className={cn(
+                            "space-y-1.5 rounded-lg border p-3",
+                            TONES[STAGE_TONES[status]].icon,
+                            status === "done" && "border-transparent",
+                            status === "active" &&
+                              "border-primary/30 ring-1 ring-primary/20",
+                            status === "upcoming" && "border-border opacity-60",
+                          )}
+                        >
+                          <div className="flex items-center gap-1.5 text-sm font-bold">
+                            <Icon
+                              className={cn(
+                                "size-5 shrink-0",
+                                status === "active" && "animate-spin",
+                              )}
+                              aria-hidden="true"
+                            />
+                            {`${index + 1}. ${label}`}
+                          </div>
+                          <p className="text-sm opacity-80">{note}</p>
+                        </li>
+                      ),
+                    )}
+                  </ol>
+                </div>
+
+                <div className="flex flex-col items-center justify-between gap-2 pt-2 text-sm text-muted-foreground sm:flex-row">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="size-5" aria-hidden="true" />
+                    <span>
+                      {TRACK_RESULT.releaseLabel}{" "}
+                      <span className={cn("font-bold", TONES.neutral.value)}>
+                        {TRACK_RESULT.release}
+                      </span>
+                    </span>
+                  </span>
+                  <span className={cn("font-semibold", TONES.brand.value)}>
+                    {TRACK_RESULT.reminder}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
+}
