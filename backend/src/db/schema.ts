@@ -86,6 +86,7 @@ export const paymentMethodEnum = pgEnum("payment_method", [
   "bank_transfer",
   "e_wallet",
   "card",
+  "cash"
 ]);
 
 export const notificationTypeEnum = pgEnum("notification_type", [

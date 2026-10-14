@@ -12,8 +12,12 @@ const PG_UNIQUE_VIOLATION = "23505";
 type DbUser = typeof users.$inferSelect;
 type UserRole = DbUser["role"];
 
-const USER_ROLES = ["student", "teacher", "admin", "staff"] as const satisfies
-  readonly UserRole[];
+const USER_ROLES = [
+  "student",
+  "teacher",
+  "admin",
+  "staff",
+] as const satisfies readonly UserRole[];
 
 interface SignupBody {
   email: string;
@@ -34,8 +38,8 @@ function toAuthUser(user: DbUser) {
     email: user.email,
     fullName: user.fullName,
     role: user.role,
-    college: user.college,
-    course: user.course,
+    college: user.collegeId,
+    course: user.courseId,
     section: user.section,
     department: user.department,
   };
@@ -154,8 +158,8 @@ export const signup = async (
         passwordHash,
         fullName,
         role,
-        college,
-        course,
+        collegeId: college,
+        courseId: course,
         ...(studentId ? { studentId } : {}),
         ...(section ? { section } : {}),
       })
