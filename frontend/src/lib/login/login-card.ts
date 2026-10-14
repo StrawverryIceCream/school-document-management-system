@@ -40,7 +40,7 @@ export const LOADING_SUBMIT_LABEL = "Loading...";
 export const SIGN_UP = {
   prompt: "Don’t have an active account yet?",
   label: "Create student or faculty account",
-  href: "#",
+  href: "/signup",
 };
 
 export const TRACK_SLIP = {
