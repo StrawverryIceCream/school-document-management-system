@@ -1,3 +1,4 @@
+import { useOrgNames } from "@/hooks/useOrgNames";
 import { getProfileFields, type ProfileUser } from "@/lib/profile-fields";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +13,13 @@ export default function ProfileFields({
   user,
   ...props
 }: ProfileFieldsProps) {
-  const fields = getProfileFields(user);
-
+  const { college, course } = useOrgNames(user.collegeId, user.courseId);
+  const fields = getProfileFields({
+    ...user,
+    college: user.college?.name ? user.college : college,
+    course: user.course?.name ? user.course : course,
+  });
+ 
   return (
     <div className={className} {...props}>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4">

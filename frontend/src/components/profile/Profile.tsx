@@ -13,11 +13,13 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrgNames } from "@/hooks/useOrgNames"; // TEMP
 import { getInitials, ROLE_META } from "@/lib/profile";
 
 function Profile() {
   const { user } = useAuth();
   const role = user ? ROLE_META[user.role] : undefined;
+  const { college, course } = useOrgNames(user?.collegeId, user?.courseId); // TEMP
 
   return (
     <Dialog>
