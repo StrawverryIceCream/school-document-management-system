@@ -18,7 +18,7 @@ export default function SearchToolbar() {
     ROLE_TABS.find((tab) => tab.role === role)?.value ?? ALL_TAB_VALUE;
 
   return (
-    <Card className="gap-4 rounded-2xl px-4 py-4 shadow-sm sm:flex-row sm:items-center">
+    <Card className="shrink-0 gap-3 rounded-2xl px-4 py-3 shadow-sm sm:flex-row sm:items-center">
       <div role="search" className="relative flex-1">
         <Search
           className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"

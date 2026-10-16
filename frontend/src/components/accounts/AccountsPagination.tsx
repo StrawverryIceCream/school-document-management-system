@@ -21,7 +21,7 @@ export default function AccountsPagination() {
   const { from, to } = getShowingRange(pagination);
 
   return (
-    <Card className="gap-3 rounded-2xl rounded-t-none bg-muted/50 px-5 py-3 shadow-none sm:flex-row sm:items-center sm:justify-between">
+    <Card className="shrink-0 gap-3 rounded-2xl rounded-t-none bg-muted/50 px-5 py-3 shadow-none sm:flex-row sm:items-center sm:justify-between">
       <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <span>
           Showing {from}-{to} of {pagination.total} accounts

@@ -15,7 +15,7 @@ export default function AccountsOverview() {
   return (
     <section
       aria-label={OVERVIEW_ARIA_LABEL}
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+      className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
     >
       {STAT_CONFIGS.map(
         ({

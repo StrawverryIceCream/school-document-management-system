@@ -20,7 +20,7 @@ export default function AccountsHeader() {
   const [exportError, setExportError] = useState<string | null>(null);
 
   return (
-    <header className="mb-8 flex flex-wrap items-start justify-between gap-5">
+    <header className="flex shrink-0 flex-wrap items-start justify-between gap-5">
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">

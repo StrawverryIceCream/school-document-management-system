@@ -66,9 +66,9 @@ export default function AccountsTable() {
   }
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-2xl rounded-b-none py-0 shadow-sm">
+    <Card className="min-h-0 gap-0 overflow-hidden rounded-2xl rounded-b-none py-0 shadow-sm [&_[data-slot=table-container]]:min-h-0 [&_[data-slot=table-container]]:flex-1 [&_[data-slot=table-container]]:overflow-y-auto">
       <Table>
-        <TableHeader className="bg-muted/70">
+        <TableHeader className="sticky top-0 z-10 bg-muted">
           <TableRow>
             <TableHead className="w-12">
               <Checkbox

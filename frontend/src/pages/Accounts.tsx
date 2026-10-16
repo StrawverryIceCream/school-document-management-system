@@ -9,15 +9,14 @@ import { UsersProvider } from "@/provider/UsersProvider";
 function Accounts() {
   return (
     <UsersProvider>
-      <div className="h-full overflow-auto p-6 sm:p-10">
-        <div className="h-full space-y-6">
-          <AccountsHeader />
-          <AccountsOverview />
-          <SearchToolbar />
-          <div>
-            <AccountsTable />
-            <AccountsPagination />
-          </div>
+      <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 sm:p-6">
+        <AccountsHeader />
+        <AccountsOverview />
+        <SearchToolbar />
+
+        <div className="flex min-h-0 flex-col">
+          <AccountsTable />
+          <AccountsPagination />
         </div>
       </div>
     </UsersProvider>
