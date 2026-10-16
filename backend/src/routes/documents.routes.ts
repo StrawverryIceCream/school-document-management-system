@@ -14,6 +14,7 @@ const router = Router();
 router.use(requireAuth);
 router.get("/", getAllDocument);
 router.get("/:id", validateId, getDocumentById);
+
 router.post("/", requireRoles("admin"), createDocument);
 router.patch("/:id", requireRoles("admin"), validateId, updateDocumentType);
 router.delete("/:id", requireRoles("admin"), validateId, deleteDocumentById);

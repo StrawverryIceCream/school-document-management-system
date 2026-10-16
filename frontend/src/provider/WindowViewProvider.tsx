@@ -11,9 +11,22 @@ import {
 } from "@/api/requests";
 import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
 import type { WindowTile } from "@/pages/Windows";
+import {
+  getRequestWindowForCollege,
+  type RequestWindow,
+} from "@/lib/windowRequests";
 
 // Matches the backend's MAX_LIMIT; one page can never return more than this
 const REQUESTS_PAGE_SIZE = 100;
+
+function getUserCollege(
+  user: DocumentRequestWithRelations["user"],
+): string | undefined {
+  return (
+    (user as unknown as { college?: string | null } | null | undefined)
+      ?.college ?? undefined
+  );
+}
 
 const TILES: WindowTile[] = [
   {
@@ -84,6 +97,31 @@ export function WindowViewProvider({
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [documentFilter, setDocumentFilter] = useState("all");
+  const [windowFilter, setWindowFilter] = useState<RequestWindow>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
+    null,
+  );
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+
+  async function refreshRequests() {
+    setLoading(true);
+    try {
+      const rows = await fetchAllRequests();
+      setRequests(rows);
+      setError(null);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load requests";
+      setError(message);
+      console.error("Failed to load requests:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function selectView(id: string) {
     setActiveView(id);
@@ -120,20 +158,53 @@ export function WindowViewProvider({
     };
   }, []);
 
-  // Colleges aren't populated yet, so every request shows; status and search are applied client-side
+  const departmentRequests = useMemo(() => {
+    const selectedCollege = TILES.find((tile) => tile.id === activeView);
+    if (!selectedCollege) return [];
+
+    const collegeNames = new Set(
+      [
+        selectedCollege.id,
+        selectedCollege.title,
+        selectedCollege.description,
+      ].map((name) => name.trim().toLowerCase()),
+    );
+
+    return requests.filter((request) => {
+      const college = getUserCollege(request.user)?.trim().toLowerCase();
+      return college ? collegeNames.has(college) : false;
+    });
+  }, [activeView, requests]);
+
+  const requestWindowsById = useMemo(
+    () =>
+      Object.fromEntries(
+        requests.map((request) => [
+          String(request.id),
+          getRequestWindowForCollege(getUserCollege(request.user)),
+        ]),
+      ),
+    [requests],
+  );
+
   const visibleRequests = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    return requests.filter((request) => {
+    return departmentRequests.filter((request) => {
       if (filter !== "all" && request.status !== filter) return false;
       if (!term) return true;
 
       return (
+        request.id.toLowerCase().includes(term) ||
         request.user?.fullName.toLowerCase().includes(term) ||
-        request.documentType?.name.toLowerCase().includes(term)
+        request.user?.studentId?.toLowerCase().includes(term) ||
+        request.user?.role.toLowerCase().includes(term) ||
+        request.documentType?.name.toLowerCase().includes(term) ||
+        request.documentType?.description?.toLowerCase().includes(term) ||
+        request.purpose?.toLowerCase().includes(term)
       );
     });
-  }, [requests, filter, search]);
+  }, [departmentRequests, filter, search]);
 
   // Errors propagate so the caller can show a toast (invalid transition, missing release date)
   async function updateRequestStatus(
@@ -159,13 +230,28 @@ export function WindowViewProvider({
         activeView,
         selectView,
         clearView,
+        departmentRequests,
+        requestWindowsById,
         visibleRequests,
         loading,
         error,
+        refreshRequests,
         filter,
         setFilter,
         search,
         setSearch,
+        documentFilter,
+        setDocumentFilter,
+        windowFilter,
+        setWindowFilter,
+        currentPage,
+        setCurrentPage,
+        selectedIds,
+        setSelectedIds,
+        selectedRequestId,
+        setSelectedRequestId,
+        guidelinesOpen,
+        setGuidelinesOpen,
         updateRequestStatus,
       }}
     >

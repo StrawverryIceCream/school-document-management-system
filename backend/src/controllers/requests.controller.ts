@@ -24,9 +24,12 @@ type RequestStatus = (typeof STATUSES)[number];
 // Requests only move forward, or get cancelled before they are claimed
 const STATUS_TRANSITIONS: Record<RequestStatus, readonly RequestStatus[]> = {
   pending: ["processing", "cancelled"],
+  awaiting_payment: ["processing", "cancelled"],
   processing: ["ready", "cancelled"],
+  on_hold: ["processing", "cancelled"],
   ready: ["claimed", "cancelled"],
   claimed: [],
+  rejected: [],
   cancelled: [],
 };
 
@@ -195,7 +198,7 @@ export async function getAllRequests(
       conditions.push(
         or(
           ilike(documentRequests.purpose, pattern),
-          ilike(documentRequests.staffNotes, pattern),
+          ilike(documentRequests.internalNotes, pattern),
           inArray(
             documentRequests.userId,
             db
@@ -375,7 +378,7 @@ export async function updateRequestStatus(
 
     if (typeof releaseDate === "string") updates.releaseDate = releaseDate;
     if (typeof staffNotes === "string") {
-      updates.staffNotes = staffNotes.trim();
+      updates.internalNotes = staffNotes.trim();
     }
     if (status === "claimed") updates.claimedAt = new Date();
 
@@ -565,6 +568,10 @@ export async function createRequest(req: Request, res: Response) {
       .values({
         userId,
         documentTypeId,
+        documentTypeCode: documentType.code,
+        documentTypeName: documentType.name,
+        amountDue: documentType.fee ?? "0",
+        turnaroundDays: documentType.processingDays ?? 0,
         ...(trimmedPurpose ? { purpose: trimmedPurpose } : {}),
         formData: submittedData,
       })
