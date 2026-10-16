@@ -13,6 +13,7 @@ interface PaymentRequestSummaryProps {
   documentName: string;
   feeLabel: string;
   formData: Record<string, FormDataValue>;
+  paymentRequired: boolean;
 }
 
 function getPurpose(formData: Record<string, FormDataValue>): string {
@@ -28,6 +29,7 @@ function PaymentRequestSummary({
   documentName,
   feeLabel,
   formData,
+  paymentRequired,
 }: PaymentRequestSummaryProps) {
   const details = [
     ["Requested item", documentName],
@@ -99,7 +101,9 @@ function PaymentRequestSummary({
           <ul className="space-y-2">
             {[
               "Keep your valid student or government-issued ID ready.",
-              "Upload an official payment receipt for verification.",
+              paymentRequired
+                ? "Upload an official payment receipt for verification."
+                : "No payment receipt is required for this request.",
               "Follow the Registrar's instructions when collecting your document.",
             ].map((requirement) => (
               <li
@@ -121,13 +125,19 @@ function PaymentRequestSummary({
               className={cn("size-4", TONES.brand.value)}
               aria-hidden="true"
             />
-            Payment proof reviewed by staff
+            {paymentRequired
+              ? "Payment proof reviewed by staff"
+              : "No payment required"}
           </span>
           <span className="font-mono">DRAFT</span>
         </div>
         <div className="flex items-center justify-between gap-2 border-t pt-2 text-sm">
-          <span className="text-muted-foreground">Settlement due</span>
-          <span className="font-bold text-primary">{feeLabel}</span>
+          <span className="text-muted-foreground">
+            {paymentRequired ? "Settlement due" : "Payment status"}
+          </span>
+          <span className="text-right font-bold text-primary">
+            {paymentRequired ? feeLabel : "No payment required"}
+          </span>
         </div>
       </div>
     </Card>

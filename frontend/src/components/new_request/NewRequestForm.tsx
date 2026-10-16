@@ -8,22 +8,22 @@ import { useMyRequest } from "@/hooks/useMyRequest";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowRight, Headset, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Headset, ShieldCheck } from "lucide-react";
 import { formatPeso } from "@/lib/format";
 import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import CashPayment from "./CashPayment";
 import DocumentRequestForm from "./DocumentRequestForm";
-import OnlinePayment from "./OnlinePayment";
-import PaymentConfirmation from "./PaymentConfirmation";
-import PaymentRequired from "./PaymentRequired";
 import PaymentRequestSummary from "./PaymentRequestSummary";
 import RequestWizardHeader from "./RequestWizardHeader";
 import StudentBillingSummary from "./StudentBillingSummary";
+import CashPayment from "@/components/payments/CashPayment";
+import OnlinePayment from "@/components/payments/OnlinePayment";
+import PaymentConfirmation from "@/components/payments/PaymentConfirmation";
+import PaymentRequired from "@/components/payments/PaymentRequired";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-type PaymentStep = "form" | "method" | "cash" | "online" | "confirmation";
+type PaymentStep = "form" | "method" | "confirmation";
 type SettlementMethod = "online" | "cash";
 type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
 
@@ -42,9 +42,13 @@ function NewRequestForm() {
     Pick<Payment, "id" | "receiptNumber"> | null
   >(null);
   const [settlementMethod, setSettlementMethod] =
-    useState<SettlementMethod>("online");
+    useState<SettlementMethod | null>(null);
   const [onlinePaymentMethod, setOnlinePaymentMethod] =
     useState<OnlinePaymentMethod>("e_wallet");
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [requestSubmitError, setRequestSubmitError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     setCurrentStep(step === "form" ? "details" : "payment");
@@ -65,7 +69,15 @@ function NewRequestForm() {
   }
 
   async function submitPayment(method: PaymentMethod, proofFile?: File) {
-    if (!document || !formData || !proofFile) return;
+    if (
+      !document ||
+      !formData ||
+      !proofFile ||
+      !settlementMethod ||
+      !(Number(document.fee) > 0)
+    ) {
+      return;
+    }
 
     let paymentToComplete = pendingPayment;
     if (!paymentToComplete) {
@@ -92,6 +104,46 @@ function NewRequestForm() {
     await refreshMyRequests();
   }
 
+  async function submitFreeRequest() {
+    if (
+      !document ||
+      !formData ||
+      Number(document.fee) > 0 ||
+      requestSubmitting
+    ) {
+      return;
+    }
+
+    setRequestSubmitting(true);
+    setRequestSubmitError(null);
+    try {
+      await createRequest({
+        documentTypeId: String(document.id),
+        formData,
+      });
+    } catch (err) {
+      setRequestSubmitError(
+        err instanceof Error ? err.message : "Request submission failed",
+      );
+      setRequestSubmitting(false);
+      return;
+    }
+
+    setReceiptNumber(null);
+    setStep("confirmation");
+    try {
+      await refreshMyRequests();
+    } catch (err) {
+      setRequestSubmitError(
+        err instanceof Error
+          ? `Request submitted, but your request list could not be refreshed: ${err.message}`
+          : "Request submitted, but your request list could not be refreshed.",
+      );
+    } finally {
+      setRequestSubmitting(false);
+    }
+  }
+
   if (!id) {
     return <p className="p-6 text-destructive">No document specified.</p>;
   }
@@ -112,6 +164,7 @@ function NewRequestForm() {
     Number.isFinite(Number(document.fee)) && Number(document.fee) > 0
       ? formatPeso(Number(document.fee))
       : "To be confirmed";
+  const paymentRequired = Number(document.fee) > 0;
 
   if (step === "form") {
     return <DocumentRequestForm document={document} onSubmit={handleSubmit} />;
@@ -126,36 +179,41 @@ function NewRequestForm() {
           <>
             <div>
               <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
-                Review, Payment &amp; Verification
+                {paymentRequired
+                  ? "Review, Payment & Verification"
+                  : "Review & Submit Request"}
               </h1>
               <p className="mt-1 text-base text-muted-foreground">
-                Choose your preferred settlement method and review your request
-                details.
+                {paymentRequired
+                  ? "Choose your preferred settlement method and review your request details."
+                  : "Review your request details before submitting."}
               </p>
             </div>
 
-            <div className="mt-4 flex items-center gap-3 rounded-xl border bg-muted px-4 py-3 shadow-sm">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <ShieldCheck className="size-4" aria-hidden="true" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold">
-                  Payment Verification by Registrar
-                </p>
-                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
-                  Upload your receipt after payment. Staff will verify it before
-                  processing your request.
-                </p>
+            {paymentRequired && (
+              <div className="mt-4 flex items-center gap-3 rounded-xl border bg-muted px-4 py-3 shadow-sm">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                  <ShieldCheck className="size-4" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-semibold">
+                    Payment Verification by Registrar
+                  </p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                    Upload your receipt after payment. Staff will verify it
+                    before processing your request.
+                  </p>
+                </div>
+                <span
+                  className={cn(
+                    "hidden rounded-full px-2.5 py-1.5 text-sm font-semibold sm:inline-flex",
+                    TONES.sky.badge,
+                  )}
+                >
+                  Staff review required
+                </span>
               </div>
-              <span
-                className={cn(
-                  "hidden rounded-full px-2.5 py-1.5 text-sm font-semibold sm:inline-flex",
-                  TONES.sky.badge,
-                )}
-              >
-                Staff review required
-              </span>
-            </div>
+            )}
           </>
         )}
 
@@ -167,80 +225,97 @@ function NewRequestForm() {
           }
         >
           {step === "method" && (
-            <div className="space-y-3">
-              <PaymentRequired
-                method={settlementMethod}
-                onMethodChange={setSettlementMethod}
-              />
-              <StudentBillingSummary
-                documentName={document.name}
-                feeLabel={feeLabel}
-              />
-              <Card className="gap-2 rounded-xl border-0 p-3 shadow-sm sm:p-4">
-                <Button
-                  type="button"
-                  className="h-12 w-full gap-2 text-base font-semibold"
-                  onClick={() =>
-                    setStep(settlementMethod === "cash" ? "cash" : "online")
-                  }
-                >
-                  <LockKeyhole className="size-3.5" aria-hidden="true" />
-                  {settlementMethod === "cash"
-                    ? "Continue to Cashier Instructions"
-                    : `Continue to Payment · ${feeLabel}`}
-                  <ArrowRight className="size-3.5" aria-hidden="true" />
-                </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                  Receipt proof is required before payment verification.
-                </p>
-              </Card>
-              <Card className="flex-row items-center gap-3 rounded-xl border-0 bg-muted p-3 shadow-none">
-                <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                  <Headset className="size-5 text-primary" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-base font-semibold">
-                    Need assistance with your billing?
-                  </p>
-                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
-                    For fee or payment questions, contact the Registrar&apos;s
-                    Office before submitting your receipt.
-                  </p>
-                </div>
-              </Card>
+            <div className="min-w-0 space-y-3">
+              {paymentRequired ? (
+                <>
+                  <PaymentRequired
+                    method={settlementMethod}
+                    onMethodChange={setSettlementMethod}
+                    onlineContent={
+                      <OnlinePayment
+                        documentName={document.name}
+                        feeLabel={feeLabel}
+                        initialMethod={onlinePaymentMethod}
+                        onMethodChange={setOnlinePaymentMethod}
+                        onConfirm={(method, proofFile) =>
+                          submitPayment(method, proofFile)
+                        }
+                        isRetry={pendingPayment !== null}
+                      />
+                    }
+                    cashContent={
+                      <CashPayment
+                        documentName={document.name}
+                        feeLabel={feeLabel}
+                        onSubmitProof={(proofFile) =>
+                          submitPayment("cash", proofFile)
+                        }
+                        isRetry={pendingPayment !== null}
+                      />
+                    }
+                  />
+                  <Card className="flex-row items-center gap-3 rounded-xl border-0 bg-muted p-3 shadow-none">
+                    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                      <Headset className="size-5 text-primary" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-base font-semibold">
+                        Need assistance with your billing?
+                      </p>
+                      <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                        For fee or payment questions, contact the Registrar&apos;s
+                        Office before submitting your receipt.
+                      </p>
+                    </div>
+                  </Card>
+                </>
+              ) : (
+                <Card className="gap-4 rounded-xl border-0 p-4 shadow-sm sm:p-5">
+                  <div>
+                    <h2 className="text-lg font-semibold">
+                      No payment required for this document.
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Continue to submit your request without payment details.
+                    </p>
+                  </div>
+                  {requestSubmitError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {requestSubmitError}
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    disabled={requestSubmitting}
+                    onClick={() => void submitFreeRequest()}
+                  >
+                    {requestSubmitting ? "Submitting..." : "Submit Request"}
+                  </Button>
+                </Card>
+              )}
             </div>
           )}
           {step === "method" && (
-            <PaymentRequestSummary
-              documentName={document.name}
-              feeLabel={feeLabel}
-              formData={formData ?? {}}
-            />
-          )}
-          {step === "cash" && (
-            <CashPayment
-              documentName={document.name}
-              feeLabel={feeLabel}
-              onSubmitProof={(proofFile) => submitPayment("cash", proofFile)}
-              onBack={() => setStep("method")}
-              isRetry={pendingPayment !== null}
-            />
-          )}
-          {step === "online" && (
-            <OnlinePayment
-              documentName={document.name}
-              feeLabel={feeLabel}
-              initialMethod={onlinePaymentMethod}
-              onMethodChange={setOnlinePaymentMethod}
-              onConfirm={(method, proofFile) => submitPayment(method, proofFile)}
-              onBack={() => setStep("method")}
-              isRetry={pendingPayment !== null}
-            />
+            <div className="space-y-3">
+              <StudentBillingSummary
+                documentName={document.name}
+                feeLabel={feeLabel}
+                paymentRequired={paymentRequired}
+              />
+              <PaymentRequestSummary
+                documentName={document.name}
+                feeLabel={feeLabel}
+                formData={formData ?? {}}
+                paymentRequired={paymentRequired}
+              />
+            </div>
           )}
           {step === "confirmation" && (
             <PaymentConfirmation
               receiptNumber={receiptNumber}
               amount={document.fee}
+              paymentRequired={paymentRequired}
+              message={requestSubmitError}
             />
           )}
         </div>

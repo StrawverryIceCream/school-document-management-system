@@ -9,10 +9,9 @@ import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 interface PaymentProofProps {
   isRetry: boolean;
   onSubmit: (proof: File) => void | Promise<void>;
-  onBack: () => void;
 }
 
-function PaymentProof({ isRetry, onSubmit, onBack }: PaymentProofProps) {
+function PaymentProof({ isRetry, onSubmit }: PaymentProofProps) {
   const [proof, setProof] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -83,14 +82,6 @@ function PaymentProof({ isRetry, onSubmit, onBack }: PaymentProofProps) {
             : isRetry || submitError
               ? "Retry Receipt Upload"
               : "Submit Proof of Payment"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={submitting || isRetry}
-        >
-          Back to payment methods
         </Button>
       </div>
     </div>

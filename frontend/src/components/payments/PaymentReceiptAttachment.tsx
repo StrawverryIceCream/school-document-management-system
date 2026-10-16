@@ -37,14 +37,14 @@ function PaymentReceiptAttachment({
   );
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       {file ? (
-        <div className="space-y-3 rounded-lg border p-3">
+        <div className="min-w-0 space-y-3 rounded-lg border p-3">
           {previewUrl ? (
             <img
               src={previewUrl}
               alt={`Selected payment receipt: ${file.name}`}
-              className="max-h-80 w-full rounded-md object-contain"
+              className="mx-auto block max-h-80 max-w-full rounded-md object-contain"
             />
           ) : (
             <div className="flex items-center gap-3 rounded-md bg-muted p-4">

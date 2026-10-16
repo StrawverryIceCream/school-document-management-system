@@ -14,9 +14,16 @@ import { TONES } from "@/lib/tones";
 interface PaymentConfirmationProps {
   receiptNumber: string | null;
   amount: string;
+  paymentRequired: boolean;
+  message: string | null;
 }
 
-function PaymentConfirmation({ receiptNumber, amount }: PaymentConfirmationProps) {
+function PaymentConfirmation({
+  receiptNumber,
+  amount,
+  paymentRequired,
+  message,
+}: PaymentConfirmationProps) {
   return (
     <Card>
       <CardHeader>
@@ -25,15 +32,16 @@ function PaymentConfirmation({ receiptNumber, amount }: PaymentConfirmationProps
             className={`size-5 ${TONES.emerald.value}`}
             aria-hidden="true"
           />
-          Payment Submitted
+          {paymentRequired ? "Payment Submitted" : "Request Submitted"}
         </CardTitle>
         <CardDescription>
-          Your payment has been submitted for verification. You can check your
-          request status in My Requests.
+          {paymentRequired
+            ? "Your payment has been submitted for verification. You can check your request status in My Requests."
+            : "Your request has been submitted. You can check its status in My Requests."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {receiptNumber && (
+        {paymentRequired && receiptNumber && (
           <div className="rounded-lg border p-4 text-sm">
             <p className="font-medium">Receipt Number</p>
             <p className="mt-1 font-mono text-muted-foreground">
@@ -45,10 +53,17 @@ function PaymentConfirmation({ receiptNumber, amount }: PaymentConfirmationProps
             </p>
           </div>
         )}
-        <p className="text-sm text-muted-foreground">
-          Your payment proof has been uploaded and is pending staff verification.
-          You will receive a notification once verification is complete.
-        </p>
+        {paymentRequired && (
+          <p className="text-sm text-muted-foreground">
+            Your payment proof has been uploaded and is pending staff verification.
+            You will receive a notification once verification is complete.
+          </p>
+        )}
+        {message && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {message}
+          </p>
+        )}
         <Button asChild>
           <Link to="/my-request">Go to My Requests</Link>
         </Button>

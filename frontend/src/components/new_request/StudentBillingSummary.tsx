@@ -5,11 +5,13 @@ import { Card } from "@/components/ui/card";
 interface StudentBillingSummaryProps {
   documentName: string;
   feeLabel: string;
+  paymentRequired: boolean;
 }
 
 function StudentBillingSummary({
   documentName,
   feeLabel,
+  paymentRequired,
 }: StudentBillingSummaryProps) {
   const { user } = useAuth();
 
@@ -55,15 +57,21 @@ function StudentBillingSummary({
       <div className="space-y-2 px-1">
         <div className="flex items-start justify-between gap-3 text-sm">
           <span className="text-muted-foreground">{documentName}</span>
-          <span className="shrink-0 font-medium">{feeLabel}</span>
+          <span className="shrink-0 font-medium">
+            {paymentRequired ? feeLabel : "No payment required"}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-3 border-t pt-2 text-sm">
           <span className="text-muted-foreground">Additional fees</span>
           <span className="font-medium">None listed</span>
         </div>
         <div className="flex items-center justify-between gap-3 border-t pt-2">
-          <span className="text-sm font-semibold">Total Settlement Due</span>
-          <span className="text-xl font-bold text-primary">{feeLabel}</span>
+          <span className="text-sm font-semibold">
+            {paymentRequired ? "Total Settlement Due" : "Payment status"}
+          </span>
+          <span className="text-right text-base font-bold text-primary sm:text-xl">
+            {paymentRequired ? feeLabel : "No payment required"}
+          </span>
         </div>
       </div>
     </Card>
