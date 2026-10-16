@@ -19,7 +19,6 @@ async function main() {
   const end = Date.now();
 
   console.log(`✅ Migrations completed in ${end - start}ms`);
-  process.exit(0);
 }
 
 main().catch((err) => {
