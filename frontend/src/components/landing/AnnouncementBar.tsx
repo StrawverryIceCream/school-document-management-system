@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Clock, Search } from "lucide-react";
+import { getAllAnnouncements } from "@/api/announcements";
 import { Badge } from "@/components/ui/badge";
+import type { Announcement } from "@/types";
 import {
   ANNOUNCEMENT_ARIA_LABEL,
   ANNOUNCEMENT_BADGE_LABEL,
@@ -10,6 +13,18 @@ import {
 } from "@/lib/landing/announcement-bar";
 
 export default function AnnouncementBar() {
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+
+  useEffect(() => {
+    getAllAnnouncements({ isPinned: true, limit: 1 })
+      .then((res) => setAnnouncement(res.data[0] ?? null))
+      .catch(() => null); // fail silently — static fallback below
+  }, []);
+
+  const message = announcement
+    ? `${announcement.title} — ${announcement.body}`
+    : ANNOUNCEMENT_MESSAGE;
+
   return (
     <aside
       aria-label={ANNOUNCEMENT_ARIA_LABEL}
@@ -20,7 +35,7 @@ export default function AnnouncementBar() {
           <Badge className="rounded-md border-transparent bg-primary-foreground/20 text-sm font-semibold uppercase tracking-wide text-primary-foreground">
             {ANNOUNCEMENT_BADGE_LABEL}
           </Badge>
-          <span>{ANNOUNCEMENT_MESSAGE}</span>
+          <span>{message}</span>
         </div>
         <div className="flex flex-wrap items-center gap-5 text-primary-foreground/80">
           <span className="flex items-center gap-1.5">

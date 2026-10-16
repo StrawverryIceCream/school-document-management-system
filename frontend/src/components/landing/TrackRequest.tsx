@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Calendar, RefreshCw, Search, ShieldCheck, Store } from "lucide-react";
+import { getRequestById } from "@/api/requests";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,15 +16,69 @@ import {
   PIPELINE_LABEL,
   STAGES,
   STAGE_TONES,
-  TRACK_RESULT,
   TRACK_SEARCH,
   TRACK_SECTION,
 } from "@/lib/landing/track-request";
 import { BADGE_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
+import { requestStatusLabels } from "@/types";
+
+// Map request statuses to pipeline stage indices so we can show done/active/upcoming
+const STATUS_STAGE_MAP: Partial<Record<RequestStatus, number>> = {
+  pending: 0,
+  awaiting_payment: 1,
+  processing: 2,
+  on_hold: 2,
+  ready: 3,
+  claimed: 4,
+};
+
+function getStatusTone(status: RequestStatus) {
+  const toneMap: Partial<Record<RequestStatus, string>> = {
+    pending: "amber",
+    awaiting_payment: "amber",
+    processing: "brand",
+    on_hold: "rose",
+    ready: "emerald",
+    claimed: "emerald",
+    rejected: "rose",
+    cancelled: "neutral",
+  };
+  return (toneMap[status] ?? "neutral") as keyof typeof TONES;
+}
 
 export default function TrackRequest() {
-  const [reference, setReference] = useState(TRACK_SEARCH.defaultReference);
+  const [reference, setReference] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<DocumentRequestWithRelations | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = reference.trim();
+    if (!trimmed) return;
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      // The API accepts the reference number as the ID path param
+      // shortcut: using reference number as ID — works only if backend supports it, upgrade to search endpoint if needed
+      const data = await getRequestById(trimmed);
+      setResult(data);
+    } catch {
+      setError("No request found for that reference number. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const activeStageIndex =
+    result ? (STATUS_STAGE_MAP[result.status] ?? 0) : null;
 
   return (
     <section
@@ -60,7 +115,7 @@ export default function TrackRequest() {
               role="search"
               aria-label={TRACK_SEARCH.ariaLabel}
               className="flex flex-col gap-3 sm:flex-row"
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={handleSubmit}
             >
               <div className="relative flex-1">
                 <Label htmlFor={TRACK_SEARCH.inputId} className="sr-only">
@@ -74,120 +129,155 @@ export default function TrackRequest() {
                   id={TRACK_SEARCH.inputId}
                   type="text"
                   value={reference}
-                  onChange={(event) => setReference(event.target.value)}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder={TRACK_SEARCH.defaultReference}
                   className="h-12 rounded-xl bg-card pl-12 text-base font-medium md:text-base"
                 />
               </div>
               <Button
                 type="submit"
                 size="lg"
+                disabled={loading || !reference.trim()}
                 className="h-12 gap-2 rounded-xl px-7 text-base font-bold shadow-sm"
               >
-                <RefreshCw className="size-5" aria-hidden="true" />
-                {TRACK_SEARCH.submitLabel}
+                <RefreshCw
+                  className={cn("size-5", loading && "animate-spin")}
+                  aria-hidden="true"
+                />
+                {loading ? "Searching…" : TRACK_SEARCH.submitLabel}
               </Button>
             </form>
 
-            <Card className="gap-6 py-5 sm:py-6">
-              <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                      {`#${TRACK_RESULT.reference}`}
+            {error && (
+              <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                {error}
+              </p>
+            )}
+
+            {result && (
+              <Card className="gap-6 py-5 sm:py-6">
+                <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        {`#${result.referenceNumber}`}
+                      </span>
+                      <Badge
+                        className={cn(
+                          BADGE_BASE,
+                          "border-transparent font-bold",
+                          TONES[getStatusTone(result.status)].badge,
+                        )}
+                      >
+                        {requestStatusLabels[result.status]}
+                      </Badge>
+                    </div>
+                    <CardTitle
+                      role="heading"
+                      aria-level={3}
+                      className="text-xl font-bold"
+                    >
+                      {result.documentTypeName}
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Requester:{" "}
+                      {result.user?.fullName ?? "—"} •{" "}
+                      {result.user?.role ?? ""}
+                    </CardDescription>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <span className="block text-sm text-muted-foreground">
+                      Designated Counter
                     </span>
-                    <Badge
+                    <span
                       className={cn(
-                        BADGE_BASE,
-                        "border-transparent font-bold",
-                        TONES[TRACK_RESULT.statusTone].badge,
+                        VALUE_BASE,
+                        "mt-1.5 flex items-center gap-1.5 text-base leading-snug sm:justify-end",
+                        TONES.brand.value,
                       )}
                     >
-                      {TRACK_RESULT.status}
-                    </Badge>
+                      <Store className="size-5" aria-hidden="true" />
+                      {result.window?.name ?? "Not yet assigned"}
+                    </span>
                   </div>
-                  <CardTitle
-                    role="heading"
-                    aria-level={3}
-                    className="text-xl font-bold"
-                  >
-                    {TRACK_RESULT.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {TRACK_RESULT.requester}
-                  </CardDescription>
-                </div>
-                <div className="text-left sm:text-right">
-                  <span className="block text-sm text-muted-foreground">
-                    {TRACK_RESULT.counterLabel}
-                  </span>
-                  <span
-                    className={cn(
-                      VALUE_BASE,
-                      "mt-1.5 flex items-center gap-1.5 text-base leading-snug sm:justify-end",
-                      TONES.brand.value,
-                    )}
-                  >
-                    <Store className="size-5" aria-hidden="true" />
-                    {TRACK_RESULT.counter}
-                  </span>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <p className="text-base font-bold text-foreground">
-                    {PIPELINE_LABEL}
-                  </p>
-                  <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                    {STAGES.map(
-                      ({ id, label, note, icon: Icon, status }, index) => (
-                        <li
-                          key={id}
-                          aria-current={
-                            status === "active" ? "step" : undefined
-                          }
-                          className={cn(
-                            "space-y-1.5 rounded-lg border p-3",
-                            TONES[STAGE_TONES[status]].icon,
-                            status === "done" && "border-transparent",
-                            status === "active" &&
-                              "border-primary/30 ring-1 ring-primary/20",
-                            status === "upcoming" && "border-border opacity-60",
-                          )}
-                        >
-                          <div className="flex items-center gap-1.5 text-sm font-bold">
-                            <Icon
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <p className="text-base font-bold text-foreground">
+                      {PIPELINE_LABEL}
+                    </p>
+                    <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                      {STAGES.map(
+                        ({ id, label, note, icon: Icon }, index) => {
+                          const status =
+                            activeStageIndex === null
+                              ? "upcoming"
+                              : index < activeStageIndex
+                                ? "done"
+                                : index === activeStageIndex
+                                  ? "active"
+                                  : "upcoming";
+                          return (
+                            <li
+                              key={id}
+                              aria-current={
+                                status === "active" ? "step" : undefined
+                              }
                               className={cn(
-                                "size-5 shrink-0",
-                                status === "active" && "animate-spin",
+                                "space-y-1.5 rounded-lg border p-3",
+                                TONES[STAGE_TONES[status]].icon,
+                                status === "done" && "border-transparent",
+                                status === "active" &&
+                                  "border-primary/30 ring-1 ring-primary/20",
+                                status === "upcoming" &&
+                                  "border-border opacity-60",
                               )}
-                              aria-hidden="true"
-                            />
-                            {`${index + 1}. ${label}`}
-                          </div>
-                          <p className="text-sm opacity-80">{note}</p>
-                        </li>
-                      ),
-                    )}
-                  </ol>
-                </div>
+                            >
+                              <div className="flex items-center gap-1.5 text-sm font-bold">
+                                <Icon
+                                  className={cn(
+                                    "size-5 shrink-0",
+                                    status === "active" && "animate-spin",
+                                  )}
+                                  aria-hidden="true"
+                                />
+                                {`${index + 1}. ${label}`}
+                              </div>
+                              <p className="text-sm opacity-80">{note}</p>
+                            </li>
+                          );
+                        },
+                      )}
+                    </ol>
+                  </div>
 
-                <div className="flex flex-col items-center justify-between gap-2 pt-2 text-sm text-muted-foreground sm:flex-row">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="size-5" aria-hidden="true" />
-                    <span>
-                      {TRACK_RESULT.releaseLabel}{" "}
-                      <span className={cn("font-bold", TONES.neutral.value)}>
-                        {TRACK_RESULT.release}
+                  <div className="flex flex-col items-center justify-between gap-2 pt-2 text-sm text-muted-foreground sm:flex-row">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="size-5" aria-hidden="true" />
+                      <span>
+                        Estimated Release:{" "}
+                        <span className={cn("font-bold", TONES.neutral.value)}>
+                          {result.releaseDate
+                            ? new Date(result.releaseDate).toLocaleDateString(
+                                "en-PH",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                },
+                              )
+                            : `${result.turnaroundDays} business days`}
+                        </span>
                       </span>
                     </span>
-                  </span>
-                  <span className={cn("font-semibold", TONES.brand.value)}>
-                    {TRACK_RESULT.reminder}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                    <span className={cn("font-semibold", TONES.brand.value)}>
+                      Bring 1 Valid Institutional ID
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
       </div>
