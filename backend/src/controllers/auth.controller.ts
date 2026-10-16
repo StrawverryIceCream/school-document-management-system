@@ -1,9 +1,9 @@
 import crypto from "crypto";
 import { type Request, type Response } from "express";
 import bcrypt from "bcrypt";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, or } from "drizzle-orm";
 import { db } from "../db/db.js";
-import { users, emailVerifications } from "../db/schema.js";
+import { users, emailVerifications, courses } from "../db/schema.js";
 import { sendOtpEmail } from "../services/email.service.js";
 
 const BCRYPT_SALT_ROUNDS = 10;
@@ -29,8 +29,12 @@ interface SignupBody {
   studentId?: string;
   college?: string;
   course?: string;
+  collegeId?: string;
+  courseId?: string;
+  yearLevel?: number | string;
   section?: string;
   department?: string;
+  contactNumber?: string;
   otp: string;
 }
 
@@ -44,8 +48,12 @@ function toAuthUser(user: DbUser) {
     role: user.role,
     college: user.collegeId,
     course: user.courseId,
+    collegeId: user.collegeId,
+    courseId: user.courseId,
+    yearLevel: user.yearLevel,
     section: user.section,
     department: user.department,
+    contactNumber: user.contactNumber,
   };
 }
 
@@ -159,10 +167,16 @@ export const signup = async (
     const { email, password, role } = body;
     const fullName = cleanText(body.fullName);
     const studentId = cleanText(body.studentId);
-    const college = cleanText(body.college);
-    const course = cleanText(body.course);
+    const effectiveCollegeId = cleanText(body.collegeId) || cleanText(body.college);
+    const effectiveCourseId = cleanText(body.courseId) || cleanText(body.course);
     const section = cleanText(body.section);
     const department = cleanText(body.department);
+    const contactNumber = cleanText(body.contactNumber);
+    const rawYearLevel = body.yearLevel;
+    const yearLevel =
+      rawYearLevel !== undefined && rawYearLevel !== null && rawYearLevel !== ""
+        ? parseInt(String(rawYearLevel), 10)
+        : undefined;
     const otp = cleanText(body.otp);
 
     if (
@@ -191,14 +205,37 @@ export const signup = async (
         .json({ error: "A valid 6-digit verification code is required" });
     }
 
-    // Public signup requires placement details.
-    if (!college || !course) {
-      return res.status(400).json({ error: "College and course are required" });
+    if (role === "student") {
+      if (!effectiveCourseId) {
+        return res
+          .status(400)
+          .json({ error: "College and degree program are required for students" });
+      }
+      if (
+        yearLevel !== undefined &&
+        (isNaN(yearLevel) || yearLevel < 1 || yearLevel > 6)
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Year level must be between 1 and 6" });
+      }
+    } else if (role === "teacher") {
+      if (!department) {
+        return res
+          .status(400)
+          .json({ error: "Department is required for faculty" });
+      }
     }
 
-    const tooLong = [fullName, studentId, college, course, section].some(
-      (value) => value !== null && value.length > FIELD_MAX_LENGTH,
-    );
+    const tooLong = [
+      fullName,
+      studentId,
+      effectiveCollegeId,
+      effectiveCourseId,
+      section,
+      contactNumber,
+      department,
+    ].some((value) => value !== null && value.length > FIELD_MAX_LENGTH);
     if (tooLong) {
       return res.status(400).json({
         error: `Fields must be at most ${FIELD_MAX_LENGTH} characters`,
@@ -224,6 +261,27 @@ export const signup = async (
 
       if (studentIdExists) {
         return res.status(409).json({ error: "Student ID already in use" });
+      }
+    }
+
+    // Resolve course and college IDs for student placement
+    let finalCollegeId: string | null = null;
+    let finalCourseId: string | null = null;
+
+    if (role === "student" && effectiveCourseId) {
+      const courseRecord = await db.query.courses.findFirst({
+        where: or(
+          eq(courses.id, effectiveCourseId),
+          eq(courses.code, effectiveCourseId),
+        ),
+      });
+
+      if (courseRecord) {
+        finalCourseId = courseRecord.id;
+        finalCollegeId = courseRecord.collegeId;
+      } else {
+        finalCourseId = effectiveCourseId;
+        finalCollegeId = effectiveCollegeId ?? null;
       }
     }
 
@@ -282,12 +340,18 @@ export const signup = async (
         passwordHash,
         fullName,
         role,
-        collegeId: college,
-        courseId: course,
+        ...(role === "student"
+          ? {
+              collegeId: finalCollegeId,
+              courseId: finalCourseId,
+              ...(yearLevel ? { yearLevel } : {}),
+            }
+          : {}),
         emailVerifiedAt: new Date(),
-        ...(department ? { department } : {}),
+        ...(department && role === "teacher" ? { department } : {}),
         ...(studentId ? { studentId } : {}),
         ...(section ? { section } : {}),
+        ...(contactNumber ? { contactNumber } : {}),
       })
       .returning();
 

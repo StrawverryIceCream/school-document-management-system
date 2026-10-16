@@ -7,11 +7,15 @@ export interface SignupPayload {
   email: string;
   password: string;
   fullName: string;
-  department: string;
-  college: string;
-  course: string;
+  department?: string;
+  college?: string;
+  course?: string;
+  collegeId?: string;
+  courseId?: string;
+  yearLevel?: number;
   section?: string;
   studentId?: string;
+  contactNumber?: string;
   role: UserRole;
   otp: string;
 }
@@ -77,13 +81,15 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 export async function signup(payload: SignupPayload): Promise<AuthUser> {
-  const { studentId, section, ...required } = payload;
+  const { studentId, section, contactNumber, yearLevel, ...required } = payload;
 
   // Optional fields are only sent when they have a value
   const body = {
     ...required,
     ...(studentId?.trim() ? { studentId: studentId.trim() } : {}),
     ...(section?.trim() ? { section: section.trim() } : {}),
+    ...(contactNumber?.trim() ? { contactNumber: contactNumber.trim() } : {}),
+    ...(yearLevel !== undefined ? { yearLevel } : {}),
   };
 
   const res = await fetch("/api/auth/signup", {

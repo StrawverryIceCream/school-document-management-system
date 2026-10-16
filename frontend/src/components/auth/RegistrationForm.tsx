@@ -15,7 +15,6 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   DEPARTMENT_OPTIONS,
   MIN_PASSWORD_LENGTH,
-  PROGRAM_OPTIONS,
   STUDENT_ID_PREFIX,
   SYNC_BADGE_TONE,
   type FacultyRank,
@@ -39,8 +38,11 @@ export default function RegistrationForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [studentId, setStudentId] = useState(STUDENT_ID_PREFIX);
-  const [program, setProgram] = useState("");
-  const [yearSection, setYearSection] = useState("");
+  const [collegeId, setCollegeId] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [yearLevel, setYearLevel] = useState<number | undefined>(undefined);
+  const [section, setSection] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   // Display-only — signup() has no field for this yet (see lib/arch-registration.ts).
   const [studentStatus, setStudentStatus] = useState<StudentStatus>("regular");
 
@@ -58,7 +60,6 @@ export default function RegistrationForm() {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
 
-  const selectedProgram = PROGRAM_OPTIONS.find((p) => p.value === program);
   const selectedDepartment = DEPARTMENT_OPTIONS.find(
     (d) => d.value === departmentValue,
   );
@@ -85,8 +86,8 @@ export default function RegistrationForm() {
       setError("Student ID is required for students");
       return;
     }
-    if (role === "student" && !selectedProgram) {
-      setError("Select a degree program");
+    if (role === "student" && (!collegeId || !courseId)) {
+      setError("Select your college and degree program");
       return;
     }
     if (role === "teacher" && !selectedDepartment) {
@@ -117,14 +118,16 @@ export default function RegistrationForm() {
         password,
         fullName,
         role,
-        college: role === "student" ? (selectedProgram?.college ?? "") : "",
-        course: role === "student" ? (selectedProgram?.course ?? "") : "",
-        section: role === "student" ? yearSection : "",
-        department: role === "teacher" ? (selectedDepartment?.label ?? "") : "",
+        collegeId: role === "student" ? collegeId : undefined,
+        courseId: role === "student" ? courseId : undefined,
+        yearLevel: role === "student" ? yearLevel : undefined,
+        section: role === "student" ? (section.trim() || undefined) : undefined,
+        contactNumber: contactNumber.trim() || undefined,
+        department: role === "teacher" ? (selectedDepartment?.label ?? "") : undefined,
         studentId:
           role === "student" && studentId !== STUDENT_ID_PREFIX
             ? studentId
-            : "",
+            : undefined,
         otp,
       });
       await login(email, password);
@@ -200,14 +203,20 @@ export default function RegistrationForm() {
 
           {role === "student" ? (
             <StudentFields
-              program={program}
-              setProgram={setProgram}
+              collegeId={collegeId}
+              contactNumber={contactNumber}
+              courseId={courseId}
+              section={section}
+              setCollegeId={setCollegeId}
+              setContactNumber={setContactNumber}
+              setCourseId={setCourseId}
+              setSection={setSection}
               setStudentId={setStudentId}
               setStudentStatus={setStudentStatus}
-              setYearSection={setYearSection}
+              setYearLevel={setYearLevel}
               studentId={studentId}
               studentStatus={studentStatus}
-              yearSection={yearSection}
+              yearLevel={yearLevel}
             />
           ) : (
             <FacultyFields

@@ -12,14 +12,12 @@ import {
 
 const router = Router();
 
-// Protect all routes
-router.use(requireAuth);
-
-// Read routes (Accessible by staff & admin)
-router.get("/", requireRoles("admin", "staff"), getAllCourses);
-router.get("/:id", requireRoles("admin", "staff"), validateId, getCourseById);
+// Read routes (Public for registration and academic catalog)
+router.get("/", getAllCourses);
+router.get("/:id", validateId, getCourseById);
 
 // Write routes (Admin only)
+router.use(requireAuth);
 router.post("/", requireRoles("admin"), createCourse);
 router.patch("/:id", requireRoles("admin"), validateId, updateCourseById);
 router.delete("/:id", requireRoles("admin"), validateId, deleteCourseById);
