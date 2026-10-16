@@ -29,8 +29,22 @@ export const STATUS_CONFIGS: Record<RequestStatus, StatusConfig> = {
     completedSteps: 1,
     canClaim: false,
   },
+  awaiting_payment: {
+    label: "awaiting_payment",
+    caption: "Waiting to be payed",
+    tone: "neutral",
+    completedSteps: 1,
+    canClaim: false,
+  },
   processing: {
     label: "Processing",
+    caption: "Being prepared by the registrar",
+    tone: "amber",
+    completedSteps: 2,
+    canClaim: false,
+  },
+  on_hold: {
+    label: "On Hold",
     caption: "Being prepared by the registrar",
     tone: "amber",
     completedSteps: 2,
@@ -50,6 +64,13 @@ export const STATUS_CONFIGS: Record<RequestStatus, StatusConfig> = {
     completedSteps: 4,
     canClaim: false,
   },
+  rejected: {
+    label: "Rejected",
+    caption: "This request was rejected",
+    tone: "neutral",
+    completedSteps: 4,
+    canClaim: false,
+  },
   cancelled: {
     label: "Cancelled",
     caption: "This request was cancelled",
@@ -59,7 +80,12 @@ export const STATUS_CONFIGS: Record<RequestStatus, StatusConfig> = {
   },
 };
 
-export const STEP_LABELS = ["Filed", "Assessed", "Signatures", "Released"] as const;
+export const STEP_LABELS = [
+  "Filed",
+  "Assessed",
+  "Signatures",
+  "Released",
+] as const;
 
 // Width classes are indexed by completed step count (0 to 4)
 export const PROGRESS_WIDTH_CLASSES = [

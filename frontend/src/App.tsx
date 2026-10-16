@@ -25,6 +25,7 @@ import HumanResource from "./pages/HumanResource";
 import Administration from "./pages/Administration";
 import { MyRequestProvider } from "./provider/MyRequestProvider";
 import { RequestWizardProvider } from "./provider/WixardRequestProvider";
+import LandingPage from "./pages/LandingPage";
 
 export default function App() {
   return (
@@ -45,7 +46,7 @@ export default function App() {
                       }
                     >
                       <Route path="/home" element={<Home />} />
-                      <Route path="/" element={<Home />} />
+
                       <Route
                         path="/new-request/:id?"
                         element={
@@ -129,6 +130,8 @@ export default function App() {
                     </Route>
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
+                    <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/" element={<LandingPage />} />
                   </Routes>
                 </BrowserRouter>
               </MyRequestProvider>
