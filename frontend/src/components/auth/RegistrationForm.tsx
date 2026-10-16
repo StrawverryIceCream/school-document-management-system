@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { signup } from "@/api/auth";
+import { signup, sendSignupOtp } from "@/api/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import FacultyFields from "@/components/auth/FacultyFields";
 import RoleSelector from "@/components/auth/RoleSelector";
 import StudentFields from "@/components/auth/StudentFields";
 import ComplianceNotice from "@/components/auth/ComplianceNotice";
+import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DEPARTMENT_OPTIONS,
@@ -54,6 +55,8 @@ export default function RegistrationForm() {
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   const selectedProgram = PROGRAM_OPTIONS.find((p) => p.value === program);
   const selectedDepartment = DEPARTMENT_OPTIONS.find(
@@ -93,6 +96,18 @@ export default function RegistrationForm() {
 
     setLoading(true);
     try {
+      await sendSignupOtp(email);
+      setShowOtpModal(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send verification code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyOtp(otp: string) {
+    setVerifyingOtp(true);
+    try {
       const fullName = [firstName, middleInitial, lastName]
         .filter(Boolean)
         .join(" ");
@@ -110,14 +125,17 @@ export default function RegistrationForm() {
           role === "student" && studentId !== STUDENT_ID_PREFIX
             ? studentId
             : "",
+        otp,
       });
       await login(email, password);
       navigate("/home");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
+  }
+
+  async function handleResendOtp() {
+    await sendSignupOtp(email);
   }
 
   return (
@@ -239,6 +257,15 @@ export default function RegistrationForm() {
           </div>
         </div>
       </form>
+
+      <OtpVerificationModal
+        email={email}
+        loading={verifyingOtp}
+        onClose={() => setShowOtpModal(false)}
+        onResend={handleResendOtp}
+        onVerify={handleVerifyOtp}
+        open={showOtpModal}
+      />
     </Card>
   );
 }

@@ -1,8 +1,10 @@
+import crypto from "crypto";
 import { type Request, type Response } from "express";
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "../db/db.js";
-import { users } from "../db/schema.js";
+import { users, emailVerifications } from "../db/schema.js";
+import { sendOtpEmail } from "../services/email.service.js";
 
 const BCRYPT_SALT_ROUNDS = 10;
 const FIELD_MAX_LENGTH = 100;
@@ -28,6 +30,8 @@ interface SignupBody {
   college?: string;
   course?: string;
   section?: string;
+  department?: string;
+  otp: string;
 }
 
 // One shape for signup, login, and me so they can't drift apart; never includes passwordHash
@@ -61,6 +65,71 @@ function hasPgErrorCode(err: unknown, code: string): boolean {
   return hasPgErrorCode(cause, code);
 }
 
+export const sendSignupOtp = async (req: Request, res: Response) => {
+  try {
+    const rawEmail = req.body?.email;
+    if (
+      typeof rawEmail !== "string" ||
+      !rawEmail.trim() ||
+      !EMAIL_REGEX.test(rawEmail.trim())
+    ) {
+      return res
+        .status(400)
+        .json({ error: "A valid email address is required" });
+    }
+
+    const email = rawEmail.trim().toLowerCase();
+
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
+      columns: { id: true },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
+
+    // Rate limiting cooldown: 60 seconds
+    const recent = await db.query.emailVerifications.findFirst({
+      where: eq(emailVerifications.email, email),
+      orderBy: (verifications, { desc: d }) => [d(verifications.createdAt)],
+    });
+
+    const now = new Date();
+    if (recent && now.getTime() - recent.createdAt.getTime() < 60 * 1000) {
+      const waitSeconds = Math.ceil(
+        (60 * 1000 - (now.getTime() - recent.createdAt.getTime())) / 1000,
+      );
+      return res.status(429).json({
+        error: `Please wait ${waitSeconds} seconds before requesting a new code`,
+      });
+    }
+
+    // Clear older OTPs for this email
+    await db
+      .delete(emailVerifications)
+      .where(eq(emailVerifications.email, email));
+
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const otpHash = await bcrypt.hash(otp, BCRYPT_SALT_ROUNDS);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await db.insert(emailVerifications).values({
+      email,
+      otpHash,
+      expiresAt,
+    });
+
+    await sendOtpEmail(email, otp);
+
+    return res.json({ message: "Verification code sent to your email" });
+  } catch (err) {
+    console.error("[sendSignupOtp] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const me = async (req: Request, res: Response) => {
   try {
     const userId = req.session.userId;
@@ -93,6 +162,8 @@ export const signup = async (
     const college = cleanText(body.college);
     const course = cleanText(body.course);
     const section = cleanText(body.section);
+    const department = cleanText(body.department);
+    const otp = cleanText(body.otp);
 
     if (
       typeof email !== "string" ||
@@ -114,6 +185,12 @@ export const signup = async (
       return res.status(400).json({ error: "Invalid email format" });
     }
 
+    if (!otp || !/^\d{6}$/.test(otp)) {
+      return res
+        .status(400)
+        .json({ error: "A valid 6-digit verification code is required" });
+    }
+
     // Public signup requires placement details.
     if (!college || !course) {
       return res.status(400).json({ error: "College and course are required" });
@@ -128,8 +205,10 @@ export const signup = async (
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const existing = await db.query.users.findFirst({
-      where: eq(users.email, email),
+      where: eq(users.email, normalizedEmail),
       columns: { id: true },
     });
 
@@ -148,22 +227,75 @@ export const signup = async (
       }
     }
 
+    // Verify OTP against email_verifications
+    const verification = await db.query.emailVerifications.findFirst({
+      where: eq(emailVerifications.email, normalizedEmail),
+      orderBy: (verifications, { desc: d }) => [d(verifications.createdAt)],
+    });
+
+    if (!verification) {
+      return res.status(400).json({
+        error: "No active verification code found. Please request a new code.",
+      });
+    }
+
+    if (verification.expiresAt < new Date()) {
+      await db
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.id, verification.id));
+      return res.status(400).json({
+        error: "Verification code has expired. Please request a new code.",
+      });
+    }
+
+    if (verification.attempts >= 5) {
+      await db
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.id, verification.id));
+      return res.status(400).json({
+        error: "Too many failed attempts. Please request a new verification code.",
+      });
+    }
+
+    const isOtpValid = await bcrypt.compare(otp, verification.otpHash);
+    if (!isOtpValid) {
+      await db
+        .update(emailVerifications)
+        .set({ attempts: verification.attempts + 1 })
+        .where(eq(emailVerifications.id, verification.id));
+
+      const remaining = 5 - (verification.attempts + 1);
+      return res.status(400).json({
+        error:
+          remaining > 0
+            ? `Invalid verification code. ${remaining} attempt(s) remaining.`
+            : "Invalid verification code. Maximum attempts reached. Please request a new code.",
+      });
+    }
+
     const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-    // Role is never read from the body, so it always falls back to the "student" default
     const [user] = await db
       .insert(users)
       .values({
-        email,
+        email: normalizedEmail,
         passwordHash,
         fullName,
         role,
         collegeId: college,
         courseId: course,
+        emailVerifiedAt: new Date(),
+        ...(department ? { department } : {}),
         ...(studentId ? { studentId } : {}),
         ...(section ? { section } : {}),
       })
       .returning();
+
+    // Invalidate consumed OTP
+    await db
+      .delete(emailVerifications)
+      .where(eq(emailVerifications.id, verification.id));
+
 
     if (!user) {
       return res.status(500).json({ error: "Failed to create user" });

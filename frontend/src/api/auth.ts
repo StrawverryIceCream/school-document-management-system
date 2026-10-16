@@ -13,6 +13,7 @@ export interface SignupPayload {
   section?: string;
   studentId?: string;
   role: UserRole;
+  otp: string;
 }
 
 // Backend errors look like { "error": "..." }, so show that message when there is one
@@ -22,6 +23,22 @@ async function getErrorMessage(
 ): Promise<string> {
   const data: { error?: unknown } | null = await res.json().catch(() => null);
   return typeof data?.error === "string" ? data.error : fallback;
+}
+
+export async function sendSignupOtp(
+  email: string,
+): Promise<{ message: string }> {
+  const res = await fetch("/api/auth/send-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await getErrorMessage(res, "Failed to send verification code"));
+  }
+  return res.json();
 }
 
 export async function login(

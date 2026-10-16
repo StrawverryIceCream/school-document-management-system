@@ -217,6 +217,19 @@ export const passwordResetTokens = pgTable(
   (table) => [index("password_reset_tokens_user_id_idx").on(table.userId)],
 );
 
+export const emailVerifications = pgTable(
+  "email_verifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    otpHash: text("otp_hash").notNull(),
+    expiresAt: tz("expires_at").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: tz("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("email_verifications_email_idx").on(table.email)],
+);
+
 /* -------------------------------------------------------------------------- */
 /*  Windows (service counters) and staff assignment                           */
 /* -------------------------------------------------------------------------- */
