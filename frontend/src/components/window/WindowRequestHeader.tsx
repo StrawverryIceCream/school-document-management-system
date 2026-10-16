@@ -1,8 +1,4 @@
-import {
-  ArrowLeft,
-  CircleAlert,
-  LoaderCircle,
-} from "lucide-react";
+import { ArrowLeft, CircleAlert, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useWindowView } from "@/hooks/useWindowView";
 import { Button } from "@/components/ui/button";
@@ -27,7 +23,6 @@ export function WindowRequestHeader() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-
         <Button
           variant="ghost"
           size="sm"
@@ -38,36 +33,32 @@ export function WindowRequestHeader() {
           Guidelines
         </Button>
       </div>
-
       <section className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={clearView}
-            className="-ml-2 mb-1 h-8 gap-1.5 text-primary hover:text-primary"
+            className="-ml-2 mb-1 h-8 gap-1.5"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             Back to Windows
           </Button>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1 className="text-3xl font-bold tracking-normal">
               {collegeTitle} Requests
             </h1>
-            <Badge
-              variant="secondary"
-              className="bg-muted text-muted-foreground font-mono text-sm hover:bg-muted"
-            >
+            <Badge variant="secondary" className="font-mono text-sm">
               Queue #{departmentRequests.length}
             </Badge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             All document requests submitted by {collegeDescription} students,
             faculty, and professors
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm">
             <span
               className={cn(
                 "size-2 rounded-full",
@@ -79,7 +70,11 @@ export function WindowRequestHeader() {
               )}
             />
             <span className="font-medium">
-              {error ? "Service Unavailable" : loading ? "Connecting" : "Service Active"}
+              {error
+                ? "Service Unavailable"
+                : loading
+                  ? "Connecting"
+                  : "Service Active"}
             </span>
             <span className="text-muted-foreground">| {collegeTitle} Desk</span>
           </div>

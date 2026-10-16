@@ -73,7 +73,7 @@ export function WindowRequestDialogs() {
                     (window) =>
                       window.id ===
                       requestWindowsById[String(selectedRequest.id)],
-                  )?.label ?? "Window 1 (Registrar)",
+                  )?.label ?? "Unassigned",
                 ],
               ].map(([label, value]) => (
                 <div

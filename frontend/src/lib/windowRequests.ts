@@ -25,6 +25,12 @@ export const REQUEST_WINDOWS = [
 
 export type RequestWindow = (typeof REQUEST_WINDOWS)[number]["id"];
 
+export type CollegeIdentity = {
+  id?: string | null;
+  code?: string | null;
+  name?: string | null;
+};
+
 const COLLEGE_WINDOWS: Record<string, Exclude<RequestWindow, "all">> = {
   cos: "window-1",
   "college of science": "window-1",
@@ -33,14 +39,33 @@ const COLLEGE_WINDOWS: Record<string, Exclude<RequestWindow, "all">> = {
   cafa: "window-3",
   "college of architecture and fine arts": "window-3",
   cmms: "window-4",
-  "college of management & multidisciplinary studies": "window-4",
+  "college of management and multidisciplinary studies": "window-4",
   cit: "window-5",
   "college of information technology": "window-5",
   cie: "window-6",
   "college of industrial education": "window-6",
 };
 
-export function getRequestWindowForCollege(collegeName: string | null | undefined) {
-  const college = collegeName?.trim().toLowerCase();
-  return college ? (COLLEGE_WINDOWS[college] ?? "window-1") : "window-1";
+export function getRequestWindowForCollege(
+  college: string | CollegeIdentity | null | undefined,
+): Exclude<RequestWindow, "all"> | undefined {
+  const identities =
+    typeof college === "string"
+      ? [college]
+      : [college?.code, college?.name, college?.id];
+
+  for (const identity of identities) {
+    const normalized = identity
+      ?.toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+    const requestWindow = normalized
+      ? COLLEGE_WINDOWS[normalized]
+      : undefined;
+    if (requestWindow) return requestWindow;
+  }
+
+  return undefined;
 }

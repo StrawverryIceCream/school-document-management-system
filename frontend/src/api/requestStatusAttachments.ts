@@ -10,7 +10,7 @@ export interface GetRequestAttachmentsParams {
 }
 
 export interface PaginatedRequestAttachmentsResponse {
-  data: GetRequestAttachmentsParams[];
+  data: RequestAttachment[];
   pagination: {
     page: number;
     limit: number;

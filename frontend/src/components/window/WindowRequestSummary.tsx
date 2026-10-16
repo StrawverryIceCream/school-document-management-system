@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { BadgeCheck, Folder, Hourglass, Timer } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { useWindowView } from "@/hooks/useWindowView";
 import { ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
@@ -31,82 +30,83 @@ export function WindowRequestSummary() {
     (request) => request.status === "ready",
   ).length;
 
+  const summaryCards = [
+    {
+      label: "Total Requests",
+      value: departmentRequests.length,
+      icon: Folder,
+      tone: TONES.neutral,
+      description: "Active in queue",
+    },
+    {
+      label: "Pending Review",
+      value: pendingCount,
+      icon: Hourglass,
+      tone: TONES.amber,
+      description: "Awaiting evaluation",
+    },
+    {
+      label: "Ready for Release",
+      value: readyCount,
+      icon: BadgeCheck,
+      tone: TONES.emerald,
+      description: "Cleared pickups",
+    },
+    {
+      label: "Avg Turnaround",
+      value: averageTurnaround,
+      icon: Timer,
+      tone: TONES.red,
+      description: "Target < 3.0d",
+    },
+  ];
+
   return (
     <section
       aria-label="Request queue summary"
       className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
-      <Card className="min-h-26 rounded-2xl border-0 bg-card py-0 shadow-sm">
-        <CardContent className="flex min-h-26 flex-col justify-between p-3">
-          <div className="flex items-center justify-between gap-3">
+      {summaryCards.map(({ label, value, icon: Icon, tone, description }) => (
+        <div
+          key={label}
+          className="relative h-28 rounded-xl border border-border bg-card p-4 shadow-sm"
+        >
+          <div
+            className={cn(
+              ICON_BOX_BASE,
+              "absolute right-3 top-3 size-8",
+              tone.icon,
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </div>
+          <div className="flex h-full flex-col justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Total Requests
+              {label}
             </p>
-            <span className={cn(ICON_BOX_BASE, "size-7", TONES.neutral.icon)} aria-hidden="true">
-              <Folder className="size-4" />
-            </span>
+            <div className="flex items-end justify-between gap-2">
+              <p className={cn(VALUE_BASE, "text-4xl", tone.value)}>
+                {value}
+                {label === "Avg Turnaround" && value !== "—" && (
+                  <span className="ml-1 text-base font-medium text-muted-foreground">
+                    d
+                  </span>
+                )}
+              </p>
+              <p
+                className={cn(
+                  "pb-1 text-right text-sm font-medium",
+                  label === "Avg Turnaround"
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : "text-muted-foreground",
+                )}
+              >
+                {description}
+              </p>
+            </div>
           </div>
-          <div className="flex items-end justify-between gap-3">
-            <p className={cn(VALUE_BASE, "text-4xl")}>{departmentRequests.length}</p>
-            <p className="pb-1 text-sm font-medium text-muted-foreground">Active in queue</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="min-h-26 rounded-2xl border-0 bg-card py-0 shadow-sm">
-        <CardContent className="flex min-h-26 flex-col justify-between p-3">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Pending Review
-            </p>
-            <span className={cn(ICON_BOX_BASE, "size-7", TONES.amber.icon)} aria-hidden="true">
-              <Hourglass className="size-4" />
-            </span>
-          </div>
-          <div className="flex items-end justify-between gap-3">
-            <p className={cn(VALUE_BASE, "text-4xl", TONES.amber.value)}>{pendingCount}</p>
-            <p className="pb-1 text-sm font-medium text-muted-foreground">Awaiting evaluation</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="min-h-26 rounded-2xl border-0 bg-card py-0 shadow-sm">
-        <CardContent className="flex min-h-26 flex-col justify-between p-3">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Ready for Release
-            </p>
-            <span className={cn(ICON_BOX_BASE, "size-7", TONES.emerald.icon)} aria-hidden="true">
-              <BadgeCheck className="size-4" />
-            </span>
-          </div>
-          <div className="flex items-end justify-between gap-3">
-            <p className={cn(VALUE_BASE, "text-4xl", TONES.emerald.value)}>{readyCount}</p>
-            <p className="pb-1 text-sm font-medium text-muted-foreground">Cleared pickups</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="min-h-26 rounded-2xl border-0 bg-card py-0 shadow-sm">
-        <CardContent className="flex min-h-26 flex-col justify-between p-3">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Avg Turnaround
-            </p>
-            <span className={cn(ICON_BOX_BASE, "size-7", TONES.neutral.icon)} aria-hidden="true">
-              <Timer className="size-4 text-destructive" />
-            </span>
-          </div>
-          <div className="flex items-end justify-between gap-3">
-            <p className={cn(VALUE_BASE, "text-4xl")}>
-              {averageTurnaround}
-              {averageTurnaround !== "—" && (
-                <span className="ml-1 text-base font-medium text-muted-foreground">d</span>
-              )}
-            </p>
-            <p className="pb-1 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-              Target &lt; 3.0d
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      ))}
     </section>
   );
 }

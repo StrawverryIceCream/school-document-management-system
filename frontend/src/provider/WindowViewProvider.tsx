@@ -1,5 +1,6 @@
 // provider/WindowViewProvider.tsx
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   WindowViewContext,
   type StatusFilter,
@@ -21,11 +22,8 @@ const REQUESTS_PAGE_SIZE = 100;
 
 function getUserCollege(
   user: DocumentRequestWithRelations["user"],
-): string | undefined {
-  return (
-    (user as unknown as { college?: string | null } | null | undefined)
-      ?.college ?? undefined
-  );
+) {
+  return user?.college;
 }
 
 const TILES: WindowTile[] = [
@@ -91,7 +89,9 @@ export function WindowViewProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [activeView, setActiveView] = useState<string | null>(null);
+  const { pathname } = useLocation();
+  const collegeRoute = pathname.match(/^\/windows\/([^/]+)/)?.[1] ?? null;
+  const [activeView, setActiveView] = useState<string | null>(collegeRoute);
   const [requests, setRequests] = useState<DocumentRequestWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,17 +162,13 @@ export function WindowViewProvider({
     const selectedCollege = TILES.find((tile) => tile.id === activeView);
     if (!selectedCollege) return [];
 
-    const collegeNames = new Set(
-      [
-        selectedCollege.id,
-        selectedCollege.title,
-        selectedCollege.description,
-      ].map((name) => name.trim().toLowerCase()),
-    );
+    const selectedWindow = getRequestWindowForCollege(selectedCollege.id);
 
     return requests.filter((request) => {
-      const college = getUserCollege(request.user)?.trim().toLowerCase();
-      return college ? collegeNames.has(college) : false;
+      const requestWindow = getRequestWindowForCollege(
+        getUserCollege(request.user),
+      );
+      return selectedWindow !== undefined && requestWindow === selectedWindow;
     });
   }, [activeView, requests]);
 

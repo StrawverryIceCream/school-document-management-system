@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -26,6 +26,7 @@ import Administration from "./pages/Administration";
 import { MyRequestProvider } from "./provider/MyRequestProvider";
 import { RequestWizardProvider } from "./provider/WixardRequestProvider";
 import LandingPage from "./pages/LandingPage";
+import WindowRequestReview from "./pages/WindowRequestReview";
 
 export default function App() {
   return (
@@ -89,11 +90,18 @@ export default function App() {
                         element={
                           <RequireRole allowedRoles={["admin", "staff"]}>
                             <WindowViewProvider>
-                              <Windows />
+                              <Outlet />
                             </WindowViewProvider>
                           </RequireRole>
                         }
-                      />
+                      >
+                        <Route index element={<Windows />} />
+                        <Route path=":collegeId" element={<Windows />} />
+                        <Route
+                          path=":collegeId/requests/:requestId"
+                          element={<WindowRequestReview />}
+                        />
+                      </Route>
                       <Route
                         path="/administration"
                         element={

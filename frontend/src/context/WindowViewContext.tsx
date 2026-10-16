@@ -23,7 +23,7 @@ interface WindowViewContextType {
   selectView: (id: string) => void;
   clearView: () => void;
   departmentRequests: DocumentRequestWithRelations[];
-  requestWindowsById: Record<string, RequestWindow>;
+  requestWindowsById: Record<string, Exclude<RequestWindow, "all"> | undefined>;
   visibleRequests: DocumentRequestWithRelations[];
   loading: boolean;
   error: string | null;

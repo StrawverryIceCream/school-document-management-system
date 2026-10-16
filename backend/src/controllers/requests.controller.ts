@@ -40,9 +40,8 @@ const REQUESTER_COLUMNS = {
   fullName: true,
   email: true,
   role: true,
-  college: true,
+  collegeId: true,
   department: true,
-  course: true,
   section: true,
 } as const;
 
@@ -242,7 +241,12 @@ export async function getAllRequests(
       db.query.documentRequests.findMany({
         where: whereClause,
         with: {
-          user: { columns: REQUESTER_COLUMNS },
+          user: {
+            columns: REQUESTER_COLUMNS,
+            with: {
+              college: { columns: { id: true, code: true, name: true } },
+            },
+          },
           documentType: true,
         },
         orderBy: [desc(documentRequests.createdAt)],
@@ -279,7 +283,12 @@ export async function getRequestById(
     const request = await db.query.documentRequests.findFirst({
       where: eq(documentRequests.id, id),
       with: {
-        user: { columns: REQUESTER_COLUMNS },
+        user: {
+          columns: REQUESTER_COLUMNS,
+          with: {
+            college: { columns: { id: true, code: true, name: true } },
+          },
+        },
         documentType: true,
         payments: true,
       },
@@ -289,7 +298,10 @@ export async function getRequestById(
       return res.status(404).json({ error: "Request not found" });
     }
 
-    return res.json(request);
+    return res.json({
+      ...request,
+      availableTransitions: STATUS_TRANSITIONS[request.status],
+    });
   } catch (err) {
     console.error("[getRequestById] error:", err);
     return res.status(500).json({ error: "Internal server error" });

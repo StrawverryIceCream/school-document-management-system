@@ -55,9 +55,12 @@ export function WindowRequestFilters() {
     const counts: Record<StatusFilter, number> = {
       all: 0,
       pending: 0,
+      awaiting_payment: 0,
       processing: 0,
+      on_hold: 0,
       ready: 0,
       claimed: 0,
+      rejected: 0,
       cancelled: 0,
     };
     departmentRequests.forEach((request) => {
@@ -69,15 +72,16 @@ export function WindowRequestFilters() {
         requestWindowsById[String(request.id)] === windowFilter;
       if (matchesDocument && matchesWindow) counts[request.status] += 1;
     });
-    counts.all = Object.values(counts)
-      .slice(1)
+    counts.all = Object.entries(counts)
+      .filter(([status]) => status !== "all")
+      .map(([, count]) => count)
       .reduce((total, count) => total + count, 0);
     return counts;
   }, [departmentRequests, documentFilter, requestWindowsById, windowFilter]);
 
   return (
-    <section className="space-y-3 rounded-xl border bg-card p-4">
-      <div className="flex flex-col gap-3 lg:flex-row">
+    <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <div className="grid items-end gap-4 lg:grid-cols-3">
         <div className="relative min-w-0 flex-1">
           <Search
             className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -88,7 +92,7 @@ export function WindowRequestFilters() {
             role="searchbox"
             aria-label="Search requests"
             placeholder="Search requester, document type, student ID, or tracking code..."
-            className="h-10 pl-9 pr-12"
+            className="h-10 rounded-lg pl-9 pr-12"
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
@@ -106,7 +110,7 @@ export function WindowRequestFilters() {
             setCurrentPage(1);
           }}
         >
-          <SelectTrigger className="h-10 w-full lg:w-52">
+          <SelectTrigger className="h-10 w-full rounded-lg">
             <SelectValue placeholder="All Document Types" />
           </SelectTrigger>
           <SelectContent>
@@ -130,7 +134,7 @@ export function WindowRequestFilters() {
             }
           }}
         >
-          <SelectTrigger className="h-10 w-full lg:w-56">
+          <SelectTrigger className="h-10 w-full rounded-lg">
             <SelectValue placeholder="All Windows" />
           </SelectTrigger>
           <SelectContent>

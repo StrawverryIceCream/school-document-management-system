@@ -7,8 +7,8 @@ import { WindowRequestTable } from "@/components/window/WindowRequestTable";
 
 function WindowRequestTableView() {
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3 px-4 py-2 sm:px-6 lg:px-8">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+      <div className="space-y-4">
         <WindowRequestHeader />
         <WindowRequestSummary />
         <WindowRequestFilters />
