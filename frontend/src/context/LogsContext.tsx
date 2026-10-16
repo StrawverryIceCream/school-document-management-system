@@ -1,9 +1,11 @@
 import { createContext } from "react";
 
+export type LogType = "request" | "payment" | "account" | "document";
+
 export interface ActivityLog {
   id: string;
   userId: string;
-  type: "request" | "payment" | "account" | "document";
+  type: string;
   message: string;
   createdAt: string;
 }
@@ -25,13 +27,13 @@ export interface LogStats {
 
 export interface LogsContextType {
   logs: LogEntry[];
-  stats: LogStats | null; // 👈 new
+  stats: LogStats | null; // 
   loading: boolean;
   error: string | null;
   search: string;
   setSearch: (value: string) => void;
-  typeFilter: "all" | ActivityLog["type"];
-  setTypeFilter: (value: "all" | ActivityLog["type"]) => void;
+  typeFilter: "all" | LogType;
+  setTypeFilter: (value: "all" | LogType) => void;
   refreshLogs: () => Promise<void>;
 }
 
