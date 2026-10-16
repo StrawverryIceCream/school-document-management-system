@@ -1,9 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLogs } from "@/hooks/useLogs";
-import type { ActivityLog } from "@/context/LogsContext";
+import type { LogType } from "@/context/LogsContext";
 
-const FILTERS: Array<{ value: "all" | ActivityLog["type"]; label: string }> = [
+const FILTERS: Array<{ value: "all" | LogType; label: string }> = [
   { value: "all", label: "All" },
   { value: "request", label: "Request" },
   { value: "payment", label: "Payment" },
