@@ -3,11 +3,18 @@ import { REQUEST_STATUS_CONFIG } from "@/lib/request";
 import { cn } from "@/lib/utils";
 import type { RequestStatus } from "@/types";
 
-type RequestStatusBadgeProps = Omit<React.ComponentProps<typeof Badge>, "children"> & {
+type RequestStatusBadgeProps = Omit<
+  React.ComponentProps<typeof Badge>,
+  "children"
+> & {
   status: RequestStatus;
 };
 
-function RequestStatusBadge({ className, status, ...props }: RequestStatusBadgeProps) {
+function RequestStatusBadge({
+  className,
+  status,
+  ...props
+}: RequestStatusBadgeProps) {
   const { label, badgeClassName, dotClassName } = REQUEST_STATUS_CONFIG[status];
 
   return (
@@ -20,7 +27,10 @@ function RequestStatusBadge({ className, status, ...props }: RequestStatusBadgeP
       )}
       {...props}
     >
-      <span className={cn("size-2 rounded-full", dotClassName)} aria-hidden="true" />
+      <span
+        className={cn("size-2 rounded-full", dotClassName)}
+        aria-hidden="true"
+      />
       {label}
     </Badge>
   );

@@ -4,11 +4,14 @@ import dotenv from "dotenv";
 import session from "express-session";
 import authRouter from "./routes/auth.routes.js";
 import usersRouter from "./routes/users.routes.js";
-import documentRouter from "./routes/document.routes.js";
+import documentRouter from "./routes/documents.routes.js";
 import requestsRouter from "./routes/requests.routes.js";
 import notificationsRouter from "./routes/notifications.routes.js";
 import paymentsRouter from "./routes/payments.routes.js";
-
+import coursesRouter from "./routes/courses.routes.js";
+import collegesRouter from "./routes/colleges.routes.js";
+import appointmentsRouter from "./routes/appointments.routes.js";
+import announcementsRouter from "./routes/announcements.routes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,9 +46,13 @@ app.get("/", (req, res) => res.send("hello"));
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/courses", coursesRouter);
+app.use("/api/colleges", collegesRouter);
 app.use("/api/documents", documentRouter);
 app.use("/api/requests", requestsRouter);
 app.use("/api/payments", paymentsRouter);
+app.use("/api/appointments", appointmentsRouter);
+app.use("/api/announcements", announcementsRouter);
 app.use("/api/notifications", notificationsRouter);
 
 app.use((req, res) => {

@@ -1,25 +1,34 @@
+import { useEffect, useState } from "react";
 import { ChevronRight, FileStack, LayoutGrid } from "lucide-react";
+import { getAllColleges } from "@/api/colleges";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-import {
-  ACTIVE_UNITS_LABEL,
-  COLLEGES,
-  TOTAL_IN_QUEUE_LABEL,
-  WINDOWS_SECTION,
-  getQueueTone,
-} from "@/lib/landing/college-window";
-import { BADGE_BASE, TONES, VALUE_BASE } from "@/lib/tones";
+import { WINDOWS_SECTION } from "@/lib/landing/college-window";
+import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import type { College } from "@/types";
 
 export default function CollegeWindows() {
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAllColleges({ isActive: true, limit: 50 })
+      .then((res) => setColleges(res.data))
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeUnitsLabel = `${colleges.length} Academic Units Active`;
+
   return (
     <section
       id={WINDOWS_SECTION.id}
@@ -61,7 +70,7 @@ export default function CollegeWindows() {
                 className={cn("size-2 rounded-full", TONES.emerald.dot)}
                 aria-hidden="true"
               />
-              {ACTIVE_UNITS_LABEL}
+              {loading ? "Loading…" : activeUnitsLabel}
             </Badge>
             <Badge
               className={cn(
@@ -71,103 +80,95 @@ export default function CollegeWindows() {
               )}
             >
               <FileStack className="size-4" aria-hidden="true" />
-              {TOTAL_IN_QUEUE_LABEL}
+              Registrar Document Services
             </Badge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {COLLEGES.map((college) => {
-            const Icon = college.icon;
-            const queueTone = getQueueTone(college.pending);
-
-            return (
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
               <Card
-                key={college.code}
-                className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md"
-              >
-                <CardHeader
-                  className={cn("gap-0 p-5", TONES[college.tone].icon)}
+                key={i}
+                className="h-48 animate-pulse gap-0 overflow-hidden bg-muted py-0"
+              />
+            ))}
+          </div>
+        ) : colleges.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">
+            No active colleges found.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {colleges.map((college, index) => {
+              // Cycle through visual tones since the API has no tone field
+              const toneKeys = [
+                "brand",
+                "amber",
+                "neutral",
+                "rose",
+                "sky",
+                "emerald",
+              ] as const;
+              const tone = toneKeys[index % toneKeys.length];
+
+              return (
+                <Card
+                  key={college.id}
+                  className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <Badge className="rounded-md border-transparent bg-card/70 text-sm font-semibold uppercase tracking-wider text-foreground">
-                      {college.house}
-                    </Badge>
-                    <Icon className="size-6" aria-hidden="true" />
-                  </div>
-                  <CardTitle className="mt-3 text-xl font-bold">
-                    {college.name}
-                  </CardTitle>
-                  <CardDescription className="mt-1 text-sm text-current opacity-80">
-                    {college.tagline}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="flex-1 space-y-4 p-5">
-                  <dl className="space-y-2.5 text-base">
+                  <CardHeader className={cn("gap-0 p-5", TONES[tone].icon)}>
                     <div className="flex items-center justify-between gap-3">
-                      <dt className="text-muted-foreground">Current Queue:</dt>
-                      <dd>
-                        <Badge
-                          className={cn(
-                            BADGE_BASE,
-                            "rounded-md border-transparent font-bold",
-                            TONES[queueTone].badge,
-                          )}
-                        >
-                          {`${college.pending} Pending Requests`}
-                        </Badge>
-                      </dd>
+                      <Badge className="rounded-md border-transparent bg-card/70 text-sm font-semibold uppercase tracking-wider text-foreground">
+                        {college.code}
+                      </Badge>
                     </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="text-muted-foreground">
-                        Active Counters:
-                      </dt>
-                      <dd
-                        className={cn(
-                          VALUE_BASE,
-                          "text-base leading-snug",
-                          TONES.neutral.value,
-                        )}
-                      >
-                        {college.counters}
-                      </dd>
-                    </div>
-                  </dl>
+                    <CardTitle className="mt-3 text-xl font-bold">
+                      {college.name}
+                    </CardTitle>
+                    <CardDescription className="mt-1 text-sm text-current opacity-80">
+                      Est. code: {college.code}
+                    </CardDescription>
+                  </CardHeader>
 
-                  <ul className="flex flex-wrap gap-2 pt-1">
-                    {college.documents.map(({ label, count }) => (
-                      <li key={label}>
-                        <Badge
-                          className={cn(
-                            BADGE_BASE,
-                            "rounded-md border-transparent px-2.5 py-0.5 font-mono font-medium",
-                            TONES.neutral.badge,
-                          )}
-                        >
-                          {`${label} (${count})`}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
+                  <CardContent className="flex-1 space-y-4 p-5">
+                    <dl className="space-y-2.5 text-base">
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="text-muted-foreground">Status:</dt>
+                        <dd>
+                          <Badge
+                            className={cn(
+                              BADGE_BASE,
+                              "rounded-md border-transparent font-bold",
+                              college.isActive
+                                ? TONES.emerald.badge
+                                : TONES.neutral.badge,
+                            )}
+                          >
+                            {college.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </dd>
+                      </div>
+                    </dl>
+                  </CardContent>
 
-                <CardFooter className="p-5 pt-0">
-                  <a
-                    href={college.queueHref}
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "lg" }),
-                      "w-full gap-1.5 text-base font-bold",
-                    )}
-                  >
-                    {college.queueLabel}
-                    <ChevronRight className="size-5" aria-hidden="true" />
-                  </a>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
+                  <CardFooter className="p-5 pt-0">
+                    <a
+                      href="#login"
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "lg" }),
+                        "w-full gap-1.5 text-base font-bold",
+                      )}
+                    >
+                      View {college.code} Queue
+                      <ChevronRight className="size-5" aria-hidden="true" />
+                    </a>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -14,10 +14,19 @@ import type { WindowTile } from "@/pages/Windows";
 import {
   getRequestWindowForCollege,
   type RequestWindow,
-} from "@/lib/window-requests";
+} from "@/lib/windowRequests";
 
 // Matches the backend's MAX_LIMIT; one page can never return more than this
 const REQUESTS_PAGE_SIZE = 100;
+
+function getUserCollege(
+  user: DocumentRequestWithRelations["user"],
+): string | undefined {
+  return (
+    (user as unknown as { college?: string | null } | null | undefined)
+      ?.college ?? undefined
+  );
+}
 
 const TILES: WindowTile[] = [
   {
@@ -162,7 +171,7 @@ export function WindowViewProvider({
     );
 
     return requests.filter((request) => {
-      const college = request.user?.college?.trim().toLowerCase();
+      const college = getUserCollege(request.user)?.trim().toLowerCase();
       return college ? collegeNames.has(college) : false;
     });
   }, [activeView, requests]);
@@ -172,7 +181,7 @@ export function WindowViewProvider({
       Object.fromEntries(
         requests.map((request) => [
           String(request.id),
-          getRequestWindowForCollege(request.user?.college),
+          getRequestWindowForCollege(getUserCollege(request.user)),
         ]),
       ),
     [requests],

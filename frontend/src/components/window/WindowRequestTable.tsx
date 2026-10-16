@@ -31,7 +31,7 @@ import {
   REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,
   WINDOW_REQUEST_PAGE_SIZE,
-} from "@/lib/window-requests";
+} from "@/lib/windowRequests";
 
 export function WindowRequestTable() {
   const {

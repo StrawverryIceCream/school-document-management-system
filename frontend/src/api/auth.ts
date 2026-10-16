@@ -7,12 +7,17 @@ export interface SignupPayload {
   email: string;
   password: string;
   fullName: string;
-  department: string;
-  college: string;
-  course: string;
+  department?: string;
+  college?: string;
+  course?: string;
+  collegeId?: string;
+  courseId?: string;
+  yearLevel?: number;
   section?: string;
   studentId?: string;
+  contactNumber?: string;
   role: UserRole;
+  otp: string;
 }
 
 // Backend errors look like { "error": "..." }, so show that message when there is one
@@ -22,6 +27,22 @@ async function getErrorMessage(
 ): Promise<string> {
   const data: { error?: unknown } | null = await res.json().catch(() => null);
   return typeof data?.error === "string" ? data.error : fallback;
+}
+
+export async function sendSignupOtp(
+  email: string,
+): Promise<{ message: string }> {
+  const res = await fetch("/api/auth/send-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await getErrorMessage(res, "Failed to send verification code"));
+  }
+  return res.json();
 }
 
 export async function login(
@@ -60,13 +81,15 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 export async function signup(payload: SignupPayload): Promise<AuthUser> {
-  const { studentId, section, ...required } = payload;
+  const { studentId, section, contactNumber, yearLevel, ...required } = payload;
 
   // Optional fields are only sent when they have a value
   const body = {
     ...required,
     ...(studentId?.trim() ? { studentId: studentId.trim() } : {}),
     ...(section?.trim() ? { section: section.trim() } : {}),
+    ...(contactNumber?.trim() ? { contactNumber: contactNumber.trim() } : {}),
+    ...(yearLevel !== undefined ? { yearLevel } : {}),
   };
 
   const res = await fetch("/api/auth/signup", {

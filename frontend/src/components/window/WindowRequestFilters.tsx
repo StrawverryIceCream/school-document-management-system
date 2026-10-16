@@ -12,7 +12,7 @@ import {
 import { useWindowView } from "@/hooks/useWindowView";
 import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import { REQUEST_WINDOWS } from "@/lib/window-requests";
+import { REQUEST_WINDOWS } from "@/lib/windowRequests";
 import type { StatusFilter } from "@/context/WindowViewContext";
 
 const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [
@@ -164,7 +164,9 @@ export function WindowRequestFilters() {
                   : filter === id
                     ? "bg-foreground text-background hover:bg-foreground/90 hover:text-background"
                     : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-              filter === id && id !== "all" && id !== "pending" &&
+              filter === id &&
+                id !== "all" &&
+                id !== "pending" &&
                 "ring-1 ring-foreground/40",
             )}
           >

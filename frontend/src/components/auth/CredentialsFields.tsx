@@ -44,7 +44,7 @@ function CredentialsFields({
           <Input
             id="first-name"
             onChange={(e) => setFirstName(e.target.value)}
-            placeholder="e.g. Alyson"
+            placeholder="e.g. Juan"
             required
             value={firstName}
           />
@@ -88,7 +88,7 @@ function CredentialsFields({
         <Input
           id="institutional-email"
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="alyson.benerao@university.edu.ph"
+          placeholder="juan.dela.cruz@university.edu.ph"
           required
           type="email"
           value={email}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { signup } from "@/api/auth";
+import { signup, sendSignupOtp } from "@/api/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,11 +10,11 @@ import FacultyFields from "@/components/auth/FacultyFields";
 import RoleSelector from "@/components/auth/RoleSelector";
 import StudentFields from "@/components/auth/StudentFields";
 import ComplianceNotice from "@/components/auth/ComplianceNotice";
+import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DEPARTMENT_OPTIONS,
   MIN_PASSWORD_LENGTH,
-  PROGRAM_OPTIONS,
   STUDENT_ID_PREFIX,
   SYNC_BADGE_TONE,
   type FacultyRank,
@@ -38,8 +38,11 @@ export default function RegistrationForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [studentId, setStudentId] = useState(STUDENT_ID_PREFIX);
-  const [program, setProgram] = useState("");
-  const [yearSection, setYearSection] = useState("");
+  const [collegeId, setCollegeId] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [yearLevel, setYearLevel] = useState<number | undefined>(undefined);
+  const [section, setSection] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   // Display-only — signup() has no field for this yet (see lib/arch-registration.ts).
   const [studentStatus, setStudentStatus] = useState<StudentStatus>("regular");
 
@@ -54,8 +57,9 @@ export default function RegistrationForm() {
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
-  const selectedProgram = PROGRAM_OPTIONS.find((p) => p.value === program);
   const selectedDepartment = DEPARTMENT_OPTIONS.find(
     (d) => d.value === departmentValue,
   );
@@ -82,8 +86,8 @@ export default function RegistrationForm() {
       setError("Student ID is required for students");
       return;
     }
-    if (role === "student" && !selectedProgram) {
-      setError("Select a degree program");
+    if (role === "student" && (!collegeId || !courseId)) {
+      setError("Select your college and degree program");
       return;
     }
     if (role === "teacher" && !selectedDepartment) {
@@ -92,6 +96,18 @@ export default function RegistrationForm() {
     }
 
     setLoading(true);
+    try {
+      await sendSignupOtp(email);
+      setShowOtpModal(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send verification code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyOtp(otp: string) {
+    setVerifyingOtp(true);
     try {
       const fullName = [firstName, middleInitial, lastName]
         .filter(Boolean)
@@ -102,22 +118,27 @@ export default function RegistrationForm() {
         password,
         fullName,
         role,
-        college: role === "student" ? (selectedProgram?.college ?? "") : "",
-        course: role === "student" ? (selectedProgram?.course ?? "") : "",
-        section: role === "student" ? yearSection : "",
-        department: role === "teacher" ? (selectedDepartment?.label ?? "") : "",
+        collegeId: role === "student" ? collegeId : undefined,
+        courseId: role === "student" ? courseId : undefined,
+        yearLevel: role === "student" ? yearLevel : undefined,
+        section: role === "student" ? (section.trim() || undefined) : undefined,
+        contactNumber: contactNumber.trim() || undefined,
+        department: role === "teacher" ? (selectedDepartment?.label ?? "") : undefined,
         studentId:
           role === "student" && studentId !== STUDENT_ID_PREFIX
             ? studentId
-            : "",
+            : undefined,
+        otp,
       });
       await login(email, password);
       navigate("/home");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
+  }
+
+  async function handleResendOtp() {
+    await sendSignupOtp(email);
   }
 
   return (
@@ -182,14 +203,20 @@ export default function RegistrationForm() {
 
           {role === "student" ? (
             <StudentFields
-              program={program}
-              setProgram={setProgram}
+              collegeId={collegeId}
+              contactNumber={contactNumber}
+              courseId={courseId}
+              section={section}
+              setCollegeId={setCollegeId}
+              setContactNumber={setContactNumber}
+              setCourseId={setCourseId}
+              setSection={setSection}
               setStudentId={setStudentId}
               setStudentStatus={setStudentStatus}
-              setYearSection={setYearSection}
+              setYearLevel={setYearLevel}
               studentId={studentId}
               studentStatus={studentStatus}
-              yearSection={yearSection}
+              yearLevel={yearLevel}
             />
           ) : (
             <FacultyFields
@@ -239,6 +266,15 @@ export default function RegistrationForm() {
           </div>
         </div>
       </form>
+
+      <OtpVerificationModal
+        email={email}
+        loading={verifyingOtp}
+        onClose={() => setShowOtpModal(false)}
+        onResend={handleResendOtp}
+        onVerify={handleVerifyOtp}
+        open={showOtpModal}
+      />
     </Card>
   );
 }
