@@ -1,7 +1,11 @@
-function Administration() {
+import AdministrationView from "@/components/administration/AdministrationView.tsx";
+import { AdministrationViewProvider } from "@/provider/AdministrationViewProvider.tsx";
+
+export default function Administration() {
   return (
-    <div>Administration</div>
-  )
+    <AdministrationViewProvider>
+      <AdministrationView />
+    </AdministrationViewProvider>
+  );
 }
 
-export default Administration
