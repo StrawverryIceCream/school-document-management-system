@@ -33,7 +33,7 @@ function DocumentDialog() {
         fee: newDocument?.fee ?? "0",
         isActive: newDocument?.isActive ?? true,
         requiredFields: newDocument?.requiredFields ?? [],
-      });
+      } as Parameters<typeof createDocument>[0]);
       setOpen(false);
       await refreshDocument();
       setCurrentPage(1);

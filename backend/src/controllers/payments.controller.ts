@@ -20,7 +20,7 @@ const RECEIPT_RANDOM_BYTES = 4;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const PAYMENT_METHODS = ["cash", "card", "e_wallet", "bank_transfer"] as const;
+const PAYMENT_METHODS = ["card", "e_wallet", "bank_transfer", "cash"] as const;
 type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 // Never expose passwordHash through the payer relation
@@ -93,7 +93,9 @@ function parsePagination(page?: string, limit?: string) {
 // Generated server-side so a client can never choose its own receipt number
 function buildReceiptNumber(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const suffix = randomBytes(RECEIPT_RANDOM_BYTES).toString("hex").toUpperCase();
+  const suffix = randomBytes(RECEIPT_RANDOM_BYTES)
+    .toString("hex")
+    .toUpperCase();
   return `${RECEIPT_PREFIX}-${date}-${suffix}`;
 }
 
@@ -431,10 +433,7 @@ export async function uploadPaymentProofHandler(
       .from(payments)
       .innerJoin(documentRequests, eq(payments.requestId, documentRequests.id))
       .where(
-        and(
-          eq(payments.id, paymentId),
-          eq(documentRequests.userId, userId),
-        ),
+        and(eq(payments.id, paymentId), eq(documentRequests.userId, userId)),
       );
 
     if (!payment) {

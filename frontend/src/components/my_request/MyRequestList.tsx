@@ -18,7 +18,7 @@ import {
   SKELETON_COUNT,
   STATUS_CONFIGS,
   STEP_LABELS,
-} from "@/lib/my-request";
+} from "@/lib/myRequest";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

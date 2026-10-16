@@ -110,7 +110,7 @@ function MyRequestDetails({
           </div>
           <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Notes</span>
-            <span className="font-medium">{request.staffNotes ?? "—"}</span>
+            <span className="font-medium">{request.internalNotes ?? "—"}</span>
           </div>
         </div>
 

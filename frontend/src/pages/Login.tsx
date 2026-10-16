@@ -1,5 +1,7 @@
-import LoginForm from "@/components/auth/LoginForm";
-import { ModeToggle } from "@/components/ModeToggle";
+import LoginCard from "@/components/auth/LoginCard";
+import LoginFooter from "@/components/auth/LoginFooter";
+import LoginHeader from "@/components/auth/LoginHeader";
+import LoginIntro from "@/components/auth/LoginIntro";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,22 +29,27 @@ function Login() {
   }
 
   return (
-    <div className="relative flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="absolute right-4 top-4">
-        <ModeToggle />
-      </div>
-
-      <div className="w-full max-w-sm">
-        <LoginForm
-          error={error}
-          loading={loading}
-          handleSubmit={handleSubmit}
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-        />
-      </div>
+    <div className="flex min-h-svh flex-col bg-background">
+      <LoginHeader />
+      <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-5 lg:pr-6">
+            <LoginIntro />
+          </div>
+          <div className="lg:col-span-7">
+            <LoginCard
+              error={error}
+              loading={loading}
+              handleSubmit={handleSubmit}
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+            />
+          </div>
+        </div>
+      </main>
+      <LoginFooter />
     </div>
   );
 }

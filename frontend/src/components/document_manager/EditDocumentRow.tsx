@@ -22,7 +22,7 @@ function EditDocumentRow({
 
   async function handleSubmit() {
     try {
-      setEdit(false, document.id);
+      setEdit(false, Number(document.id));
       await updateDocument(String(document.id), {
         code,
         name,
@@ -40,7 +40,7 @@ function EditDocumentRow({
     setName(document.name);
     setDescription(document.description || "");
     setFee(document.fee);
-    setEdit(false, document.id);
+    setEdit(false, Number(document.id));
   }
 
   return (

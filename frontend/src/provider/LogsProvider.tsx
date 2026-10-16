@@ -3,7 +3,6 @@ import { LogsContext } from "@/context/LogsContext";
 import type { ActivityLog, LogEntry, LogStats } from "@/context/LogsContext";
 import type { User } from "@/types";
 
-
 // TEMPORARY MOCK DATA
 const MOCK_ACCOUNTS: User[] = [
   {
@@ -507,7 +506,9 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const [typeFilter, setTypeFilter] = useState<"all" | ActivityLog["type"]>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | ActivityLog["type"]>(
+    "all",
+  );
 
   const loadLogs = useCallback(async () => {
     const [logsData, statsData] = await Promise.all([
@@ -518,7 +519,10 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   }, [debouncedSearch, typeFilter]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS);
+    const timeout = setTimeout(
+      () => setDebouncedSearch(search),
+      SEARCH_DEBOUNCE_MS,
+    );
     return () => clearTimeout(timeout);
   }, [search]);
 
