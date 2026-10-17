@@ -13,6 +13,7 @@ import collegesRouter from "./routes/colleges.routes.js";
 import appointmentsRouter from "./routes/appointments.routes.js";
 import announcementsRouter from "./routes/announcements.routes.js";
 import requestAttachmentsRouter from "./routes/requestAttachments.routes.js";
+import logsRouter from "./routes/logs.routes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -56,6 +57,7 @@ app.use("/api/appointments", appointmentsRouter);
 app.use("/api/announcements", announcementsRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/request-attachments", requestAttachmentsRouter);
+app.use("/api/logs", logsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not Found" });
