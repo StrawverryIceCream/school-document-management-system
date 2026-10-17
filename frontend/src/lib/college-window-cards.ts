@@ -101,17 +101,19 @@ export type CollegeSummary = {
   highlights: string[];
 };
 
-// users.college is free text, so accept either the code ("COS") or the full name
 export function matchesCollege(
-  value: string | null | undefined,
+  value: string | { code?: string; name?: string } | null | undefined,
   tile: CollegeTile,
 ): boolean {
-  const normalized = value?.trim().toLowerCase();
-  if (!normalized) return false;
+  const code = typeof value === "string" ? value : value?.code;
+  const name = typeof value === "string" ? value : value?.name;
+  const normalizedCode = code?.trim().toLowerCase();
+  const normalizedName = name?.trim().toLowerCase();
+  if (!normalizedCode && !normalizedName) return false;
 
   return (
-    normalized === tile.title.toLowerCase() ||
-    normalized === tile.description.toLowerCase()
+    normalizedCode === tile.title.toLowerCase() ||
+    normalizedName === tile.description.toLowerCase()
   );
 }
 
