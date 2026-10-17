@@ -40,8 +40,6 @@ interface WindowViewContextType {
   setCurrentPage: Dispatch<SetStateAction<number>>;
   selectedIds: string[];
   setSelectedIds: Dispatch<SetStateAction<string[]>>;
-  selectedRequestId: string | null;
-  setSelectedRequestId: Dispatch<SetStateAction<string | null>>;
   guidelinesOpen: boolean;
   setGuidelinesOpen: Dispatch<SetStateAction<boolean>>;
   updateRequestStatus: (

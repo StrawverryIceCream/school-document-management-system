@@ -1,6 +1,6 @@
 // provider/WindowViewProvider.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   WindowViewContext,
   type StatusFilter,
@@ -20,9 +20,7 @@ import {
 // Matches the backend's MAX_LIMIT; one page can never return more than this
 const REQUESTS_PAGE_SIZE = 100;
 
-function getUserCollege(
-  user: DocumentRequestWithRelations["user"],
-) {
+function getUserCollege(user: DocumentRequestWithRelations["user"]) {
   return user?.college;
 }
 
@@ -90,8 +88,8 @@ export function WindowViewProvider({
   children: React.ReactNode;
 }) {
   const { pathname } = useLocation();
-  const collegeRoute = pathname.match(/^\/windows\/([^/]+)/)?.[1] ?? null;
-  const [activeView, setActiveView] = useState<string | null>(collegeRoute);
+  const navigate = useNavigate();
+  const activeView = pathname.match(/^\/windows\/([^/]+)/)?.[1] ?? null;
   const [requests, setRequests] = useState<DocumentRequestWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +99,6 @@ export function WindowViewProvider({
   const [windowFilter, setWindowFilter] = useState<RequestWindow>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
-    null,
-  );
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   async function refreshRequests() {
@@ -124,11 +119,11 @@ export function WindowViewProvider({
   }
 
   function selectView(id: string) {
-    setActiveView(id);
+    navigate(`/windows/${id}`);
   }
 
   function clearView() {
-    setActiveView(null);
+    navigate("/windows");
   }
 
   useEffect(() => {
@@ -243,8 +238,6 @@ export function WindowViewProvider({
         setCurrentPage,
         selectedIds,
         setSelectedIds,
-        selectedRequestId,
-        setSelectedRequestId,
         guidelinesOpen,
         setGuidelinesOpen,
         updateRequestStatus,
