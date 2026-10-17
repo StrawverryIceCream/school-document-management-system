@@ -8,7 +8,10 @@ const collegeCache = new Map<string, College>();
 const courseCache = new Map<string, Course>();
 
 // The profile API only returns collegeId and courseId, so this looks up the names
-export function useOrgNames(collegeId?: string | null, courseId?: string | null) {
+export function useOrgNames(
+  collegeId?: string | null,
+  courseId?: string | null,
+) {
   const [, setVersion] = useState(0);
 
   useEffect(() => {
