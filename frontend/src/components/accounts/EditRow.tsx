@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
+import { ACCOUNT_STATUS } from "@/lib/accounts-table";
 
 function EditRow({
   user,
@@ -54,6 +55,9 @@ function EditRow({
           placeholder="Board name"
           className="text-2xl font-bold"
         />
+      </TableCell>
+      <TableCell className="text-base text-muted-foreground">
+        {ACCOUNT_STATUS.label}
       </TableCell>
       <TableCell>
         <div className="flex justify-end gap-2">
