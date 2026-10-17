@@ -35,7 +35,7 @@ function ProfileTrigger({ userId, children }: ProfileTriggerProps) {
   return (
     <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent align="start">
+      <PopoverContent align="start" className="w-[min(92vw,40rem)]">
         <ProfileCard
           user={user}
           error={failed}

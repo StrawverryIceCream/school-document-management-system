@@ -1,4 +1,5 @@
 import { CircleUser } from "lucide-react";
+import ProfileFields from "@/components/profile/ProfileFields";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,13 +13,7 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
-import ProfileDetail from "@/components/profile/ProfileDetail";
-import {
-  getContactNumber,
-  getInitials,
-  getTupIdLabel,
-  ROLE_META,
-} from "@/lib/profile";
+import { getInitials, ROLE_META } from "@/lib/profile";
 
 function Profile() {
   const { user } = useAuth();
@@ -32,21 +27,23 @@ function Profile() {
           Profile
         </DropdownMenuItem>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-200 sm:h-200">
+      {/* No fixed height: the dialog grows with however many fields the role has */}
+      <DialogContent className="sm:max-w-2xl">
         <div className="flex flex-col gap-4">
           <DialogHeader>
             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20 items-center justify-center">
-                <AvatarFallback className="text-3xl font-normal leading-none">
+              <Avatar className="size-16 items-center justify-center">
+                <AvatarFallback className="text-2xl font-normal leading-none">
                   {getInitials(user?.fullName || "Unknown")}
                 </AvatarFallback>
               </Avatar>
               <div className="grid min-w-0 flex-1 gap-1 text-left leading-tight">
-                <DialogTitle className="truncate text-lg font-medium leading-tight">
+                <DialogTitle className="truncate text-xl font-medium leading-tight">
                   {user?.fullName}
                 </DialogTitle>
-                <DialogDescription className="truncate text-base">
-                  {user?.email}
+                {/* Email now lives in the field list; Radix still wants a description for screen readers */}
+                <DialogDescription className="sr-only">
+                  Account details
                 </DialogDescription>
                 {role && (
                   <Badge variant={role.variant} className="w-fit">
@@ -57,18 +54,7 @@ function Profile() {
             </div>
           </DialogHeader>
           <Separator />
-          {user && (
-            <div className="flex flex-col gap-3">
-              <ProfileDetail
-                label="TUP ID"
-                value={getTupIdLabel(user.studentId)}
-              />
-              <ProfileDetail
-                label="Contact number"
-                value={getContactNumber(user.id)}
-              />
-            </div>
-          )}
+          {user && <ProfileFields user={user} />}
         </div>
       </DialogContent>
     </Dialog>

@@ -1,20 +1,15 @@
+import ProfileFields from "@/components/profile/ProfileFields";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import ProfileDetail from "@/components/profile/ProfileDetail";
+import { getInitials, ROLE_META } from "@/lib/profile";
+import type { ProfileUser } from "@/lib/profile-fields";
 import { cn } from "@/lib/utils";
-import {
-  getContactNumber,
-  getInitials,
-  getTupIdLabel,
-  ROLE_META,
-} from "@/lib/profile";
-import type { AuthUser } from "@/types";
 
 type ProfileCardProps = React.ComponentProps<"div"> & {
-  user: AuthUser | undefined;
+  user: ProfileUser | undefined;
   error: boolean;
   onRetry: () => void;
 };
@@ -66,21 +61,14 @@ function ProfileCard({
           </AvatarFallback>
         </Avatar>
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="truncate text-base font-semibold">{user.fullName}</p>
+          <p className="truncate text-lg font-semibold">{user.fullName}</p>
           <Badge variant={role.variant} className="w-fit">
             {role.label}
           </Badge>
         </div>
       </div>
       <Separator />
-      <div className="flex flex-col gap-3">
-        <ProfileDetail label="TUP ID" value={getTupIdLabel(user.studentId)} />
-        <ProfileDetail label="Email" value={user.email} />
-        <ProfileDetail
-          label="Contact number"
-          value={getContactNumber(user.id)}
-        />
-      </div>
+      <ProfileFields user={user} />
     </div>
   );
 }
