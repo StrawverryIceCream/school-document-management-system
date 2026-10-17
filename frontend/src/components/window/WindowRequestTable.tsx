@@ -2,20 +2,14 @@ import { useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  EllipsisVertical,
+  Eye,
   LoaderCircle,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -26,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { useWindowView } from "@/hooks/useWindowView";
 import { statusStyles } from "@/lib/request";
-import { cn } from "@/lib/utils";
 import {
   REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,
@@ -48,9 +41,8 @@ export function WindowRequestTable() {
     setCurrentPage,
     selectedIds,
     setSelectedIds,
-    setSelectedRequestId,
-    updateRequestStatus,
   } = useWindowView();
+  const navigate = useNavigate();
 
   const college = TILES.find((tile) => tile.id === activeView);
   const collegeTitle = college?.title ?? activeView ?? "Department";
@@ -94,7 +86,7 @@ export function WindowRequestTable() {
   return (
     <section
       aria-label="Requests"
-      className="overflow-hidden rounded-xl border bg-card"
+      className="overflow-hidden rounded-xl border border-border bg-card"
     >
       {loading ? (
         <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
@@ -107,231 +99,196 @@ export function WindowRequestTable() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <Table className="min-w-[920px]">
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="w-10">
-                    <Checkbox
-                      aria-label="Select all requests on this page"
-                      checked={allPageRowsSelected}
-                      onCheckedChange={(checked) =>
-                        setSelectedIds((current) =>
-                          checked
-                            ? Array.from(
-                                new Set([
-                                  ...current,
-                                  ...pageRequests.map((request) =>
-                                    String(request.id),
-                                  ),
-                                ]),
-                              )
-                            : current.filter(
-                                (id) =>
-                                  !pageRequests.some(
-                                    (request) => String(request.id) === id,
-                                  ),
-                              ),
-                        )
-                      }
-                    />
-                  </TableHead>
-                  <TableHead>Requester</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Document Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Routing</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+          <Table className="table-fixed">
+            <TableHeader className="bg-muted/70">
+              <TableRow>
+                <TableHead className="w-[4%] whitespace-normal">
+                  <Checkbox
+                    aria-label="Select all requests on this page"
+                    checked={allPageRowsSelected}
+                    onCheckedChange={(checked) =>
+                      setSelectedIds((current) =>
+                        checked
+                          ? Array.from(
+                              new Set([
+                                ...current,
+                                ...pageRequests.map((request) =>
+                                  String(request.id),
+                                ),
+                              ]),
+                            )
+                          : current.filter(
+                              (id) =>
+                                !pageRequests.some(
+                                  (request) => String(request.id) === id,
+                                ),
+                            ),
+                      )
+                    }
+                  />
+                </TableHead>
+                <TableHead className="w-[19%] whitespace-normal">
+                  Requester
+                </TableHead>
+                <TableHead className="w-[8%] whitespace-normal">Role</TableHead>
+                <TableHead className="w-[21%] whitespace-normal">
+                  Document Type
+                </TableHead>
+                <TableHead className="w-[10%] whitespace-normal">Date</TableHead>
+                <TableHead className="w-[12%] whitespace-normal">
+                  Status
+                </TableHead>
+                <TableHead className="w-[11%] whitespace-normal">
+                  Routing
+                </TableHead>
+                <TableHead className="w-[15%] whitespace-normal text-right">
+                  Action
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pageRequests.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="h-36 text-center text-muted-foreground"
+                  >
+                    {departmentRequests.length === 0
+                      ? `No requests are currently assigned to ${collegeDescription}.`
+                      : "No requests match these filters."}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pageRequests.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className="h-36 text-center text-muted-foreground"
-                    >
-                      {departmentRequests.length === 0
-                        ? `No requests are currently assigned to ${collegeDescription}.`
-                        : "No requests match these filters."}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pageRequests.map((request) => {
-                    const requester = request.user?.fullName ?? "Unknown";
-                    const initials = requester
-                      .split(/\s+/)
-                      .map((part) => part.charAt(0))
-                      .slice(0, 2)
-                      .join("")
-                      .toUpperCase();
-                    const windowId =
-                      requestWindowsById[String(request.id)] ?? "window-1";
-                    const requestWindow = REQUEST_WINDOWS.find(
-                      (item) => item.id === windowId,
-                    );
+              ) : (
+                pageRequests.map((request) => {
+                  const requester = request.user?.fullName ?? "Unknown";
+                  const initials = requester
+                    .split(/\s+/)
+                    .map((part) => part.charAt(0))
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase();
+                  const windowId = requestWindowsById[String(request.id)];
+                  const requestWindow = REQUEST_WINDOWS.find(
+                    (item) => item.id === windowId,
+                  );
 
-                    return (
-                      <TableRow key={request.id} className="align-middle">
-                        <TableCell>
-                          <Checkbox
-                            aria-label={`Select request from ${requester}`}
-                            checked={selectedIds.includes(String(request.id))}
-                            onCheckedChange={(checked) =>
-                              setSelectedIds((current) =>
-                                checked
-                                  ? [...current, String(request.id)]
-                                  : current.filter(
-                                      (id) => id !== String(request.id),
-                                    ),
+                  return (
+                    <TableRow key={request.id} className="align-middle">
+                      <TableCell className="whitespace-normal">
+                        <Checkbox
+                          aria-label={`Select request from ${requester}`}
+                          checked={selectedIds.includes(String(request.id))}
+                          onCheckedChange={(checked) =>
+                            setSelectedIds((current) =>
+                              checked
+                                ? [...current, String(request.id)]
+                                : current.filter(
+                                    (id) => id !== String(request.id),
+                                  ),
+                            )
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
+                            {initials || "?"}
+                          </span>
+                          <div className="min-w-0">
+                            {request.user ? (
+                              <ProfileTrigger userId={request.user.id}>
+                                <button
+                                  type="button"
+                                  className="max-w-40 truncate text-left font-medium text-foreground hover:underline"
+                                >
+                                  {requester}
+                                </button>
+                              </ProfileTrigger>
+                            ) : (
+                              <span className="font-medium text-foreground">
+                                {requester}
+                              </span>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              ID: {request.user?.studentId ?? "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-transparent bg-muted text-muted-foreground font-normal capitalize"
+                        >
+                          {request.user?.role ?? "—"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-52 whitespace-normal break-words">
+                        <p className="font-medium">
+                          {request.documentType?.name ?? "Unknown document"}
+                        </p>
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {request.purpose ??
+                            request.documentType?.description ??
+                            "Document request"}
+                        </p>
+                      </TableCell>
+                      <TableCell className="whitespace-normal text-sm">
+                        {request.createdAt
+                          ? new Date(request.createdAt).toLocaleDateString(
+                              "en-US",
+                            )
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        <Badge
+                          variant="outline"
+                          className={`capitalize ${statusStyles[request.status]}`}
+                        >
+                          {REQUEST_STATUS_OPTIONS.find(
+                            (status) => status.id === request.status,
+                          )?.label ?? request.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        <div className="flex items-center gap-1.5 break-words text-sm text-muted-foreground">
+                          <span
+                            aria-label={
+                              windowId
+                                ? `Window ${windowId.split("-")[1]}`
+                                : "College window unassigned"
+                            }
+                            className="flex size-5 shrink-0 items-center justify-center rounded-full border border-muted-foreground/70 text-xs font-semibold leading-none text-muted-foreground"
+                          >
+                            {windowId?.split("-")[1] ?? "—"}
+                          </span>
+                          {requestWindow?.label.split(" (")[0] ?? "Unassigned"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="align-middle whitespace-normal">
+                        <div className="flex w-full justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            aria-label={`Review details for ${requester}`}
+                            className="h-auto min-w-0 gap-1 px-1.5 py-1.5 text-xs whitespace-normal"
+                            onClick={() =>
+                              navigate(
+                                `/windows/${activeView}/requests/${request.id}`,
                               )
                             }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2.5">
-                            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                              {initials || "?"}
-                            </span>
-                            <div className="min-w-0">
-                              {request.user ? (
-                                <ProfileTrigger userId={request.user.id}>
-                                  <button
-                                    type="button"
-                                    className="max-w-40 truncate text-left text-sm font-medium hover:underline"
-                                  >
-                                    {requester}
-                                  </button>
-                                </ProfileTrigger>
-                              ) : (
-                                <span className="text-sm font-medium">
-                                  {requester}
-                                </span>
-                              )}
-                              <p className="text-sm text-muted-foreground">
-                                ID: {request.user?.studentId ?? "—"}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="border-transparent bg-muted text-muted-foreground font-normal capitalize"
                           >
-                            {request.user?.role ?? "—"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-52">
-                          <p className="font-medium">
-                            {request.documentType?.name ?? "Unknown document"}
-                          </p>
-                          <p className="line-clamp-2 text-sm text-muted-foreground">
-                            {request.purpose ??
-                              request.documentType?.description ??
-                              "Document request"}
-                          </p>
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap text-sm">
-                          {request.createdAt
-                            ? new Date(request.createdAt).toLocaleDateString(
-                                "en-US",
-                              )
-                            : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "gap-1.5 rounded-full px-2.5 py-1 font-medium",
-                              statusStyles[request.status],
-                            )}
-                          >
-                            <span className="size-1.5 rounded-full bg-current" />
-                            {REQUEST_STATUS_OPTIONS.find(
-                              (status) => status.id === request.status,
-                            )?.label ?? request.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <span
-                              aria-label={`Window ${windowId.split("-")[1]}`}
-                              className="flex size-5 shrink-0 items-center justify-center rounded-full border border-muted-foreground/70 text-xs font-semibold leading-none text-muted-foreground"
-                            >
-                              {windowId.split("-")[1]}
-                            </span>
-                            {requestWindow?.label.split(" (")[0] ?? "Window 1"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="align-middle">
-                          <div className="flex w-full items-center justify-between gap-1.5">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              aria-label={`Review details for ${requester}`}
-                              className="h-12 w-24 flex-col gap-0 rounded-lg bg-muted/70 px-2 py-1 text-sm font-medium leading-tight whitespace-normal text-primary hover:bg-muted hover:text-primary"
-                              onClick={() =>
-                                setSelectedRequestId(String(request.id))
-                              }
-                            >
-                              <span>Review</span>
-                              <span>Details</span>
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label={`More actions for ${requester}`}
-                                  className="size-8 shrink-0"
-                                >
-                                  <EllipsisVertical
-                                    className="size-4"
-                                    aria-hidden="true"
-                                  />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {REQUEST_STATUS_OPTIONS.map(
-                                  ({ id: status, label }) => (
-                                    <DropdownMenuItem
-                                      key={status}
-                                      disabled={request.status === status}
-                                      onSelect={async () => {
-                                        try {
-                                          await updateRequestStatus(
-                                            String(request.id),
-                                            status,
-                                          );
-                                          toast.success(
-                                            `Request marked ${label.toLowerCase()}.`,
-                                          );
-                                        } catch (err) {
-                                          toast.error(
-                                            err instanceof Error
-                                              ? err.message
-                                              : "Could not update request status.",
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      Mark as {label}
-                                    </DropdownMenuItem>
-                                  ),
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                            <Eye className="size-4" aria-hidden="true" />
+                            <span>Review Details</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3 text-sm">
             <p className="text-muted-foreground">
               Showing {startResult}–{endResult} of {filteredRequests.length}{" "}

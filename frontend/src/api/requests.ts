@@ -9,6 +9,10 @@ export type DocumentRequestRow = Omit<
   "user" | "documentType" | "payments"
 >;
 
+export type RequestReviewDetails = DocumentRequestWithRelations & {
+  availableTransitions: RequestStatus[];
+};
+
 // A student's own request: same as the staff view, minus the requester
 export type MyRequest = Omit<DocumentRequestWithRelations, "user">;
 
@@ -87,11 +91,11 @@ export async function getAllRequests(
 
 export async function getRequestById(
   id: string,
-): Promise<DocumentRequestWithRelations> {
+): Promise<RequestReviewDetails> {
   const url = `/api/requests/${id}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return handleResponse<DocumentRequestWithRelations>(res, url);
+  return handleResponse<RequestReviewDetails>(res, url);
 }
 
 export async function updateRequestStatus(

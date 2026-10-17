@@ -226,6 +226,13 @@ export type UserSummary = Pick<
   "id" | "fullName" | "email" | "role" | "studentId"
 >;
 
+/** Requester summary with the college identity returned by staff request APIs. */
+export interface RequesterSummary extends UserSummary {
+  collegeId: UUID | null;
+  college: Pick<College, "id" | "code" | "name"> | null;
+  department: string | null;
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Service windows                                                           */
 /*  Named ServiceWindow to avoid shadowing the DOM global `Window`.           */
@@ -384,7 +391,7 @@ export interface Payment extends Timestamps {
  * At most one is pending or verified at any time.
  */
 export interface DocumentRequestWithRelations extends DocumentRequest {
-  user?: UserSummary;
+  user?: RequesterSummary;
   documentType?: DocumentType;
   window?: ServiceWindow | null;
   assignee?: UserSummary | null;
@@ -396,7 +403,7 @@ export interface DocumentRequestWithRelations extends DocumentRequest {
 
 /** Every relation loaded, for the request detail page. */
 export interface DocumentRequestDetail extends DocumentRequest {
-  user: UserSummary;
+  user: RequesterSummary;
   documentType: DocumentType;
   window: ServiceWindow | null;
   assignee: UserSummary | null;
@@ -408,7 +415,7 @@ export interface DocumentRequestDetail extends DocumentRequest {
 
 /** Only what list and queue tables need. */
 export interface DocumentRequestListItem extends DocumentRequest {
-  user: UserSummary;
+  user: RequesterSummary;
   window: ServiceWindow | null;
   assignee: UserSummary | null;
 }

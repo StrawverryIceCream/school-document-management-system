@@ -23,7 +23,7 @@ interface WindowViewContextType {
   selectView: (id: string) => void;
   clearView: () => void;
   departmentRequests: DocumentRequestWithRelations[];
-  requestWindowsById: Record<string, RequestWindow>;
+  requestWindowsById: Record<string, Exclude<RequestWindow, "all"> | undefined>;
   visibleRequests: DocumentRequestWithRelations[];
   loading: boolean;
   error: string | null;
@@ -40,8 +40,6 @@ interface WindowViewContextType {
   setCurrentPage: Dispatch<SetStateAction<number>>;
   selectedIds: string[];
   setSelectedIds: Dispatch<SetStateAction<string[]>>;
-  selectedRequestId: string | null;
-  setSelectedRequestId: Dispatch<SetStateAction<string | null>>;
   guidelinesOpen: boolean;
   setGuidelinesOpen: Dispatch<SetStateAction<boolean>>;
   updateRequestStatus: (

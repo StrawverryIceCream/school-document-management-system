@@ -1,5 +1,6 @@
 // provider/WindowViewProvider.tsx
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   WindowViewContext,
   type StatusFilter,
@@ -19,13 +20,8 @@ import {
 // Matches the backend's MAX_LIMIT; one page can never return more than this
 const REQUESTS_PAGE_SIZE = 100;
 
-function getUserCollege(
-  user: DocumentRequestWithRelations["user"],
-): string | undefined {
-  return (
-    (user as unknown as { college?: string | null } | null | undefined)
-      ?.college ?? undefined
-  );
+function getUserCollege(user: DocumentRequestWithRelations["user"]) {
+  return user?.college;
 }
 
 const TILES: WindowTile[] = [
@@ -91,7 +87,9 @@ export function WindowViewProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [activeView, setActiveView] = useState<string | null>(null);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const activeView = pathname.match(/^\/windows\/([^/]+)/)?.[1] ?? null;
   const [requests, setRequests] = useState<DocumentRequestWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +99,6 @@ export function WindowViewProvider({
   const [windowFilter, setWindowFilter] = useState<RequestWindow>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
-    null,
-  );
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   async function refreshRequests() {
@@ -124,11 +119,11 @@ export function WindowViewProvider({
   }
 
   function selectView(id: string) {
-    setActiveView(id);
+    navigate(`/windows/${id}`);
   }
 
   function clearView() {
-    setActiveView(null);
+    navigate("/windows");
   }
 
   useEffect(() => {
@@ -162,17 +157,13 @@ export function WindowViewProvider({
     const selectedCollege = TILES.find((tile) => tile.id === activeView);
     if (!selectedCollege) return [];
 
-    const collegeNames = new Set(
-      [
-        selectedCollege.id,
-        selectedCollege.title,
-        selectedCollege.description,
-      ].map((name) => name.trim().toLowerCase()),
-    );
+    const selectedWindow = getRequestWindowForCollege(selectedCollege.id);
 
     return requests.filter((request) => {
-      const college = getUserCollege(request.user)?.trim().toLowerCase();
-      return college ? collegeNames.has(college) : false;
+      const requestWindow = getRequestWindowForCollege(
+        getUserCollege(request.user),
+      );
+      return selectedWindow !== undefined && requestWindow === selectedWindow;
     });
   }, [activeView, requests]);
 
@@ -247,8 +238,6 @@ export function WindowViewProvider({
         setCurrentPage,
         selectedIds,
         setSelectedIds,
-        selectedRequestId,
-        setSelectedRequestId,
         guidelinesOpen,
         setGuidelinesOpen,
         updateRequestStatus,
