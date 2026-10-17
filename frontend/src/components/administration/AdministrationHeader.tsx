@@ -5,23 +5,17 @@ import {
   HEADER_COPY,
   HEADER_PILLS,
   type HeaderPillKey,
-} from "@/lib/administration-header.ts";
-import { ADMINISTRATION_UNITS } from "@/lib/administration-units.ts";
+} from "@/lib/administration-header";
+import { ADMINISTRATION_UNITS } from "@/lib/administration-units";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import { PENDING_STATUS } from "@/lib/windows-header";
 
 export default function AdministrationHeader() {
-  const { requests, loading, error } = useAdministrationView() as {
-    requests: { status: string }[];
-    loading: boolean;
-    error: unknown;
-  };
+  const { requests, loading, error } = useAdministrationView();
 
   const counts: Record<HeaderPillKey, number> = {
     units: ADMINISTRATION_UNITS.length,
-    pending: requests.filter((request) => request.status === PENDING_STATUS)
-      .length,
+    pending: requests.filter((request) => request.status === "pending").length,
   };
 
   return (

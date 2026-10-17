@@ -9,13 +9,11 @@ import {
   CHIP_LABEL,
   ENTER_SUFFIX,
   getUnitSummary,
-  type UnitSummary,
-} from "@/lib/admininstration-unit-cards.ts";
-import { ADMINISTRATION_UNITS } from "@/lib/administration-units.ts";
-import {
   HIGHLIGHTS_LABEL,
   NO_PENDING_LABEL,
-} from "@/lib/college-window-cards";
+  type UnitSummary,
+} from "@/lib/administration-unit-cards";
+import { ADMINISTRATION_UNITS } from "@/lib/administration-units";
 import {
   BADGE_BASE,
   BANNER_TONES,

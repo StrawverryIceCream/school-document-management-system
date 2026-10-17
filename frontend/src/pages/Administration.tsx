@@ -1,5 +1,5 @@
-import AdministrationView from "@/components/administration/AdministrationView.tsx";
-import { AdministrationViewProvider } from "@/provider/AdministrationViewProvider.tsx";
+import AdministrationView from "@/components/administration/AdministrationView";
+import { AdministrationViewProvider } from "@/provider/AdministrationViewProvider";
 
 export default function Administration() {
   return (

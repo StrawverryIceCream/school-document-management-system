@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AdministrationViewContext,
   type StatusFilter,
-} from "@/context/AdministrationViewContext.tsx";
+} from "@/context/AdministrationViewContext";
 import { getAllRequests } from "@/api/requests";
 import {
   ADMINISTRATION_UNITS,
   ADMIN_REQUESTER_ROLES,
   matchesUnit,
-} from "@/lib/administration-units.ts";
+} from "@/lib/administration-units";
 import type { DocumentRequestWithRelations } from "@/types";
 
 // Matches the backend's MAX_LIMIT; one page can never return more than this
@@ -108,10 +108,7 @@ export function AdministrationViewProvider({
     const term = search.trim().toLowerCase();
 
     return requests.filter((request) => {
-      const user = request.user as
-        | (typeof request.user & { department?: string })
-        | undefined;
-      if (!matchesUnit(user?.department, activeUnit)) return false;
+      if (!matchesUnit(request.user?.department, activeUnit)) return false;
       if (filter !== "all" && request.status !== filter) return false;
       if (!term) return true;
 

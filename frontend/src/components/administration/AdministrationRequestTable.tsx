@@ -24,12 +24,7 @@ import {
 } from "@/lib/administration-request-table";
 import { cn } from "@/lib/utils";
 
-const statusStyles: Record<string, string> = {
-  pending: "border-yellow-500/50 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-  approved: "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400",
-  rejected: "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400",
-  completed: "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400",
-};
+import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
 
 export default function AdministrationRequestTable() {
   const {
@@ -146,17 +141,28 @@ export default function AdministrationRequestTable() {
                       {request.documentType?.name ?? UNKNOWN_DOCUMENT}
                     </TableCell>
                     <TableCell className="text-base">
-                      {new Date(request.createdAt).toLocaleDateString()}
+                      {request.createdAt
+                        ? new Date(request.createdAt).toLocaleDateString("en-US")
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
                         className={cn(
-                          "px-3 py-1 text-sm capitalize",
+                          "gap-1.5 px-3 py-1 text-sm font-medium capitalize",
                           statusStyles[request.status],
                         )}
                       >
-                        {request.status}
+                        {(() => {
+                          const config = REQUEST_STATUS_CONFIG[request.status];
+                          const Icon = config?.icon;
+                          return (
+                            <>
+                              {Icon && <Icon className="size-3.5" aria-hidden="true" />}
+                              {config?.label ?? request.status}
+                            </>
+                          );
+                        })()}
                       </Badge>
                     </TableCell>
                   </TableRow>

@@ -2,13 +2,14 @@ import {
   matchesUnit,
   type AdministrationUnit,
 } from "@/lib/administration-units";
-import {
-  LOW_LOAD_MAX_PENDING,
-  MAX_HIGHLIGHTS,
-} from "@/lib/college-window-cards";
 import type { Tone } from "@/lib/tones";
-import { PENDING_STATUS } from "@/lib/windows-header";
 import type { DocumentRequestWithRelations } from "@/types";
+
+export const LOW_LOAD_MAX_PENDING = 5;
+export const MAX_HIGHLIGHTS = 3;
+export const HIGHLIGHTS_LABEL = "Queue highlights";
+export const NO_PENDING_LABEL = "No pending documents";
+const PENDING_STATUS = "pending";
 
 export const CHIP_LABEL = "Administration";
 export const ENTER_SUFFIX = "Office";
