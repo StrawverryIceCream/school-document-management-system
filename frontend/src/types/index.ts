@@ -223,8 +223,11 @@ export interface UserWithOrg extends User {
 /** Minimal user shape embedded in other records (requester, assignee, reviewer). */
 export type UserSummary = Pick<
   User,
-  "id" | "fullName" | "email" | "role" | "studentId"
->;
+  "id" | "fullName" | "email" | "role" | "studentId" | "department" | "office"
+> & {
+  college?: { id: string; code: string; name: string } | null;
+  course?: { id: string; code: string; name: string } | null;
+};
 
 /** Requester summary with the college identity returned by staff request APIs. */
 export interface RequesterSummary extends UserSummary {

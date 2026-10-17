@@ -68,3 +68,21 @@ export type Tone = keyof typeof TONES;
 export const ICON_BOX_BASE = "flex shrink-0 items-center justify-center rounded-xl";
 export const BADGE_BASE = "gap-2 rounded-full px-3 py-1 text-sm font-semibold";
 export const VALUE_BASE = "font-bold leading-none tracking-tight";
+
+// Banner surfaces are full-card backgrounds, which none of the four TONES fields (icon, badge, value, dot) cover, so they get their own map instead of changing the shape of TONES.
+export type BannerTone =
+  | "crimson"
+  | "bronze"
+  | "slate"
+  | "mauve"
+  | "teal"
+  | "forest";
+
+export const BANNER_TONES: Record<BannerTone, string> = {
+  crimson: "bg-red-900 text-white",
+  bronze: "bg-amber-800 text-white",
+  slate: "bg-zinc-800 text-white",
+  mauve: "bg-stone-700 text-white",
+  teal: "bg-teal-800 text-white",
+  forest: "bg-emerald-900 text-white",
+};

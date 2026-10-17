@@ -19,6 +19,7 @@ export interface RequestDocumentType {
 
 interface WindowViewContextType {
   TILES: WindowTile[];
+  requests: DocumentRequestWithRelations[];
   activeView: string | null;
   selectView: (id: string) => void;
   clearView: () => void;
