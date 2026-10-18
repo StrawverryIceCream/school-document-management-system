@@ -78,7 +78,7 @@ export const DOCUMENT_META_BY_CODE: Record<string, DocumentMeta> = {
   },
 };
 
-export function getRequestFormPath(documentId: number): string {
+export function getRequestFormPath(documentId: string): string {
   return `/new-request/${documentId}`;
 }
 

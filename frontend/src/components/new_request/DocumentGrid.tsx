@@ -21,7 +21,7 @@ const CHIP_CLASS_NAME = "rounded-lg px-3 py-1.5 font-medium";
 export default function DocumentGrid() {
   const { documents, loading, error, refreshDocument } = useDocument();
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Inactive document types can't be requested, so they never reach the grid
   const requestableDocuments = documents.filter(

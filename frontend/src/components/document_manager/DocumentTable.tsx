@@ -75,7 +75,7 @@ function DocumentTable() {
                   }
                 >
                   <TableCell className="font-medium">{document.id}</TableCell>
-                  {editingDocument === document.id ? (
+                  {editingDocument?.toString() === document.id ? (
                     <EditDocumentRow document={document} setEdit={setEdit} />
                   ) : (
                     <>

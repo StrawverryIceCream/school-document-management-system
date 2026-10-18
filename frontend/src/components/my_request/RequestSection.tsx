@@ -19,10 +19,13 @@ function RequestsSection() {
     const counts: Record<RequestFilter, number> = {
       all: requests.length,
       pending: 0,
+      awaiting_payment: 0,
       processing: 0,
+      on_hold: 0,
       ready: 0,
       claimed: 0,
       cancelled: 0,
+      rejected: 0,
     };
     for (const request of requests) counts[request.status] += 1;
     return counts;

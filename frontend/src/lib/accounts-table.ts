@@ -66,7 +66,7 @@ export function formatShortId(id: string): string {
 export function getAccountSubtitle(user: User): string {
   return (
     user.department?.trim() ||
-    user.course?.trim() ||
+    user.courseId?.trim() ||
     ROLE_META[user.role].label
   );
 }

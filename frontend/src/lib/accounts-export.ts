@@ -21,8 +21,8 @@ export const CSV_COLUMNS: CsvColumn[] = [
   { header: "Role", getValue: (user) => user.role },
   { header: "Student / Staff ID", getValue: (user) => user.studentId ?? "" },
   { header: "Department", getValue: (user) => user.department ?? "" },
-  { header: "College", getValue: (user) => user.college ?? "" },
-  { header: "Course", getValue: (user) => user.course ?? "" },
+  { header: "College", getValue: (user) => user.collegeId ?? "" },
+  { header: "Course", getValue: (user) => user.courseId ?? "" },
   { header: "Section", getValue: (user) => user.section ?? "" },
   {
     header: "Created at",
