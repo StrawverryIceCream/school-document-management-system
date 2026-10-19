@@ -8,6 +8,7 @@ import {
   ilike,
   not,
   or,
+  sql,
 } from "drizzle-orm";
 import { db } from "../db/db.js";
 import { auditLogs, users } from "../db/schema.js";
@@ -86,7 +87,7 @@ export async function getLogs(req: Request, res: Response) {
       const pattern = `%${search}%`;
       conditions.push(
         or(
-          ilike(auditLogs.id, pattern),
+          sql`${auditLogs.id}::text ilike ${pattern}`,
           ilike(auditLogs.action, pattern),
           ilike(auditLogs.entityType, pattern),
           ilike(users.fullName, pattern),
