@@ -1,6 +1,7 @@
+import SearchToolbar from "@/components/shared/SearchToolbar";
 import { type StatusFilter } from "@/context/RequestContext";
 import { useRequests } from "@/hooks/useRequest";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 function RequestFilter() {
   const {
@@ -14,44 +15,41 @@ function RequestFilter() {
   } = useRequests();
 
   return (
-    <div className="grid items-end gap-4 lg:grid-cols-3">
-      <div className="relative w-full">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search applicant, document, or request ID"
-          className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
+    <SearchToolbar
+      value={search}
+      onChange={setSearch}
+      placeholder="Search applicant, document, or request ID"
+      ariaLabel="Search requests"
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterSelect
+          ariaLabel="Filter by window"
+          value={windowFilter}
+          onChange={setWindowFilter}
+          disabled={windowOptions.length === 0}
+          options={[
+            { value: "all", label: "All windows" },
+            ...windowOptions.map((window) => ({
+              value: window,
+              label: window,
+            })),
+          ]}
+        />
+        <FilterSelect
+          ariaLabel="Filter by status"
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value as StatusFilter)}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "pending", label: "Pending" },
+            { value: "processing", label: "Processing" },
+            { value: "ready", label: "Ready" },
+            { value: "claimed", label: "Claimed" },
+            { value: "cancelled", label: "Cancelled" },
+          ]}
         />
       </div>
-
-      <FilterSelect
-        ariaLabel="Filter by window"
-        value={windowFilter}
-        onChange={setWindowFilter}
-        disabled={windowOptions.length === 0}
-        options={[
-          { value: "all", label: "All windows" },
-          ...windowOptions.map((window) => ({
-            value: window,
-            label: window,
-          })),
-        ]}
-      />
-      <FilterSelect
-        ariaLabel="Filter by status"
-        value={statusFilter}
-        onChange={(value) => setStatusFilter(value as StatusFilter)}
-        options={[
-          { value: "all", label: "All statuses" },
-          { value: "pending", label: "Pending" },
-          { value: "processing", label: "Processing" },
-          { value: "ready", label: "Ready" },
-          { value: "claimed", label: "Claimed" },
-          { value: "cancelled", label: "Cancelled" },
-        ]}
-      />
-    </div>
+    </SearchToolbar>
   );
 }
 
@@ -69,13 +67,13 @@ function FilterSelect({
   disabled?: boolean;
 }) {
   return (
-    <div className="w-full">
+    <div className="w-full sm:w-auto">
       <div className="relative">
         <select
           aria-label={ariaLabel}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full appearance-none rounded-lg border border-border bg-background px-3 py-2.5 pr-9 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
+          className="h-12 w-full appearance-none rounded-xl border border-input bg-background px-4 pr-10 text-base outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/40"
           disabled={disabled}
         >
           {options.map((option) => (
