@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import PageHeader from "@/components/shared/PageHeader";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
 import { useDocument } from "@/hooks/useDocument";
 import { initializeDocumentTypeItem } from "@/lib/document";
@@ -24,17 +25,11 @@ function AvailableDocuments({
   );
 
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Available Documents to Request
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Select an official institutional record to initiate verification and
-            seal processing
-          </p>
-        </div>
+    <section className="flex flex-col gap-4">
+      <PageHeader
+        title="Available Documents to Request"
+        description="Select an official institutional record to initiate verification and seal processing"
+      >
         <Link
           to={exploreHref}
           className="flex shrink-0 items-center gap-2 text-base font-semibold text-primary hover:underline"
@@ -42,7 +37,7 @@ function AvailableDocuments({
           Explore all {totalCount} credentials
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
-      </div>
+      </PageHeader>
 
       {error ? (
         <p

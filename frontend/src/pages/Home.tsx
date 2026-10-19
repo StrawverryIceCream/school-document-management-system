@@ -22,26 +22,24 @@ function Home() {
   }
 
   return (
-    <div className="h-full overflow-hidden p-6 sm:p-10">
-      <div className="mx-auto h-full flex flex-col gap-8">
-        <DashboardHero
-          greeting={getGreeting()}
-          userName={user?.fullName ?? ""}
-          portalLabel="Administrative Records and Coordination Hub"
-          academicYear="AY 2026–2027"
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          onSearchSubmit={handleSearchSubmit}
-          searchInputRef={searchInputRef}
-        />
-        <AvailableDocuments
-          exploreHref="/documents"
-          onApply={(documentId) => navigate(`/new-request/${documentId}`)}
-        />
+    <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto p-4 sm:p-6">
+      <DashboardHero
+        greeting={getGreeting()}
+        userName={user?.fullName ?? ""}
+        portalLabel="Administrative Records and Coordination Hub"
+        academicYear="AY 2026–2027"
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        onSearchSubmit={handleSearchSubmit}
+        searchInputRef={searchInputRef}
+      />
+      <AvailableDocuments
+        exploreHref="/documents"
+        onApply={(documentId) => navigate(`/new-request/${documentId}`)}
+      />
 
-        <MyRequestCards />
-        <RequestsSection />
-      </div>
+      <MyRequestCards />
+      <RequestsSection />
     </div>
   );
 }

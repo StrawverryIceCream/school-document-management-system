@@ -1,3 +1,4 @@
+import PageHeader from "@/components/shared/PageHeader";
 import RequestsTable from "@/components/my_request/RequestTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyRequest } from "@/hooks/useMyRequest";
@@ -48,18 +49,11 @@ function RequestsSection() {
   }
 
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Your Requests
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Real-time tracking of credentials currently routed across university
-            offices
-          </p>
-        </div>
-
+    <section className="flex flex-col gap-4">
+      <PageHeader
+        title="Your Requests"
+        description="Real-time tracking of credentials currently routed across university offices"
+      >
         <Tabs
           value={statusFilter}
           onValueChange={(value) => handleFilterChange(value as RequestFilter)}
@@ -77,7 +71,7 @@ function RequestsSection() {
             ))}
           </TabsList>
         </Tabs>
-      </div>
+      </PageHeader>
 
       <RequestsTable
         requests={pageRequests}
