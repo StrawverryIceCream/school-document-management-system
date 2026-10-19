@@ -9,6 +9,7 @@ import {
   requestStatusEnum,
   users,
 } from "../db/schema.js";
+import { recordAuditLog } from "../services/audit.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -463,6 +464,19 @@ export async function updateRequestStatus(
       });
     }
 
+    void recordAuditLog({
+      actorId: staffId,
+      action: `Updated request status to ${status.replace("_", " ")}`,
+      entityType: "request",
+      entityId: id,
+      ipAddress: req.ip,
+      metadata: {
+        fromStatus: request.status,
+        toStatus: status,
+        documentTypeName: request.documentType?.name,
+      },
+    });
+
     return res.json(updated);
   } catch (err) {
     console.error("[updateRequestStatus] error:", err);
@@ -622,6 +636,19 @@ export async function createRequest(req: Request, res: Response) {
       return res.status(500).json({ error: "Failed to create request" });
     }
 
+    void recordAuditLog({
+      actorId: userId,
+      action: `Submitted request for ${documentType.name}`,
+      entityType: "request",
+      entityId: created.id,
+      ipAddress: req.ip,
+      metadata: {
+        referenceNumber: created.referenceNumber,
+        documentTypeCode: documentType.code,
+        documentTypeName: documentType.name,
+      },
+    });
+
     return res.status(201).json(created);
   } catch (err) {
     console.error("[createRequest] error:", err);
@@ -680,6 +707,14 @@ export async function cancelMyRequest(
         .status(409)
         .json({ error: "Request is already being processed" });
     }
+
+    void recordAuditLog({
+      actorId: userId,
+      action: "Cancelled document request",
+      entityType: "request",
+      entityId: id,
+      ipAddress: req.ip,
+    });
 
     return res.json(updated);
   } catch (err) {
