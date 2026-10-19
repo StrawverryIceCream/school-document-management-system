@@ -8,7 +8,7 @@ import {
   BRAND_VERSION,
   BRAND_VERSION_TONE,
 } from "@/lib/landing/landing-nav";
-import { LOGIN_HEADER } from "@/lib/login/login-header";
+import { LOGIN_HEADER } from "@/lib/auth/login-header";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

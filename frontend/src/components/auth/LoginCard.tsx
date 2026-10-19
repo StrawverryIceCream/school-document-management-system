@@ -25,7 +25,7 @@ import {
   SSO_BUTTON_LABEL,
   SUBMIT_LABEL,
   TRACK_SLIP,
-} from "@/lib/login/login-card";
+} from "@/lib/auth/login-card";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

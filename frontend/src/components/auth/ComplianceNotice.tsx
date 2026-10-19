@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { COMPLIANCE_NOTICE_TONE } from "@/lib/signup/arch-registration";
+import { COMPLIANCE_NOTICE_TONE } from "@/lib/auth/arch-registration";
 import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

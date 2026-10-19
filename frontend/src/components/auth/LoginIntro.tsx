@@ -8,7 +8,7 @@ import {
   INTRO_PILL,
   INTRO_STATS,
   INTRO_TITLE,
-} from "@/lib/login/login-intro";
+} from "@/lib/auth/login-intro";
 import { BADGE_BASE, ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

@@ -11,7 +11,7 @@ import {
 import {
   STUDENT_STATUS_OPTIONS,
   type StudentStatus,
-} from "@/lib/signup/arch-registration";
+} from "@/lib/auth/arch-registration";
 import { getAllColleges } from "@/api/colleges";
 import { getAllCourses } from "@/api/courses";
 import type { College, Course } from "@/types";

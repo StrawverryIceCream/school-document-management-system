@@ -1,6 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { ROLE_OPTIONS } from "@/lib/signup/arch-registration";
+import { ROLE_OPTIONS } from "@/lib/auth/arch-registration";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
 

@@ -19,7 +19,7 @@ import {
   SYNC_BADGE_TONE,
   type FacultyRank,
   type StudentStatus,
-} from "@/lib/signup/arch-registration";
+} from "@/lib/auth/arch-registration";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";

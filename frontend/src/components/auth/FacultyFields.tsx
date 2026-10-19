@@ -12,7 +12,7 @@ import {
   DEPARTMENT_OPTIONS,
   FACULTY_RANK_OPTIONS,
   type FacultyRank,
-} from "@/lib/signup/arch-registration";
+} from "@/lib/auth/arch-registration";
 
 type FacultyFieldsProps = {
   facultyId: string;
