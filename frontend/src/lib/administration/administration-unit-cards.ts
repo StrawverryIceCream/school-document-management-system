@@ -1,7 +1,7 @@
 import {
   matchesUnit,
   type AdministrationUnit,
-} from "@/lib/administration-units";
+} from "./administration-units";
 import type { Tone } from "@/lib/tones";
 import type { DocumentRequestWithRelations } from "@/types";
 

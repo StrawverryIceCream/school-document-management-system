@@ -8,7 +8,7 @@ import {
   ADMINISTRATION_UNITS,
   ADMIN_REQUESTER_ROLES,
   matchesUnit,
-} from "@/lib/administration-units";
+} from "@/lib/administration/administration-units";
 import type { DocumentRequestWithRelations } from "@/types";
 
 // Matches the backend's MAX_LIMIT; one page can never return more than this

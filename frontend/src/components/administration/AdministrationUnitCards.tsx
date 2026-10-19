@@ -12,8 +12,8 @@ import {
   HIGHLIGHTS_LABEL,
   NO_PENDING_LABEL,
   type UnitSummary,
-} from "@/lib/administration-unit-cards";
-import { ADMINISTRATION_UNITS } from "@/lib/administration-units";
+} from "@/lib/administration/administration-unit-cards";
+import { ADMINISTRATION_UNITS } from "@/lib/administration/administration-units";
 import {
   BADGE_BASE,
   BANNER_TONES,

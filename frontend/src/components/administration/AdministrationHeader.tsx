@@ -5,8 +5,8 @@ import {
   HEADER_COPY,
   HEADER_PILLS,
   type HeaderPillKey,
-} from "@/lib/administration-header";
-import { ADMINISTRATION_UNITS } from "@/lib/administration-units";
+} from "@/lib/administration/administration-header";
+import { ADMINISTRATION_UNITS } from "@/lib/administration/administration-units";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

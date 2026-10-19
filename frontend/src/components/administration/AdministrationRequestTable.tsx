@@ -21,7 +21,7 @@ import {
   UNKNOWN_DOCUMENT,
   UNKNOWN_REQUESTER,
   UNKNOWN_ROLE,
-} from "@/lib/administration-request-table";
+} from "@/lib/administration/administration-request-table";
 import { cn } from "@/lib/utils";
 
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AdministrationUnit } from "@/lib/administration-units";
+import type { AdministrationUnit } from "@/lib/administration/administration-units";
 import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
 
 export type StatusFilter = "all" | RequestStatus;
