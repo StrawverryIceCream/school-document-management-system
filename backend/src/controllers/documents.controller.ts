@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { db } from "../db/db.js";
 import { documentTypes } from "../db/schema.js";
 import { and, count, eq, ilike, or } from "drizzle-orm";
+import { recordAuditLog } from "../services/audit.service.js";
 
 const CATEGORIES = ["student", "teacher", "staff"] as const;
 type DocumentCategory = (typeof CATEGORIES)[number];
@@ -132,6 +133,15 @@ export async function createDocument(req: Request, res: Response) {
       return res.status(500).json({ error: "Failed to create document" });
     }
 
+    void recordAuditLog({
+      actorId: req.session.userId ?? null,
+      action: `Created document type "${document.name}"`,
+      entityType: "document",
+      entityId: document.id,
+      ipAddress: req.ip,
+      metadata: { code: document.code },
+    });
+
     return res.status(201).json(document);
   } catch (err) {
     console.error("[createDocument] error:", err);
@@ -170,6 +180,14 @@ export async function updateDocumentType(
       return res.status(404).json({ error: "Document type not found" });
     }
 
+    void recordAuditLog({
+      actorId: req.session.userId ?? null,
+      action: `Updated document type "${updated.name}"`,
+      entityType: "document",
+      entityId: id,
+      ipAddress: req.ip,
+    });
+
     return res.json(updated);
   } catch (err: any) {
     if (err?.code === "23505") {
@@ -200,6 +218,14 @@ export async function deleteDocumentById(
     if (deletedDocument.length === 0) {
       return res.status(404).json({ error: "Document not found" });
     }
+
+    void recordAuditLog({
+      actorId: req.session.userId ?? null,
+      action: `Deleted document type "${deletedDocument[0]?.id ?? id}"`,
+      entityType: "document",
+      entityId: id,
+      ipAddress: req.ip,
+    });
 
     return res.status(200).json({ message: "Document deleted successfully" });
   } catch (err) {

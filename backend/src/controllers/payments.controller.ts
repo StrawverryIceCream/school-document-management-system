@@ -11,6 +11,7 @@ import {
   users,
 } from "../db/schema.js";
 import { uploadPaymentProof } from "../services/storage.service.js";
+import { recordAuditLog } from "../services/audit.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -215,6 +216,18 @@ export async function createPayment(req: Request, res: Response) {
     if (!result.ok) {
       return res.status(result.status).json({ error: result.error });
     }
+
+    void recordAuditLog({
+      actorId: userId,
+      action: `Submitted payment (${result.payment.method.replace("_", " ")}, ₱${result.payment.amount})`,
+      entityType: "payment",
+      entityId: result.payment.id,
+      ipAddress: req.ip,
+      metadata: {
+        receiptNumber: result.payment.receiptNumber,
+        requestId,
+      },
+    });
 
     return res.status(201).json(result.payment);
   } catch (err) {
@@ -452,6 +465,15 @@ export async function uploadPaymentProofHandler(
       .update(payments)
       .set({ paymentProofUrl: url })
       .where(eq(payments.id, paymentId));
+
+    void recordAuditLog({
+      actorId: userId,
+      action: "Uploaded payment proof",
+      entityType: "payment",
+      entityId: paymentId,
+      ipAddress: req.ip,
+      metadata: { paymentId },
+    });
 
     return res.json({ paymentProofUrl: url });
   } catch (err) {
