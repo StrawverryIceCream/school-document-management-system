@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import { db } from "../db/db.js";
 import { users } from "../db/schema.js";
 import { eq, and, ilike, or, count } from "drizzle-orm";
+import { recordAuditLog } from "../services/audit.service.js";
 
 interface UpdateUserBody {
   fullName?: string;
@@ -158,6 +159,15 @@ export async function updateUserById(
       },
     });
 
+    void recordAuditLog({
+      actorId: req.session.userId ?? null,
+      action: `Updated account details for ${updatedUser?.fullName ?? id}`,
+      entityType: "account",
+      entityId: id,
+      ipAddress: req.ip,
+      metadata: { updatedFields: Object.keys(updateData) },
+    });
+
     res.json(updatedUser);
   } catch (err) {
     console.error("[updateUserById] error:", err);
@@ -182,6 +192,14 @@ export async function deleteUserById(
     if (deletedUsers.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    void recordAuditLog({
+      actorId: req.session.userId ?? null,
+      action: `Deleted user account ${id}`,
+      entityType: "account",
+      entityId: id,
+      ipAddress: req.ip,
+    });
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {

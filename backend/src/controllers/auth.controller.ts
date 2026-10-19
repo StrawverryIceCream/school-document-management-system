@@ -5,6 +5,7 @@ import { eq, desc, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import { users, emailVerifications, courses } from "../db/schema.js";
 import { sendOtpEmail } from "../services/email.service.js";
+import { recordAuditLog } from "../services/audit.service.js";
 
 const BCRYPT_SALT_ROUNDS = 10;
 const FIELD_MAX_LENGTH = 100;
@@ -370,6 +371,14 @@ export const signup = async (
       if (err) {
         return res.status(500).json({ error: "Failed to start session" });
       }
+      void recordAuditLog({
+        actorId: user.id,
+        action: `Registered account (${user.role})`,
+        entityType: "account",
+        entityId: user.id,
+        ipAddress: req.ip,
+        metadata: { role: user.role, email: user.email },
+      });
       return res.status(201).json(toAuthUser(user));
     });
   } catch (err) {
@@ -411,6 +420,16 @@ export const login = async (req: Request, res: Response) => {
       if (err) {
         return res.status(500).json({ error: "Failed to start session" });
       }
+      if (user.role !== "student") {
+        void recordAuditLog({
+          actorId: user.id,
+          action: `Signed in (${user.role})`,
+          entityType: "account",
+          entityId: user.id,
+          ipAddress: req.ip,
+          metadata: { role: user.role, email: user.email },
+        });
+      }
       return res.json(toAuthUser(user));
     });
   } catch (err) {
@@ -419,7 +438,23 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response) => {
+  const userId = req.session.userId;
+  if (userId) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { role: true, email: true },
+    });
+    if (user && user.role !== "student") {
+      void recordAuditLog({
+        actorId: userId,
+        action: `Signed out (${user.role})`,
+        entityType: "account",
+        entityId: userId,
+        ipAddress: req.ip,
+      });
+    }
+  }
   req.session.destroy(() => {
     res.status(204).send();
   });
