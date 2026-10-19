@@ -1,4 +1,4 @@
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import { useDocument } from "@/hooks/useDocument";
 import type { Tone } from "@/lib/tones";
 import { CheckCircle2, FileText, Slash, type LucideIcon } from "lucide-react";

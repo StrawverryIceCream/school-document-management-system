@@ -6,7 +6,7 @@ import {
   PackageCheck,
   type LucideIcon,
 } from "lucide-react";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import type { Tone } from "@/lib/tones";
 
 type CardConfig = {

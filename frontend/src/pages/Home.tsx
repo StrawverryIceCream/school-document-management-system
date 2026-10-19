@@ -1,4 +1,4 @@
-import DashboardHero from "@/components/dashboard/DashboardHero";
+import DashboardHero from "@/components/home/DashboardHero";
 import AvailableDocuments from "@/components/home/AvailableDocuments";
 import MyRequestCards from "@/components/my_request/MyRequestCards";
 import RequestsSection from "@/components/my_request/RequestSection";

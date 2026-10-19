@@ -1,4 +1,4 @@
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import { useLogs } from "@/hooks/useLogs";
 import { formatDate } from "@/lib/logs";
 import type { Tone } from "@/lib/tones";

@@ -1,5 +1,5 @@
 import { BadgeCheck, Folder, Hourglass, type LucideIcon } from "lucide-react";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import { useAdministrationView } from "@/hooks/useAdministrationView";
 import type { Tone } from "@/lib/tones";
 

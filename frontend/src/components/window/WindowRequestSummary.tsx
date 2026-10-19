@@ -6,7 +6,7 @@ import {
   Timer,
   type LucideIcon,
 } from "lucide-react";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import { useWindowView } from "@/hooks/useWindowView";
 import type { Tone } from "@/lib/tones";
 

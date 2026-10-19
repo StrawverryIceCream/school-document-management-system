@@ -1,6 +1,6 @@
 import { useMyRequest } from "@/hooks/useMyRequest";
 import { Layers3, Clock3, CheckCircle2 } from "lucide-react";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 
 function MyRequestCards() {
   const { totalCount, activeCount, readyCount } = useMyRequest();

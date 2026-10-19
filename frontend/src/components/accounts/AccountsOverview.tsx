@@ -1,4 +1,4 @@
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/shared/StatCard";
 import { useUsers } from "@/hooks/useUsers";
 import {
   COUNT_PLACEHOLDER,
