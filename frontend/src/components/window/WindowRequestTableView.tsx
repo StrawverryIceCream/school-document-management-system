@@ -5,19 +5,17 @@ import { WindowRequestHeader } from "@/components/window/WindowRequestHeader";
 import { WindowRequestSummary } from "@/components/window/WindowRequestSummary";
 import { WindowRequestTable } from "@/components/window/WindowRequestTable";
 
-function WindowRequestTableView() {
+export default function WindowRequestTableView() {
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-      <div className="space-y-4">
-        <WindowRequestHeader />
-        <WindowRequestSummary />
-        <WindowRequestFilters />
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+      <WindowRequestHeader />
+      <WindowRequestSummary />
+      <WindowRequestFilters />
+      <div className="flex min-h-0 flex-1 flex-col">
         <WindowRequestTable />
-        <WindowRequestGuidelines />
       </div>
+      <WindowRequestGuidelines />
       <WindowRequestDialogs />
     </div>
   );
 }
-
-export default WindowRequestTableView;

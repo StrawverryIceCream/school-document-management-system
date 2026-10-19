@@ -10,7 +10,7 @@ export interface WindowTile {
   description: string;
 }
 
-function Windows() {
+export default function Windows() {
   const { activeView } = useWindowView();
 
   if (activeView) {
@@ -18,13 +18,9 @@ function Windows() {
   }
 
   return (
-    <div className="h-full overflow-auto p-6 sm:p-10">
-      <div className="mx-auto flex flex-col gap-8">
-        <WindowsHeader />
-        <CollegeWindowCards />
-      </div>
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+      <WindowsHeader />
+      <CollegeWindowCards />
     </div>
   );
-}
-
-export default Windows;
+}
