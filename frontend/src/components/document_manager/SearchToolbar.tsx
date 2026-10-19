@@ -1,36 +1,38 @@
-import { Search } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SearchToolbar, {
+  type SearchToolbarTab,
+} from "@/components/shared/SearchToolbar";
 import { useDocument } from "@/hooks/useDocument";
 
-function SearchToolbar() {
-  const { setIsActive, setSearch, search } = useDocument();
+const DOCUMENT_TABS: SearchToolbarTab[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+];
+
+function DocumentSearchToolbar() {
+  const { setIsActive, setSearch, search, isActive } = useDocument();
+
+  const activeTab =
+    isActive === undefined ? "all" : isActive ? "active" : "inactive";
+
+  const handleTabChange = (val: string) => {
+    if (val === "all") setIsActive(undefined);
+    else if (val === "active") setIsActive(true);
+    else setIsActive(false);
+  };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Search by code, name or description"
-          className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-ring/40"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-      <Tabs defaultValue="All">
-        <TabsList className="h-10">
-          <TabsTrigger onClick={() => setIsActive(undefined)} value="All">
-            All
-          </TabsTrigger>
-          <TabsTrigger onClick={() => setIsActive(true)} value="Active">
-            Active
-          </TabsTrigger>
-          <TabsTrigger onClick={() => setIsActive(false)} value="Inactive">
-            Inactive
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-    </div>
+    <SearchToolbar
+      value={search}
+      onChange={setSearch}
+      placeholder="Search by code, name or description"
+      ariaLabel="Search documents"
+      tabs={DOCUMENT_TABS}
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+      tabsAriaLabel="Filter documents by status"
+    />
   );
 }
 
-export default SearchToolbar;
+export default DocumentSearchToolbar;
