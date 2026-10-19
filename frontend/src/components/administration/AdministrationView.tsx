@@ -7,17 +7,15 @@ export default function AdministrationView() {
   const { activeUnit } = useAdministrationView();
 
   return (
-    <div className="h-full overflow-auto p-6 sm:p-10">
-      <div className="mx-auto flex flex-col gap-8">
-        {activeUnit ? (
-          <AdministrationRequestTable />
-        ) : (
-          <>
-            <AdministrationHeader />
-            <AdministrationUnitCards />
-          </>
-        )}
-      </div>
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+      {activeUnit ? (
+        <AdministrationRequestTable />
+      ) : (
+        <>
+          <AdministrationHeader />
+          <AdministrationUnitCards />
+        </>
+      )}
     </div>
   );
 }
