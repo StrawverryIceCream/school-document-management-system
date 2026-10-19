@@ -1,34 +1,25 @@
+import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import AdministrationRequestSummary from "./AdministrationRequestSummary";
 import SearchToolbar, {
   type SearchToolbarTab,
 } from "@/components/shared/SearchToolbar";
+import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import type { StatusFilter } from "@/context/AdministrationViewContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAdministrationView } from "@/hooks/useAdministrationView";
 import {
   BACK_LABEL,
   EMPTY_LABEL,
-  LOADING_LABEL,
   SEARCH_PLACEHOLDER,
   STATUS_FILTERS,
-  TABLE_COLUMNS,
   UNKNOWN_DOCUMENT,
   UNKNOWN_REQUESTER,
   UNKNOWN_ROLE,
 } from "@/lib/administration/administration-request-table";
-import { cn } from "@/lib/utils";
-
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
+import type { DocumentRequestWithRelations } from "@/types";
 
 const adminTabs: SearchToolbarTab[] = STATUS_FILTERS.map((item) => ({
   value: item.value,
@@ -48,7 +39,79 @@ export default function AdministrationRequestTable() {
     setSearch,
   } = useAdministrationView();
 
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const columns: DataTableColumn<DocumentRequestWithRelations>[] = useMemo(
+    () => [
+      {
+        key: "requester",
+        header: "Requester",
+        cell: (req) => (
+          <span className="text-base font-medium">
+            {req.user?.fullName ?? UNKNOWN_REQUESTER}
+          </span>
+        ),
+      },
+      {
+        key: "role",
+        header: "Role",
+        cell: (req) => (
+          <span className="text-base capitalize text-muted-foreground">
+            {req.user?.role ?? UNKNOWN_ROLE}
+          </span>
+        ),
+      },
+      {
+        key: "document",
+        header: "Document Type",
+        cell: (req) => (
+          <span className="text-base">
+            {req.documentType?.name ?? UNKNOWN_DOCUMENT}
+          </span>
+        ),
+      },
+      {
+        key: "date",
+        header: "Date",
+        cell: (req) => (
+          <span className="text-base">
+            {req.createdAt
+              ? new Date(req.createdAt).toLocaleDateString("en-US")
+              : "—"}
+          </span>
+        ),
+      },
+      {
+        key: "status",
+        header: "Status",
+        cell: (req) => {
+          const config = REQUEST_STATUS_CONFIG[req.status];
+          const Icon = config?.icon;
+          return (
+            <Badge
+              variant="outline"
+              className={`gap-1.5 px-3 py-1 text-sm font-medium capitalize ${
+                statusStyles[req.status] ?? ""
+              }`}
+            >
+              {Icon && <Icon className="size-3.5" aria-hidden="true" />}
+              {config?.label ?? req.status}
+            </Badge>
+          );
+        },
+      },
+    ],
+    [],
+  );
+
   if (!activeUnit) return null;
+
+  const totalPages = Math.max(1, Math.ceil(visibleRequests.length / pageSize));
+  const pagedData = visibleRequests.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
     <section
@@ -78,90 +141,37 @@ export default function AdministrationRequestTable() {
 
       <SearchToolbar
         value={search}
-        onChange={setSearch}
+        onChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
         placeholder={SEARCH_PLACEHOLDER}
         ariaLabel={SEARCH_PLACEHOLDER}
         tabs={adminTabs}
         activeTab={filter}
-        onTabChange={(value) => setFilter(value as StatusFilter)}
+        onTabChange={(value) => {
+          setFilter(value as StatusFilter);
+          setPage(1);
+        }}
         tabsAriaLabel="Filter requests by status"
       />
 
-      {loading && (
-        <p className="text-base text-muted-foreground">{LOADING_LABEL}</p>
-      )}
-      {error && (
-        <p role="alert" className="text-base text-destructive">
-          {error}
-        </p>
-      )}
-
-      {!loading && !error && (
-        <div className="overflow-hidden rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {TABLE_COLUMNS.map((column) => (
-                  <TableHead key={column} className="h-12 text-sm">
-                    {column}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visibleRequests.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={TABLE_COLUMNS.length}
-                    className="h-24 text-center text-base text-muted-foreground"
-                  >
-                    {EMPTY_LABEL}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                visibleRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="text-base font-medium">
-                      {request.user?.fullName ?? UNKNOWN_REQUESTER}
-                    </TableCell>
-                    <TableCell className="text-base capitalize text-muted-foreground">
-                      {request.user?.role ?? UNKNOWN_ROLE}
-                    </TableCell>
-                    <TableCell className="text-base">
-                      {request.documentType?.name ?? UNKNOWN_DOCUMENT}
-                    </TableCell>
-                    <TableCell className="text-base">
-                      {request.createdAt
-                        ? new Date(request.createdAt).toLocaleDateString("en-US")
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "gap-1.5 px-3 py-1 text-sm font-medium capitalize",
-                          statusStyles[request.status],
-                        )}
-                      >
-                        {(() => {
-                          const config = REQUEST_STATUS_CONFIG[request.status];
-                          const Icon = config?.icon;
-                          return (
-                            <>
-                              {Icon && <Icon className="size-3.5" aria-hidden="true" />}
-                              {config?.label ?? request.status}
-                            </>
-                          );
-                        })()}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <DataTable
+        columns={columns}
+        data={pagedData}
+        keyExtractor={(req) => req.id}
+        loading={loading}
+        error={error}
+        emptyMessage={EMPTY_LABEL}
+        pagination={{
+          page,
+          totalPages,
+          totalItems: visibleRequests.length,
+          itemsPerPage: pageSize,
+          itemLabel: "requests",
+          onPageChange: setPage,
+        }}
+      />
     </section>
   );
 }
