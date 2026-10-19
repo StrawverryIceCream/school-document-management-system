@@ -1,115 +1,129 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Eye } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
+import RequestDetailDialog from "@/components/dashboard_page/RequestDetailDialog";
 import { useDashboard } from "@/hooks/useDashboard";
 import { statusStyles } from "@/lib/request";
-import RequestDetailDialog from "@/components/dashboard_page/RequestDetailDialog";
 import type { RequestRow } from "@/context/DashboardContext";
 
-function RequestTable() {
+export default function RequestTable() {
   const { requests, loading, error } = useDashboard();
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(
     null,
   );
   const [detailOpen, setDetailOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   function handleViewClick(request: RequestRow) {
     setSelectedRequest(request);
     setDetailOpen(true);
   }
 
-  if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading requests...</p>;
-  }
+  const columns: DataTableColumn<RequestRow>[] = useMemo(
+    () => [
+      {
+        key: "id",
+        header: "ID",
+        className: "w-24",
+        cell: (row) => <span className="font-mono text-xs">#{row.id}</span>,
+      },
+      {
+        key: "applicant",
+        header: "Applicant",
+        cell: (row) =>
+          row.userId ? (
+            <ProfileTrigger userId={row.userId}>
+              <button
+                type="button"
+                className="text-left font-medium hover:underline"
+              >
+                {row.applicant}
+              </button>
+            </ProfileTrigger>
+          ) : (
+            <span className="font-medium">{row.applicant}</span>
+          ),
+      },
+      {
+        key: "document",
+        header: "Document",
+        accessor: "document",
+      },
+      {
+        key: "college",
+        header: "College",
+        cell: (row) => row.college ?? "—",
+      },
+      {
+        key: "course",
+        header: "Course",
+        cell: (row) => row.course ?? "—",
+      },
+      {
+        key: "submitted",
+        header: "Submitted",
+        cell: (row) =>
+          row.submittedAt
+            ? new Date(row.submittedAt).toLocaleDateString()
+            : "—",
+      },
+      {
+        key: "status",
+        header: "Status",
+        cell: (row) => (
+          <Badge
+            variant="outline"
+            className={`capitalize ${statusStyles[row.status] ?? ""}`}
+          >
+            {row.status}
+          </Badge>
+        ),
+      },
+      {
+        key: "actions",
+        header: "Action",
+        className: "w-20 text-right",
+        headerClassName: "text-right",
+        cell: (row) => (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewClick(row)}
+            aria-label={`View details of request #${row.id}`}
+          >
+            <Eye className="size-4" />
+          </Button>
+        ),
+      },
+    ],
+    [],
+  );
 
-  if (error) return null; // no API / fetch failed — show nothing
+  const totalPages = Math.max(1, Math.ceil(requests.length / pageSize));
+  const pagedData = requests.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <>
-      <div className="flex-1 overflow-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Applicant</TableHead>
-              <TableHead>Document</TableHead>
-              <TableHead>College</TableHead>
-              <TableHead>Window</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {requests.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center text-muted-foreground"
-                >
-                  No requests found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              requests.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="font-mono text-xs">{r.id}</TableCell>
-                  <TableCell>
-                    {r.userId ? (
-                      <ProfileTrigger userId={r.userId}>
-                        <button
-                          type="button"
-                          className="text-left hover:underline"
-                        >
-                          {r.applicant}
-                        </button>
-                      </ProfileTrigger>
-                    ) : (
-                      r.applicant
-                    )}
-                  </TableCell>
-                  <TableCell>{r.document}</TableCell>
-                  <TableCell>{r.college ?? "—"}</TableCell>
-                  <TableCell>{r.course ?? "—"}</TableCell>
-                  <TableCell>
-                    {r.submittedAt
-                      ? new Date(r.submittedAt).toLocaleDateString()
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`capitalize ${statusStyles[r.status]}`}
-                    >
-                      {r.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`View request ${r.id}`}
-                      onClick={() => handleViewClick(r)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={pagedData}
+        keyExtractor={(row) => row.id}
+        loading={loading}
+        error={error}
+        emptyMessage="No requests found."
+        pagination={{
+          page,
+          totalPages,
+          totalItems: requests.length,
+          itemsPerPage: pageSize,
+          itemLabel: "requests",
+          onPageChange: setPage,
+        }}
+      />
 
       <RequestDetailDialog
         request={selectedRequest}
@@ -119,5 +133,3 @@ function RequestTable() {
     </>
   );
 }
-
-export default RequestTable;
