@@ -11,8 +11,8 @@ type LogCardConfig = {
   tone: Tone;
 };
 
-function LogsOverview() {
-  const { stats, error } = useLogs();
+export default function LogsOverview() {
+  const { stats, error, loading } = useLogs();
 
   if (error) return null;
 
@@ -38,7 +38,10 @@ function LogsOverview() {
   ];
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+    <section
+      aria-label="Activity statistics"
+      className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    >
       {cards.map(({ label, value, icon, tone }) => (
         <StatCard
           key={label}
@@ -46,10 +49,9 @@ function LogsOverview() {
           value={value}
           icon={icon}
           tone={tone}
+          loading={loading}
         />
       ))}
-    </div>
+    </section>
   );
 }
-
-export default LogsOverview;
