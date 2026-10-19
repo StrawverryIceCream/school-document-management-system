@@ -1,24 +1,28 @@
+import { RefreshCw } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { RefreshCw } from "lucide-react";
 
-function DashboardHeader() {
+export default function DashboardHeader() {
   const { refreshDashboard, loading } = useDashboard();
 
   return (
-    <div className="mb-8 flex items-start justify-between gap-5">
-      <div>
-        <h1 className="text-3xl font-bold tracking-normal">Admin Dashboard</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Overview of document requests and system activity
-        </p>
-      </div>
-      <Button variant="outline" onClick={refreshDashboard} disabled={loading}>
-        <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+    <PageHeader
+      title="Admin Dashboard"
+      badge="Realtime Analytics"
+      description="Overview of document requests, window performance, and system activity"
+    >
+      <Button
+        variant="outline"
+        className="h-11 px-5 text-base"
+        onClick={refreshDashboard}
+        disabled={loading}
+      >
+        <RefreshCw
+          className={`size-4 mr-2 ${loading ? "animate-spin" : ""}`}
+        />
         Refresh
       </Button>
-    </div>
+    </PageHeader>
   );
 }
-
-export default DashboardHeader;

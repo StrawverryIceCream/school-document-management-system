@@ -24,13 +24,16 @@ const cards: CardConfig[] = [
   { key: "cancelled", label: "Cancelled", icon: Ban, tone: "red" },
 ];
 
-function StatsOverview() {
+export default function StatsOverview() {
   const { stats, loading, error } = useDashboard();
 
   if (error) return null;
 
   return (
-    <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <section
+      aria-label="Dashboard statistics"
+      className="grid shrink-0 gap-4 sm:grid-cols-2 xl:grid-cols-5"
+    >
       {cards.map(({ key, label, icon, tone }) => (
         <StatCard
           key={key}
@@ -44,5 +47,3 @@ function StatsOverview() {
     </section>
   );
 }
-
-export default StatsOverview;

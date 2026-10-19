@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+import SearchToolbar from "@/components/shared/SearchToolbar";
 import {
   Select,
   SelectContent,
@@ -8,17 +8,16 @@ import {
 } from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
 
-function RequestSearchToolbar() {
+export default function RequestSearchToolbar() {
   const { search, setSearch, status, setStatus } = useDashboard();
 
   return (
-    <div className="flex items-center gap-4">
-      <Input
-        placeholder="Search student name or ID..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="flex-1"
-      />
+    <SearchToolbar
+      value={search}
+      onChange={setSearch}
+      placeholder="Search student name or ID..."
+      ariaLabel="Search student name or ID"
+    >
       <Select
         value={status ?? "all"}
         onValueChange={(v) => setStatus(v === "all" ? undefined : v)}
@@ -35,8 +34,6 @@ function RequestSearchToolbar() {
           <SelectItem value="cancelled">Cancelled</SelectItem>
         </SelectContent>
       </Select>
-    </div>
+    </SearchToolbar>
   );
 }
-
-export default RequestSearchToolbar;
