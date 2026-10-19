@@ -2,28 +2,29 @@ import { useMyRequest } from "@/hooks/useMyRequest";
 import { Layers3, Clock3, CheckCircle2 } from "lucide-react";
 import StatCard from "@/components/shared/StatCard";
 
-function MyRequestCards() {
+export default function MyRequestCards() {
   const { totalCount, activeCount, readyCount } = useMyRequest();
 
   const summaryCards = [
-    { label: "Total Requests", value: totalCount, icon: Layers3 },
-    { label: "Active Requests", value: activeCount, icon: Clock3 },
-    { label: "Ready for Release", value: readyCount, icon: CheckCircle2 },
+    { label: "Total Requests", value: totalCount, icon: Layers3, tone: "neutral" as const },
+    { label: "Active Requests", value: activeCount, icon: Clock3, tone: "amber" as const },
+    { label: "Ready for Release", value: readyCount, icon: CheckCircle2, tone: "emerald" as const },
   ];
 
   return (
-    <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {summaryCards.map(({ label, value, icon: Icon }) => (
+    <section
+      aria-label="Personal request summary"
+      className="grid shrink-0 gap-4 md:grid-cols-2 xl:grid-cols-3"
+    >
+      {summaryCards.map(({ label, value, icon: Icon, tone }) => (
         <StatCard
+          key={label}
           label={label}
           value={value}
-          caption="Claim Slip validated & stamped"
           icon={Icon}
-          tone="emerald"
-          tag={{ label: "Claim Window 3", tone: "emerald" }}
+          tone={tone}
         />
       ))}
-    </div>
+    </section>
   );
 }
-export default MyRequestCards;

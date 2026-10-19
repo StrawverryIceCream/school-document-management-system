@@ -13,23 +13,19 @@ const statusFilterOptions: SearchToolbarTab[] = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-function MyRequestFilters() {
+export default function MyRequestFilters() {
   const { search, setSearch, statusFilter, setStatusFilter } = useMyRequest();
 
   return (
-    <div className="mb-6">
-      <SearchToolbar
-        value={search}
-        onChange={setSearch}
-        placeholder="Search by request ID, document, or keyword"
-        ariaLabel="Search requests"
-        tabs={statusFilterOptions}
-        activeTab={statusFilter}
-        onTabChange={(value) => setStatusFilter(value as "all" | RequestStatus)}
-        tabsAriaLabel="Filter requests by status"
-      />
-    </div>
+    <SearchToolbar
+      value={search}
+      onChange={setSearch}
+      placeholder="Search by request ID, document, or keyword"
+      ariaLabel="Search requests"
+      tabs={statusFilterOptions}
+      activeTab={statusFilter}
+      onTabChange={(value) => setStatusFilter(value as "all" | RequestStatus)}
+      tabsAriaLabel="Filter requests by status"
+    />
   );
 }
-
-export default MyRequestFilters;
