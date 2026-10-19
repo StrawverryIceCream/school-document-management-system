@@ -1,8 +1,11 @@
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import AdministrationRequestSummary from "./AdministrationRequestSummary";
+import SearchToolbar, {
+  type SearchToolbarTab,
+} from "@/components/shared/SearchToolbar";
+import type { StatusFilter } from "@/context/AdministrationViewContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -26,6 +29,11 @@ import {
 import { cn } from "@/lib/utils";
 
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
+
+const adminTabs: SearchToolbarTab[] = STATUS_FILTERS.map((item) => ({
+  value: item.value,
+  label: item.label,
+}));
 
 export default function AdministrationRequestTable() {
   const {
@@ -68,37 +76,16 @@ export default function AdministrationRequestTable() {
 
       <AdministrationRequestSummary />
 
-      <div
-        role="search"
-        className="flex flex-col gap-3 lg:flex-row lg:items-center"
-      >
-        <div className="relative flex-1">
-          <Search
-            className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={SEARCH_PLACEHOLDER}
-            aria-label={SEARCH_PLACEHOLDER}
-            className="h-12 pl-12 text-base"
-          />
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {STATUS_FILTERS.map((option) => (
-            <Button
-              key={option.value}
-              size="sm"
-              variant={filter === option.value ? "default" : "outline"}
-              className="h-10 px-4 text-sm"
-              onClick={() => setFilter(option.value)}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <SearchToolbar
+        value={search}
+        onChange={setSearch}
+        placeholder={SEARCH_PLACEHOLDER}
+        ariaLabel={SEARCH_PLACEHOLDER}
+        tabs={adminTabs}
+        activeTab={filter}
+        onTabChange={(value) => setFilter(value as StatusFilter)}
+        tabsAriaLabel="Filter requests by status"
+      />
 
       {loading && (
         <p className="text-base text-muted-foreground">{LOADING_LABEL}</p>
