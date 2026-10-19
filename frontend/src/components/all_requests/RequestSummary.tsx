@@ -16,12 +16,12 @@ type RequestSummaryItem = {
   tone: Tone;
 };
 
-function RequestSummary() {
+export default function RequestSummary() {
   const { summary } = useRequests();
 
   const summaryCards: RequestSummaryItem[] = [
     {
-      label: "Total requests",
+      label: "Total Requests",
       value: summary.total,
       icon: Layers3,
       tone: "neutral",
@@ -42,7 +42,10 @@ function RequestSummary() {
   ];
 
   return (
-    <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section
+      aria-label="Request status overview"
+      className="grid shrink-0 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+    >
       {summaryCards.map(({ label, value, icon, tone }) => (
         <StatCard
           key={label}
@@ -55,5 +58,3 @@ function RequestSummary() {
     </section>
   );
 }
-
-export default RequestSummary;
