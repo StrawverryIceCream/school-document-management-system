@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CircleAlert, LoaderCircle } from "lucide-react";
+import { ArrowLeft, CircleAlert, LoaderCircle, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { AuditTrailCard } from "@/components/window_request_review/AuditTrailCard";
+import { ComplianceChecklistCard } from "@/components/window_request_review/ComplianceChecklistCard";
 import { RegistrarReviewCard } from "@/components/window_request_review/RegistrarReviewCard";
 import { RequestDetailsCard } from "@/components/window_request_review/RequestDetailsCard";
 import { StatusChangeDialog } from "@/components/window_request_review/StatusChangeDialog";
 import { StudentInfoCard } from "@/components/window_request_review/StudentInfoCard";
+import { WindowOperationsCard } from "@/components/window_request_review/WindowOperationsCard";
+import { WorkflowPipelineCard } from "@/components/window_request_review/WorkflowPipelineCard";
 import { useWindowView } from "@/hooks/useWindowView";
 import { getRequestWindowForCollege } from "@/lib/windowRequests";
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
 import { REVIEW_ACTIONS } from "@/lib/window_request_review/constants";
 import { fetchReviewData } from "@/lib/window_request_review/fetch-review-data";
+import { formatDate } from "@/lib/window_request_review/format";
 import type {
   ReviewData,
   ReviewField,
 } from "@/lib/window_request_review/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RequestStatus } from "@/types";
 
 function WindowRequestReview() {
@@ -240,8 +245,9 @@ function WindowRequestReview() {
   ];
 
   return (
-    <main className="space-y-6 p-6 sm:p-10">
-      <header className="space-y-3">
+    <main className="space-y-6 p-6 sm:p-10 max-w-7xl mx-auto">
+      {/* Top Navigation & Tracking Meta */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Button
           variant="ghost"
           size="sm"
@@ -251,28 +257,78 @@ function WindowRequestReview() {
           <ArrowLeft className="size-4" aria-hidden="true" />
           Back to {college.title} Requests
         </Button>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">
-              {college.description} Registrar Queue
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Review {request.referenceNumber}
-            </h1>
-          </div>
-          <Badge
-            variant="outline"
-            className={`gap-1.5 rounded-full px-2.5 py-1 font-medium ${statusStyles[request.status]}`}
-          >
-            <statusConfig.icon className="size-3.5" aria-hidden="true" />
-            {statusConfig.label}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Tracking ID:</span>
+          <span className="font-mono font-bold text-foreground">
+            {request.referenceNumber}
+          </span>
+          <span>•</span>
+          <Badge variant="outline" className="text-xs">
+            {college.title} Queue
           </Badge>
         </div>
-      </header>
+      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(18rem,1fr)]">
-        <div className="space-y-6">
-          <StudentInfoCard student={student} />
+      {/* Action Banner */}
+      <Card className="rounded-2xl border bg-card p-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Request Review: {documentType?.name ?? request.documentTypeName}
+              </h1>
+              <Badge
+                variant="outline"
+                className={`gap-1.5 rounded-full px-2.5 py-1 font-medium ${statusStyles[request.status]}`}
+              >
+                <statusConfig.icon className="size-3.5" aria-hidden="true" />
+                {statusConfig.label}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Requester: <span className="font-semibold text-foreground">{student.fullName}</span> ({student.department || "College Department"}) • Submitted {formatDate(request.createdAt)} via Requester Portal
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs h-9"
+              onClick={() => window.print()}
+            >
+              <Printer className="size-3.5" aria-hidden="true" />
+              Print Slip
+            </Button>
+            {actions.map(({ status, label, icon: Icon }) => {
+              const paymentBlocked =
+                status === "processing" &&
+                processingRequiresPayment &&
+                !hasPaymentRecord;
+              const releaseDateMissing = status === "ready" && !releaseDate;
+              return (
+                <Button
+                  key={status}
+                  size="sm"
+                  className="gap-2 text-xs h-9"
+                  disabled={updating || paymentBlocked || releaseDateMissing}
+                  onClick={() => setPendingAction(status)}
+                >
+                  <Icon className="size-3.5" aria-hidden="true" />
+                  {label}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
+
+      {/* 2-Column Workspace Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (8 cols): Requester Profile, Schema & Attachments, Compliance */}
+        <div className="lg:col-span-8 space-y-6">
+          <StudentInfoCard student={student} amountDue={request.amountDue} />
           <RequestDetailsCard
             request={request}
             paymentStatus={paymentStatus}
@@ -280,9 +336,14 @@ function WindowRequestReview() {
             attachments={attachments}
             attachmentsError={attachmentsError}
           />
+          <ComplianceChecklistCard
+            request={request}
+            paymentStatus={paymentStatus}
+          />
         </div>
 
-        <aside className="space-y-6">
+        {/* Right Column (4 cols): Registrar Controls, Workflow Stepper, Window Ops, Audit Trail */}
+        <div className="lg:col-span-4 space-y-6">
           <RegistrarReviewCard
             actions={actions}
             statusLabel={statusConfig.label}
@@ -295,21 +356,14 @@ function WindowRequestReview() {
             updating={updating}
             onSelectAction={setPendingAction}
           />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Internal Notes</CardTitle>
-              <CardDescription>
-                Registrar-only notes currently saved on this request.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                {request.internalNotes || "No internal notes have been saved."}
-              </p>
-            </CardContent>
-          </Card>
-        </aside>
+          <WorkflowPipelineCard request={request} />
+          <WindowOperationsCard request={request} />
+          <AuditTrailCard
+            request={request}
+            staffNotes={staffNotes}
+            onStaffNotesChange={setStaffNotes}
+          />
+        </div>
       </div>
 
       <StatusChangeDialog
