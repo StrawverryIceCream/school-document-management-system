@@ -5,7 +5,7 @@ import {
   COUNT_PLACEHOLDER,
   OVERVIEW_ARIA_LABEL,
   STAT_CONFIGS,
-} from "@/lib/accounts-overview";
+} from "@/lib/accounts/accounts-overview";
 import { ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "cn";
 

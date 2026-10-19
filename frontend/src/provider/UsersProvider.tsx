@@ -8,7 +8,7 @@ import {
   buildUsersCsv,
   downloadCsv,
   getExportFilename,
-} from "@/lib/accounts-export";
+} from "@/lib/accounts/accounts-export";
 import type { User, UserRole } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 

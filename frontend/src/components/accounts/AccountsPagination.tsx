@@ -9,7 +9,7 @@ import {
   PAGINATION_ARIA_LABEL,
   PREVIOUS_LABEL,
   SYNCED_LABEL,
-} from "@/lib/accounts-pagination";
+} from "@/lib/accounts/accounts-pagination";
 import { TONES } from "@/lib/tones";
 import { cn } from "cn";
 

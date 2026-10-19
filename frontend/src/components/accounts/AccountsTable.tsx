@@ -33,7 +33,7 @@ import {
   TABLE_COLUMN_COUNT,
   TABLE_COLUMNS,
   YOU_LABEL,
-} from "@/lib/accounts-table";
+} from "@/lib/accounts/accounts-table";
 import { getInitials, getTupIdLabel, ROLE_META } from "@/lib/profile";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "cn";

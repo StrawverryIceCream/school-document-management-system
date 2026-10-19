@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
-import { ACCOUNT_STATUS } from "@/lib/accounts-table";
+import { ACCOUNT_STATUS } from "@/lib/accounts/accounts-table";
 
 function EditRow({
   user,

@@ -10,7 +10,7 @@ import {
   SEARCH_ARIA_LABEL,
   SEARCH_PLACEHOLDER,
   TABS_ARIA_LABEL,
-} from "@/lib/search-toolbar";
+} from "@/lib/accounts/search-toolbar";
 
 export default function SearchToolbar() {
   const { search, setSearch, role, setRole, counts } = useUsers();

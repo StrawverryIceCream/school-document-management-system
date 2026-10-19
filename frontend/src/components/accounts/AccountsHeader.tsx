@@ -10,7 +10,7 @@ import {
   EXPORT_LABEL,
   EXPORTING_LABEL,
   REGISTRY_BADGE_LABEL,
-} from "@/lib/accounts-header";
+} from "@/lib/accounts/accounts-header";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "cn";
 
