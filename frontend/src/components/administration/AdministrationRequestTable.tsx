@@ -1,4 +1,5 @@
 import { ArrowLeft, Search } from "lucide-react";
+import AdministrationRequestSummary from "./AdministrationRequestSummary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,8 @@ export default function AdministrationRequestTable() {
           staff
         </p>
       </div>
+
+      <AdministrationRequestSummary />
 
       <div
         role="search"
