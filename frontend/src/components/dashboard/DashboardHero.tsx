@@ -1,16 +1,13 @@
-import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { Kbd } from "@/components/ui/kbd";
+import SearchToolbar from "@/components/shared/SearchToolbar";
+import { cn } from "@/lib/utils";
 
 type DashboardHeroProps = Omit<React.ComponentProps<"section">, "children"> & {
   greeting: string;
   userName: string;
   portalLabel: string;
   academicYear: string;
-  // null hides the pickup card when nothing is rea
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
   onSearchSubmit: () => void;
@@ -30,16 +27,11 @@ function DashboardHero({
   searchInputRef,
   ...props
 }: DashboardHeroProps) {
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    onSearchSubmit();
-  }
-
   return (
     <Card className="p-0 rounded-3xl">
       <section
         className={cn(
-          "flex flex-col gap-8  bg-linear-to-br from-card via-card to-primary/20 p-6 sm:p-8",
+          "flex flex-col gap-8 bg-linear-to-br from-card via-card to-primary/20 p-6 sm:p-8",
           className,
         )}
         {...props}
@@ -66,30 +58,18 @@ function DashboardHero({
           </div>
         </div>
 
-        <form
-          role="search"
-          onSubmit={handleSubmit}
-          className="w-full max-w-3xl"
-        >
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              ref={searchInputRef}
-              type="search"
-              value={searchQuery}
-              onChange={(e) => onSearchQueryChange(e.target.value)}
-              placeholder="Search by Document Name, Request ID (#8245...), or Academic Unit..."
-              aria-label="Search documents and requests"
-              className="h-12 rounded-xl border-0 bg-card pl-11 pr-20 shadow-sm "
-            />
-            <Kbd className="absolute right-3 top-1/2 -translate-y-1/2">
-              ⌘ + K
-            </Kbd>
-          </div>
-        </form>
+        <div className="w-full max-w-3xl">
+          <SearchToolbar
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            onSubmit={onSearchSubmit}
+            inputRef={searchInputRef}
+            placeholder="Search by Document Name, Request ID (#8245...), or Academic Unit..."
+            ariaLabel="Search documents and requests"
+            shortcutBadge="⌘K"
+            className="border border-border/70 bg-card/90 shadow-md backdrop-blur-sm"
+          />
+        </div>
       </section>
     </Card>
   );
