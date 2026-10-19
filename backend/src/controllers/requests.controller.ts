@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
-import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
+  colleges,
   documentRequests,
   documentTypes,
   notifications,
@@ -55,6 +56,8 @@ interface GetRequestsQuery {
   search?: string;
   status?: string;
   userId?: string;
+  college?: string;
+  collegeId?: string;
   page?: string;
   limit?: string;
 }
@@ -183,7 +186,8 @@ export async function getAllRequests(
   res: Response,
 ) {
   try {
-    const { search, status, userId, page, limit } = req.query;
+    const { search, status, userId, college, collegeId, page, limit } =
+      req.query;
     const { pageNum, limitNum, offset } = parsePagination(page, limit);
 
     if (userId !== undefined && !isUuid(userId)) {
@@ -192,10 +196,33 @@ export async function getAllRequests(
 
     const conditions = [];
 
+    const targetCollege = collegeId ?? college;
+    if (typeof targetCollege === "string" && targetCollege.trim()) {
+      const trimmed = targetCollege.trim();
+      const collegeMatch = isUuid(trimmed)
+        ? eq(colleges.id, trimmed)
+        : or(
+            ilike(colleges.code, trimmed),
+            ilike(colleges.name, `%${trimmed}%`),
+          );
+
+      conditions.push(
+        inArray(
+          documentRequests.userId,
+          db
+            .select({ id: users.id })
+            .from(users)
+            .innerJoin(colleges, eq(users.collegeId, colleges.id))
+            .where(collegeMatch),
+        ),
+      );
+    }
+
     if (typeof search === "string" && search.trim()) {
       const pattern = `%${search.trim()}%`;
       conditions.push(
         or(
+          ilike(documentRequests.referenceNumber, pattern),
           ilike(documentRequests.purpose, pattern),
           ilike(documentRequests.internalNotes, pattern),
           inArray(
@@ -208,6 +235,7 @@ export async function getAllRequests(
                   ilike(users.fullName, pattern),
                   ilike(users.studentId, pattern),
                   ilike(users.email, pattern),
+                  ilike(users.role, pattern),
                 ),
               ),
           ),
@@ -220,6 +248,7 @@ export async function getAllRequests(
                 or(
                   ilike(documentTypes.name, pattern),
                   ilike(documentTypes.code, pattern),
+                  ilike(documentTypes.description, pattern),
                 ),
               ),
           ),

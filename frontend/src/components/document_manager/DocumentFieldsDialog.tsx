@@ -1,9 +1,9 @@
 import type { NewDocument } from "@/types";
-import { Field } from "../ui/field";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
-import { Textarea } from "../ui/textarea";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
 function DocumentFieldsDialog({

@@ -14,7 +14,7 @@ import {
 } from "@/lib/landing/landing-nav";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "../ModeToggle";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export default function LandingNav() {
   return (

@@ -6,7 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "../ui/sidebar";
+} from "@/components/ui/sidebar";
 import { NavLink } from "react-router-dom";
 
 function NavConfig({

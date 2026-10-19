@@ -4,7 +4,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "../ui/sidebar";
+} from "@/components/ui/sidebar";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -12,10 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenu,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import Profile from "../profile/Profile";
+import Profile from "@/components/profile/Profile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/profile";
 

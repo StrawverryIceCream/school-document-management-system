@@ -1,5 +1,5 @@
-import { DialogClose, DialogFooter } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 function DocumentDialogFooter({
   handleSubmit,

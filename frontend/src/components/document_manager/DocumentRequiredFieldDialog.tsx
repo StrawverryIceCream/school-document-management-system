@@ -1,5 +1,5 @@
 import { Settings2 } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -7,17 +7,17 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from "../ui/popover";
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Input } from "../ui/input";
-import { FieldGroup } from "../ui/field";
-import { Label } from "../ui/label";
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { FieldGroup } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import type { RequiredFieldDefinition } from "@/types";
 
 const FIELD_TYPES = [

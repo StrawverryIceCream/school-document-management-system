@@ -1,116 +1,24 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  CircleAlert,
-  Eye,
-  FileText,
-  LoaderCircle,
-  PackageCheck,
-  Pause,
-  Play,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, CircleAlert, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { getAllRequestAttachments } from "@/api/requestStatusAttachments";
-import { getRequestById } from "@/api/requests";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RegistrarReviewCard } from "@/components/window_request_review/RegistrarReviewCard";
+import { RequestDetailsCard } from "@/components/window_request_review/RequestDetailsCard";
+import { StatusChangeDialog } from "@/components/window_request_review/StatusChangeDialog";
+import { StudentInfoCard } from "@/components/window_request_review/StudentInfoCard";
 import { useWindowView } from "@/hooks/useWindowView";
 import { getRequestWindowForCollege } from "@/lib/windowRequests";
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
+import { REVIEW_ACTIONS } from "@/lib/window_request_review/constants";
+import { fetchReviewData } from "@/lib/window_request_review/fetch-review-data";
 import type {
-  RequestAttachment,
-  RequestStatus,
-} from "@/types";
-import type { RequestReviewDetails } from "@/api/requests";
-
-const REVIEW_ACTIONS: {
-  status: RequestStatus;
-  label: string;
-  icon: LucideIcon;
-}[] = [
-  { status: "processing", label: "Start or resume processing", icon: Play },
-  { status: "on_hold", label: "Place on hold", icon: Pause },
-  { status: "rejected", label: "Reject request", icon: XCircle },
-  { status: "ready", label: "Mark ready", icon: CheckCircle2 },
-  { status: "claimed", label: "Mark claimed", icon: PackageCheck },
-];
-
-interface ReviewData {
-  request: RequestReviewDetails;
-  attachments: RequestAttachment[];
-  attachmentsError: string | null;
-}
-
-async function fetchReviewData(requestId: string): Promise<ReviewData> {
-  const request = await getRequestById(requestId);
-  let attachments: RequestAttachment[] = [];
-  let attachmentsError: string | null = null;
-
-  try {
-    const response = await getAllRequestAttachments({
-      requestId,
-      limit: 100,
-    });
-    attachments = response.data;
-  } catch (err) {
-    attachmentsError =
-      err instanceof Error ? err.message : "Could not load supporting files.";
-  }
-
-  return { request, attachments, attachmentsError };
-}
-
-function displayValue(value: unknown): string {
-  if (value === null || value === undefined || value === "") {
-    return "Not provided";
-  }
-  if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value === "string" || typeof value === "number") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => displayValue(item)).join(", ");
-  }
-  return JSON.stringify(value);
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "Not available";
-  const date = new Date(
-    /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value,
-  );
-  return Number.isNaN(date.getTime())
-    ? "Not available"
-    : date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-}
+  ReviewData,
+  ReviewField,
+} from "@/lib/window_request_review/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { RequestStatus } from "@/types";
 
 function WindowRequestReview() {
   const { collegeId, requestId } = useParams();
@@ -261,12 +169,6 @@ function WindowRequestReview() {
   }
 
   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
-  const initials = student.fullName
-    .split(/\s+/)
-    .map((part) => part.charAt(0))
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
   const configuredFields = documentType?.requiredFields ?? [];
   const formData = request.formData ?? {};
   const configuredKeys = new Set(configuredFields.map((field) => field.key));
@@ -322,7 +224,7 @@ function WindowRequestReview() {
     }
   }
 
-  const fields = [
+  const fields: ReviewField[] = [
     ...configuredFields.map((field) => ({
       key: field.key,
       label: field.label,
@@ -370,286 +272,29 @@ function WindowRequestReview() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(18rem,1fr)]">
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Student Information</CardTitle>
-              <CardDescription>
-                Student details supplied by the registrar request API.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start gap-4">
-                <div
-                  className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-semibold text-muted-foreground"
-                  aria-label={`Avatar for ${student.fullName}`}
-                >
-                  {initials || "?"}
-                </div>
-                <div className="grid min-w-0 flex-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                  <Info label="Full name" value={student.fullName} />
-                  <Info label="TUP / Student ID" value={student.studentId} />
-                  <Info label="College" value={student.college?.name} />
-                  <Info label="Department" value={student.department} />
-                  <Info label="Email address" value={student.email} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Request Details</CardTitle>
-              <CardDescription>
-                Submitted information and document configuration for this
-                request.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-                <Info
-                  label="Document type"
-                  value={documentType?.name ?? request.documentTypeName}
-                />
-                <Info label="Submitted" value={formatDate(request.createdAt)} />
-                <Info label="Purpose" value={request.purpose} />
-                <Info label="Number of copies" value={request.copies} />
-                <Info
-                  label="Amount due"
-                  value={`₱${Number(request.amountDue).toFixed(2)}`}
-                />
-                <Info label="Payment status" value={paymentStatus} />
-                <Info
-                  label="Turnaround"
-                  value={`${request.turnaroundDays} days`}
-                />
-                {request.releaseDate && (
-                  <Info
-                    label="Release date"
-                    value={formatDate(request.releaseDate)}
-                  />
-                )}
-                {request.claimedAt && (
-                  <Info
-                    label="Claimed"
-                    value={formatDate(request.claimedAt)}
-                  />
-                )}
-              </div>
-
-              {fields.length > 0 && (
-                <section className="space-y-3 border-t pt-4">
-                  <h2 className="text-sm font-semibold">Submitted form fields</h2>
-                  <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-                    {fields.map((field) => {
-                      const fieldAttachments = attachments.filter(
-                        (attachment) => attachment.label === field.key,
-                      );
-                      return (
-                        <div key={field.key} className="min-w-0 space-y-1">
-                          <p className="text-sm text-muted-foreground">
-                            {field.label}
-                          </p>
-                          <p className="break-words text-sm font-medium">
-                            {displayValue(field.value)}
-                          </p>
-                          {field.fileField &&
-                            fieldAttachments.map((attachment) => (
-                              <AttachmentLink
-                                key={attachment.id}
-                                attachment={attachment}
-                              />
-                            ))}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-              <section className="space-y-3 border-t pt-4">
-                <h2 className="text-sm font-semibold">Supporting documents</h2>
-                {attachmentsError ? (
-                  <p className="text-sm text-destructive">
-                    {attachmentsError}
-                  </p>
-                ) : attachments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No supporting documents are attached to this request.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {attachments.map((attachment) => (
-                      <AttachmentLink
-                        key={attachment.id}
-                        attachment={attachment}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-
-              {request.payments && request.payments.length > 0 && (
-                <section className="space-y-3 border-t pt-4">
-                  <h2 className="text-sm font-semibold">Payments</h2>
-                  {request.payments.map((payment) => (
-                    <div
-                      key={payment.id}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium">
-                          ₱{Number(payment.amount).toFixed(2)} ·{" "}
-                          {payment.method.replace("_", " ")}
-                        </p>
-                        <p className="text-muted-foreground">
-                          {payment.status} · submitted{" "}
-                          {formatDate(payment.submittedAt)}
-                        </p>
-                        {payment.referenceNumber && (
-                          <p className="text-muted-foreground">
-                            Reference: {payment.referenceNumber}
-                          </p>
-                        )}
-                        {payment.receiptNumber && (
-                          <p className="text-muted-foreground">
-                            Receipt: {payment.receiptNumber}
-                          </p>
-                        )}
-                        {payment.rejectionReason && (
-                          <p className="text-destructive">
-                            Rejection reason: {payment.rejectionReason}
-                          </p>
-                        )}
-                      </div>
-                      {payment.paymentProofUrl && (
-                        <a
-                          href={payment.paymentProofUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline"
-                        >
-                          <FileText className="size-4" aria-hidden="true" />
-                          View payment proof
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </section>
-              )}
-
-              {request.remarks && (
-                <section className="space-y-1 border-t pt-4">
-                  <h2 className="text-sm font-semibold">Requester remarks</h2>
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                    {request.remarks}
-                  </p>
-                </section>
-              )}
-            </CardContent>
-          </Card>
+          <StudentInfoCard student={student} />
+          <RequestDetailsCard
+            request={request}
+            paymentStatus={paymentStatus}
+            fields={fields}
+            attachments={attachments}
+            attachmentsError={attachmentsError}
+          />
         </div>
 
         <aside className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Registrar Review</CardTitle>
-              <CardDescription>
-                Available actions follow the request status transitions
-                accepted by the current status API.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {actions.length > 0 ? (
-                <>
-                  {actions.some((action) => action.status === "ready") && (
-                    <div className="space-y-2">
-                      <Label htmlFor="release-date">Release date</Label>
-                      <Input
-                        id="release-date"
-                        type="date"
-                        value={releaseDate}
-                        onChange={(event) =>
-                          setReleaseDate(event.currentTarget.value)
-                        }
-                        aria-required="true"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Required by the API before this request can be marked
-                        ready.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label htmlFor="staff-notes">
-                      Internal registrar note
-                    </Label>
-                    <Textarea
-                      id="staff-notes"
-                      value={staffNotes}
-                      maxLength={1000}
-                      onChange={(event) =>
-                        setStaffNotes(event.currentTarget.value)
-                      }
-                      placeholder="Add an internal note"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Saved with the next status change.
-                    </p>
-                  </div>
-
-                  {actions.map(({ status, label, icon: Icon }) => {
-                    const paymentBlocked =
-                      status === "processing" &&
-                      processingRequiresPayment &&
-                      !hasPaymentRecord;
-                    const releaseDateMissing =
-                      status === "ready" && !releaseDate;
-                    return (
-                      <div key={status} className="space-y-1">
-                        <Button
-                          className="w-full gap-2"
-                          disabled={
-                            updating || paymentBlocked || releaseDateMissing
-                          }
-                          onClick={() => setPendingAction(status)}
-                        >
-                          <Icon className="size-4" aria-hidden="true" />
-                          {label}
-                        </Button>
-                        {paymentBlocked && (
-                          <p className="text-xs text-muted-foreground">
-                            A payment record is required before processing.
-                          </p>
-                        )}
-                        {releaseDateMissing && (
-                          <p className="text-xs text-muted-foreground">
-                            Select a release date to enable this action.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No status changes are available for a{" "}
-                  {statusConfig.label.toLowerCase()} request.
-                </p>
-              )}
-
-              <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
-                <p className="flex items-center gap-2 font-medium">
-                  <Eye className="size-4" aria-hidden="true" />
-                  Workflow limitations
-                </p>
-                <p className="mt-1 text-muted-foreground">
-                  The current backend does not support moving requests to On
-                  Hold or Rejected. Those actions are unavailable here.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <RegistrarReviewCard
+            actions={actions}
+            statusLabel={statusConfig.label}
+            releaseDate={releaseDate}
+            onReleaseDateChange={setReleaseDate}
+            staffNotes={staffNotes}
+            onStaffNotesChange={setStaffNotes}
+            processingRequiresPayment={processingRequiresPayment}
+            hasPaymentRecord={hasPaymentRecord}
+            updating={updating}
+            onSelectAction={setPendingAction}
+          />
 
           <Card>
             <CardHeader>
@@ -667,77 +312,13 @@ function WindowRequestReview() {
         </aside>
       </div>
 
-      <AlertDialog
-        open={pendingAction !== null}
-        onOpenChange={(open) => {
-          if (!open && !updating) setPendingAction(null);
-        }}
-      >
-        <AlertDialogContent size="sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm request status change</AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingAction
-                ? `Are you sure you want to mark this request ${statusLabel(pendingAction).toLowerCase()}? This will update the request and notify the requester where supported.`
-                : "Confirm this request status change."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={updating}>Go back</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={updating}
-              onClick={confirmStatusChange}
-            >
-              {updating && (
-                <LoaderCircle
-                  className="size-4 animate-spin"
-                  aria-hidden="true"
-                />
-              )}
-              Confirm change
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <StatusChangeDialog
+        statusLabel={pendingAction ? statusLabel(pendingAction) : null}
+        updating={updating}
+        onConfirm={confirmStatusChange}
+        onClose={() => setPendingAction(null)}
+      />
     </main>
-  );
-}
-
-function Info({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number | null | undefined;
-}) {
-  return (
-    <div className="min-w-0 space-y-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="break-words text-sm font-medium">
-        {value === null || value === undefined || value === ""
-          ? "Not available"
-          : value}
-      </p>
-    </div>
-  );
-}
-
-function AttachmentLink({ attachment }: { attachment: RequestAttachment }) {
-  return (
-    <a
-      href={attachment.fileUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="flex min-w-0 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-    >
-      <FileText className="size-4 shrink-0" aria-hidden="true" />
-      <span className="truncate">{attachment.fileName}</span>
-      {attachment.label && (
-        <span className="truncate text-xs text-muted-foreground">
-          ({attachment.label})
-        </span>
-      )}
-    </a>
   );
 }
 

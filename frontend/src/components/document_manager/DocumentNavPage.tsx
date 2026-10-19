@@ -1,5 +1,5 @@
 import { useDocument } from "@/hooks/useDocument";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 const FIRST_PAGE = 1;
 

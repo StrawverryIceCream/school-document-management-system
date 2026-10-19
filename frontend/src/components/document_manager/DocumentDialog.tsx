@@ -1,7 +1,7 @@
 import { ClipboardPlus } from "lucide-react";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { FieldGroup } from "../ui/field";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { FieldGroup } from "@/components/ui/field";
 import RequiredFieldsDialog from "./RequiredFieldsDialog";
 import DocumentFieldsDialog from "./DocumentFieldsDialog";
 import { createDocument } from "@/api/documents";
@@ -9,7 +9,7 @@ import type { NewDocument } from "@/types";
 import { useState } from "react";
 import DocumentDialogHeader from "./DocumentDialogHeader";
 import { useDocument } from "@/hooks/useDocument";
-import { DialogFooter } from "../ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 function DocumentDialog() {

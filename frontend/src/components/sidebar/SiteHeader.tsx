@@ -1,8 +1,8 @@
 import { useBreadcrumbs } from "@/lib/utils";
-import { ModeToggle } from "../ModeToggle";
-import { Separator } from "../ui/separator";
-import { SidebarTrigger } from "../ui/sidebar";
-import Notification from "../notification/Notification";
+import { ModeToggle } from "@/components/ModeToggle";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import Notification from "@/components/notification/Notification";
 import {
   Breadcrumb,
   BreadcrumbItem,

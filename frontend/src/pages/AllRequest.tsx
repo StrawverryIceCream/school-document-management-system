@@ -3,8 +3,9 @@ import RequestHeader from "@/components/all_requests/RequestHeader";
 import RequestSummary from "@/components/all_requests/RequestSummary";
 import RequestTable from "@/components/all_requests/RequestTable";
 import { useRequests } from "@/hooks/useRequest";
+import { RequestProvider } from "@/provider/RequestProvider";
 
-function AllRequest() {
+function AllRequestContent() {
   const { loading } = useRequests();
 
   return (
@@ -25,6 +26,15 @@ function AllRequest() {
         )}
       </div>
     </div>
+  );
+}
+
+// Provider lives here so the all-requests fetch only runs on this page
+function AllRequest() {
+  return (
+    <RequestProvider>
+      <AllRequestContent />
+    </RequestProvider>
   );
 }
 

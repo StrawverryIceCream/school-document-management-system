@@ -1,13 +1,13 @@
 import { EllipsisVertical } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
-import { Dialog, DialogContent } from "../ui/dialog";
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { DocumentType } from "@/types";
 import { deleteDocumentById, updateDocument } from "@/api/documents";
 import { useDocument } from "@/hooks/useDocument";

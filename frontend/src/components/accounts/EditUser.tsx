@@ -1,5 +1,5 @@
 import { EllipsisVertical } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
   DropdownMenuSubContent,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { userRoles, type User, type UserRole } from "@/types";
 import { deleteUserById, updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";

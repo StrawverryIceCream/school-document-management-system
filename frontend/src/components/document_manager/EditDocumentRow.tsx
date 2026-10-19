@@ -1,7 +1,7 @@
 import type { DocumentType } from "@/types";
-import { Input } from "../ui/input";
-import { TableCell } from "../ui/table";
-import { Button } from "../ui/button";
+import { Input } from "@/components/ui/input";
+import { TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateDocument } from "@/api/documents";
 import { useDocument } from "@/hooks/useDocument";

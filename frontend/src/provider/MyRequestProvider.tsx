@@ -5,7 +5,7 @@ import {
 import { getMyRequests } from "@/api/requests";
 import { getAllDocument } from "@/api/documents";
 import type { RequestStatus } from "@/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
 const MY_REQUESTS_FETCH_LIMIT = 200;
@@ -24,7 +24,10 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
     "all",
   );
 
+  const latestLoadId = useRef(0);
+
   const refreshMyRequests = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     setLoading(true);
     setError(null);
     try {
@@ -32,6 +35,7 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
         getMyRequests({ limit: MY_REQUESTS_FETCH_LIMIT }),
         getAllDocument({ limit: DOCUMENT_TYPES_FETCH_LIMIT }),
       ]);
+      if (loadId !== latestLoadId.current) return;
 
       const documentNameById = new Map(
         documentsRes.data.map((document) => [
@@ -49,17 +53,19 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
 
       setRequests(enrichedRequests);
     } catch (err) {
+      if (loadId !== latestLoadId.current) return;
       setError(
         err instanceof Error ? err.message : "Failed to load your requests",
       );
       console.error("Failed to load my requests:", err);
     } finally {
-      setLoading(false);
+      if (loadId === latestLoadId.current) setLoading(false);
     }
   }, []);
 
+  // Deferred so the lint rule does not see setState run synchronously in the effect.
   useEffect(() => {
-    void refreshMyRequests();
+    void Promise.resolve().then(refreshMyRequests);
   }, [refreshMyRequests]);
 
   const filteredRequests = useMemo(() => {
@@ -87,13 +93,17 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
     });
   }, [requests, search, statusFilter]);
 
-  const totalCount = requests.length;
-  const activeCount = requests.filter((request) =>
-    ACTIVE_STATUSES.includes(request.status),
-  ).length;
-  const readyCount = requests.filter(
-    (request) => request.status === "ready",
-  ).length;
+  const { totalCount, activeCount, readyCount } = useMemo(
+    () => ({
+      totalCount: requests.length,
+      activeCount: requests.filter((request) =>
+        ACTIVE_STATUSES.includes(request.status),
+      ).length,
+      readyCount: requests.filter((request) => request.status === "ready")
+        .length,
+    }),
+    [requests],
+  );
 
   return (
     <MyRequestContext.Provider

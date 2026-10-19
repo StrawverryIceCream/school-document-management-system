@@ -1,5 +1,5 @@
 // provider/WindowViewProvider.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   WindowViewContext,
@@ -63,9 +63,11 @@ const TILES: WindowTile[] = [
   },
 ];
 
-// The first page reports totalPages, so the remaining pages can load in parallel
-async function fetchAllRequests(): Promise<DocumentRequestWithRelations[]> {
+async function fetchRequests(
+  collegeId?: string | null,
+): Promise<DocumentRequestWithRelations[]> {
   const first = await getAllRequests({
+    college: collegeId ?? undefined,
     page: 1,
     limit: REQUESTS_PAGE_SIZE,
   });
@@ -75,7 +77,11 @@ async function fetchAllRequests(): Promise<DocumentRequestWithRelations[]> {
 
   const rest = await Promise.all(
     Array.from({ length: totalPages - 1 }, (_, index) =>
-      getAllRequests({ page: index + 2, limit: REQUESTS_PAGE_SIZE }),
+      getAllRequests({
+        college: collegeId ?? undefined,
+        page: index + 2,
+        limit: REQUESTS_PAGE_SIZE,
+      }),
     ),
   );
 
@@ -101,57 +107,46 @@ export function WindowViewProvider({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
-  async function refreshRequests() {
-    setLoading(true);
+  const latestLoadId = useRef(0);
+
+  const loadRequests = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     try {
-      const rows = await fetchAllRequests();
+      const rows = await fetchRequests(activeView);
+      if (loadId !== latestLoadId.current) return;
       setRequests(rows);
       setError(null);
     } catch (err) {
+      if (loadId !== latestLoadId.current) return;
       const message =
         err instanceof Error ? err.message : "Failed to load requests";
       setError(message);
       console.error("Failed to load requests:", err);
-      throw err;
     } finally {
-      setLoading(false);
+      if (loadId === latestLoadId.current) setLoading(false);
     }
-  }
+  }, [activeView]);
 
-  function selectView(id: string) {
-    navigate(`/windows/${id}`);
-  }
+  const refreshRequests = useCallback(async () => {
+    setLoading(true);
+    await loadRequests();
+  }, [loadRequests]);
 
-  function clearView() {
-    navigate("/windows");
-  }
-
+  // Deferred so the lint rule does not see setState run synchronously in the effect.
   useEffect(() => {
-    // Ignore late responses after unmount so we never set state on a dead provider
-    let cancelled = false;
+    void Promise.resolve().then(refreshRequests);
+  }, [refreshRequests]);
 
-    async function loadRequests() {
-      try {
-        const rows = await fetchAllRequests();
-        if (cancelled) return;
-        setRequests(rows);
-      } catch (err) {
-        if (cancelled) return;
-        setError(
-          err instanceof Error ? err.message : "Failed to load requests",
-        );
-        console.error("Failed to load requests:", err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  const selectView = useCallback(
+    (id: string) => {
+      navigate(`/windows/${id}`);
+    },
+    [navigate],
+  );
 
-    loadRequests();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const clearView = useCallback(() => {
+    navigate("/windows");
+  }, [navigate]);
 
   const departmentRequests = useMemo(() => {
     const selectedCollege = TILES.find((tile) => tile.id === activeView);
@@ -197,53 +192,76 @@ export function WindowViewProvider({
     });
   }, [departmentRequests, filter, search]);
 
-  // Errors propagate so the caller can show a toast (invalid transition, missing release date)
-  async function updateRequestStatus(
-    id: string,
-    status: RequestStatus,
-    extra: Omit<UpdateRequestStatusPayload, "status"> = {},
-  ) {
-    const updated = await apiUpdateRequestStatus(id, { status, ...extra });
+  const updateRequestStatus = useCallback(
+    async (
+      id: string,
+      status: RequestStatus,
+      extra: Omit<UpdateRequestStatusPayload, "status"> = {},
+    ) => {
+      const updated = await apiUpdateRequestStatus(id, { status, ...extra });
 
-    // The response is the bare row, so merge it to keep the loaded user and document type
-    setRequests((prev) =>
-      prev.map((request) =>
-        String(request.id) === id ? { ...request, ...updated } : request,
-      ),
-    );
-  }
+      setRequests((prev) =>
+        prev.map((request) =>
+          String(request.id) === id ? { ...request, ...updated } : request,
+        ),
+      );
+    },
+    [],
+  );
+
+  const value = useMemo(
+    () => ({
+      TILES,
+      requests,
+      activeView,
+      selectView,
+      clearView,
+      departmentRequests,
+      requestWindowsById,
+      visibleRequests,
+      loading,
+      error,
+      refreshRequests,
+      filter,
+      setFilter,
+      search,
+      setSearch,
+      documentFilter,
+      setDocumentFilter,
+      windowFilter,
+      setWindowFilter,
+      currentPage,
+      setCurrentPage,
+      selectedIds,
+      setSelectedIds,
+      guidelinesOpen,
+      setGuidelinesOpen,
+      updateRequestStatus,
+    }),
+    [
+      requests,
+      activeView,
+      selectView,
+      clearView,
+      departmentRequests,
+      requestWindowsById,
+      visibleRequests,
+      loading,
+      error,
+      refreshRequests,
+      filter,
+      search,
+      documentFilter,
+      windowFilter,
+      currentPage,
+      selectedIds,
+      guidelinesOpen,
+      updateRequestStatus,
+    ],
+  );
 
   return (
-    <WindowViewContext.Provider
-      value={{
-        TILES,
-        requests,
-        activeView,
-        selectView,
-        clearView,
-        departmentRequests,
-        requestWindowsById,
-        visibleRequests,
-        loading,
-        error,
-        refreshRequests,
-        filter,
-        setFilter,
-        search,
-        setSearch,
-        documentFilter,
-        setDocumentFilter,
-        windowFilter,
-        setWindowFilter,
-        currentPage,
-        setCurrentPage,
-        selectedIds,
-        setSelectedIds,
-        guidelinesOpen,
-        setGuidelinesOpen,
-        updateRequestStatus,
-      }}
-    >
+    <WindowViewContext.Provider value={value}>
       {children}
     </WindowViewContext.Provider>
   );

@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
 
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 import { useState } from "react";

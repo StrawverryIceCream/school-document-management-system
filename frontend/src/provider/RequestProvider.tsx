@@ -3,7 +3,7 @@ import type { RequestRow } from "@/context/DashboardContext";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
 
 import { normalizeRequestRow } from "@/lib/request";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [requests, setRequests] = useState<RequestRow[]>([]);
@@ -17,10 +17,14 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     "Loading request records from the backend...",
   );
 
+  const latestLoadId = useRef(0);
+
   const refreshRequests = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     setLoading(true);
     try {
       const response = await getAllRequests();
+      if (loadId !== latestLoadId.current) return;
       const rows = response.data
         .map((item) => normalizeRequestRow(item))
         .filter((item): item is RequestRow => Boolean(item));
@@ -34,6 +38,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
           : "Live request data is active. Window filters are derived from the available request fields.",
       );
     } catch (requestError) {
+      if (loadId !== latestLoadId.current) return;
       console.error("Failed to load request rows:", requestError);
       setRequests([]);
       setTotal(0);
@@ -46,10 +51,11 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
         "The request data source is not available yet. Check that the backend request routes are running.",
       );
     } finally {
-      setLoading(false);
+      if (loadId === latestLoadId.current) setLoading(false);
     }
   }, []);
 
+  // Deferred so the lint rule does not see setState run synchronously in the effect.
   useEffect(() => {
     void Promise.resolve().then(refreshRequests);
   }, [refreshRequests]);

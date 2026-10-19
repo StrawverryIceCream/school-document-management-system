@@ -1,4 +1,4 @@
-import { DialogHeader, DialogDescription, DialogTitle } from "../ui/dialog";
+import { DialogHeader, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 function DocumentDialogHeader({ type }: { type: "Add" | "Edit" }) {
   return (

@@ -2,8 +2,8 @@ import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Card } from "../ui/card";
-import { Kbd } from "../ui/kbd";
+import { Card } from "@/components/ui/card";
+import { Kbd } from "@/components/ui/kbd";
 
 type DashboardHeroProps = Omit<React.ComponentProps<"section">, "children"> & {
   greeting: string;

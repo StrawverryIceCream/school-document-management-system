@@ -1,7 +1,7 @@
 import type { User } from "@/types";
-import { Input } from "../ui/input";
-import { TableCell } from "../ui/table";
-import { Button } from "../ui/button";
+import { Input } from "@/components/ui/input";
+import { TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateUserById } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";

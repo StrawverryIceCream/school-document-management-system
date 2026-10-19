@@ -6,7 +6,7 @@ import {
 import { NotificationContext } from "@/context/NotificationContext";
 import type { Notification } from "@/context/NotificationContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function NotificationProvider({
   children,
@@ -18,7 +18,10 @@ export function NotificationProvider({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const latestLoadId = useRef(0);
+
   const refreshNotifications = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     if (!user?.id) {
       setNotifications([]);
       setError(null);
@@ -29,9 +32,11 @@ export function NotificationProvider({
     setLoading(true);
     try {
       const response = await getMyNotifications({ limit: 100 });
+      if (loadId !== latestLoadId.current) return;
       setNotifications(response.data);
       setError(null);
     } catch (notificationError) {
+      if (loadId !== latestLoadId.current) return;
       console.error("Failed to load notifications:", notificationError);
       setNotifications([]);
       setError(
@@ -40,7 +45,7 @@ export function NotificationProvider({
           : "Failed to load notifications",
       );
     } finally {
-      setLoading(false);
+      if (loadId === latestLoadId.current) setLoading(false);
     }
   }, [user?.id]);
 

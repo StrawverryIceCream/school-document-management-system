@@ -1,12 +1,12 @@
 import type { UserRole } from "@/types";
-import { Field, FieldLabel } from "../ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "@/components/ui/select";
 
 const ROLES = {
   STUDENT: "student",

@@ -8,7 +8,7 @@ import {
   Terminal,
   type LucideIcon,
 } from "lucide-react";
-import type { Tone } from "../tones";
+import type { Tone } from "@/lib/tones";
 
 export type DocumentCount = {
   label: string;
