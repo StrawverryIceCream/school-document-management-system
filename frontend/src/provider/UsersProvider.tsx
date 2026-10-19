@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const SEARCH_DEBOUNCE_MS = 250;
 const FIRST_PAGE = 1;
-const ACCOUNTS_PAGE_SIZE = 5;
+const ACCOUNTS_PAGE_SIZE = 6;
 // Matches the backend cap in getAllUsers (max 100 per request)
 const EXPORT_PAGE_SIZE = 100;
 // Count requests only need pagination.total, so one row is enough
