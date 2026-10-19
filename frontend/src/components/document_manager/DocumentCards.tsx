@@ -10,16 +10,14 @@ type DocumentSummaryItem = {
   tone: Tone;
 };
 
-function DocumentCards() {
+export default function DocumentCards() {
   const { documents, loading, error } = useDocument();
 
+  if (error) return null;
+
   const totalDocuments = documents.length;
-  const activeDocuments = documents.filter(
-    (document) => document.isActive,
-  ).length;
-  const inactiveDocuments = documents.filter(
-    (document) => !document.isActive,
-  ).length;
+  const activeDocuments = documents.filter((doc) => doc.isActive).length;
+  const inactiveDocuments = documents.filter((doc) => !doc.isActive).length;
 
   const summaryCards: DocumentSummaryItem[] = [
     {
@@ -42,18 +40,11 @@ function DocumentCards() {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="mb-6 flex h-full w-full items-center justify-center">
-        <p className="text-lg text-muted-foreground">
-          Something went wrong: {error}
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <section
+      aria-label="Document statistics"
+      className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    >
       {summaryCards.map(({ label, value, icon, tone }) => (
         <StatCard
           key={label}
@@ -67,5 +58,3 @@ function DocumentCards() {
     </section>
   );
 }
-
-export default DocumentCards;

@@ -1,15 +1,14 @@
+import PageHeader from "@/components/shared/PageHeader";
 import DocumentDialog from "./DocumentDialog";
 
-function DocumentHeader() {
+export default function DocumentHeader() {
   return (
-    <div className="flex items-start justify-between mb-8 gap-5">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Document Manager</h1>
-        <p className="text-sm mt-2">All document tracking status</p>
-      </div>
+    <PageHeader
+      title="Document Manager"
+      badge="Catalog"
+      description="Manage and configure available document types, fees, and requirements"
+    >
       <DocumentDialog />
-    </div>
+    </PageHeader>
   );
 }
-
-export default DocumentHeader;

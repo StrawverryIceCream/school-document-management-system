@@ -2,20 +2,16 @@ import SearchToolbar from "@/components/document_manager/SearchToolbar";
 import DocumentHeader from "@/components/document_manager/DocumentHeader";
 import DocumentCards from "@/components/document_manager/DocumentCards";
 import DocumentTable from "@/components/document_manager/DocumentTable";
-import DocumentNavPage from "@/components/document_manager/DocumentNavPage";
 
-function DocumentManager() {
+export default function DocumentManager() {
   return (
-    <div className="h-full overflow-auto p-6 sm:p-10">
-      <div className="h-full space-y-6">
-        <DocumentHeader />
-        <DocumentCards />
-        <SearchToolbar />
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 sm:p-6">
+      <DocumentHeader />
+      <DocumentCards />
+      <SearchToolbar />
+      <div className="flex min-h-0 flex-1 flex-col">
         <DocumentTable />
-        <DocumentNavPage />
       </div>
     </div>
   );
 }
-
-export default DocumentManager;
