@@ -1,8 +1,8 @@
-import type { NotificationKind } from "@/context/NotificationContext";
 import {
   Bell,
   CheckCircle2,
   Clock3,
+  CreditCard,
   FileCheck2,
   FileText,
   XCircle,
@@ -10,8 +10,13 @@ import {
 import { useNotifications } from "@/hooks/useNotification";
 import { useLocation } from "react-router-dom";
 
+const DEFAULT_STYLE = {
+  icon: Bell,
+  className: "bg-muted text-muted-foreground",
+};
+
 const notificationStyles: Record<
-  NotificationKind,
+  string,
   { icon: typeof Bell; className: string }
 > = {
   approved: {
@@ -34,14 +39,26 @@ const notificationStyles: Record<
     icon: FileText,
     className: "bg-primary/10 text-primary",
   },
+  payment: {
+    icon: CreditCard,
+    className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  },
+  system: DEFAULT_STYLE,
 };
 
 function getNotificationKind(
-  type: NotificationKind | undefined,
+  type: string | undefined,
   title: string,
   message: string,
-): NotificationKind | undefined {
-  if (type) return type;
+): string {
+  if (
+    type &&
+    type in notificationStyles &&
+    type !== "system" &&
+    type !== "status_update"
+  ) {
+    return type;
+  }
 
   const content = `${title} ${message}`.toLowerCase();
   if (/\b(approved|accepted)\b/.test(content)) return "approved";
@@ -50,7 +67,9 @@ function getNotificationKind(
   if (/\b(rejected|cancelled|canceled|denied)\b/.test(content)) {
     return "rejected";
   }
+  if (/\b(payment|receipt|paid)\b/.test(content)) return "payment";
   if (/\b(submitted|new request)\b/.test(content)) return "submitted";
+  return type && type in notificationStyles ? type : "system";
 }
 
 export function NotificationItems() {
@@ -67,18 +86,25 @@ export function NotificationItems() {
           notification.title,
           notification.message,
         );
-        const style = kind
-          ? notificationStyles[kind]
-          : { icon: Bell, className: "bg-muted text-muted-foreground" };
+        const style = notificationStyles[kind] ?? DEFAULT_STYLE;
         const Icon = style.icon;
-        const timestamp = new Date(notification.createdAt);
-        const formattedDate = timestamp.toLocaleDateString(undefined, {
-          dateStyle: "medium",
-        });
-        const formattedTime = timestamp.toLocaleTimeString(undefined, {
-          timeStyle: "short",
-        });
-        const formattedTimestamp = `${formattedDate} · ${formattedTime}`;
+        const timestamp = notification.createdAt
+          ? new Date(notification.createdAt)
+          : new Date();
+        const isValidDate = !isNaN(timestamp.getTime());
+        const formattedDate = isValidDate
+          ? timestamp.toLocaleDateString(undefined, {
+              dateStyle: "medium",
+            })
+          : "—";
+        const formattedTime = isValidDate
+          ? timestamp.toLocaleTimeString(undefined, {
+              timeStyle: "short",
+            })
+          : "";
+        const formattedTimestamp = formattedTime
+          ? `${formattedDate} · ${formattedTime}`
+          : formattedDate;
 
         return (
           <button

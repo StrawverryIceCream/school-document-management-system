@@ -21,10 +21,10 @@ export interface Notification {
   requestId: string | null;
   title: string;
   message: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   isRead: boolean;
-  type?: NotificationKind;
+  type?: NotificationKind | string;
   sender?: NotificationSender | null;
 }
 
