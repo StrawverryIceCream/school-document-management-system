@@ -1,45 +1,52 @@
-import { Card, CardContent } from "@/components/ui/card";
+import StatCard from "@/components/dashboard/StatCard";
 import { useLogs } from "@/hooks/useLogs";
 import { formatDate } from "@/lib/logs";
-import { Activity, Clock, Users } from "lucide-react";
+import type { Tone } from "@/lib/tones";
+import { Activity, Clock, Users, type LucideIcon } from "lucide-react";
+
+type LogCardConfig = {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  tone: Tone;
+};
 
 function LogsOverview() {
   const { stats, error } = useLogs();
 
-  if (error) return null; // no API / fetch failed — show nothing
+  if (error) return null;
 
-  const cards = [
+  const cards: LogCardConfig[] = [
     {
       label: "Total Logs",
       value: stats ? stats.total : "—",
       icon: Activity,
+      tone: "neutral",
     },
     {
       label: "Active Accounts",
       value: stats ? stats.activeAccounts : "—",
       icon: Users,
+      tone: "emerald",
     },
     {
       label: "Last Activity",
       value: stats?.lastActivityAt ? formatDate(stats.lastActivityAt) : "—",
       icon: Clock,
+      tone: "brand",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
-      {cards.map(({ label, value, icon: Icon }) => (
-        <Card key={label} className="py-0">
-          <CardContent className="flex items-start justify-between p-5">
-            <div>
-              <p className="text-sm">{label}</p>
-              <p className="mt-2 text-3xl font-bold">{value}</p>
-            </div>
-            <div className="rounded-md border p-2">
-              <Icon className="h-4 w-4" />
-            </div>
-          </CardContent>
-        </Card>
+    <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      {cards.map(({ label, value, icon, tone }) => (
+        <StatCard
+          key={label}
+          label={label}
+          value={value}
+          icon={icon}
+          tone={tone}
+        />
       ))}
     </div>
   );
