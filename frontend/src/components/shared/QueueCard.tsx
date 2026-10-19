@@ -59,7 +59,7 @@ export default function QueueCard({
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(currentColor_1.5px,transparent_1.5px)] bg-[length:16px_16px] opacity-10"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(currentColor_1.5px,transparent_1.5px)] bg-size-[16px_16px] opacity-10"
         />
 
         <div className="relative flex items-start justify-between gap-3">
@@ -136,7 +136,7 @@ export default function QueueCard({
               summary.highlights.map((label) => (
                 <Badge
                   key={label}
-                  variant="secondary"
+                  variant="default"
                   className="px-3 py-1 text-sm font-normal"
                 >
                   {label}
@@ -146,7 +146,7 @@ export default function QueueCard({
         </div>
 
         <Button
-          variant="secondary"
+          variant="default"
           size="lg"
           className="mt-auto w-full text-base"
           onClick={onSelect}
