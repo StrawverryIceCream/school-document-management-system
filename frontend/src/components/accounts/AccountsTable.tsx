@@ -75,8 +75,8 @@ export default function AccountsTable() {
       },
       {
         key: "id",
-        className: "w-48",
-        header: "Identifier (UUID)",
+        className: "w-36",
+        header: "ID",
         cell: (user) => (
           <CopyableId
             id={user.id}
@@ -87,7 +87,7 @@ export default function AccountsTable() {
       },
       {
         key: "name",
-        className: "min-w-64 max-w-xs",
+        className: "min-w-56 max-w-xs",
         header: "Name",
         cell: (user) => {
           const isCurrentUser = user.id === currentUser?.id;
@@ -96,10 +96,10 @@ export default function AccountsTable() {
 
           return (
             <div className="flex min-w-0 max-w-xs items-center gap-3">
-              <Avatar className="size-12 shrink-0">
+              <Avatar className="size-9 shrink-0">
                 <AvatarFallback
                   className={cn(
-                    "text-base font-semibold",
+                    "text-xs font-semibold",
                     isCurrentUser
                       ? "bg-primary text-primary-foreground"
                       : roleTone.badge,
@@ -113,7 +113,7 @@ export default function AccountsTable() {
                   <ProfileTrigger userId={user.id}>
                     <button
                       type="button"
-                      className="truncate text-left text-lg font-semibold text-foreground hover:underline"
+                      className="truncate text-left text-sm font-semibold text-foreground hover:underline"
                     >
                       <TruncatedText
                         text={user.fullName}
@@ -135,7 +135,7 @@ export default function AccountsTable() {
                 </div>
                 <TruncatedText
                   text={subtitle}
-                  className="text-base text-muted-foreground max-w-48"
+                  className="text-xs text-muted-foreground max-w-48"
                 />
               </div>
             </div>
@@ -144,18 +144,18 @@ export default function AccountsTable() {
       },
       {
         key: "email",
-        className: "min-w-64 max-w-xs",
-        header: "Institutional Email",
+        className: "min-w-56 max-w-xs",
+        header: "Email",
         cell: (user) => (
           <TruncatedText
             text={user.email}
-            className="text-base text-foreground max-w-xs"
+            className="text-sm text-foreground max-w-xs"
           />
         ),
       },
       {
         key: "role",
-        className: "w-36",
+        className: "w-28",
         header: "Role",
         cell: (user) => {
           const roleTone = TONES[ROLE_TONES[user.role]];
@@ -172,8 +172,8 @@ export default function AccountsTable() {
       },
       {
         key: "studentId",
-        className: "w-48",
-        header: "Student / Staff ID",
+        className: "w-36",
+        header: "Student ID",
         cell: (user) => (
           <CopyableId
             id={user.studentId}
@@ -184,23 +184,24 @@ export default function AccountsTable() {
       },
       {
         key: "status",
-        className: "w-36",
+        className: "w-28",
         header: "Status",
         cell: () => (
-          <span
-            className={cn(
-              "inline-flex shrink-0 items-center gap-2 text-base font-medium",
-              TONES[ACCOUNT_STATUS.tone].value,
-            )}
+          <Badge
+            variant="secondary"
+            className="gap-2 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
           >
-            <ACCOUNT_STATUS.icon className="size-4" aria-hidden="true" />
+            <span
+              className="size-1.5 rounded-full shrink-0 bg-emerald-600"
+              aria-hidden="true"
+            />
             {ACCOUNT_STATUS.label}
-          </span>
+          </Badge>
         ),
       },
       {
         key: "actions",
-        className: "text-right",
+        className: "w-20 text-right",
         headerClassName: "text-right",
         header: ACTION_COLUMN_LABEL,
         cell: (user) => (

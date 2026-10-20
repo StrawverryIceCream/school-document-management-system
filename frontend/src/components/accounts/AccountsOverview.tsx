@@ -23,7 +23,7 @@ export default function AccountsOverview() {
             icon={icon}
             tone={tone}
             loading={loading}
-            subtext={caption}
+            caption={caption}
           />
         ),
       )}

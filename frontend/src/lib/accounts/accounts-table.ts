@@ -30,12 +30,12 @@ type TableColumn = {
 };
 
 export const TABLE_COLUMNS: TableColumn[] = [
-  { key: "id", label: "Identifier (UUID)", className: "w-48" },
-  { key: "name", label: "Name", className: "min-w-64" },
-  { key: "email", label: "Institutional Email", className: "min-w-64" },
-  { key: "role", label: "Role", className: "w-36" },
-  { key: "studentId", label: "Student / Staff ID", className: "w-48" },
-  { key: "status", label: "Status", className: "w-36" },
+  { key: "id", label: "ID", className: "w-36" },
+  { key: "name", label: "Name", className: "min-w-56 max-w-xs" },
+  { key: "email", label: "Email", className: "min-w-56 max-w-xs" },
+  { key: "role", label: "Role", className: "w-28" },
+  { key: "studentId", label: "Student ID", className: "w-36" },
+  { key: "status", label: "Status", className: "w-28" },
 ];
 
 export const ACTION_COLUMN_LABEL = "Action";
