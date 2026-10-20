@@ -65,18 +65,18 @@ function PaymentMethodChart() {
   const data = buildMonthlyPaymentData(requests);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Payments by method</CardTitle>
-        <CardDescription>Cash vs. online payments per month</CardDescription>
+    <Card className="rounded-xl border border-border/60 bg-card shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-bold">Payments by Method</CardTitle>
+        <CardDescription>Cash vs. online payments processed per month</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-10 text-center">
+          <p className="py-10 text-center text-sm text-muted-foreground">
             No paid requests yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig}>
+          <ChartContainer config={chartConfig} className="max-h-[300px] w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />

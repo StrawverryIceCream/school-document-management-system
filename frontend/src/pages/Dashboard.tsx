@@ -15,29 +15,31 @@ export default function Dashboard() {
         <DashboardHeader />
         <StatsOverview />
 
-        {/* Operational Overview: Status Velocity Chart & Live Window / Payment Breakdown */}
+        {/* Operational Overview: Status Velocity Chart & Live Window Loads */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           {/* Velocity & Status Chart */}
           <div className="lg:col-span-8">
             <RequestsStatusChart />
           </div>
 
-          {/* Side Operational Panel: Live Window Loads & Payment Distribution */}
-          <div className="flex flex-col gap-6 lg:col-span-4">
+          {/* Side Operational Panel: Live Window Loads */}
+          <div className="lg:col-span-4">
             <WindowCounterLoads />
-            <PaymentMethodChart />
           </div>
         </div>
 
-        {/* Priority Requests Queue - Full Width for Maximum Workspace */}
-        <section aria-label="Requests Queue and Counter Window Distribution" className="flex flex-col gap-6">
+        {/* Priority Requests Queue & Analytics */}
+        <section aria-label="Requests Queue and Historical Analytics" className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             <RequestSearchToolbar />
             <RequestTable />
           </div>
 
-          {/* Monthly Windows Processed Analytics below Request Table */}
+          {/* Requests by Counter Window */}
           <WindowsProcessedChart />
+
+          {/* Payments by Method Underneath */}
+          <PaymentMethodChart />
         </section>
       </div>
     </DashboardProvider>
