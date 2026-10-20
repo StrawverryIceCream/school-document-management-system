@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/dashboard";
-import { getRequestWindowForCollege } from "@/lib/windowRequests";
+import { getRequestWindowForCollege } from "@/lib/windows";
 import type { RequestRow } from "@/context/DashboardContext";
 
 const WINDOWS = [

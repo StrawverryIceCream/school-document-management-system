@@ -1,7 +1,7 @@
 import { getAllRequestAttachments } from "@/api/requestStatusAttachments";
 import { getRequestById } from "@/api/requests";
-import { ATTACHMENTS_FETCH_LIMIT } from "@/lib/window_request_review/constants";
-import type { ReviewData } from "@/lib/window_request_review/types";
+import { ATTACHMENTS_FETCH_LIMIT } from "./constants";
+import type { ReviewData } from "./types";
 import type { RequestAttachment } from "@/types";
 
 export async function fetchReviewData(requestId: string): Promise<ReviewData> {

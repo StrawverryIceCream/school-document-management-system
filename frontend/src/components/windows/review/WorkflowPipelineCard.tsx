@@ -1,7 +1,7 @@
 import { Check, Edit3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { formatDate } from "@/lib/window_request_review/format";
+import { formatDate } from "@/lib/windows/review/format";
 import { cn } from "@/lib/utils";
 import type { RequestReviewDetails } from "@/api/requests";
 

@@ -12,7 +12,7 @@ import {
   REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,
   WINDOW_REQUEST_PAGE_SIZE,
-} from "@/lib/windowRequests";
+} from "@/lib/windows";
 import type { DocumentRequestWithRelations } from "@/types";
 
 export function WindowRequestTable() {

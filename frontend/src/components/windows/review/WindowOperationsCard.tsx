@@ -1,6 +1,6 @@
 import { Calendar, Store } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { formatDate } from "@/lib/window_request_review/format";
+import { formatDate } from "@/lib/windows/review/format";
 import type { RequestReviewDetails } from "@/api/requests";
 
 interface WindowOperationsCardProps {

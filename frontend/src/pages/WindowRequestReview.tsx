@@ -5,24 +5,24 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AuditTrailCard } from "@/components/window_request_review/AuditTrailCard";
-import { ComplianceChecklistCard } from "@/components/window_request_review/ComplianceChecklistCard";
-import { RegistrarReviewCard } from "@/components/window_request_review/RegistrarReviewCard";
-import { RequestDetailsCard } from "@/components/window_request_review/RequestDetailsCard";
-import { StatusChangeDialog } from "@/components/window_request_review/StatusChangeDialog";
-import { StudentInfoCard } from "@/components/window_request_review/StudentInfoCard";
-import { WindowOperationsCard } from "@/components/window_request_review/WindowOperationsCard";
-import { WorkflowPipelineCard } from "@/components/window_request_review/WorkflowPipelineCard";
+import { AuditTrailCard } from "@/components/windows/review/AuditTrailCard";
+import { ComplianceChecklistCard } from "@/components/windows/review/ComplianceChecklistCard";
+import { RegistrarReviewCard } from "@/components/windows/review/RegistrarReviewCard";
+import { RequestDetailsCard } from "@/components/windows/review/RequestDetailsCard";
+import { StatusChangeDialog } from "@/components/windows/review/StatusChangeDialog";
+import { StudentInfoCard } from "@/components/windows/review/StudentInfoCard";
+import { WindowOperationsCard } from "@/components/windows/review/WindowOperationsCard";
+import { WorkflowPipelineCard } from "@/components/windows/review/WorkflowPipelineCard";
 import { useWindowView } from "@/hooks/useWindowView";
-import { getRequestWindowForCollege } from "@/lib/windowRequests";
+import { getRequestWindowForCollege } from "@/lib/windows";
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
-import { REVIEW_ACTIONS } from "@/lib/window_request_review/constants";
-import { fetchReviewData } from "@/lib/window_request_review/fetch-review-data";
-import { formatDate } from "@/lib/window_request_review/format";
+import { REVIEW_ACTIONS } from "@/lib/windows/review/constants";
+import { fetchReviewData } from "@/lib/windows/review/fetch-review-data";
+import { formatDate } from "@/lib/windows/review/format";
 import type {
   ReviewData,
   ReviewField,
-} from "@/lib/window_request_review/types";
+} from "@/lib/windows/review/types";
 import type { RequestStatus } from "@/types";
 
 function WindowRequestReview() {

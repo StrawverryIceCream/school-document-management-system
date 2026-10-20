@@ -12,7 +12,7 @@ import {
   type QueueSummary,
 } from "@/lib/shared/queue-card";
 import type { BannerTone, Tone } from "@/lib/tones";
-import { PENDING_STATUS } from "@/lib/windows-header";
+import { PENDING_STATUS } from "./header";
 import type { DocumentRequestWithRelations } from "@/types";
 
 export type HouseConfig = {

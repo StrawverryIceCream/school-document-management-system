@@ -12,7 +12,7 @@ import {
 import { useWindowView } from "@/hooks/useWindowView";
 import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import { REQUEST_WINDOWS } from "@/lib/windowRequests";
+import { REQUEST_WINDOWS } from "@/lib/windows";
 import type { StatusFilter } from "@/context/WindowViewContext";
 
 const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [

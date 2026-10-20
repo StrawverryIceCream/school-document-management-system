@@ -15,7 +15,7 @@ import type { WindowTile } from "@/pages/Windows";
 import {
   getRequestWindowForCollege,
   type RequestWindow,
-} from "@/lib/windowRequests";
+} from "@/lib/windows";
 
 // Matches the backend's MAX_LIMIT; one page can never return more than this
 const REQUESTS_PAGE_SIZE = 100;

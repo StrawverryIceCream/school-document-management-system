@@ -1,7 +1,7 @@
 import { useWindowView } from "@/hooks/useWindowView";
-import WindowRequestTableView from "@/components/window/WindowRequestTableView";
-import WindowsHeader from "@/components/window/WindowsHeader";
-import  CollegeWindowCards  from "@/components/window/CollegeWindowCards";
+import WindowRequestTableView from "@/components/windows/WindowRequestTableView";
+import WindowsHeader from "@/components/windows/WindowsHeader";
+import CollegeWindowCards from "@/components/windows/CollegeWindowCards";
 
 export interface WindowTile {
   id: string;

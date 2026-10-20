@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { getRequestWindowForCollege } from "@/lib/windowRequests";
+import { getRequestWindowForCollege } from "@/lib/windows";
 import { cn } from "@/lib/utils";
 
 const WINDOW_DEFS = [

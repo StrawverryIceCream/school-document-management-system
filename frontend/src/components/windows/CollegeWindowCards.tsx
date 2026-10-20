@@ -6,7 +6,7 @@ import {
   HOUSE_CONFIGS,
   getCollegeSummary,
   type CollegeSummary,
-} from "@/lib/college-window-cards";
+} from "@/lib/windows";
 
 export default function CollegeWindowsCards() {
   const { TILES, requests, loading, error, selectView } = useWindowView();

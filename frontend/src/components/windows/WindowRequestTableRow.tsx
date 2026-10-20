@@ -10,7 +10,7 @@ import {
   REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,
   type RequestWindow,
-} from "@/lib/windowRequests";
+} from "@/lib/windows";
 import type { DocumentRequestWithRelations } from "@/types";
 
 type WindowRequestTableRowProps = {

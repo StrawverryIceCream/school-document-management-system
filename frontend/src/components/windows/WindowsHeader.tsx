@@ -8,7 +8,7 @@ import {
   HEADER_PILLS,
   PENDING_STATUS,
   type HeaderPillKey,
-} from "@/lib/windows-header";
+} from "@/lib/windows";
 
 export default function WindowsHeader() {
   const { TILES, requests, loading, error } = useWindowView();

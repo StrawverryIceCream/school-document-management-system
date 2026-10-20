@@ -5,10 +5,10 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { AttachmentLink } from "@/components/window_request_review/AttachmentLink";
-import { displayValue, formatDate } from "@/lib/window_request_review/format";
+import { AttachmentLink } from "./AttachmentLink";
+import { displayValue, formatDate } from "@/lib/windows/review/format";
 import { cn } from "@/lib/utils";
-import type { ReviewField } from "@/lib/window_request_review/types";
+import type { ReviewField } from "@/lib/windows/review/types";
 import type { RequestReviewDetails } from "@/api/requests";
 import type { RequestAttachment } from "@/types";
 
