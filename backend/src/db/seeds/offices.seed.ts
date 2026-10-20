@@ -92,6 +92,7 @@ export async function seedOffices() {
     { code: "IILEAO", name: "Linkages & External Affairs Office", sector: "OUP" as const, category: "ADMINISTRATIVE" as const, officialEmail: "linkages@tup.edu.ph", parentOfficeId: seededVps.OUP },
 
     // Academic Colleges (Parent: OVPAA)
+    { code: "COL", name: "Academic Colleges (College Clearance)", sector: "OVPAA" as const, category: "COLLEGE" as const, officialEmail: "colleges@tup.edu.ph", parentOfficeId: seededVps.OVPAA },
     { code: "CIT", name: "College of Industrial Technology", sector: "OVPAA" as const, category: "COLLEGE" as const, officialEmail: "cit@tup.edu.ph", parentOfficeId: seededVps.OVPAA },
     { code: "CIE", name: "College of Industrial Education", sector: "OVPAA" as const, category: "COLLEGE" as const, officialEmail: "cie@tup.edu.ph", parentOfficeId: seededVps.OVPAA },
     { code: "COE", name: "College of Engineering", sector: "OVPAA" as const, category: "COLLEGE" as const, officialEmail: "coe@tup.edu.ph", parentOfficeId: seededVps.OVPAA },

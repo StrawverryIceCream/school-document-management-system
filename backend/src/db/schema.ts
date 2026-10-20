@@ -517,6 +517,51 @@ export const requestAttachments = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  Request routing steps (Clearance & Multi-Office Approvals)                */
+/* -------------------------------------------------------------------------- */
+
+export const routingStepStatusEnum = pgEnum("routing_step_status", [
+  "locked",
+  "pending",
+  "approved",
+  "action_required",
+  "rejected",
+]);
+
+export const routingStepTypeEnum = pgEnum("routing_step_type", [
+  "clearance",
+  "fee_assessment",
+  "payment_verification",
+  "document_processing",
+  "executive_signature",
+  "window_release",
+]);
+
+export const requestRoutingSteps = pgTable(
+  "request_routing_steps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .references(() => documentRequests.id, { onDelete: "cascade" })
+      .notNull(),
+    officeId: uuid("office_id")
+      .references(() => offices.id)
+      .notNull(),
+    stepOrder: integer("step_order").notNull(),
+    stepType: routingStepTypeEnum("step_type").notNull(),
+    status: routingStepStatusEnum("status").notNull().default("locked"),
+    remarks: text("remarks"),
+    actedBy: uuid("acted_by").references(() => users.id),
+    actedAt: tz("acted_at"),
+    ...timestamps,
+  },
+  (table) => [
+    index("routing_steps_request_idx").on(table.requestId, table.stepOrder),
+    index("routing_steps_office_status_idx").on(table.officeId, table.status),
+  ],
+);
+
+/* -------------------------------------------------------------------------- */
 /*  Payments                                                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -789,7 +834,26 @@ export const documentRequestsRelations = relations(
     notifications: many(notifications),
     statusHistory: many(requestStatusHistory),
     attachments: many(requestAttachments),
+    routingSteps: many(requestRoutingSteps),
     appointments: many(appointments),
+  }),
+);
+
+export const requestRoutingStepsRelations = relations(
+  requestRoutingSteps,
+  ({ one }) => ({
+    request: one(documentRequests, {
+      fields: [requestRoutingSteps.requestId],
+      references: [documentRequests.id],
+    }),
+    office: one(offices, {
+      fields: [requestRoutingSteps.officeId],
+      references: [offices.id],
+    }),
+    actedByUser: one(users, {
+      fields: [requestRoutingSteps.actedBy],
+      references: [users.id],
+    }),
   }),
 );
 
