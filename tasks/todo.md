@@ -1,16 +1,15 @@
-# Implementation Plan: Codebase File & Folder Organization Overhaul
+# Implementation Plan: Data Table System-Wide Design Unification
 
-## Batch 1: Root Cleanups & Standalone Components
-- [x] Task 1: Clean Up Ghost Folders & Relocate Loose Route Guards (`guards/`, `shared/`)
+Plan: `docs/plans/2026-10-20-data-table-design-unification.md`
 
-## Batch 2: Feature Folder Normalization
-- [x] Task 2: Normalize Feature Folders (`dashboard`, `logs`, `documents`, `notifications`)
-
-## Batch 3: Counter Windows Domain Consolidation
-- [x] Task 3: Consolidate Counter Windows Domain (`components/windows`, `lib/windows`)
-
-## Batch 4: Document Requests Domain Consolidation
-- [x] Task 4: Consolidate Document Requests Domain (`components/requests`, `lib/requests`)
-
-## Batch 5: Profile & Full End-to-End Build Verification
-- [x] Task 5: Consolidate Profile Helpers & Full End-to-End Build Verification (`lib/profile`, build checks)
+- [x] Task 1: Create Shared `TruncatedText` Component with Radix Tooltip
+- [x] Task 2: Create Shared `CopyableId` Component
+- [x] Task 3: Centralize `RequestStatusBadge` into Shared Components
+- [x] Task 4: Upgrade `WindowRequestTable.tsx` to Modern Styling
+- [x] Task 5: Upgrade `dashboard/RequestTable.tsx` to Modern Styling
+- [x] Task 6: Upgrade `requests/all/RequestTable.tsx` to Modern Styling
+- [x] Task 7: Upgrade `documents/DocumentTable.tsx` to Modern Styling
+- [x] Task 8: Upgrade `logs/LogsTable.tsx` to Modern Styling
+- [x] Task 9: Upgrade `administration/AdministrationRequestTable.tsx` to Modern Styling
+- [x] Task 10: Harmonize `AccountsTable.tsx` to Shared Components
+- [x] Task 11: System-Wide Verification
