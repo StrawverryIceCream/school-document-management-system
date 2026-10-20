@@ -80,7 +80,7 @@ export const WindowRequestTableRow = memo(function WindowRequestTableRow({
           {request.user?.role ?? "—"}
         </Badge>
       </TableCell>
-      <TableCell className="max-w-52 whitespace-normal break-words">
+      <TableCell className="max-w-52 whitespace-normal wrap-break-word">
         <p className="font-medium">
           {request.documentType?.name ?? "Unknown document"}
         </p>
@@ -105,7 +105,7 @@ export const WindowRequestTableRow = memo(function WindowRequestTableRow({
         </Badge>
       </TableCell>
       <TableCell className="whitespace-normal">
-        <div className="flex items-center gap-1.5 break-words text-sm text-muted-foreground">
+        <div className="flex items-center gap-1.5 wrap-break-word text-sm text-muted-foreground">
           <span
             aria-label={
               windowId

@@ -32,7 +32,7 @@ export default function TruncatedText({
             {children ?? text}
           </span>
         </TooltipTrigger>
-        <TooltipContent className="max-w-xs break-words">
+        <TooltipContent className="max-w-xs wrap-break-word">
           <span>{text}</span>
         </TooltipContent>
       </Tooltip>

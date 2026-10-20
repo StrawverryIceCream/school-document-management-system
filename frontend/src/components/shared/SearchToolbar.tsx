@@ -89,7 +89,7 @@ export default function SearchToolbar({
         <Tabs
           value={activeTab}
           onValueChange={onTabChange}
-          className="max-w-full min-w-0 sm:shrink-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="max-w-full min-w-0 sm:shrink-0 overflow-x-auto overflow-y-hidden scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           <TabsList
             aria-label={tabsAriaLabel}

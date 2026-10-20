@@ -12,11 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import type { DocumentType, RequiredFieldValues } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
-import { formatPeso } from "@/lib/format";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import RequestWizardHeader from "./RequestWizardHeader";
@@ -29,8 +27,6 @@ type DocumentRequestFormProps = {
   document: DocumentType;
   onSubmit: (values: RequiredFieldValues) => Promise<void>;
 };
-
-const COURIER_FEE = 180;
 
 export default function DocumentRequestForm({
   document,
@@ -80,15 +76,6 @@ export default function DocumentRequestForm({
     setValues((prev) => ({ ...prev, [key]: val }));
     if (validationError) setValidationError(null);
   }
-
-  // Cost calculation
-  const baseFee = Number(document.fee) || 0;
-  const copiesField = document.requiredFields.find(
-    (f) => f.type === "number" && f.label.toLowerCase().includes("cop"),
-  );
-  const copiesCount = copiesField ? Number(values[copiesField.key]) || 1 : 1;
-  const deliveryFee = deliveryMethod === "courier" ? COURIER_FEE : 0;
-  const totalDue = baseFee * copiesCount + deliveryFee;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -154,159 +141,97 @@ export default function DocumentRequestForm({
         </Card>
 
         {/* Main Content Layout */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column (8 cols) */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
-            {/* Section A: Applicant Profile */}
-            <ApplicantProfileCard />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          {/* Section A: Applicant Profile */}
+          <ApplicantProfileCard />
 
-            {/* Section B: Dynamic Document Fields */}
-            <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 flex flex-col gap-5">
-              <div className="flex items-center gap-2.5 pb-1">
-                <span className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <FileCheck2 className="size-4" />
+          {/* Section B: Dynamic Document Fields */}
+          <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 flex flex-col gap-5">
+            <div className="flex items-center gap-2.5 pb-1">
+              <span className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <FileCheck2 className="size-4" />
+              </span>
+              <div>
+                <h2 className="text-base font-bold text-foreground">
+                  Registry Evaluation Parameters
+                </h2>
+                <span className="text-xs text-muted-foreground">
+                  Fields rendered dynamically from document type specification
                 </span>
-                <div>
-                  <h2 className="text-base font-bold text-foreground">
-                    Registry Evaluation Parameters
-                  </h2>
-                  <span className="text-xs text-muted-foreground">
-                    Fields rendered dynamically from document type specification
-                  </span>
-                </div>
               </div>
-
-              {document.requiredFields.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {document.requiredFields.map((field) => (
-                    <div
-                      key={field.key}
-                      className={cn(
-                        field.type === "textarea" ||
-                          field.label.toLowerCase().includes("purpose")
-                          ? "md:col-span-2"
-                          : "col-span-1",
-                      )}
-                    >
-                      <DynamicFieldRenderer
-                        field={field}
-                        value={values[field.key]}
-                        onChange={handleFieldChange}
-                        disabled={submitting}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  No additional custom fields required for this document. Standard registry records will be referenced.
-                </div>
-              )}
-            </Card>
-
-            {/* Section C: Delivery Method */}
-            <DeliveryMethodCard
-              value={deliveryMethod}
-              onChange={setDeliveryMethod}
-              disabled={submitting}
-            />
-
-            {/* Section E: Applicant Declaration */}
-            <ApplicantDeclarationCard
-              checked={declarationAccepted}
-              onChange={setDeclarationAccepted}
-              disabled={submitting}
-            />
-
-            {/* Validation Alert */}
-            {validationError && (
-              <div className="flex items-center gap-2.5 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-                <ShieldAlert className="size-4 shrink-0" />
-                <span>{validationError}</span>
-              </div>
-            )}
-
-            {/* Bottom Form Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2"
-                onClick={() => navigate("/new-request")}
-                disabled={submitting}
-              >
-                <ArrowLeft className="size-4" />
-                Back to Document Selection
-              </Button>
-
-              <Button
-                type="submit"
-                className="gap-2"
-                disabled={submitting}
-              >
-                <span>{submitting ? "Processing..." : "Proceed to Payment & Verification"}</span>
-                <ArrowRight className="size-4" />
-              </Button>
             </div>
-          </div>
 
-          {/* Right Column (4 cols) - Sticky Order Summary */}
-          <div className="lg:col-span-4 flex flex-col gap-4 sticky top-6">
-            <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-foreground">
-                  Request Summary
-                </h3>
-                <Badge variant="secondary" className={cn(BADGE_BASE, TONES.brand.badge)}>
-                  Step 2 of 3
-                </Badge>
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Document</span>
-                  <span className="font-medium text-foreground text-right">{document.name}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Base Unit Fee</span>
-                  <span className="font-medium text-foreground">{formatPeso(baseFee)}</span>
-                </div>
-                {copiesCount > 1 && (
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Copies ({copiesCount}x)</span>
-                    <span className="font-medium text-foreground">{formatPeso(baseFee * copiesCount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Delivery Method</span>
-                  <span
+            {document.requiredFields.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {document.requiredFields.map((field) => (
+                  <div
+                    key={field.key}
                     className={cn(
-                      deliveryFee > 0
-                        ? "text-primary font-semibold"
-                        : "text-emerald-600 font-medium",
+                      field.type === "textarea" ||
+                        field.label.toLowerCase().includes("purpose")
+                        ? "md:col-span-2"
+                        : "col-span-1",
                     )}
                   >
-                    {deliveryMethod === "courier"
-                      ? `+${formatPeso(COURIER_FEE)} (Courier)`
-                      : "Free (Pickup)"}
-                  </span>
-                </div>
+                    <DynamicFieldRenderer
+                      field={field}
+                      value={values[field.key]}
+                      onChange={handleFieldChange}
+                      disabled={submitting}
+                    />
+                  </div>
+                ))}
               </div>
-
-              <Separator />
-
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm font-semibold text-foreground">Total Assessment</span>
-                <span className="text-xl font-bold text-primary">
-                  {totalDue > 0 ? formatPeso(totalDue) : "Free of Charge"}
-                </span>
+            ) : (
+              <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                No additional custom fields required for this document. Standard registry records will be referenced.
               </div>
+            )}
+          </Card>
 
-              <div className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
-                <p className="font-semibold text-foreground">Processing Schedule</p>
-                <p>Standard processing: {document.processingDays} working days upon payment verification.</p>
-              </div>
-            </Card>
+          {/* Section C: Delivery Method */}
+          <DeliveryMethodCard
+            value={deliveryMethod}
+            onChange={setDeliveryMethod}
+            disabled={submitting}
+          />
+
+          {/* Section E: Applicant Declaration */}
+          <ApplicantDeclarationCard
+            checked={declarationAccepted}
+            onChange={setDeclarationAccepted}
+            disabled={submitting}
+          />
+
+          {/* Validation Alert */}
+          {validationError && (
+            <div className="flex items-center gap-2.5 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+              <ShieldAlert className="size-4 shrink-0" />
+              <span>{validationError}</span>
+            </div>
+          )}
+
+          {/* Bottom Form Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              onClick={() => navigate("/new-request")}
+              disabled={submitting}
+            >
+              <ArrowLeft className="size-4" />
+              Back to Document Selection
+            </Button>
+
+            <Button
+              type="submit"
+              className="gap-2"
+              disabled={submitting}
+            >
+              <span>{submitting ? "Processing..." : "Proceed to Payment & Verification"}</span>
+              <ArrowRight className="size-4" />
+            </Button>
           </div>
         </form>
       </div>

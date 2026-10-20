@@ -72,7 +72,7 @@ export default function DataTable<T>({
         className={cn(
           "min-h-0 gap-0 overflow-hidden rounded-2xl py-0 shadow-sm",
           hasPagination && "rounded-b-none border-b-0",
-          "[&_[data-slot=table-container]]:min-h-0 [&_[data-slot=table-container]]:flex-1 [&_[data-slot=table-container]]:overflow-y-auto",
+          "**:data-[slot=table-container]:min-h-0 **:data-[slot=table-container]:flex-1 **:data-[slot=table-container]:overflow-y-auto",
         )}
       >
         <Table className={tableClassName}>

@@ -32,18 +32,10 @@ export default function DeliveryMethodCard({
       id: "representative",
       title: "Authorized Representative Pickup",
       badge: null,
+      badgeTone: null,
       desc: "Requires formal signed Authorization Letter and Photocopy of valid IDs",
       feeLabel: "₱0.00",
       feeColor: "text-foreground font-semibold",
-    },
-    {
-      id: "courier",
-      title: "Courier Delivery / Express Mailing",
-      badge: "Tracked",
-      badgeTone: TONES.sky.badge,
-      desc: "Nationwide delivery with secure tamper-proof thermal packaging",
-      feeLabel: "+₱180.00",
-      feeColor: "text-primary font-bold",
     },
   ] as const;
 

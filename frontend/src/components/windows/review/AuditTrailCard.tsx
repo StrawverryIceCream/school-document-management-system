@@ -34,7 +34,7 @@ export function AuditTrailCard({
           placeholder="Add internal staff remark or verification note..."
           value={staffNotes}
           onChange={(e) => onStaffNotesChange(e.target.value)}
-          className="min-h-[70px] text-xs bg-muted/30"
+          className="min-h-17.5 text-xs bg-muted/30"
         />
         {onSaveNote && (
           <div className="flex justify-end">

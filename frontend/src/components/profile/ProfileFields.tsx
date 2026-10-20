@@ -37,7 +37,7 @@ export default function ProfileFields({
               <dd
                 className={cn(
                   "text-base font-medium",
-                  key === "email" ? "break-all" : "break-words",
+                  key === "email" ? "break-all" : "wrap-break-word",
                   isEmpty && "font-normal text-muted-foreground",
                 )}
               >

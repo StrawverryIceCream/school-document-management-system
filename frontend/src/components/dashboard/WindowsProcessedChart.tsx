@@ -94,7 +94,7 @@ function WindowsProcessedChart() {
             No requests processed yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="max-h-[300px] w-full">
+          <ChartContainer config={chartConfig} className="max-h-75 w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
@@ -110,4 +110,4 @@ function WindowsProcessedChart() {
   );
 }
 
-export default WindowsProcessedChart;
+export default WindowsProcessedChart;
