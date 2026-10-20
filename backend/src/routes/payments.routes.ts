@@ -10,6 +10,7 @@ import {
   getMyPayments,
   getPaymentById,
   uploadPaymentProofHandler,
+  verifyPayment,
 } from "../controllers/payments.controller.js";
 import { handleUpload } from "../middleware/upload.js";
 
@@ -28,5 +29,11 @@ router.post(
 
 router.get("/", requireRoles("admin", "staff"), getAllPayments);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getPaymentById);
+router.patch(
+  "/:id/verify",
+  requireRoles("admin", "staff"),
+  validateId,
+  verifyPayment,
+);
 
 export default router;

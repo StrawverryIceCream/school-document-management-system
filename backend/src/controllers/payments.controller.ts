@@ -481,3 +481,84 @@ export async function uploadPaymentProofHandler(
     return res.status(500).json({ error: "Failed to upload payment proof" });
   }
 }
+
+export async function verifyPayment(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const userId = getSessionUserId(req);
+    const { id } = req.params;
+    const { receiptNumber, rejectionReason, decision } = (req.body as any) || {};
+
+    const payment = await db.query.payments.findFirst({
+      where: eq(payments.id, id),
+      with: { request: true },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    if (decision === "rejected") {
+      const [updated] = await db
+        .update(payments)
+        .set({
+          status: "rejected",
+          rejectionReason: rejectionReason || "Payment proof invalid",
+          reviewedBy: userId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(payments.id, id))
+        .returning();
+
+      void recordAuditLog({
+        actorId: userId,
+        action: `Rejected payment proof for request ${payment.request?.referenceNumber || id}`,
+        entityType: "payment",
+        entityId: id,
+        ipAddress: req.ip,
+      });
+
+      return res.json({ ok: true, payment: updated });
+    }
+
+    const officialReceipt = receiptNumber || payment.receiptNumber || buildReceiptNumber();
+
+    const result = await db.transaction(async (tx) => {
+      const [updatedPayment] = await tx
+        .update(payments)
+        .set({
+          status: "verified",
+          receiptNumber: officialReceipt,
+          reviewedBy: userId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(payments.id, id))
+        .returning();
+
+      if (payment.request?.status === "awaiting_payment" || payment.request?.status === "pending") {
+        await tx
+          .update(documentRequests)
+          .set({ status: "processing" })
+          .where(eq(documentRequests.id, payment.requestId));
+      }
+
+      return updatedPayment;
+    });
+
+    void recordAuditLog({
+      actorId: userId,
+      action: `Verified payment (OR: ${officialReceipt}) for request ${payment.request?.referenceNumber || id}`,
+      entityType: "payment",
+      entityId: id,
+      ipAddress: req.ip,
+    });
+
+    return res.json({ ok: true, payment: result });
+  } catch (err) {
+    console.error("[verifyPayment] error:", err);
+    return res.status(500).json({ error: "Failed to verify payment" });
+  }
+}
+
