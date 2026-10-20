@@ -13,9 +13,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
+import OfficeSwitcher from "./OfficeSwitcher";
+import { useAuth } from "@/hooks/useAuth";
 
 function SiteHeader() {
   const crumbs = useBreadcrumbs();
+  const { user } = useAuth();
+  const isStaffOrAdmin = user?.role === "staff" || user?.role === "admin";
+  const userOfficeCode =
+    user?.department ||
+    (user as any)?.officeCode ||
+    (user?.office ? String(user.office).toUpperCase() : "OUR");
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -47,7 +55,8 @@ function SiteHeader() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-3">
+          {isStaffOrAdmin && <OfficeSwitcher userOfficeCode={userOfficeCode} />}
           <Notification />
           <ModeToggle />
         </div>
