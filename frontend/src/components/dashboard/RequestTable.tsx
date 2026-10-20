@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { Eye } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
+import TruncatedText from "@/components/shared/TruncatedText";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
-import { statusStyles } from "@/lib/requests";
+import { getInitials } from "@/lib/profile";
 import type { RequestRow } from "@/context/DashboardContext";
 
 export default function RequestTable() {
@@ -28,44 +31,87 @@ export default function RequestTable() {
       {
         key: "id",
         header: "ID",
-        className: "w-24",
-        cell: (row) => <span className="font-mono text-xs">#{row.id}</span>,
+        className: "w-36",
+        cell: (row) => (
+          <CopyableId
+            id={row.id}
+            displayValue={`#${row.id}`}
+            label={`Copy request #${row.id}`}
+          />
+        ),
       },
       {
         key: "applicant",
         header: "Applicant",
-        cell: (row) =>
-          row.userId ? (
-            <ProfileTrigger userId={row.userId}>
-              <button
-                type="button"
-                className="text-left font-medium hover:underline"
-              >
-                {row.applicant}
-              </button>
-            </ProfileTrigger>
-          ) : (
-            <span className="font-medium">{row.applicant}</span>
-          ),
+        className: "min-w-56 max-w-xs",
+        cell: (row) => (
+          <div className="flex items-center gap-3">
+            <Avatar className="size-9 shrink-0">
+              <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
+                {getInitials(row.applicant)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col">
+              {row.userId ? (
+                <ProfileTrigger userId={row.userId}>
+                  <button
+                    type="button"
+                    className="truncate text-left font-semibold text-foreground hover:underline"
+                  >
+                    <TruncatedText
+                      text={row.applicant}
+                      className="font-semibold text-foreground max-w-40"
+                    />
+                  </button>
+                </ProfileTrigger>
+              ) : (
+                <TruncatedText
+                  text={row.applicant}
+                  className="font-semibold text-foreground max-w-40"
+                />
+              )}
+              <span className="text-xs text-muted-foreground">Student</span>
+            </div>
+          </div>
+        ),
       },
       {
         key: "document",
         header: "Document",
-        accessor: "document",
+        className: "min-w-48 max-w-xs",
+        cell: (row) => (
+          <TruncatedText
+            text={row.document}
+            className="font-medium text-foreground max-w-52"
+          />
+        ),
       },
       {
         key: "college",
         header: "College",
-        cell: (row) => row.college ?? "—",
+        className: "w-36",
+        cell: (row) => (
+          <TruncatedText
+            text={row.college ?? "—"}
+            className="text-sm text-muted-foreground max-w-32"
+          />
+        ),
       },
       {
         key: "course",
         header: "Course",
-        cell: (row) => row.course ?? "—",
+        className: "w-36",
+        cell: (row) => (
+          <TruncatedText
+            text={row.course ?? "—"}
+            className="text-sm text-muted-foreground max-w-32"
+          />
+        ),
       },
       {
         key: "submitted",
         header: "Submitted",
+        className: "w-32 text-sm text-muted-foreground",
         cell: (row) =>
           row.submittedAt
             ? new Date(row.submittedAt).toLocaleDateString()
@@ -74,14 +120,8 @@ export default function RequestTable() {
       {
         key: "status",
         header: "Status",
-        cell: (row) => (
-          <Badge
-            variant="outline"
-            className={`capitalize ${statusStyles[row.status] ?? ""}`}
-          >
-            {row.status}
-          </Badge>
-        ),
+        className: "w-32",
+        cell: (row) => <RequestStatusBadge status={row.status} />,
       },
       {
         key: "actions",
