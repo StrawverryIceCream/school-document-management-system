@@ -10,7 +10,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { getTupIdLabel, NO_TUP_ID_LABEL } from "@/lib/profile";
+import { getTupIdLabel, NO_TUP_ID_LABEL } from "./profile";
 import {
   officeLabels,
   userRoles,

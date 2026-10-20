@@ -13,4 +13,4 @@
 - [x] Task 4: Consolidate Document Requests Domain (`components/requests`, `lib/requests`)
 
 ## Batch 5: Profile & Full End-to-End Build Verification
-- [ ] Task 5: Consolidate Profile Helpers & Full End-to-End Build Verification (`lib/profile`, build checks)
+- [x] Task 5: Consolidate Profile Helpers & Full End-to-End Build Verification (`lib/profile`, build checks)

@@ -4,8 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getInitials, ROLE_META } from "@/lib/profile";
-import type { ProfileUser } from "@/lib/profile-fields";
+import { getInitials, ROLE_META, type ProfileUser } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 type ProfileCardProps = React.ComponentProps<"div"> & {

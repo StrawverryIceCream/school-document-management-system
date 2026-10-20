@@ -1,5 +1,5 @@
 import { useOrgNames } from "@/hooks/useOrgNames";
-import { getProfileFields, type ProfileUser } from "@/lib/profile-fields";
+import { getProfileFields, type ProfileUser } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 const FULL_WIDTH_KEYS = ["college", "course", "department"];

@@ -1,7 +1,7 @@
 import type { UserRole } from "@/types";
 
 // Avatar fallbacks, role badges, and TUP ID formatting for the profile UI.
-// Which fields each role shows lives in lib/profile-fields.ts.
+// Which fields each role shows lives in fields.ts.
 
 export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
