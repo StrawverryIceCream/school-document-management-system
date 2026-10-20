@@ -1,12 +1,12 @@
-import { Check, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
 import EditRow from "@/components/accounts/EditRow";
 import EditUser from "@/components/accounts/EditUser";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
+import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import TruncatedText from "@/components/shared/TruncatedText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +14,6 @@ import { useUsers } from "@/hooks/useUsers";
 import {
   ACCOUNT_STATUS,
   ACTION_COLUMN_LABEL,
-  COPY_FEEDBACK_MS,
   EMPTY_MESSAGE,
   ERROR_PREFIX,
   formatShortId,
@@ -37,7 +36,6 @@ export default function AccountsTable() {
   const { user: currentUser } = useAuth();
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const selectedOnPage = users.filter((u) => selectedIds.includes(u.id)).length;
   const headerChecked: boolean | "indeterminate" =
@@ -46,16 +44,6 @@ export default function AccountsTable() {
       : selectedOnPage === users.length
         ? true
         : "indeterminate";
-
-  const handleCopy = async (text: string, key: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedKey(key);
-      window.setTimeout(() => setCopiedKey(null), COPY_FEEDBACK_MS);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
 
   const columns = useMemo<DataTableColumn<User>[]>(
     () => [
@@ -90,26 +78,11 @@ export default function AccountsTable() {
         className: "w-48",
         header: "Identifier (UUID)",
         cell: (user) => (
-          <div className="flex items-center gap-2">
-            <code
-              className="max-w-32 truncate font-mono text-sm text-muted-foreground"
-              title={user.id}
-            >
-              {formatShortId(user.id)}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={`Copy ID of ${user.fullName}`}
-              onClick={() => handleCopy(user.id, `id-${user.id}`)}
-            >
-              {copiedKey === `id-${user.id}` ? (
-                <Check className="size-4" aria-hidden="true" />
-              ) : (
-                <Copy className="size-4" aria-hidden="true" />
-              )}
-            </Button>
-          </div>
+          <CopyableId
+            id={user.id}
+            displayValue={formatShortId(user.id)}
+            label={`Copy ID of ${user.fullName}`}
+          />
         ),
       },
       {
@@ -141,9 +114,11 @@ export default function AccountsTable() {
                     <button
                       type="button"
                       className="truncate text-left text-lg font-semibold text-foreground hover:underline"
-                      title={user.fullName}
                     >
-                      {user.fullName}
+                      <TruncatedText
+                        text={user.fullName}
+                        className="font-semibold text-foreground max-w-44"
+                      />
                     </button>
                   </ProfileTrigger>
                   {isCurrentUser && (
@@ -158,12 +133,10 @@ export default function AccountsTable() {
                     </Badge>
                   )}
                 </div>
-                <span
-                  className="truncate text-base text-muted-foreground"
-                  title={subtitle}
-                >
-                  {subtitle}
-                </span>
+                <TruncatedText
+                  text={subtitle}
+                  className="text-base text-muted-foreground max-w-48"
+                />
               </div>
             </div>
           );
@@ -174,12 +147,10 @@ export default function AccountsTable() {
         className: "min-w-64 max-w-xs",
         header: "Institutional Email",
         cell: (user) => (
-          <span
-            className="block max-w-xs truncate text-base text-foreground"
-            title={user.email}
-          >
-            {user.email}
-          </span>
+          <TruncatedText
+            text={user.email}
+            className="text-base text-foreground max-w-xs"
+          />
         ),
       },
       {
@@ -204,30 +175,11 @@ export default function AccountsTable() {
         className: "w-48",
         header: "Student / Staff ID",
         cell: (user) => (
-          <div className="flex items-center gap-2">
-            <code
-              className="max-w-32 truncate rounded-md bg-muted px-2 py-1 font-mono text-sm text-foreground"
-              title={user.studentId ?? undefined}
-            >
-              {getTupIdLabel(user.studentId)}
-            </code>
-            {user.studentId && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={`Copy Student ID of ${user.fullName}`}
-                onClick={() =>
-                  handleCopy(user.studentId!, `student-${user.id}`)
-                }
-              >
-                {copiedKey === `student-${user.id}` ? (
-                  <Check className="size-4" aria-hidden="true" />
-                ) : (
-                  <Copy className="size-4" aria-hidden="true" />
-                )}
-              </Button>
-            )}
-          </div>
+          <CopyableId
+            id={user.studentId}
+            displayValue={getTupIdLabel(user.studentId)}
+            label={`Copy ID of ${user.fullName}`}
+          />
         ),
       },
       {
@@ -263,7 +215,7 @@ export default function AccountsTable() {
         ),
       },
     ],
-    [users, selectedIds, headerChecked, currentUser, copiedKey],
+    [users, selectedIds, headerChecked, currentUser],
   );
 
   const renderCustomRow = (user: User) => {
@@ -285,26 +237,11 @@ export default function AccountsTable() {
           />
         </TableCell>
         <TableCell>
-          <div className="flex items-center gap-2">
-            <code
-              className="max-w-32 truncate font-mono text-sm text-muted-foreground"
-              title={user.id}
-            >
-              {formatShortId(user.id)}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={`Copy ID of ${user.fullName}`}
-              onClick={() => handleCopy(user.id, `id-${user.id}`)}
-            >
-              {copiedKey === `id-${user.id}` ? (
-                <Check className="size-4" aria-hidden="true" />
-              ) : (
-                <Copy className="size-4" aria-hidden="true" />
-              )}
-            </Button>
-          </div>
+          <CopyableId
+            id={user.id}
+            displayValue={formatShortId(user.id)}
+            label={`Copy ID of ${user.fullName}`}
+          />
         </TableCell>
         <EditRow
           user={user}
