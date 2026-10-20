@@ -1,11 +1,13 @@
-# Implementation Plan: Dashboard Shared Components Overhaul
+# Implementation Plan: StatCard System-Wide Style & Typography Overhaul
 
-## Batch 1: Shared Core (`StatCard`, `StatsOverview`, `DashboardHeader`)
-- [x] Task 1: Enhance `StatCard` with Executive KPI & Compact Mode Support (`StatCard.tsx`)
-- [x] Task 2: Refactor `StatsOverview` to Render via `StatCard` (`StatsOverview.tsx`)
-- [x] Task 3: Refactor `DashboardHeader` to Compose via `PageHeader` (`DashboardHeader.tsx`)
+## Batch 1: Shared Core Component & Windows
+- [ ] Task 1: Upgrade `StatCard` Typography and Universal Dashboard Aesthetic (`StatCard.tsx`, `tones.ts`)
+- [ ] Task 2: Roll Out to Window Overview (`WindowRequestSummary.tsx`)
 
-## Batch 2: Widget Primitives & Final Verification
-- [x] Task 4: Standardize `WindowCounterLoads` with Primitives (`Card`, `Badge`, `Progress`) (`WindowCounterLoads.tsx`)
-- [x] Task 5: End-to-End Build and Verification
+## Batch 2: Personal & Informational Overviews
+- [ ] Task 3: Roll Out to My Requests Overview (`MyRequestCards.tsx`)
+- [ ] Task 4: Roll Out to Document Manager & System Logs (`DocumentCards.tsx`, `LogsOverview.tsx`)
 
+## Batch 3: System Operations & End-to-End Verification
+- [ ] Task 5: Roll Out to All Requests & Administration (`RequestSummary.tsx`, `AdministrationRequestSummary.tsx`)
+- [ ] Task 6: Roll Out to Accounts Overview & Full End-to-End Verification (`AccountsOverview.tsx`, build check)
