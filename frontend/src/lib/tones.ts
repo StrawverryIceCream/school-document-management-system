@@ -64,6 +64,18 @@ export const TONES = {
 
 export type Tone = keyof typeof TONES;
 
+// Accent bar colors at the top of StatCard matching each tone
+export const TONE_TOP_BARS: Record<Tone, string> = {
+  neutral: "bg-muted-foreground/40",
+  brand: "bg-primary",
+  rose: "bg-rose-500",
+  amber: "bg-amber-500",
+  emerald: "bg-emerald-500",
+  sky: "bg-sky-500",
+  orange: "bg-orange-500",
+  red: "bg-destructive",
+};
+
 // Shared shapes so every icon box and badge has the same size and rounding
 export const ICON_BOX_BASE = "flex shrink-0 items-center justify-center rounded-xl";
 export const BADGE_BASE = "gap-2 rounded-full px-3 py-1 text-sm font-semibold";
