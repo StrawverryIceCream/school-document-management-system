@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { NotificationItems } from "@/components/notification/NotificationItem";
+import { NotificationItems } from "@/components/notifications/NotificationItem";
 import { useNotifications } from "@/hooks/useNotification";
 import { CheckCheck, Inbox, RefreshCw } from "lucide-react";
 

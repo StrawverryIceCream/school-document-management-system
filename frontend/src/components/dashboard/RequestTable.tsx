@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
-import RequestDetailDialog from "@/components/dashboard_page/RequestDetailDialog";
+import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
 import { useDashboard } from "@/hooks/useDashboard";
 import { statusStyles } from "@/lib/request";
 import type { RequestRow } from "@/context/DashboardContext";

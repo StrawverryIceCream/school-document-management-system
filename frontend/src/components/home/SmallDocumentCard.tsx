@@ -7,7 +7,7 @@ import { CARD_HOVER_LIFT, cn } from "@/lib/utils";
 import {
   initializeDocumentTypeItem,
   type DocumentTypeItem,
-} from "@/lib/document";
+} from "@/lib/documents";
 import { ICON_BOX_BASE, TONES } from "@/lib/tones";
 
 type SmallDocumentCardProps = {

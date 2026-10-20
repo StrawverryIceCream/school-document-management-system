@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { FileText, FileCheck, Files } from "lucide-react";
-import type { Tone } from "./tones";
+import type { Tone } from "@/lib/tones";
 
 export interface DocumentTypeItem {
   id: string;

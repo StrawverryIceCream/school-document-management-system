@@ -1,11 +1,11 @@
-import DashboardHeader from "@/components/dashboard_page/DashboardHeader";
-import StatsOverview from "@/components/dashboard_page/StatsOverview";
-import RequestSearchToolbar from "@/components/dashboard_page/RequestSearchToolbar";
-import RequestsStatusChart from "@/components/dashboard_page/RequestStatusChart";
-import WindowsProcessedChart from "@/components/dashboard_page/WindowsProcessedChart";
-import PaymentMethodChart from "@/components/dashboard_page/PaymentMethodChart";
-import RequestTable from "@/components/dashboard_page/RequestTable";
-import WindowCounterLoads from "@/components/dashboard_page/WindowCounterLoads";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import StatsOverview from "@/components/dashboard/StatsOverview";
+import RequestSearchToolbar from "@/components/dashboard/RequestSearchToolbar";
+import RequestsStatusChart from "@/components/dashboard/RequestStatusChart";
+import WindowsProcessedChart from "@/components/dashboard/WindowsProcessedChart";
+import PaymentMethodChart from "@/components/dashboard/PaymentMethodChart";
+import RequestTable from "@/components/dashboard/RequestTable";
+import WindowCounterLoads from "@/components/dashboard/WindowCounterLoads";
 import { DashboardProvider } from "@/provider/DashboardProvider";
 
 export default function Dashboard() {

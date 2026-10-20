@@ -11,7 +11,7 @@ import {
   FEE_PENDING_LABEL,
   getRequestFormPath,
   NO_DESCRIPTION_LABEL,
-} from "@/lib/document";
+} from "@/lib/documents";
 import { formatPeso } from "@/lib/format";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { CARD_HOVER_LIFT, cn } from "@/lib/utils";

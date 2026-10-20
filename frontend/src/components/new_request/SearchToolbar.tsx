@@ -1,6 +1,6 @@
 import SearchToolbar from "@/components/shared/SearchToolbar";
 import { useDocument } from "@/hooks/useDocument";
-import { SEARCH_PLACEHOLDER } from "@/lib/document";
+import { SEARCH_PLACEHOLDER } from "@/lib/documents";
 
 export default function DocumentSearchToolbar() {
   const { search, setSearch } = useDocument();

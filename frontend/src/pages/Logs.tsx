@@ -1,7 +1,7 @@
-import LogsHeader from "@/components/logs_page/LogsHeader";
-import LogsOverview from "@/components/logs_page/LogsOverview";
-import LogsSearchToolbar from "@/components/logs_page/LogsSearchToolbar";
-import LogsTable from "@/components/logs_page/LogsTable";
+import LogsHeader from "@/components/logs/LogsHeader";
+import LogsOverview from "@/components/logs/LogsOverview";
+import LogsSearchToolbar from "@/components/logs/LogsSearchToolbar";
+import LogsTable from "@/components/logs/LogsTable";
 import { LogsProvider } from "@/provider/LogsProvider";
 
 export default function Logs() {

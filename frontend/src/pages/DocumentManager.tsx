@@ -1,7 +1,7 @@
-import SearchToolbar from "@/components/document_manager/SearchToolbar";
-import DocumentHeader from "@/components/document_manager/DocumentHeader";
-import DocumentCards from "@/components/document_manager/DocumentCards";
-import DocumentTable from "@/components/document_manager/DocumentTable";
+import SearchToolbar from "@/components/documents/SearchToolbar";
+import DocumentHeader from "@/components/documents/DocumentHeader";
+import DocumentCards from "@/components/documents/DocumentCards";
+import DocumentTable from "@/components/documents/DocumentTable";
 
 export default function DocumentManager() {
   return (

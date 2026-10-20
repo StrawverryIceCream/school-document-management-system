@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import PageHeader from "@/components/shared/PageHeader";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
 import { useDocument } from "@/hooks/useDocument";
-import { initializeDocumentTypeItem } from "@/lib/document";
+import { initializeDocumentTypeItem } from "@/lib/documents";
 
 type DocumentTypesSectionProps = {
   exploreHref: string;
