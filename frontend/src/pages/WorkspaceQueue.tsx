@@ -16,7 +16,7 @@ export default function WorkspaceQueue() {
   const selectedOffice =
     searchParams.get("officeCode") ||
     user?.department ||
-    (user as any)?.officeCode ||
+    user?.officeCode ||
     "OUR";
 
   const fetchQueue = async () => {

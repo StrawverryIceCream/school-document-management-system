@@ -19,4 +19,11 @@ describe("OfficeSwitcher Component", () => {
     );
     expect(screen.getByText(/Sector: OVPAA/i)).toBeDefined();
   });
+
+  it("renders interactive scope dropdown for administrators", () => {
+    render(<OfficeSwitcher isAdmin={true} userOfficeCode="ALL" />);
+    expect(screen.getByText(/Scope:/i)).toBeDefined();
+    expect(screen.getByText("ALL")).toBeDefined();
+  });
 });
+

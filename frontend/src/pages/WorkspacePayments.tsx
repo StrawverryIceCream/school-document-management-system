@@ -56,7 +56,7 @@ export default function WorkspacePayments() {
   const selectedOffice =
     searchParams.get("officeCode") ||
     user?.department ||
-    (user as any)?.officeCode ||
+    user?.officeCode ||
     "CO";
 
   const fetchPayments = async () => {

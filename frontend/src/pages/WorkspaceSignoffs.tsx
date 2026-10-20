@@ -52,7 +52,7 @@ export default function WorkspaceSignoffs() {
   const selectedOffice =
     searchParams.get("officeCode") ||
     user?.department ||
-    (user as any)?.officeCode ||
+    user?.officeCode ||
     "OUR";
 
   const fetchSteps = async () => {

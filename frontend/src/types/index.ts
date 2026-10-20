@@ -217,6 +217,8 @@ export interface User extends Timestamps {
   yearLevel: number | null;
   department: string | null;
   office: Office | null;
+  officeId?: UUID | null;
+  officeCode?: string | null;
   emailVerifiedAt: ISODateTimeString | null;
   lastLoginAt: ISODateTimeString | null;
 }
