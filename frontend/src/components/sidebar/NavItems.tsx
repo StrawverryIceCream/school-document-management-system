@@ -20,7 +20,7 @@ function NavItems({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="font-mono">REQUEST</SidebarGroupLabel>
+      <SidebarGroupLabel className="font-mono">WORKSPACE</SidebarGroupLabel>
       <SidebarGroupContent className="flex flex-col">
         <SidebarMenu>
           {items.map((item) => (

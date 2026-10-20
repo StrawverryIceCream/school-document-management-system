@@ -26,6 +26,10 @@ const HumanResource = lazy(() => import("./pages/HumanResource"));
 const Administration = lazy(() => import("./pages/Administration"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const WindowRequestReview = lazy(() => import("./pages/WindowRequestReview"));
+const WorkspaceQueue = lazy(() => import("./pages/WorkspaceQueue"));
+const WorkspaceSignoffs = lazy(() => import("./pages/WorkspaceSignoffs"));
+const WorkspacePayments = lazy(() => import("./pages/WorkspacePayments"));
+const WorkspaceRegistry = lazy(() => import("./pages/WorkspaceRegistry"));
 
 const STAFF_ROLES: UserRole[] = ["admin", "staff"];
 const ADMIN_ROLES: UserRole[] = ["admin"];
@@ -106,6 +110,87 @@ export default function App() {
                     element={<WindowRequestReview />}
                   />
                 </Route>
+                <Route
+                  path="/workspace/queue"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <WorkspaceQueue />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/workspace/signoffs"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <WorkspaceSignoffs />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/workspace/payments"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <WorkspacePayments />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/workspace/registry"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <WorkspaceRegistry />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/workspace/windows"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <WindowViewProvider>
+                        <Outlet />
+                      </WindowViewProvider>
+                    </RequireRole>
+                  }
+                >
+                  <Route index element={<Windows />} />
+                  <Route path=":collegeId" element={<Windows />} />
+                  <Route
+                    path=":collegeId/requests/:requestId"
+                    element={<WindowRequestReview />}
+                  />
+                </Route>
+                <Route
+                  path="/admin/catalog"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <DocumentManager />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/offices"
+                  element={
+                    <RequireRole allowedRoles={ADMIN_ROLES}>
+                      <Administration />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/accounts"
+                  element={
+                    <RequireRole allowedRoles={ADMIN_ROLES}>
+                      <Accounts />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/logs"
+                  element={
+                    <RequireRole allowedRoles={ADMIN_ROLES}>
+                      <Logs />
+                    </RequireRole>
+                  }
+                />
                 <Route
                   path="/administration"
                   element={

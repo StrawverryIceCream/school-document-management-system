@@ -18,7 +18,7 @@ describe("Clearance & Document Routing Engine", () => {
     const steps = await generateRoutingStepsForRequest("OUR-006");
     const officeCodes = steps.map((s) => s.officeCode);
     expect(officeCodes).toEqual(
-      expect.arrayContaining(["COL", "ULLR", "OSA", "URDS", "AO"])
+      expect.arrayContaining(["COL", "ULLR", "OSA", "URDS", "AO"]),
     );
   });
 
