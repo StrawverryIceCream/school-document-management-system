@@ -18,7 +18,7 @@ import {
   UNKNOWN_REQUESTER,
   UNKNOWN_ROLE,
 } from "@/lib/administration/administration-request-table";
-import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
+import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/requests";
 import type { DocumentRequestWithRelations } from "@/types";
 
 const adminTabs: SearchToolbarTab[] = STATUS_FILTERS.map((item) => ({

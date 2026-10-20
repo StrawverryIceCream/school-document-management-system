@@ -16,10 +16,10 @@ import DocumentRequestForm from "./DocumentRequestForm";
 import PaymentRequestSummary from "./PaymentRequestSummary";
 import RequestWizardHeader from "./RequestWizardHeader";
 import StudentBillingSummary from "./StudentBillingSummary";
-import CashPayment from "@/components/payments/CashPayment";
-import OnlinePayment from "@/components/payments/OnlinePayment";
-import PaymentConfirmation from "@/components/payments/PaymentConfirmation";
-import PaymentRequired from "@/components/payments/PaymentRequired";
+import CashPayment from "@/components/requests/payments/CashPayment";
+import OnlinePayment from "@/components/requests/payments/OnlinePayment";
+import PaymentConfirmation from "@/components/requests/payments/PaymentConfirmation";
+import PaymentRequired from "@/components/requests/payments/PaymentRequired";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 

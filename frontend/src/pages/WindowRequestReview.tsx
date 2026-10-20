@@ -15,7 +15,7 @@ import { WindowOperationsCard } from "@/components/windows/review/WindowOperatio
 import { WorkflowPipelineCard } from "@/components/windows/review/WorkflowPipelineCard";
 import { useWindowView } from "@/hooks/useWindowView";
 import { getRequestWindowForCollege } from "@/lib/windows";
-import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/request";
+import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/requests";
 import { REVIEW_ACTIONS } from "@/lib/windows/review/constants";
 import { fetchReviewData } from "@/lib/windows/review/fetch-review-data";
 import { formatDate } from "@/lib/windows/review/format";

@@ -1,7 +1,7 @@
 import DashboardHero from "@/components/home/DashboardHero";
 import AvailableDocuments from "@/components/home/AvailableDocuments";
-import MyRequestCards from "@/components/my_request/MyRequestCards";
-import RequestsSection from "@/components/my_request/RequestSection";
+import MyRequestCards from "@/components/requests/my/MyRequestCards";
+import RequestsSection from "@/components/requests/my/RequestSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchShortcut } from "@/hooks/useSearchShortcut";
 import { getGreeting } from "@/lib/home";

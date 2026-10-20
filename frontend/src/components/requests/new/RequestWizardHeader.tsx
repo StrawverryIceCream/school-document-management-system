@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
-import { PROGRESS_MAX_PERCENT, REQUEST_WIZARD_STEPS } from "@/lib/request";
+import { PROGRESS_MAX_PERCENT, REQUEST_WIZARD_STEPS } from "@/lib/requests";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 

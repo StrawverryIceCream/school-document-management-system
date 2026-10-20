@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { RequestWizardStep } from "@/lib/request";
+import type { RequestWizardStep } from "@/lib/requests";
 
 interface RequestWizardContextType {
   currentStep: RequestWizardStep;

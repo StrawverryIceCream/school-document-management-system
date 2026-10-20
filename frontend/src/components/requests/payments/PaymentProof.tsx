@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   PAYMENT_PROOF_MAX_SIZE_LABEL,
   validatePaymentProof,
-} from "@/lib/payment-proof";
+} from "@/lib/requests";
 import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 
 interface PaymentProofProps {

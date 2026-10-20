@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
-import RequestDetailsDialog from "@/components/all_requests/RequestDetailsDialog";
+import RequestDetailsDialog from "./RequestDetailsDialog";
 import { useRequests } from "@/hooks/useRequest";
-import { statusStyles } from "@/lib/request";
+import { statusStyles } from "@/lib/requests";
 import type { RequestRow } from "@/context/DashboardContext";
 
 export default function RequestTable() {

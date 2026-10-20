@@ -6,7 +6,7 @@ import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import RequestDetailDialog from "@/components/dashboard/RequestDetailDialog";
 import { useDashboard } from "@/hooks/useDashboard";
-import { statusStyles } from "@/lib/request";
+import { statusStyles } from "@/lib/requests";
 import type { RequestRow } from "@/context/DashboardContext";
 
 export default function RequestTable() {

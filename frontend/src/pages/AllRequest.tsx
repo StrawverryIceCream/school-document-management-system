@@ -1,7 +1,7 @@
-import RequestFilter from "@/components/all_requests/RequestFilter";
-import RequestHeader from "@/components/all_requests/RequestHeader";
-import RequestSummary from "@/components/all_requests/RequestSummary";
-import RequestTable from "@/components/all_requests/RequestTable";
+import RequestFilter from "@/components/requests/all/RequestFilter";
+import RequestHeader from "@/components/requests/all/RequestHeader";
+import RequestSummary from "@/components/requests/all/RequestSummary";
+import RequestTable from "@/components/requests/all/RequestTable";
 import { RequestProvider } from "@/provider/RequestProvider";
 
 function AllRequestContent() {

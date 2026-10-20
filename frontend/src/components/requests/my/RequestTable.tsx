@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
-import RequestActionButton from "@/components/my_request/RequestActionButton";
-import RequestStatusBadge from "@/components/my_request/RequestStatusBadge";
+import RequestActionButton from "./RequestActionButton";
+import RequestStatusBadge from "./RequestStatusBadge";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import {
@@ -14,7 +14,7 @@ import {
   NO_PURPOSE_LABEL,
   REQUEST_STATUS_CONFIG,
   REQUESTS_PAGE_SIZE,
-} from "@/lib/request";
+} from "@/lib/requests";
 
 export type RequestsTableProps = {
   requests: MyRequestWithDocumentName[];

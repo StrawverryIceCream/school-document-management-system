@@ -1,7 +1,7 @@
-import DocumentGrid from "@/components/new_request/DocumentGrid";
-import NewRequestForm from "@/components/new_request/NewRequestForm";
-import RequestWizardHeader from "@/components/new_request/RequestWizardHeader";
-import DocumentSearchToolbar from "@/components/new_request/SearchToolbar";
+import DocumentGrid from "@/components/requests/new/DocumentGrid";
+import NewRequestForm from "@/components/requests/new/NewRequestForm";
+import RequestWizardHeader from "@/components/requests/new/RequestWizardHeader";
+import DocumentSearchToolbar from "@/components/requests/new/SearchToolbar";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
 import { useEffect } from "react";
 

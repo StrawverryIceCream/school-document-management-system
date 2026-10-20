@@ -12,7 +12,7 @@ import type { PaymentMethod } from "@/api/payments";
 import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 import { cn } from "@/lib/utils";
 import { TONES } from "@/lib/tones";
-import { validatePaymentProof } from "@/lib/payment-proof";
+import { validatePaymentProof } from "@/lib/requests";
 
 type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
 const DEFAULT_PAYMENT_METHOD: OnlinePaymentMethod = "bank_transfer";

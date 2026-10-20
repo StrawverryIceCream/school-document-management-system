@@ -3,7 +3,7 @@ import { RequestWizardContext } from "@/context/RequestWizardContext";
 import {
   INITIAL_REQUEST_WIZARD_STEP,
   type RequestWizardStep,
-} from "@/lib/request";
+} from "@/lib/requests";
 
 export function RequestWizardProvider({
   children,

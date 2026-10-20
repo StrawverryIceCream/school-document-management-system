@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { REQUEST_STATUS_CONFIG } from "@/lib/request";
+import { REQUEST_STATUS_CONFIG } from "@/lib/requests";
 import { cn } from "@/lib/utils";
 import type { RequestStatus } from "@/types";
 

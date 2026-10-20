@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 import {
   PAYMENT_PROOF_ACCEPT,
   PAYMENT_PROOF_MAX_SIZE_LABEL,
-} from "@/lib/payment-proof";
+} from "@/lib/requests";
 
 interface PaymentReceiptAttachmentProps {
   id: string;

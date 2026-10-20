@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useWindowView } from "@/hooks/useWindowView";
-import { statusStyles } from "@/lib/request";
+import { statusStyles } from "@/lib/requests";
 import {
   REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,

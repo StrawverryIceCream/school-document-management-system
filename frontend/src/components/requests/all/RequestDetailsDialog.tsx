@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import RequestDetailsField from "@/components/all_requests/RequestDetailsField";
-import RequestDetailsHeader from "@/components/all_requests/RequestDetailsHeader";
+import RequestDetailsField from "./RequestDetailsField";
+import RequestDetailsHeader from "./RequestDetailsHeader";
 import type { RequestRow } from "@/context/DashboardContext";
 
 interface RequestDetailsDialogProps {

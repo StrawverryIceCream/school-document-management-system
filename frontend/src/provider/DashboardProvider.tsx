@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DashboardContext } from "@/context/DashboardContext";
 import type { DashboardStats, RequestRow } from "@/context/DashboardContext";
 import { getAllRequests } from "@/api/requests";
-import { normalizeRequestRow } from "@/lib/request";
+import { normalizeRequestRow } from "@/lib/requests";
 import { buildStatsFromRequests } from "@/lib/dashboard";
 import type { RequestStatus } from "@/types";
 

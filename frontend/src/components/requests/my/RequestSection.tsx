@@ -1,5 +1,5 @@
 import PageHeader from "@/components/shared/PageHeader";
-import RequestsTable from "@/components/my_request/RequestTable";
+import RequestsTable from "./RequestTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import {
@@ -7,7 +7,7 @@ import {
   REQUEST_FILTERS,
   REQUESTS_PAGE_SIZE,
   type RequestFilter,
-} from "@/lib/request";
+} from "@/lib/requests";
 import { useMemo, useState } from "react";
 
 function RequestsSection() {

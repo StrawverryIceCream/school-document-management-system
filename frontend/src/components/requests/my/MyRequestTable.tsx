@@ -9,7 +9,7 @@ import {
 import { useMyRequest } from "@/hooks/useMyRequest";
 import MyRequestDetails from "./MyRequestDetails";
 import { Badge } from "@/components/ui/badge";
-import { statusStyles } from "@/lib/request";
+import { statusStyles } from "@/lib/requests";
 
 
 
