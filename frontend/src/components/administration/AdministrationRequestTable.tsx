@@ -1,13 +1,18 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import AdministrationRequestSummary from "./AdministrationRequestSummary";
+import CopyableId from "@/components/shared/CopyableId";
+import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
 import SearchToolbar, {
   type SearchToolbarTab,
 } from "@/components/shared/SearchToolbar";
-import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
-import type { StatusFilter } from "@/context/AdministrationViewContext";
+import TruncatedText from "@/components/shared/TruncatedText";
+import ProfileTrigger from "@/components/profile/ProfileTrigger";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { StatusFilter } from "@/context/AdministrationViewContext";
 import { useAdministrationView } from "@/hooks/useAdministrationView";
 import {
   BACK_LABEL,
@@ -18,7 +23,7 @@ import {
   UNKNOWN_REQUESTER,
   UNKNOWN_ROLE,
 } from "@/lib/administration/administration-request-table";
-import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/requests";
+import { getInitials } from "@/lib/profile";
 import type { DocumentRequestWithRelations } from "@/types";
 
 const adminTabs: SearchToolbarTab[] = STATUS_FILTERS.map((item) => ({
@@ -45,37 +50,97 @@ export default function AdministrationRequestTable() {
   const columns: DataTableColumn<DocumentRequestWithRelations>[] = useMemo(
     () => [
       {
+        key: "id",
+        header: "ID",
+        className: "w-36",
+        cell: (req) => (
+          <CopyableId
+            id={req.id}
+            displayValue={`#${req.id}`}
+            label={`Copy request #${req.id}`}
+          />
+        ),
+      },
+      {
         key: "requester",
         header: "Requester",
-        cell: (req) => (
-          <span className="text-base font-medium">
-            {req.user?.fullName ?? UNKNOWN_REQUESTER}
-          </span>
-        ),
+        className: "min-w-56 max-w-xs",
+        cell: (req) => {
+          const fullName = req.user?.fullName ?? UNKNOWN_REQUESTER;
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar className="size-9 shrink-0">
+                <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
+                  {getInitials(fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-col">
+                {req.user ? (
+                  <ProfileTrigger userId={req.user.id}>
+                    <button
+                      type="button"
+                      className="truncate text-left font-semibold text-foreground hover:underline"
+                    >
+                      <TruncatedText
+                        text={fullName}
+                        className="font-semibold text-foreground max-w-44"
+                      />
+                    </button>
+                  </ProfileTrigger>
+                ) : (
+                  <TruncatedText
+                    text={fullName}
+                    className="font-semibold text-foreground max-w-44"
+                  />
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {req.user?.studentId ? `ID: ${req.user.studentId}` : (req.user?.role ?? UNKNOWN_ROLE)}
+                </span>
+              </div>
+            </div>
+          );
+        },
       },
       {
         key: "role",
         header: "Role",
+        className: "w-28",
         cell: (req) => (
-          <span className="text-base capitalize text-muted-foreground">
+          <Badge
+            variant="outline"
+            className="border-transparent bg-muted text-muted-foreground font-normal capitalize"
+          >
             {req.user?.role ?? UNKNOWN_ROLE}
-          </span>
+          </Badge>
         ),
       },
       {
         key: "document",
         header: "Document Type",
-        cell: (req) => (
-          <span className="text-base">
-            {req.documentType?.name ?? UNKNOWN_DOCUMENT}
-          </span>
-        ),
+        className: "min-w-48 max-w-xs",
+        cell: (req) => {
+          const docName = req.documentType?.name ?? UNKNOWN_DOCUMENT;
+          const purpose = req.purpose ?? "Document request";
+          return (
+            <div className="flex min-w-0 flex-col">
+              <TruncatedText
+                text={docName}
+                className="font-medium text-foreground max-w-52"
+              />
+              <TruncatedText
+                text={purpose}
+                className="text-xs text-muted-foreground max-w-52"
+              />
+            </div>
+          );
+        },
       },
       {
         key: "date",
         header: "Date",
+        className: "w-32",
         cell: (req) => (
-          <span className="text-base">
+          <span className="text-sm text-muted-foreground">
             {req.createdAt
               ? new Date(req.createdAt).toLocaleDateString("en-US")
               : "—"}
@@ -85,21 +150,8 @@ export default function AdministrationRequestTable() {
       {
         key: "status",
         header: "Status",
-        cell: (req) => {
-          const config = REQUEST_STATUS_CONFIG[req.status];
-          const Icon = config?.icon;
-          return (
-            <Badge
-              variant="outline"
-              className={`gap-1.5 px-3 py-1 text-sm font-medium capitalize ${
-                statusStyles[req.status] ?? ""
-              }`}
-            >
-              {Icon && <Icon className="size-3.5" aria-hidden="true" />}
-              {config?.label ?? req.status}
-            </Badge>
-          );
-        },
+        className: "w-32",
+        cell: (req) => <RequestStatusBadge status={req.status} />,
       },
     ],
     [],
