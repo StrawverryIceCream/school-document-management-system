@@ -864,19 +864,39 @@ export async function getRoutingSteps(req: Request, res: Response) {
     const sessionUserId = getSessionUserId(req);
     if (!sessionUserId) return res.status(401).json({ error: "Unauthorized" });
 
+    const staffUser = await db.query.users.findFirst({
+      where: eq(users.id, sessionUserId),
+      columns: { id: true, role: true, officeId: true },
+    });
+    if (!staffUser || (staffUser.role !== "admin" && staffUser.role !== "staff")) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     const statusFilter = (req.query.status as string) || "pending";
     const officeCode = req.query.officeCode as string | undefined;
 
     let targetOfficeIds: string[] = [];
-    if (officeCode) {
-      targetOfficeIds = await getDescendantOfficeIds(officeCode);
+
+    if (staffUser.role === "admin") {
+      if (officeCode && officeCode !== "ALL") {
+        targetOfficeIds = await getDescendantOfficeIds(officeCode);
+      }
     } else {
-      const staffUser = await db.query.users.findFirst({
-        where: eq(users.id, sessionUserId),
-        columns: { officeId: true },
-      });
-      if (staffUser?.officeId) {
-        targetOfficeIds = [staffUser.officeId];
+      if (!staffUser.officeId) {
+        return res.status(403).json({ error: "Staff member has no assigned office" });
+      }
+
+      const coveredOfficeIds = await getDescendantOfficeIds(staffUser.officeId);
+
+      if (officeCode && officeCode !== "ALL") {
+        const requestedIds = await getDescendantOfficeIds(officeCode);
+        const matchedIds = requestedIds.filter((id) => coveredOfficeIds.includes(id));
+        if (matchedIds.length === 0) {
+          return res.status(403).json({ error: "Unauthorized for requested office" });
+        }
+        targetOfficeIds = matchedIds;
+      } else {
+        targetOfficeIds = coveredOfficeIds;
       }
     }
 

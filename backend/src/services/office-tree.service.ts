@@ -39,10 +39,18 @@ export function invalidateOfficeTreeCache(): void {
   lastCacheTime = 0;
 }
 
-export async function getDescendantOfficeIds(officeId: string): Promise<string[]> {
+export async function getDescendantOfficeIds(idOrCode: string): Promise<string[]> {
   const allOffices = await loadOfficesCache();
-  const result: string[] = [officeId];
-  const queue: string[] = [officeId];
+  const rootOffice = allOffices.find(
+    (o) => o.id === idOrCode || o.code.toUpperCase() === idOrCode.toUpperCase()
+  );
+  if (!rootOffice) {
+    return [];
+  }
+
+  const rootId = rootOffice.id;
+  const result: string[] = [rootId];
+  const queue: string[] = [rootId];
 
   while (queue.length > 0) {
     const currentId = queue.shift()!;

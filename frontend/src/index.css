@@ -21,7 +21,7 @@
   --secondary-foreground: #663500;
   --muted: #ece8e1;
   --muted-foreground: #574142;
-  --accent: #da4430;
+  --accent: rgb(204, 105, 105)
   --accent-foreground: #5bc9bc;
   --destructive: #ba1a1a;
   --destructive-foreground: #ffffff;
