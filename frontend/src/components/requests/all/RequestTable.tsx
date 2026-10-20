@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
-import { Eye, FileText, UserRound } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Eye, FileText } from "lucide-react";
+import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
+import TruncatedText from "@/components/shared/TruncatedText";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import RequestDetailsDialog from "./RequestDetailsDialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useRequests } from "@/hooks/useRequest";
-import { statusStyles } from "@/lib/requests";
+import { getInitials } from "@/lib/profile";
 import type { RequestRow } from "@/context/DashboardContext";
 
 export default function RequestTable() {
@@ -28,32 +31,46 @@ export default function RequestTable() {
       {
         key: "id",
         header: "ID",
-        className: "w-24",
-        cell: (req) => <span className="font-mono text-sm">#{req.id}</span>,
+        className: "w-36",
+        cell: (req) => (
+          <CopyableId
+            id={req.id}
+            displayValue={`#${req.id}`}
+            label={`Copy request #${req.id}`}
+          />
+        ),
       },
       {
         key: "applicant",
         header: "Applicant",
-        className: "min-w-45",
+        className: "min-w-56 max-w-xs",
         cell: (req) => (
-          <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <UserRound className="size-4" />
-            </div>
-            <div>
+          <div className="flex items-center gap-3">
+            <Avatar className="size-9 shrink-0">
+              <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
+                {getInitials(req.applicant)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col">
               {req.userId ? (
                 <ProfileTrigger userId={req.userId}>
                   <button
                     type="button"
-                    className="text-left font-medium text-foreground hover:underline"
+                    className="truncate text-left font-semibold text-foreground hover:underline"
                   >
-                    {req.applicant}
+                    <TruncatedText
+                      text={req.applicant}
+                      className="font-semibold text-foreground max-w-40"
+                    />
                   </button>
                 </ProfileTrigger>
               ) : (
-                <p className="font-medium text-foreground">{req.applicant}</p>
+                <TruncatedText
+                  text={req.applicant}
+                  className="font-semibold text-foreground max-w-40"
+                />
               )}
-              <p className="text-xs text-muted-foreground">Student</p>
+              <span className="text-xs text-muted-foreground">Student</span>
             </div>
           </div>
         ),
@@ -61,43 +78,44 @@ export default function RequestTable() {
       {
         key: "document",
         header: "Document",
-        className: "min-w-45",
+        className: "min-w-48 max-w-xs",
         cell: (req) => (
-          <div className="flex items-center gap-2">
-            <FileText className="size-4 text-muted-foreground" />
-            <span>{req.document}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <FileText className="size-4 shrink-0 text-muted-foreground" />
+            <TruncatedText
+              text={req.document}
+              className="font-medium text-foreground max-w-52"
+            />
           </div>
         ),
       },
       {
         key: "window",
         header: "Window",
-        className: "min-w-35",
-        cell: (req) => req.course ?? "Not available",
+        className: "w-36",
+        cell: (req) => (
+          <TruncatedText
+            text={req.course ?? "Not available"}
+            className="text-sm text-muted-foreground max-w-32"
+          />
+        ),
       },
       {
         key: "submitted",
         header: "Submitted",
-        className: "min-w-35",
+        className: "w-32 text-sm text-muted-foreground",
         cell: (req) => req.submittedAt ?? "Not available",
       },
       {
         key: "status",
         header: "Status",
         className: "w-32",
-        cell: (req) => (
-          <Badge
-            variant="outline"
-            className={`capitalize ${statusStyles[req.status] ?? ""}`}
-          >
-            {req.status}
-          </Badge>
-        ),
+        cell: (req) => <RequestStatusBadge status={req.status} />,
       },
       {
         key: "actions",
         header: "Action",
-        className: "w-24 text-right",
+        className: "w-20 text-right",
         headerClassName: "text-right",
         cell: (req) => (
           <Button
