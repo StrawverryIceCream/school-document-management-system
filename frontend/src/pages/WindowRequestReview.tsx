@@ -36,6 +36,7 @@ function WindowRequestReview() {
     data: ReviewData | null;
   }>({ id: null, loading: true, error: null, data: null });
   const [releaseDate, setReleaseDate] = useState("");
+  const [releasePdfUrl, setReleasePdfUrl] = useState("");
   const [staffNotes, setStaffNotes] = useState("");
   const [pendingAction, setPendingAction] = useState<RequestStatus | null>(
     null,
@@ -65,6 +66,7 @@ function WindowRequestReview() {
         if (cancelled) return;
         setReviewData({ id: requestId, loading: false, error: null, data });
         setReleaseDate(data.request.releaseDate ?? "");
+        setReleasePdfUrl(data.request.releasePdfUrl ?? "");
         setStaffNotes(data.request.internalNotes ?? "");
       })
       .catch((err: unknown) => {
@@ -202,6 +204,10 @@ function WindowRequestReview() {
     try {
       await updateRequestStatus(requestId, pendingAction, {
         releaseDate: pendingAction === "ready" ? releaseDate : undefined,
+        releasePdfUrl:
+          pendingAction === "ready" && releasePdfUrl.trim()
+            ? releasePdfUrl.trim()
+            : undefined,
         staffNotes: staffNotes.trim() || null,
       });
       setPendingAction(null);
@@ -211,6 +217,7 @@ function WindowRequestReview() {
         const data = await fetchReviewData(requestId);
         setReviewData({ id: requestId, loading: false, error: null, data });
         setReleaseDate(data.request.releaseDate ?? "");
+        setReleasePdfUrl(data.request.releasePdfUrl ?? "");
         setStaffNotes(data.request.internalNotes ?? "");
         await refreshRequests();
       } catch (err) {
@@ -349,6 +356,8 @@ function WindowRequestReview() {
             statusLabel={statusConfig.label}
             releaseDate={releaseDate}
             onReleaseDateChange={setReleaseDate}
+            releasePdfUrl={releasePdfUrl}
+            onReleasePdfUrlChange={setReleasePdfUrl}
             staffNotes={staffNotes}
             onStaffNotesChange={setStaffNotes}
             processingRequiresPayment={processingRequiresPayment}

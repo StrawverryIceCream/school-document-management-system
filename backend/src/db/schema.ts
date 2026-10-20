@@ -63,6 +63,13 @@ export const userCategoryEnum = pgEnum("user_category", [
   "staff",
 ]);
 
+export const studentStatusEnum = pgEnum("student_status", [
+  "regular",
+  "irregular",
+  "graduating",
+  "alumni",
+]);
+
 export const officeEnum = pgEnum("office", ["registrar", "hr"]);
 
 export const requestStatusEnum = pgEnum("request_status", [
@@ -147,6 +154,7 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     passwordHash: text("password_hash").notNull(),
     role: userRoleEnum("role").notNull().default("student"),
+    studentStatus: studentStatusEnum("student_status"),
     isActive: boolean("is_active").notNull().default(true),
     contactNumber: text("contact_number"),
     collegeId: uuid("college_id").references(() => colleges.id),
@@ -182,6 +190,10 @@ export const users = pgTable(
     check(
       "users_year_level_students_only",
       sql`${table.yearLevel} IS NULL OR (${table.role} = 'student' AND ${table.yearLevel} BETWEEN 1 AND 6)`,
+    ),
+    check(
+      "users_student_status_allowed_roles",
+      sql`${table.studentStatus} IS NULL OR ${table.role} IN ('student', 'admin')`,
     ),
     // Departments belong to teachers and admins
     check(
@@ -349,6 +361,7 @@ export const documentRequests = pgTable(
     processedAt: tz("processed_at"),
     readyAt: tz("ready_at"),
     releaseDate: date("release_date"),
+    releasePdfUrl: text("release_pdf_url"),
 
     // Claiming
     claimedAt: tz("claimed_at"),

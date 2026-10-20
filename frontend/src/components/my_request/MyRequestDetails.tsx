@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -100,6 +101,22 @@ function MyRequestDetails({
             <span className="text-muted-foreground">Release Date</span>
             <span className="font-medium">{request.releaseDate ?? "—"}</span>
           </div>
+          {request.releasePdfUrl && (
+            <div className="grid gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
+              <span className="text-sm font-semibold text-primary">Official Document</span>
+              <div>
+                <a
+                  href={request.releasePdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+                >
+                  <Download className="size-3.5" />
+                  Download Released PDF
+                </a>
+              </div>
+            </div>
+          )}
           <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
             <span className="text-muted-foreground">Student ID</span>
             <span className="font-medium">

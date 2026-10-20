@@ -1,29 +1,40 @@
-# School Document Management System
+# ARCH School Document Management System
 
-A web-based system that lets students and teachers request school-issued documents (e.g. Transcript of Records, Certificate of Registration, True Copy of Grades) online — instead of lining up at the registrar's office — with online payment, digital receipts, and status notifications when documents are ready for release.
+A web-based credential request and lifecycle management platform for university registrars and academic institutions (modeled on TUP Manila). The system streamlines document requests (Transcript of Records, Certificate of Registration, True Copy of Grades, Honorable Dismissal, Clearances), replacing long registrar lines with self-service ordering, email OTP verification, payment proof validation, and hybrid document release (in-person window pickup or optional digital PDF download).
 
-## Overview
-
-Students and teachers submit document requests through a portal, fill out any additional information required for that specific document type, pay online, and track their request status until it's ready for pickup. Registrar staff manage incoming requests, configure document types, and organize the workflow from a dedicated admin interface.
+---
 
 ## Tech Stack
 
-- **PostgreSQL** — database
-- **Express** — backend API
-- **React** — frontend
-- **Node.js** — runtime
-- **Drizzle ORM** — database schema and queries
-- **TypeScript**
-- **Tailwind CSS + shadcn/ui** — styling and components
+- **Backend:** Node.js, Express 5, TypeScript, `tsx`
+- **Database & ORM:** PostgreSQL (Neon Serverless with WebSocket pool), Drizzle ORM, Drizzle Kit
+- **Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS v4, Radix UI / shadcn/ui, Lucide Icons, Sonner
+- **Session & Security:** `express-session` (HTTP-only secure cookies), `bcrypt`, Node.js `crypto`
+- **File Storage:** Cloudinary via `multer` (payment slips & requirement attachments)
+- **Email Delivery:** Nodemailer (6-digit registration OTP & status alerts, with local dev console fallback)
+
+---
+
+## Role-Based Access Control (RBAC)
+
+The system enforces strict multi-role separation across both database constraints and frontend routing:
+
+- **Student:** Current students (`regular`, `irregular`, `graduating`) and former students (`alumni`). Request documents, track status, upload clearance attachments and payment proofs.
+- **Teacher / Faculty:** Request employment certificates, service records, and teaching load clearances.
+- **Registrar / HR Staff:** Manage incoming request queues, verify payment proofs, assign pickup windows, upload approved digital PDFs, and mark requests as ready or claimed.
+- **Administrator:** Manage document catalogs, fee rules, colleges, degree programs, user accounts, and review audit logs.
+
+---
 
 ## Prerequisites
 
-Before setting up the project, ensure you have the following installed:
-
+Before starting, ensure you have the following installed:
 - **Node.js** (v18 or higher) — [Download](https://nodejs.org/)
-- **npm** or **yarn** — package manager (comes with Node.js)
-- **PostgreSQL** (v14 or higher) — [Download](https://www.postgresql.org/download/)
+- **npm** (comes with Node.js)
 - **Git** — for version control
+- Neon PostgreSQL connection string (or local PostgreSQL v14+)
+
+---
 
 ## Getting Started
 
@@ -36,200 +47,175 @@ cd school-document-management-system
 
 ### 2. Install Dependencies
 
-Install dependencies for both the frontend and backend:
+Install dependencies for both backend and frontend:
 
 ```bash
-# Install backend dependencies
+# Backend dependencies
 cd backend
 npm install
 
-# Install frontend dependencies
+# Frontend dependencies
 cd ../frontend
 npm install
+cd ..
 ```
 
 ### 3. Environment Configuration
 
-Copy the example environment file in the `backend` directory:
+Copy the backend environment template:
 
-```bash
-cd backend
-cp .env.example .env
-```
-
-On Windows (PowerShell):
+**Windows (PowerShell):**
 ```powershell
 cd backend
 copy .env.example .env
 ```
 
-Edit `backend/.env` and configure the following:
-
-```env
-DATABASE_URL=postgresql://username:password@host:5432/database?sslmode=require
-SESSION_SECRET=replace_with_a_secure_random_secret
-PORT=5000
-CLIENT_ORIGIN=http://localhost:5173
-```
-
-**Configuration steps:**
-
-1. **DATABASE_URL** — In our Group chat(ask there)
-  
-2. **SESSION_SECRET** — Generate a secure random secret:
-   ```bash
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
-
-3. **PORT** — Backend server port (default: 5000)
-
-4. **CLIENT_ORIGIN** — Frontend URL (default: http://localhost:5173)
-
-### 4. Generate Drizzle ORM Configuration
-
-Generate the Drizzle client for database queries:
-
+**macOS / Linux:**
 ```bash
 cd backend
-npm run db:generate
+cp .env.example .env
 ```
 
-### 5. Start the Development Servers
+Edit `backend/.env` with your credentials:
 
-Open two terminal windows:
+```env
+# Server & Client Configuration
+PORT=5000
+CLIENT_ORIGIN=http://localhost:5173
+SESSION_SECRET=replace_with_a_secure_random_secret
 
-**Terminal 1 — Start the backend server:**
+# Neon PostgreSQL Database
+DATABASE_URL=postgresql://username:password@host:5432/database?sslmode=require
+
+# Cloudinary Storage (for payment proofs and attachments)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# SMTP Mail Server (Leave empty to log OTPs to the backend terminal in dev mode)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM="ARCH Support <noreply@arch.edu>"
+```
+
+> **Tip:** Generate a secure session secret using:
+> ```bash
+> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> ```
+
+---
+
+## Running the Development Servers
+
+Open two terminal windows from the repository root:
+
+**Terminal 1 — Backend API Server:**
 ```bash
 cd backend
 npm run dev
 ```
+*Backend runs on: `http://localhost:5000`*
 
-**Terminal 2 — Start the frontend:**
+**Terminal 2 — Frontend Client:**
 ```bash
 cd frontend
 npm run dev
 ```
+*Frontend runs on: `http://localhost:5173` (Vite dev proxy forwards `/api` to port 5000)*
 
-The application should now be running at:
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:5000
+---
+
+## Available Scripts
+
+### Backend (`/backend`)
+| Script | Command | Description |
+| :--- | :--- | :--- |
+| `npm run dev` | `tsx watch src/server.ts` | Starts development server with live reload. |
+| `npm run build` | `tsc` | Compiles TypeScript to `dist/`. |
+| `npm start` | `node dist/server.js` | Runs production build. |
+| `npm run db:generate` | `drizzle-kit generate` | Generates Drizzle migration files from schema. |
+| `npm run db:migrate` | `tsx src/migrate.ts` | Executes pending migrations against database. |
+
+### Frontend (`/frontend`)
+| Script | Command | Description |
+| :--- | :--- | :--- |
+| `npm run dev` | `vite` | Starts Vite development server with HMR. |
+| `npm run build` | `tsc -b && vite build` | Type-checks and creates production bundle in `dist/`. |
+| `npm run lint` | `eslint .` | Runs ESLint rules. |
+| `npm run preview` | `vite preview` | Previews production build locally. |
+
+---
 
 ## Project Structure
 
 ```
 school-document-management-system/
-├── backend/                    # Express backend
-│   ├── src/                   # Source code
-│   │   ├── routes/           # API route handlers
-│   │   ├── db/               # Database schema and connection
-│   │   └── index.ts          # Server entry point
-│   ├── drizzle/              # Drizzle ORM generated files
-│   ├── .env                  # Environment variables (YOU create this)
-│   ├── .env.example          # Environment template
+├── backend/
+│   ├── src/
+│   │   ├── controllers/      # Route controllers (auth, requests, payments, logs, etc.)
+│   │   ├── db/
+│   │   │   ├── db.ts         # Neon Serverless + Drizzle client instance
+│   │   │   └── schema.ts     # PostgreSQL schema, check constraints, and relations
+│   │   ├── middleware/       # Session guards (requireAuth, requireRoles), multer upload
+│   │   ├── routes/           # Domain REST routers (/api/auth, /api/requests, etc.)
+│   │   ├── services/         # Storage (Cloudinary), Email (Nodemailer), Audit services
+│   │   ├── migrate.ts        # Migration execution script
+│   │   └── server.ts         # Express server entry point & middleware pipeline
+│   ├── drizzle/              # Generated SQL migrations
+│   ├── .env.example          # Backend environment template
 │   └── package.json
 │
-├── frontend/                  # React frontend
-│   ├── src/                  # Source code
-│   │   ├── components/       # React components
-│   │   ├── pages/            # Page components
-│   │   ├── hooks/            # Custom React hooks
-│   │   └── lib/              # Utilities and helpers
-│   ├── public/               # Static assets
+├── frontend/
+│   ├── src/
+│   │   ├── api/              # Typed client API callers
+│   │   ├── components/       # Reusable UI primitives (shadcn/ui) and feature modals
+│   │   ├── context/          # Shared context providers (Auth, Requests, Documents)
+│   │   ├── hooks/            # Custom React hooks (useAuth, useMobile)
+│   │   ├── lib/              # Client utilities, tone maps, registration constants
+│   │   ├── pages/            # View pages (Home, NewRequest, MyRequest, Windows, Accounts, Logs)
+│   │   ├── types/            # TypeScript interfaces mirroring backend schema
+│   │   ├── App.tsx           # Client router & protected route layout
+│   │   └── main.tsx          # React application root
+│   ├── vite.config.ts        # Vite configuration with API reverse proxy
 │   └── package.json
 │
+├── docs/
+│   ├── architecture.md       # Full system architecture and ER diagrams
+│   └── plans/                # PRD and feature design documents
 └── README.md
 ```
 
-## ⚠️ IMPORTANT — DO NOT DO THESE
+---
 
-Read this carefully before making any changes:
+## Important Development Guidelines
 
-### Database Commands — DO NOT RUN
+1. **Database Schema Safety:**
+   - The team shares a central database. Coordinate with the team before modifying `backend/src/db/schema.ts` or running `npm run db:migrate`.
+2. **File Placement Conventions:**
+   - Put backend business logic in `backend/src/controllers/` or `backend/src/services/`.
+   - Put new frontend route views in `frontend/src/pages/` and reusable widgets in `frontend/src/components/`.
+3. **Environment Security:**
+   - Never commit `.env` files or hardcode secrets into the codebase.
+   - If SMTP credentials are omitted, OTPs will safely print to the backend terminal console for easy local testing.
 
-**NEVER run these commands unless explicitly told by your instructor:**
-
-```bash
-# ❌ DO NOT RUN
-npm run db:push
-npm run db:migrate
-npm run db:drop
-npm run db:reset
-```
-
-**Why?** The database schema is already set up and shared across the team. Running migrations will modify the database structure and break everyone else's setup.
-
-### File Placement — PUT FILES IN THE RIGHT PLACE
-
-- **Backend code** → Always goes in `backend/src/`
-- **Frontend components** → Always goes in `frontend/src/components/`
-- **API routes** → Always goes in `backend/src/routes/`
-- **React pages** → Always goes in `frontend/src/pages/`
-
-**DO NOT:**
-- Create files in the root directory
-- Mix frontend and backend code
-- Create new top-level folders without team discussion
-
-### Environment Files — NEVER COMMIT SECRETS
-
-**DO NOT:**
-- Commit your `.env` file to git (it's already in `.gitignore`)
-- Share your `SESSION_SECRET` publicly
-- Push database credentials to the repository
-- Modify `.env.example` with real credentials
-
-**DO:**
-- Keep your `.env` file local only
-- Use the `.env.example` as a template
-- Ask for the `DATABASE_URL` in the group chat
-
-### Code Changes — ASK BEFORE MAJOR CHANGES
-
-**DO NOT make these changes without team discussion:**
-- Modify database schema files in `backend/src/db/`
-- Change authentication logic
-- Add new npm packages without discussing
-- Modify environment variable names in `.env.example`
-- Change API endpoint URLs or port numbers
-
-### Git Workflow — PROTECT THE MAIN BRANCH
-
-**DO NOT:**
-- Push directly to `main` branch
-- Force push (`git push -f`) to any shared branch
-- Commit `node_modules/` or `.env` files
-
-**DO:**
-- Create a feature branch for your work
-- Write clear commit messages
-- Pull latest changes before starting work
-- Review your changes before committing
+---
 
 ## Troubleshooting
 
-**Port already in use:**
-```bash
-# Check what's using the port
-netstat -ano | findstr :5000
-netstat -ano | findstr :5173
-
-# Kill the process or change the PORT in backend/.env
-```
-
-**Database connection failed:**
-- Verify your `DATABASE_URL` is correct
-- Check that PostgreSQL is running
-- Confirm the database exists
-- Ask for the correct connection string in the group chat
-
-**Module not found errors:**
-```bash
-# Delete node_modules and reinstall
-cd backend
-rm -rf node_modules package-lock.json
-npm install
-
-cd ../frontend
-rm -rf node_modules package-lock.json
-npm install
-```
+- **Port in use (`5000` or `5173`):**
+  ```powershell
+  # Windows
+  netstat -ano | findstr :5000
+  netstat -ano | findstr :5173
+  ```
+- **Database Connection Error:**
+  - Verify that `DATABASE_URL` in `backend/.env` is valid and includes `?sslmode=require`.
+- **Node Modules Reset:**
+  ```bash
+  # Backend
+  cd backend && rm -rf node_modules package-lock.json && npm install
+  # Frontend
+  cd ../frontend && rm -rf node_modules package-lock.json && npm install
+  ```

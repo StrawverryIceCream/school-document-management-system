@@ -28,6 +28,7 @@ interface SignupBody {
   fullName: string;
   role: UserRole;
   studentId?: string;
+  studentStatus?: "regular" | "irregular" | "graduating" | "alumni";
   college?: string;
   course?: string;
   collegeId?: string;
@@ -47,6 +48,7 @@ function toAuthUser(user: DbUser) {
     email: user.email,
     fullName: user.fullName,
     role: user.role,
+    studentStatus: user.studentStatus,
     college: user.collegeId,
     course: user.courseId,
     collegeId: user.collegeId,
@@ -168,6 +170,11 @@ export const signup = async (
     const { email, password, role } = body;
     const fullName = cleanText(body.fullName);
     const studentId = cleanText(body.studentId);
+    const rawStudentStatus = cleanText(body.studentStatus);
+    const validStudentStatuses = ["regular", "irregular", "graduating", "alumni"] as const;
+    const studentStatus = validStudentStatuses.includes(rawStudentStatus as any)
+      ? (rawStudentStatus as (typeof validStudentStatuses)[number])
+      : undefined;
     const effectiveCollegeId = cleanText(body.collegeId) || cleanText(body.college);
     const effectiveCourseId = cleanText(body.courseId) || cleanText(body.course);
     const section = cleanText(body.section);
@@ -179,6 +186,7 @@ export const signup = async (
         ? parseInt(String(rawYearLevel), 10)
         : undefined;
     const otp = cleanText(body.otp);
+    const isAlumni = role === "student" && studentStatus === "alumni";
 
     if (
       typeof email !== "string" ||
@@ -213,6 +221,7 @@ export const signup = async (
           .json({ error: "College and degree program are required for students" });
       }
       if (
+        !isAlumni &&
         yearLevel !== undefined &&
         (isNaN(yearLevel) || yearLevel < 1 || yearLevel > 6)
       ) {
@@ -345,7 +354,8 @@ export const signup = async (
           ? {
               collegeId: finalCollegeId,
               courseId: finalCourseId,
-              ...(yearLevel ? { yearLevel } : {}),
+              studentStatus: studentStatus ?? "regular",
+              ...(!isAlumni && yearLevel ? { yearLevel } : {}),
             }
           : {}),
         emailVerifiedAt: new Date(),

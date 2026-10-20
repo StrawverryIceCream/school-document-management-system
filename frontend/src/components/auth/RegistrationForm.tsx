@@ -118,6 +118,7 @@ export default function RegistrationForm() {
         password,
         fullName,
         role,
+        studentStatus: role === "student" ? studentStatus : undefined,
         collegeId: role === "student" ? collegeId : undefined,
         courseId: role === "student" ? courseId : undefined,
         yearLevel: role === "student" ? yearLevel : undefined,

@@ -19,6 +19,14 @@ export type DecimalString = string;
 export const userRoles = ["student", "teacher", "admin", "staff"] as const;
 export type UserRole = (typeof userRoles)[number];
 
+export const studentStatuses = [
+  "regular",
+  "irregular",
+  "graduating",
+  "alumni",
+] as const;
+export type StudentStatus = (typeof studentStatuses)[number];
+
 export const userCategories = ["student", "teacher", "staff"] as const;
 export type UserCategory = (typeof userCategories)[number];
 
@@ -200,6 +208,7 @@ export interface User extends Timestamps {
   fullName: string;
   email: string;
   role: UserRole;
+  studentStatus: StudentStatus | null;
   isActive: boolean;
   contactNumber: string | null;
   collegeId: UUID | null;
@@ -327,6 +336,7 @@ export interface DocumentRequest extends Timestamps {
   processedAt: ISODateTimeString | null;
   readyAt: ISODateTimeString | null;
   releaseDate: ISODateString | null;
+  releasePdfUrl: string | null;
 
   // Claiming
   claimedAt: ISODateTimeString | null;

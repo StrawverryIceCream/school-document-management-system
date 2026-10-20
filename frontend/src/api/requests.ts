@@ -60,6 +60,7 @@ export interface UpdateRequestStatusPayload {
   status: RequestStatus;
   // YYYY-MM-DD, required by the backend when status is "ready"
   releaseDate?: string | null;
+  releasePdfUrl?: string | null;
   staffNotes?: string | null;
 }
 

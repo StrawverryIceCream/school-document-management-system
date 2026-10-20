@@ -20,6 +20,8 @@ export function RegistrarReviewCard({
   statusLabel,
   releaseDate,
   onReleaseDateChange,
+  releasePdfUrl = "",
+  onReleasePdfUrlChange,
   staffNotes,
   onStaffNotesChange,
   processingRequiresPayment,
@@ -31,6 +33,8 @@ export function RegistrarReviewCard({
   statusLabel: string;
   releaseDate: string;
   onReleaseDateChange: (value: string) => void;
+  releasePdfUrl?: string;
+  onReleasePdfUrlChange?: (value: string) => void;
   staffNotes: string;
   onStaffNotesChange: (value: string) => void;
   processingRequiresPayment: boolean;
@@ -51,21 +55,40 @@ export function RegistrarReviewCard({
         {actions.length > 0 ? (
           <>
             {actions.some((action) => action.status === "ready") && (
-              <div className="space-y-2">
-                <Label htmlFor="release-date">Release date</Label>
-                <Input
-                  id="release-date"
-                  type="date"
-                  value={releaseDate}
-                  onChange={(event) =>
-                    onReleaseDateChange(event.currentTarget.value)
-                  }
-                  aria-required="true"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Required by the API before this request can be marked ready.
-                </p>
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="release-date">Release date</Label>
+                  <Input
+                    id="release-date"
+                    type="date"
+                    value={releaseDate}
+                    onChange={(event) =>
+                      onReleaseDateChange(event.currentTarget.value)
+                    }
+                    aria-required="true"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Required by the API before this request can be marked ready.
+                  </p>
+                </div>
+                {onReleasePdfUrlChange && (
+                  <div className="space-y-2">
+                    <Label htmlFor="release-pdf-url">Digital PDF Release URL (Optional)</Label>
+                    <Input
+                      id="release-pdf-url"
+                      type="url"
+                      placeholder="https://... (Cloudinary or approved document link)"
+                      value={releasePdfUrl}
+                      onChange={(event) =>
+                        onReleasePdfUrlChange(event.currentTarget.value)
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      If provided, student can download the official PDF from their portal.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="space-y-2">

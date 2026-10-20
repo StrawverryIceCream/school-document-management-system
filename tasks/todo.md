@@ -1,13 +1,10 @@
-# Task List: Email OTP for User Signup
+# Implementation Plan: PRD Milestone Execution
 
-## Phase 1: Foundation (Backend Schema & Mailer)
-- [x] Task 1: Add `email_verifications` table in `backend/src/db/schema.ts` and generate migration.
-- [x] Task 2: Create lightweight email transport service (`backend/src/services/email.service.ts`) with dev console fallback.
+## Batch 1: Schema, Auth Sync & Documentation Modernization
+- [x] Task 1: Database Schema Update (Add `student_status` enum/column to `users` and `release_pdf_url` to `document_requests`).
+- [x] Task 2: Auth Controller & Registration Form Sync (Persist `studentStatus`, allow personal emails for alumni, update client API and types).
+- [x] Task 3: Modernize & Clean `README.md` (Rewrite outdated entry point, scripts, tech stack, and `.env` template).
 
-## Phase 2: Core OTP Endpoints (Backend API)
-- [x] Task 3: Implement `POST /api/auth/send-otp` in `backend/src/controllers/auth.controller.ts` with 60s cooldown.
-- [x] Task 4: Require and verify OTP in `POST /api/auth/signup` and set `emailVerifiedAt`.
-
-## Phase 3: Frontend Integration
-- [x] Task 5: Add OTP auth client methods in `frontend/src/api/auth.ts`.
-- [x] Task 6: Build `OtpVerificationModal` and wire into `RegistrationForm.tsx`.
+## Batch 2: Hybrid Release & Notification Automation
+- [x] Task 4: Hybrid PDF Release Workflow (Allow staff to attach completed PDF URL when marking ready; render download in `MyRequest`).
+- [x] Task 5: Status Change Email Notifications (Wire `email.service.ts` into request status transitions).

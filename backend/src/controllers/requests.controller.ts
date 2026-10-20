@@ -10,6 +10,7 @@ import {
   users,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
+import { sendStatusNotificationEmail } from "../services/email.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -73,6 +74,7 @@ interface UpdateStatusBody {
   status?: unknown;
   releaseDate?: unknown;
   staffNotes?: unknown;
+  releasePdfUrl?: unknown;
 }
 
 function getSessionUserId(req: Pick<Request, "session">): string | undefined {
@@ -347,7 +349,7 @@ export async function updateRequestStatus(
     if (!staffId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
-    const { status, releaseDate, staffNotes } = (req.body ??
+    const { status, releaseDate, staffNotes, releasePdfUrl } = (req.body ??
       {}) as UpdateStatusBody;
 
     if (!isRequestStatus(status)) {
@@ -382,6 +384,7 @@ export async function updateRequestStatus(
       with: {
         documentType: { columns: { name: true, fee: true } },
         payments: { columns: { id: true } },
+        user: { columns: { email: true, fullName: true } },
       },
     });
 
@@ -419,6 +422,9 @@ export async function updateRequestStatus(
     const updates: Partial<typeof documentRequests.$inferInsert> = { status };
 
     if (typeof releaseDate === "string") updates.releaseDate = releaseDate;
+    if (typeof releasePdfUrl === "string") {
+      updates.releasePdfUrl = releasePdfUrl.trim() || null;
+    }
     if (typeof staffNotes === "string") {
       updates.internalNotes = staffNotes.trim();
     }
@@ -476,6 +482,26 @@ export async function updateRequestStatus(
         documentTypeName: request.documentType?.name,
       },
     });
+
+    if (request.user?.email) {
+      void sendStatusNotificationEmail(
+        request.user.email,
+        request.user.fullName,
+        request.documentType.name,
+        request.referenceNumber,
+        status,
+        {
+          releaseDate: effectiveReleaseDate,
+          remarks: typeof staffNotes === "string" ? staffNotes.trim() : null,
+          releasePdfUrl:
+            typeof releasePdfUrl === "string"
+              ? releasePdfUrl.trim() || null
+              : request.releasePdfUrl ?? null,
+        },
+      ).catch((err) => {
+        console.error("[sendStatusNotificationEmail] error:", err);
+      });
+    }
 
     return res.json(updated);
   } catch (err) {

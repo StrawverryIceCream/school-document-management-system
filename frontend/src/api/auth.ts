@@ -15,6 +15,7 @@ export interface SignupPayload {
   yearLevel?: number;
   section?: string;
   studentId?: string;
+  studentStatus?: string;
   contactNumber?: string;
   role: UserRole;
   otp: string;
