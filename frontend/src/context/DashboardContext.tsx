@@ -7,22 +7,37 @@ export interface DashboardStats {
   ready: number;
   claimed: number;
   cancelled: number;
+  // Extended Operational KPIs from DashboardPage.html
+  immediateBacklog: number;
+  inProduction: number;
+  readyForRelease: number;
+  slaWarning: number;
+  totalRevenue: number;
+  settledTransactions: number;
+  efficiencyRate: number;
+  avgTurnaroundDays: number;
 }
 
 export interface RequestRow {
   id: string;
+  referenceNumber?: string;
   userId?: string;
   applicant: string;
+  studentId?: string | null;
   document: string;
   status: RequestStatus;
   submittedAt: string | null;
   releaseDate: string | null;
   claimedAt: string | null;
   purpose: string | null;
+  amountDue?: string;
+  processingDays?: number;
 
   college?: string | null;
+  collegeName?: string | null;
   course?: string | null;
   section?: string | null;
+  windowId?: string | null;
   paymentMethod?: "cash" | "online";
   feeRequired?: boolean;
 }

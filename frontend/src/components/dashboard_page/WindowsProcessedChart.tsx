@@ -15,12 +15,16 @@ import {
 } from "@/components/ui/chart";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getMonthKey, monthLabel } from "@/lib/dashboard";
-import type { RequestRow } from "@/context/DashboardContext"; 
+import { getRequestWindowForCollege } from "@/lib/windowRequests";
+import type { RequestRow } from "@/context/DashboardContext";
 
 const WINDOWS = [
-  { key: "window1", value: "Window 1", label: "Window 1", color: "var(--chart-1)" },
-  { key: "window2", value: "Window 2", label: "Window 2", color: "var(--chart-2)" },
-  { key: "window3", value: "Window 3", label: "Window 3", color: "#3b82f6" },
+  { key: "window1", label: "W1: COS", color: "var(--chart-1)" },
+  { key: "window2", label: "W2: COE", color: "var(--chart-2)" },
+  { key: "window3", label: "W3: CAFA", color: "var(--chart-3)" },
+  { key: "window4", label: "W4: CMMS", color: "var(--chart-4)" },
+  { key: "window5", label: "W5: CIT", color: "var(--chart-5)" },
+  { key: "window6", label: "W6: CIE", color: "#fe932c" },
 ];
 
 const chartConfig = Object.fromEntries(
@@ -33,12 +37,24 @@ interface MonthlyWindowCounts {
   [windowKey: string]: string | number;
 }
 
-function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] { 
+function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] {
   const counts = new Map<string, MonthlyWindowCounts>();
 
   for (const req of requests) {
-    const windowEntry = WINDOWS.find((w) => w.value === req.course);
-    if (!windowEntry || !req.submittedAt) continue; 
+    if (!req.submittedAt) continue;
+
+    const assignedWindow = getRequestWindowForCollege(req.college ?? req.collegeName);
+    let matchedKey = assignedWindow ? assignedWindow.replace("-", "") : undefined;
+
+    if (!matchedKey && req.windowId) {
+      const norm = req.windowId.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const found = WINDOWS.find((w) => w.key === norm);
+      if (found) matchedKey = found.key;
+    }
+
+    if (!matchedKey) {
+      matchedKey = "window1";
+    }
 
     const date = new Date(req.submittedAt);
     const monthKey = getMonthKey(date);
@@ -51,7 +67,7 @@ function buildMonthlyWindowData(requests: RequestRow[]): MonthlyWindowCounts[] {
         ...Object.fromEntries(WINDOWS.map((w) => [w.key, 0])),
       } as MonthlyWindowCounts);
 
-    existing[windowEntry.key] = (existing[windowEntry.key] as number) + 1;
+    existing[matchedKey] = ((existing[matchedKey] as number) || 0) + 1;
     counts.set(monthKey, existing);
   }
 
@@ -65,18 +81,20 @@ function WindowsProcessedChart() {
   const data = buildMonthlyWindowData(requests);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Requests by window</CardTitle>
-        <CardDescription>Requests processed per window, per month</CardDescription>
+    <Card className="rounded-xl border border-border/60 bg-card shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-bold">Requests by Counter Window</CardTitle>
+        <CardDescription>
+          Monthly volume processed across all 6 campus college counter windows
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-10 text-center">
-            No requests yet.
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            No requests processed yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig}>
+          <ChartContainer config={chartConfig} className="max-h-[300px] w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
@@ -92,4 +110,4 @@ function WindowsProcessedChart() {
   );
 }
 
-export default WindowsProcessedChart;
+export default WindowsProcessedChart;

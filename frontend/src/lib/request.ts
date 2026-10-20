@@ -144,20 +144,46 @@ export function normalizeRequestRow(
         ? "online"
         : undefined;
 
+  const rawForm =
+    raw.formData && typeof raw.formData === "object"
+      ? (raw.formData as Record<string, unknown>)
+      : undefined;
+
+  const userCollege = raw.user?.college?.code ?? raw.user?.college?.name;
+  const formCollege =
+    typeof rawForm?.college === "string" ? rawForm.college : undefined;
+  const college = userCollege ?? formCollege ?? undefined;
+  const collegeName =
+    raw.user?.college?.name ??
+    (typeof rawForm?.collegeName === "string" ? rawForm.collegeName : undefined);
+  const course =
+    raw.user?.department ??
+    (typeof rawForm?.course === "string" ? rawForm.course : undefined);
+  const section =
+    typeof rawForm?.section === "string" ? rawForm.section : undefined;
+  const windowId =
+    raw.window?.name ?? (raw.windowId ? String(raw.windowId) : undefined);
+
   return {
     id: String(raw.id),
+    referenceNumber: raw.referenceNumber,
     userId: raw.user?.id,
     applicant: raw.user?.fullName ?? "Unknown applicant",
-    document: raw.documentType?.name ?? "Unknown document",
+    studentId: raw.user?.studentId,
+    document: raw.documentType?.name ?? raw.documentTypeName ?? "Unknown document",
     status: raw.status,
     submittedAt: raw.createdAt ? new Date(raw.createdAt).toISOString() : null,
     releaseDate: raw.releaseDate,
     claimedAt: raw.claimedAt ? new Date(raw.claimedAt).toISOString() : null,
     purpose: raw.purpose,
+    amountDue: raw.amountDue ?? String(raw.documentType?.fee ?? "0"),
+    processingDays: raw.documentType?.processingDays ?? raw.turnaroundDays ?? 3,
     paymentMethod,
-    college: undefined, // not in the current schema
-    course: undefined,
-    section: undefined,
+    college,
+    collegeName,
+    course,
+    section,
+    windowId,
     feeRequired: raw.documentType
       ? Number(raw.documentType.fee) > 0
       : undefined,
