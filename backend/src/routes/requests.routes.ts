@@ -12,6 +12,9 @@ import {
   getRequestById,
   getWorkspaceQueue,
   updateRequestStatus,
+  getRoutingSteps,
+  approveRoutingStep,
+  flagDeficiencyRoutingStep,
 } from "../controllers/requests.controller.js";
 
 const router = Router();
@@ -25,6 +28,17 @@ router.patch("/me/:id/cancel", validateId, cancelMyRequest);
 router.post("/", createRequest);
 
 router.get("/workspace-queue", requireRoles("admin", "staff"), getWorkspaceQueue);
+router.get("/routing-steps", requireRoles("admin", "staff"), getRoutingSteps);
+router.post(
+  "/:id/steps/:stepId/approve",
+  requireRoles("admin", "staff"),
+  approveRoutingStep,
+);
+router.post(
+  "/:id/steps/:stepId/deficiency",
+  requireRoles("admin", "staff"),
+  flagDeficiencyRoutingStep,
+);
 router.get("/", requireRoles("admin", "staff"), getAllRequests);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getRequestById);
 router.patch(

@@ -14,6 +14,7 @@ import {
 import { recordAuditLog } from "../services/audit.service.js";
 import { sendStatusNotificationEmail } from "../services/email.service.js";
 import { getDescendantOfficeIds } from "../services/office-tree.service.js";
+import { completeRoutingStep } from "../services/routing.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -857,3 +858,94 @@ export async function getWorkspaceQueue(req: Request, res: Response) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function getRoutingSteps(req: Request, res: Response) {
+  try {
+    const sessionUserId = getSessionUserId(req);
+    if (!sessionUserId) return res.status(401).json({ error: "Unauthorized" });
+
+    const statusFilter = (req.query.status as string) || "pending";
+    const officeCode = req.query.officeCode as string | undefined;
+
+    let targetOfficeIds: string[] = [];
+    if (officeCode) {
+      targetOfficeIds = await getDescendantOfficeIds(officeCode);
+    } else {
+      const staffUser = await db.query.users.findFirst({
+        where: eq(users.id, sessionUserId),
+        columns: { officeId: true },
+      });
+      if (staffUser?.officeId) {
+        targetOfficeIds = [staffUser.officeId];
+      }
+    }
+
+    const whereConditions = [];
+    if (statusFilter && statusFilter !== "all") {
+      whereConditions.push(eq(requestRoutingSteps.status, statusFilter as any));
+    }
+    if (targetOfficeIds.length > 0) {
+      whereConditions.push(inArray(requestRoutingSteps.officeId, targetOfficeIds));
+    }
+
+    const steps = await db.query.requestRoutingSteps.findMany({
+      where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
+      with: {
+        office: true,
+        request: {
+          with: {
+            user: { columns: REQUESTER_COLUMNS },
+            documentType: true,
+          },
+        },
+      },
+      orderBy: (rs, { desc }) => [desc(rs.createdAt)],
+    });
+
+    return res.json({ items: steps });
+  } catch (err) {
+    console.error("[getRoutingSteps] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function approveRoutingStep(req: Request, res: Response) {
+  try {
+    const staffUserId = getSessionUserId(req);
+    const { stepId } = req.params;
+    const { remarks } = req.body || {};
+
+    const updated = await completeRoutingStep({
+      stepId,
+      status: "approved",
+      remarks,
+      staffUserId,
+    });
+
+    return res.json({ ok: true, step: updated });
+  } catch (err: any) {
+    console.error("[approveRoutingStep] error:", err);
+    return res.status(400).json({ error: err.message || "Failed to approve routing step" });
+  }
+}
+
+export async function flagDeficiencyRoutingStep(req: Request, res: Response) {
+  try {
+    const staffUserId = getSessionUserId(req);
+    const { stepId } = req.params;
+    const { remarks } = req.body || {};
+
+    const updated = await completeRoutingStep({
+      stepId,
+      status: "action_required",
+      remarks,
+      staffUserId,
+    });
+
+    return res.json({ ok: true, step: updated });
+  } catch (err: any) {
+    console.error("[flagDeficiencyRoutingStep] error:", err);
+    return res.status(400).json({ error: err.message || "Failed to flag deficiency" });
+  }
+}
+
