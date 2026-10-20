@@ -15,7 +15,7 @@ export default function AccountsOverview() {
       className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
     >
       {STAT_CONFIGS.map(
-        ({ key, label, caption, captionIcon, captionTone, icon, tone }) => (
+        ({ key, label, caption, icon, tone }) => (
           <StatCard
             key={key}
             label={label}
@@ -23,15 +23,7 @@ export default function AccountsOverview() {
             icon={icon}
             tone={tone}
             loading={loading}
-            tag={
-              caption
-                ? {
-                    label: caption,
-                    tone: captionTone ?? "neutral",
-                    icon: captionIcon ?? undefined,
-                  }
-                : undefined
-            }
+            subtext={caption}
           />
         ),
       )}
