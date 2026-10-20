@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
+import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import TruncatedText from "@/components/shared/TruncatedText";
+import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 import EditDocumentRow from "./EditDocumentRow";
 import EditDocument from "./EditDocument";
 import { useDocument } from "@/hooks/useDocument";
+import { cn } from "@/lib/utils";
 import type { DocumentType } from "@/types";
 
 export default function DocumentTable() {
@@ -22,26 +26,46 @@ export default function DocumentTable() {
       {
         key: "id",
         header: "ID",
-        className: "w-24",
-        cell: (doc) => <span className="font-medium">#{doc.id}</span>,
+        className: "w-36",
+        cell: (doc) => (
+          <CopyableId
+            id={doc.id}
+            displayValue={`#${doc.id}`}
+            label={`Copy document #${doc.id}`}
+          />
+        ),
       },
       {
         key: "code",
         header: "Code",
         className: "w-32",
-        accessor: "code",
+        cell: (doc) => (
+          <code className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-foreground">
+            {doc.code}
+          </code>
+        ),
       },
       {
         key: "name",
         header: "Name",
-        className: "max-w-48 truncate",
-        accessor: "name",
+        className: "min-w-44 max-w-xs",
+        cell: (doc) => (
+          <TruncatedText
+            text={doc.name}
+            className="font-semibold text-foreground max-w-48"
+          />
+        ),
       },
       {
         key: "description",
         header: "Description",
-        className: "max-w-64 truncate",
-        cell: (doc) => doc.description || "—",
+        className: "min-w-56 max-w-xs",
+        cell: (doc) => (
+          <TruncatedText
+            text={doc.description || "—"}
+            className="text-sm text-muted-foreground max-w-64"
+          />
+        ),
       },
       {
         key: "requiredFields",
@@ -54,23 +78,42 @@ export default function DocumentTable() {
       {
         key: "fee",
         header: "Fee",
-        className: "w-24 whitespace-nowrap",
-        cell: (doc) => `₱${doc.fee}`,
+        className: "w-28 whitespace-nowrap",
+        cell: (doc) => (
+          <span className="font-semibold text-foreground">
+            ₱{Number(doc.fee).toFixed(2)}
+          </span>
+        ),
       },
       {
         key: "status",
         header: "Status",
-        className: "w-28",
+        className: "w-32",
         cell: (doc) => (
-          <span className={doc.isActive ? "text-green-600" : "text-red-600"}>
+          <Badge
+            variant="secondary"
+            className={cn(
+              "gap-2 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
+              doc.isActive
+                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            <span
+              className={cn(
+                "size-1.5 rounded-full shrink-0",
+                doc.isActive ? "bg-emerald-600" : "bg-muted-foreground",
+              )}
+              aria-hidden="true"
+            />
             {doc.isActive ? "Active" : "Inactive"}
-          </span>
+          </Badge>
         ),
       },
       {
         key: "actions",
         header: "Action",
-        className: "w-24 text-right",
+        className: "w-20 text-right",
         headerClassName: "text-right",
         cell: (doc) => (
           <div className="flex justify-end">
@@ -86,13 +129,15 @@ export default function DocumentTable() {
   const pagedData = documents.slice((page - 1) * pageSize, page * pageSize);
 
   const customRow = (doc: DocumentType) => {
-    if (editingDocument?.toString() === doc.id) {
+    if (editingDocument?.toString() === doc.id?.toString()) {
       return (
         <TableRow
           key={doc.id}
           className={!doc.isActive ? "text-muted-foreground" : "align-middle"}
         >
-          <TableCell className="font-medium">#{doc.id}</TableCell>
+          <TableCell className="font-medium">
+            <CopyableId id={doc.id} displayValue={`#${doc.id}`} />
+          </TableCell>
           <EditDocumentRow document={doc} setEdit={setEdit} />
         </TableRow>
       );
