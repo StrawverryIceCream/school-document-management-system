@@ -323,6 +323,13 @@ export const staffWindows = pgTable(
   ],
 );
 
+export const feeUnitEnum = pgEnum("fee_unit", [
+  "FLAT",
+  "PER_PAGE",
+  "PER_SUBJECT",
+  "PER_SEMESTER",
+]);
+
 /* -------------------------------------------------------------------------- */
 /*  Document types                                                            */
 /* -------------------------------------------------------------------------- */
@@ -333,19 +340,32 @@ export const documentTypes = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     code: text("code").notNull().unique(),
     name: text("name").notNull(),
-    // Who may request it. Column renamed from "user_category" to "category".
+    officeId: uuid("office_id").references(() => offices.id),
+    // Legacy category kept for backwards compatibility; allowedCategories stores multi-role access
     category: userCategoryEnum("category").notNull().default("student"),
-    // Which office processes it
+    allowedCategories: jsonb("allowed_categories")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'["student"]'::jsonb`),
+    allowedStudentStatuses: jsonb("allowed_student_statuses")
+      .$type<string[]>()
+      .default(sql`'[]'::jsonb`),
+    // Which office processes it (legacy enum)
     office: officeEnum("office").notNull().default("registrar"),
     description: text("description"),
     // Shown to the requester before they submit
     instructions: text("instructions"),
     // fee = 0 means free, so no separate requiresPayment flag
     fee: numeric("fee", { precision: 10, scale: 2 }).notNull().default("0"),
+    feeUnit: feeUnitEnum("fee_unit").notNull().default("FLAT"),
     processingDays: integer("processing_days").notNull().default(3),
+    slaMinutes: integer("sla_minutes").notNull().default(1440),
     maxCopies: integer("max_copies").notNull().default(1),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
+    routingTemplate: jsonb("routing_template")
+      .$type<{ stepOrder: number; officeCode: string; stepType: string }[]>()
+      .default(sql`'[]'::jsonb`),
     requiredFields: jsonb("required_fields")
       .$type<RequiredField[]>()
       .notNull()
@@ -358,6 +378,7 @@ export const documentTypes = pgTable(
       "document_types_processing_days_nonneg",
       sql`${table.processingDays} >= 0`,
     ),
+    check("document_types_sla_minutes_nonneg", sql`${table.slaMinutes} >= 0`),
     check("document_types_max_copies_min", sql`${table.maxCopies} >= 1`),
   ],
 );
