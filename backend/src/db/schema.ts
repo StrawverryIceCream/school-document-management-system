@@ -253,8 +253,12 @@ export const users = pgTable(
       sql`${table.office} IS NULL OR ${table.role} IN ('staff', 'admin')`,
     ),
     check(
+      "users_office_id_allowed_roles",
+      sql`${table.officeId} IS NULL OR ${table.role} IN ('staff', 'admin')`,
+    ),
+    check(
       "users_staff_requires_office",
-      sql`${table.role} <> 'staff' OR ${table.office} IS NOT NULL`,
+      sql`${table.role} <> 'staff' OR (${table.office} IS NOT NULL OR ${table.officeId} IS NOT NULL)`,
     ),
     index("users_role_idx").on(table.role),
     index("users_course_id_idx").on(table.courseId),

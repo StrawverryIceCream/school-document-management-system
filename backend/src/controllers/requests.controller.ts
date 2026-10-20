@@ -6,11 +6,14 @@ import {
   documentRequests,
   documentTypes,
   notifications,
+  offices,
+  requestRoutingSteps,
   requestStatusEnum,
   users,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { sendStatusNotificationEmail } from "../services/email.service.js";
+import { getDescendantOfficeIds } from "../services/office-tree.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -745,6 +748,112 @@ export async function cancelMyRequest(
     return res.json(updated);
   } catch (err) {
     console.error("[cancelMyRequest] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getWorkspaceQueue(req: Request, res: Response) {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const staffUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { id: true, role: true, officeId: true },
+    });
+
+    if (!staffUser) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    let allowedOfficeIds: string[] = [];
+
+    if (staffUser.role === "admin") {
+      if (req.query.officeCode) {
+        const targetOffice = await db.query.offices.findFirst({
+          where: eq(offices.code, req.query.officeCode as string),
+        });
+        if (targetOffice) {
+          allowedOfficeIds = await getDescendantOfficeIds(targetOffice.id);
+        }
+      } else {
+        const all = await db.query.offices.findMany({ columns: { id: true } });
+        allowedOfficeIds = all.map((o) => o.id);
+      }
+    } else {
+      if (!staffUser.officeId) {
+        return res.status(403).json({ error: "Staff member has no assigned office" });
+      }
+
+      const coveredOfficeIds = await getDescendantOfficeIds(staffUser.officeId);
+
+      if (req.query.officeCode) {
+        const targetOffice = await db.query.offices.findFirst({
+          where: eq(offices.code, req.query.officeCode as string),
+        });
+        if (!targetOffice || !coveredOfficeIds.includes(targetOffice.id)) {
+          return res.status(403).json({ error: "Unauthorized for requested office" });
+        }
+        allowedOfficeIds = [targetOffice.id];
+      } else {
+        allowedOfficeIds = coveredOfficeIds;
+      }
+    }
+
+    if (allowedOfficeIds.length === 0) {
+      return res.json({ queue: [], total: 0, page: 1, limit: 20 });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page as string, 10) || DEFAULT_PAGE);
+    const limit = Math.min(
+      MAX_LIMIT,
+      Math.max(1, parseInt(req.query.limit as string, 10) || DEFAULT_LIMIT),
+    );
+    const offset = (page - 1) * limit;
+
+    const queue = await db.query.documentRequests.findMany({
+      where: (dr, { inArray, or }) => {
+        return or(
+          inArray(
+            dr.documentTypeId,
+            db
+              .select({ id: documentTypes.id })
+              .from(documentTypes)
+              .where(inArray(documentTypes.officeId, allowedOfficeIds)),
+          ),
+          inArray(
+            dr.id,
+            db
+              .select({ requestId: requestRoutingSteps.requestId })
+              .from(requestRoutingSteps)
+              .where(inArray(requestRoutingSteps.officeId, allowedOfficeIds)),
+          ),
+        );
+      },
+      with: {
+        user: { columns: REQUESTER_COLUMNS },
+        documentType: true,
+        routingSteps: {
+          with: { office: true },
+          orderBy: (rs, { asc }) => [asc(rs.stepOrder)],
+        },
+      },
+      orderBy: (dr, { desc }) => [desc(dr.createdAt)],
+      limit,
+      offset,
+    });
+
+    return res.json({
+      queue,
+      total: queue.length,
+      page,
+      limit,
+      allowedOfficeIds,
+    });
+  } catch (err) {
+    console.error("[getWorkspaceQueue] error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

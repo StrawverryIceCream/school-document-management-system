@@ -63,4 +63,8 @@ app.use((req, res) => {
   res.status(404).json({ message: "Not Found" });
 });
 
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+export { app };
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => console.log(`Server on ${PORT}`));
+}

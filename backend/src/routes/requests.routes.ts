@@ -10,6 +10,7 @@ import {
   getMyRequestById,
   getMyRequests,
   getRequestById,
+  getWorkspaceQueue,
   updateRequestStatus,
 } from "../controllers/requests.controller.js";
 
@@ -23,6 +24,7 @@ router.get("/me/:id", validateId, getMyRequestById);
 router.patch("/me/:id/cancel", validateId, cancelMyRequest);
 router.post("/", createRequest);
 
+router.get("/workspace-queue", requireRoles("admin", "staff"), getWorkspaceQueue);
 router.get("/", requireRoles("admin", "staff"), getAllRequests);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getRequestById);
 router.patch(
