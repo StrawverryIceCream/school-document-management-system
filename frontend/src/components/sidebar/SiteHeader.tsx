@@ -1,5 +1,5 @@
 import { useBreadcrumbs } from "@/lib/utils";
-import { ModeToggle } from "@/components/ModeToggle";
+import { ModeToggle } from "@/components/shared/ModeToggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Notification from "@/components/notification/Notification";
