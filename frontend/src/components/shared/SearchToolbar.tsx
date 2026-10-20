@@ -89,17 +89,17 @@ export default function SearchToolbar({
         <Tabs
           value={activeTab}
           onValueChange={onTabChange}
-          className="max-w-full overflow-x-auto"
+          className="max-w-full min-w-0 sm:shrink-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           <TabsList
             aria-label={tabsAriaLabel}
-            className="group-data-horizontal/tabs:h-12"
+            className="group-data-horizontal/tabs:h-12 w-fit shrink-0"
           >
             {tabs.map(({ value: tabVal, label, count }) => (
               <TabsTrigger
                 key={tabVal}
                 value={tabVal}
-                className="gap-2 px-4 text-base"
+                className="gap-2 px-4 text-base shrink-0"
               >
                 {label}
                 {count !== undefined && (
