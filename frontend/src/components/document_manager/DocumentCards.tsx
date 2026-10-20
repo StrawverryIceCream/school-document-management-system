@@ -8,6 +8,7 @@ type DocumentSummaryItem = {
   value: number;
   icon: LucideIcon;
   tone: Tone;
+  caption: string;
 };
 
 export default function DocumentCards() {
@@ -24,19 +25,22 @@ export default function DocumentCards() {
       label: "Total Documents",
       value: totalDocuments,
       icon: FileText,
-      tone: "neutral",
+      tone: "brand",
+      caption: "Configured document catalog",
     },
     {
       label: "Active Documents",
       value: activeDocuments,
       icon: CheckCircle2,
       tone: "emerald",
+      caption: "Available for student requests",
     },
     {
       label: "Inactive Documents",
       value: inactiveDocuments,
       icon: Slash,
-      tone: "red",
+      tone: "rose",
+      caption: "Archived or disabled types",
     },
   ];
 
@@ -45,13 +49,14 @@ export default function DocumentCards() {
       aria-label="Document statistics"
       className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {summaryCards.map(({ label, value, icon, tone }) => (
+      {summaryCards.map(({ label, value, icon, tone, caption }) => (
         <StatCard
           key={label}
           label={label}
           value={value}
           icon={icon}
           tone={tone}
+          caption={caption}
           loading={loading}
         />
       ))}

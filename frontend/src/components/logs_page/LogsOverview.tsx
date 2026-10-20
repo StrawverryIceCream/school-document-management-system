@@ -9,6 +9,7 @@ type LogCardConfig = {
   value: string | number;
   icon: LucideIcon;
   tone: Tone;
+  caption: string;
 };
 
 export default function LogsOverview() {
@@ -21,19 +22,22 @@ export default function LogsOverview() {
       label: "Total Logs",
       value: stats ? stats.total : "—",
       icon: Activity,
-      tone: "neutral",
+      tone: "brand",
+      caption: "Recorded system audit events",
     },
     {
       label: "Active Accounts",
       value: stats ? stats.activeAccounts : "—",
       icon: Users,
       tone: "emerald",
+      caption: "Users with recorded activity",
     },
     {
       label: "Last Activity",
       value: stats?.lastActivityAt ? formatDate(stats.lastActivityAt) : "—",
       icon: Clock,
-      tone: "brand",
+      tone: "sky",
+      caption: "Most recent system event",
     },
   ];
 
@@ -42,13 +46,14 @@ export default function LogsOverview() {
       aria-label="Activity statistics"
       className="grid shrink-0 gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {cards.map(({ label, value, icon, tone }) => (
+      {cards.map(({ label, value, icon, tone, caption }) => (
         <StatCard
           key={label}
           label={label}
           value={value}
           icon={icon}
           tone={tone}
+          caption={caption}
           loading={loading}
         />
       ))}
