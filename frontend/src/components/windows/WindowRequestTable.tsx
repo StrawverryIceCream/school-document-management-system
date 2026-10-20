@@ -1,15 +1,18 @@
 import { useCallback, useMemo } from "react";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
+import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
+import TruncatedText from "@/components/shared/TruncatedText";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useWindowView } from "@/hooks/useWindowView";
-import { statusStyles } from "@/lib/requests";
+import { getInitials } from "@/lib/profile";
 import {
-  REQUEST_STATUS_OPTIONS,
   REQUEST_WINDOWS,
   WINDOW_REQUEST_PAGE_SIZE,
 } from "@/lib/windows";
@@ -136,39 +139,46 @@ export function WindowRequestTable() {
       {
         key: "requester",
         header: "Requester",
-        className: "w-[19%] whitespace-normal",
+        className: "w-[21%] whitespace-normal",
         cell: (request) => {
           const requester = request.user?.fullName ?? "Unknown";
-          const initials = requester
-            .split(/\s+/)
-            .map((part) => part.charAt(0))
-            .slice(0, 2)
-            .join("")
-            .toUpperCase();
 
           return (
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
-                {initials || "?"}
-              </span>
-              <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <Avatar className="size-10 shrink-0">
+                <AvatarFallback className="bg-muted text-sm font-semibold text-foreground">
+                  {getInitials(requester)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-col">
                 {request.user ? (
                   <ProfileTrigger userId={request.user.id}>
                     <button
                       type="button"
-                      className="max-w-40 truncate text-left font-medium text-foreground hover:underline"
+                      className="truncate text-left font-semibold text-foreground hover:underline"
                     >
-                      {requester}
+                      <TruncatedText
+                        text={requester}
+                        className="font-semibold text-foreground max-w-44"
+                      />
                     </button>
                   </ProfileTrigger>
                 ) : (
-                  <span className="font-medium text-foreground">
-                    {requester}
-                  </span>
+                  <TruncatedText
+                    text={requester}
+                    className="font-semibold text-foreground max-w-44"
+                  />
                 )}
-                <p className="text-xs text-muted-foreground">
-                  ID: {request.user?.studentId ?? "—"}
-                </p>
+                {request.user?.studentId ? (
+                  <CopyableId
+                    id={request.user.studentId}
+                    displayValue={`ID: ${request.user.studentId}`}
+                    codeClassName="text-xs text-muted-foreground"
+                    label={`Copy student ID of ${requester}`}
+                  />
+                ) : (
+                  <span className="text-xs text-muted-foreground">ID: —</span>
+                )}
               </div>
             </div>
           );
@@ -190,19 +200,27 @@ export function WindowRequestTable() {
       {
         key: "documentType",
         header: "Document Type",
-        className: "w-[21%] whitespace-normal break-words",
-        cell: (request) => (
-          <>
-            <p className="font-medium">
-              {request.documentType?.name ?? "Unknown document"}
-            </p>
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {request.purpose ??
-                request.documentType?.description ??
-                "Document request"}
-            </p>
-          </>
-        ),
+        className: "w-[20%] whitespace-normal",
+        cell: (request) => {
+          const docName = request.documentType?.name ?? "Unknown document";
+          const purpose =
+            request.purpose ??
+            request.documentType?.description ??
+            "Document request";
+
+          return (
+            <div className="flex min-w-0 flex-col">
+              <TruncatedText
+                text={docName}
+                className="font-medium text-foreground max-w-52"
+              />
+              <TruncatedText
+                text={purpose}
+                className="text-xs text-muted-foreground max-w-52"
+              />
+            </div>
+          );
+        },
       },
       {
         key: "date",
@@ -217,15 +235,7 @@ export function WindowRequestTable() {
         key: "status",
         header: "Status",
         className: "w-[12%] whitespace-normal",
-        cell: (request) => (
-          <Badge
-            variant="outline"
-            className={`capitalize ${statusStyles[request.status] ?? ""}`}
-          >
-            {REQUEST_STATUS_OPTIONS.find((status) => status.id === request.status)
-              ?.label ?? request.status}
-          </Badge>
-        ),
+        cell: (request) => <RequestStatusBadge status={request.status} />,
       },
       {
         key: "routing",
@@ -237,7 +247,7 @@ export function WindowRequestTable() {
             (item) => item.id === windowId,
           );
           return (
-            <div className="flex items-center gap-1.5 break-words text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 wrap-break-word text-sm text-muted-foreground">
               <span
                 aria-label={
                   windowId
