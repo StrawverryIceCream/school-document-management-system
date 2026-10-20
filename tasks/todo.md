@@ -1,13 +1,16 @@
-# Implementation Plan: StatCard System-Wide Style & Typography Overhaul
+# Implementation Plan: Codebase File & Folder Organization Overhaul
 
-## Batch 1: Shared Core Component & Windows
-- [x] Task 1: Upgrade `StatCard` Typography and Universal Dashboard Aesthetic (`StatCard.tsx`, `tones.ts`)
-- [x] Task 2: Roll Out to Window Overview (`WindowRequestSummary.tsx`)
+## Batch 1: Root Cleanups & Standalone Components
+- [ ] Task 1: Clean Up Ghost Folders & Relocate Loose Route Guards (`guards/`, `shared/`)
 
-## Batch 2: Personal & Informational Overviews
-- [x] Task 3: Roll Out to My Requests Overview (`MyRequestCards.tsx`)
-- [x] Task 4: Roll Out to Document Manager & System Logs (`DocumentCards.tsx`, `LogsOverview.tsx`)
+## Batch 2: Feature Folder Normalization
+- [ ] Task 2: Normalize Feature Folders (`dashboard`, `logs`, `documents`, `notifications`)
 
-## Batch 3: System Operations & End-to-End Verification
-- [x] Task 5: Roll Out to All Requests & Administration (`RequestSummary.tsx`, `AdministrationRequestSummary.tsx`)
-- [x] Task 6: Roll Out to Accounts Overview & Full End-to-End Verification (`AccountsOverview.tsx`, build check)
+## Batch 3: Counter Windows Domain Consolidation
+- [ ] Task 3: Consolidate Counter Windows Domain (`components/windows`, `lib/windows`)
+
+## Batch 4: Document Requests Domain Consolidation
+- [ ] Task 4: Consolidate Document Requests Domain (`components/requests`, `lib/requests`)
+
+## Batch 5: Profile & Full End-to-End Build Verification
+- [ ] Task 5: Consolidate Profile Helpers & Full End-to-End Build Verification (`lib/profile`, build checks)
