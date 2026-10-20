@@ -112,6 +112,51 @@ export const appointmentStatusEnum = pgEnum("appointment_status", [
 ]);
 
 /* -------------------------------------------------------------------------- */
+/*  Offices & Organizational Hierarchy                                        */
+/* -------------------------------------------------------------------------- */
+
+export const officeSectorEnum = pgEnum("office_sector", [
+  "OUP",
+  "OVPAA",
+  "OVPAF",
+  "OVPRE",
+  "OVPPDSC",
+]);
+
+export const officeCategoryEnum = pgEnum("office_category", [
+  "COLLEGE",
+  "ACADEMIC_SUPPORT",
+  "ADMINISTRATIVE",
+  "FINANCIAL",
+  "RESEARCH",
+  "PLANNING",
+  "EXECUTIVE",
+]);
+
+export const offices = pgTable("offices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  sector: officeSectorEnum("sector").notNull(),
+  category: officeCategoryEnum("category").notNull(),
+  officialEmail: text("official_email"),
+  parentOfficeId: uuid("parent_office_id"),
+  isActive: boolean("is_active").notNull().default(true),
+  ...timestamps,
+});
+
+export const officesRelations = relations(offices, ({ one, many }) => ({
+  parentOffice: one(offices, {
+    fields: [offices.parentOfficeId],
+    references: [offices.id],
+    relationName: "office_hierarchy",
+  }),
+  childOffices: many(offices, {
+    relationName: "office_hierarchy",
+  }),
+}));
+
+/* -------------------------------------------------------------------------- */
 /*  Organization: colleges, courses                                           */
 /* -------------------------------------------------------------------------- */
 
@@ -119,6 +164,7 @@ export const colleges = pgTable("colleges", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
+  officeId: uuid("office_id").references(() => offices.id),
   isActive: boolean("is_active").notNull().default(true),
   ...timestamps,
 });
@@ -162,8 +208,9 @@ export const users = pgTable(
     section: text("section"),
     yearLevel: integer("year_level"),
     department: text("department"),
-    // Which office a staff member works for (registrar or HR)
+    // Which office a staff member works for (legacy enum and new hierarchical UUID FK)
     office: officeEnum("office"),
+    officeId: uuid("office_id").references(() => offices.id),
     emailVerifiedAt: tz("email_verified_at"),
     lastLoginAt: tz("last_login_at"),
     ...timestamps,
