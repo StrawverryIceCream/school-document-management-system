@@ -14,6 +14,7 @@ type RequestSummaryItem = {
   value: number;
   icon: LucideIcon;
   tone: Tone;
+  caption: string;
 };
 
 export default function RequestSummary() {
@@ -24,20 +25,29 @@ export default function RequestSummary() {
       label: "Total Requests",
       value: summary.total,
       icon: Layers3,
-      tone: "neutral",
+      tone: "brand",
+      caption: "Across all colleges and offices",
     },
-    { label: "Pending", value: summary.pending, icon: Clock3, tone: "amber" },
+    {
+      label: "Pending",
+      value: summary.pending,
+      icon: Clock3,
+      tone: "amber",
+      caption: "Awaiting evaluation & payment",
+    },
     {
       label: "Processing",
       value: summary.processing,
       icon: Activity,
       tone: "brand",
+      caption: "In verification & print queue",
     },
     {
       label: "Ready",
       value: summary.ready,
       icon: CheckCircle2,
       tone: "emerald",
+      caption: "Completed for student release",
     },
   ];
 
@@ -46,13 +56,14 @@ export default function RequestSummary() {
       aria-label="Request status overview"
       className="grid shrink-0 gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
-      {summaryCards.map(({ label, value, icon, tone }) => (
+      {summaryCards.map(({ label, value, icon, tone, caption }) => (
         <StatCard
           key={label}
           label={label}
           value={value}
           icon={icon}
           tone={tone}
+          caption={caption}
         />
       ))}
     </section>

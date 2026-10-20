@@ -28,22 +28,22 @@ export default function AdministrationRequestSummary() {
       label: "Office Requests",
       value: visibleRequests.length,
       icon: Folder,
-      tone: "neutral",
-      caption: `${activeUnit.code} active queue`,
+      tone: "brand",
+      caption: `${activeUnit.code} active queue submissions`,
     },
     {
       label: "Pending Review",
       value: pendingCount,
       icon: Hourglass,
       tone: "amber",
-      caption: "Awaiting approval",
+      caption: "Awaiting office endorsement",
     },
     {
       label: "Ready for Release",
       value: readyCount,
       icon: BadgeCheck,
       tone: "emerald",
-      caption: "Processed documents",
+      caption: "Cleared for release",
     },
   ];
 
