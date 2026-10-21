@@ -43,7 +43,7 @@ export function SectorsVisibilityProvider({
   }, []);
 
   useEffect(() => {
-    void loadOffices();
+    void Promise.resolve().then(loadOffices);
   }, [loadOffices]);
 
   const activeOfficeCodes = useMemo(() => {

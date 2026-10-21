@@ -38,13 +38,15 @@ export default function NavSectors() {
 
   // Auto-expand sector when navigating to it
   useEffect(() => {
-    for (const sector of visibleSectors) {
-      if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
-        setOpenSectors((prev) =>
-          prev[sector.id] ? prev : { ...prev, [sector.id]: true },
-        );
+    void Promise.resolve().then(() => {
+      for (const sector of visibleSectors) {
+        if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
+          setOpenSectors((prev) =>
+            prev[sector.id] ? prev : { ...prev, [sector.id]: true },
+          );
+        }
       }
-    }
+    });
   }, [location.pathname, visibleSectors]);
 
   return (
