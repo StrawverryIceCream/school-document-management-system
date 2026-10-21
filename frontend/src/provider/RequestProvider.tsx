@@ -17,13 +17,24 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     "Loading request records from the backend...",
   );
 
+  const [debounceSearch, setDebounceSearch] = useState(search);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebounceSearch(search), 250);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
   const latestLoadId = useRef(0);
 
   const refreshRequests = useCallback(async () => {
     const loadId = ++latestLoadId.current;
     setLoading(true);
     try {
-      const response = await getAllRequests();
+      const response = await getAllRequests({
+        limit: 100,
+        search: debounceSearch.trim() ? debounceSearch.trim() : undefined,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+      });
       if (loadId !== latestLoadId.current) return;
       const rows = response.data
         .map((item) => normalizeRequestRow(item))
@@ -53,7 +64,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     } finally {
       if (loadId === latestLoadId.current) setLoading(false);
     }
-  }, []);
+  }, [debounceSearch, statusFilter]);
 
   // Deferred so the lint rule does not see setState run synchronously in the effect.
   useEffect(() => {
