@@ -7,7 +7,7 @@ import RequireRole from "./components/guards/RequireRole";
 import { AuthProvider } from "./provider/AuthProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { RequestWizardProvider } from "./provider/WizardRequestProvider";
-import { SectorsVisibilityProvider } from "./context/SectorsVisibilityContext";
+import { SectorsVisibilityProvider } from "./provider/SectorsVisibilityProvider";
 import type { UserRole } from "./types";
 
 const Home = lazy(() => import("./pages/Home"));
