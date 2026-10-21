@@ -383,6 +383,7 @@ export async function getAllRequests(
               },
             },
           },
+          payments: true,
         },
         orderBy: [desc(documentRequests.createdAt)],
         limit: limitNum,

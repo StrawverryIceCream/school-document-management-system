@@ -130,17 +130,14 @@ export function isRequestFilter(value: string): value is RequestFilter {
 export function normalizeRequestRow(
   raw: DocumentRequestWithRelations,
 ): RequestRow {
-  const paymentMethodValue = raw.payments?.find(
-    (payment) =>
-      payment.method === "cash" ||
-      payment.method === "bank_transfer" ||
-      payment.method === "e_wallet" ||
-      payment.method === "card",
-  )?.method;
+  const validPayment =
+    raw.payments?.find((p) => p.status === "verified") ??
+    raw.payments?.find((p) => p.status === "pending") ??
+    raw.payments?.[0];
   const paymentMethod =
-    paymentMethodValue === "cash"
+    validPayment?.method === "cash"
       ? "cash"
-      : paymentMethodValue
+      : validPayment?.method
         ? "online"
         : undefined;
 

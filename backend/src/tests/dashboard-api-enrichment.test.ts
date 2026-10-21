@@ -19,6 +19,7 @@ async function verifyEnrichedRequestRelations() {
       user: {
         columns: { id: true, fullName: true, studentId: true },
       },
+      payments: true,
     },
   });
 
@@ -33,6 +34,7 @@ async function verifyEnrichedRequestRelations() {
     documentTypeName: sampleRequest.documentType?.name,
     officeCode: sampleRequest.documentType?.officeRecord?.code,
     sector: sampleRequest.documentType?.officeRecord?.sector,
+    paymentsCount: sampleRequest.payments?.length ?? 0,
   });
 
   console.log("✅ Enriched request relations verified successfully.");
