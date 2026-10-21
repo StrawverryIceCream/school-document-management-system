@@ -6,7 +6,7 @@ import RequireAuth from "./components/guards/RequireAuth";
 import RequireRole from "./components/guards/RequireRole";
 import { AuthProvider } from "./provider/AuthProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
-import { RequestWizardProvider } from "./provider/WixardRequestProvider";
+import { RequestWizardProvider } from "./provider/WizardRequestProvider";
 import { SectorsVisibilityProvider } from "./context/SectorsVisibilityContext";
 import type { UserRole } from "./types";
 
