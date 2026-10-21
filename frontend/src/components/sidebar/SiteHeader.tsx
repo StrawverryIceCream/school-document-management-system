@@ -28,7 +28,6 @@ function SiteHeader() {
                 <Link to="/home">ARCH</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
             {crumbs.map((crumb, index) => (
               <Fragment key={crumb.to}>
                 <BreadcrumbSeparator />

@@ -112,6 +112,51 @@ export const appointmentStatusEnum = pgEnum("appointment_status", [
 ]);
 
 /* -------------------------------------------------------------------------- */
+/*  Offices & Organizational Hierarchy                                        */
+/* -------------------------------------------------------------------------- */
+
+export const officeSectorEnum = pgEnum("office_sector", [
+  "OUP",
+  "OVPAA",
+  "OVPAF",
+  "OVPRE",
+  "OVPPDSC",
+]);
+
+export const officeCategoryEnum = pgEnum("office_category", [
+  "COLLEGE",
+  "ACADEMIC_SUPPORT",
+  "ADMINISTRATIVE",
+  "FINANCIAL",
+  "RESEARCH",
+  "PLANNING",
+  "EXECUTIVE",
+]);
+
+export const offices = pgTable("offices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  sector: officeSectorEnum("sector").notNull(),
+  category: officeCategoryEnum("category").notNull(),
+  officialEmail: text("official_email"),
+  parentOfficeId: uuid("parent_office_id"),
+  isActive: boolean("is_active").notNull().default(true),
+  ...timestamps,
+});
+
+export const officesRelations = relations(offices, ({ one, many }) => ({
+  parentOffice: one(offices, {
+    fields: [offices.parentOfficeId],
+    references: [offices.id],
+    relationName: "office_hierarchy",
+  }),
+  childOffices: many(offices, {
+    relationName: "office_hierarchy",
+  }),
+}));
+
+/* -------------------------------------------------------------------------- */
 /*  Organization: colleges, courses                                           */
 /* -------------------------------------------------------------------------- */
 
@@ -119,6 +164,7 @@ export const colleges = pgTable("colleges", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
+  officeId: uuid("office_id").references(() => offices.id),
   isActive: boolean("is_active").notNull().default(true),
   ...timestamps,
 });
@@ -162,8 +208,9 @@ export const users = pgTable(
     section: text("section"),
     yearLevel: integer("year_level"),
     department: text("department"),
-    // Which office a staff member works for (registrar or HR)
+    // Which office a staff member works for (legacy enum and new hierarchical UUID FK)
     office: officeEnum("office"),
+    officeId: uuid("office_id").references(() => offices.id),
     emailVerifiedAt: tz("email_verified_at"),
     lastLoginAt: tz("last_login_at"),
     ...timestamps,
@@ -206,8 +253,12 @@ export const users = pgTable(
       sql`${table.office} IS NULL OR ${table.role} IN ('staff', 'admin')`,
     ),
     check(
+      "users_office_id_allowed_roles",
+      sql`${table.officeId} IS NULL OR ${table.role} IN ('staff', 'admin')`,
+    ),
+    check(
       "users_staff_requires_office",
-      sql`${table.role} <> 'staff' OR ${table.office} IS NOT NULL`,
+      sql`${table.role} <> 'staff' OR (${table.office} IS NOT NULL OR ${table.officeId} IS NOT NULL)`,
     ),
     index("users_role_idx").on(table.role),
     index("users_course_id_idx").on(table.courseId),
@@ -276,6 +327,13 @@ export const staffWindows = pgTable(
   ],
 );
 
+export const feeUnitEnum = pgEnum("fee_unit", [
+  "FLAT",
+  "PER_PAGE",
+  "PER_SUBJECT",
+  "PER_SEMESTER",
+]);
+
 /* -------------------------------------------------------------------------- */
 /*  Document types                                                            */
 /* -------------------------------------------------------------------------- */
@@ -286,19 +344,32 @@ export const documentTypes = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     code: text("code").notNull().unique(),
     name: text("name").notNull(),
-    // Who may request it. Column renamed from "user_category" to "category".
+    officeId: uuid("office_id").references(() => offices.id),
+    // Legacy category kept for backwards compatibility; allowedCategories stores multi-role access
     category: userCategoryEnum("category").notNull().default("student"),
-    // Which office processes it
+    allowedCategories: jsonb("allowed_categories")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'["student"]'::jsonb`),
+    allowedStudentStatuses: jsonb("allowed_student_statuses")
+      .$type<string[]>()
+      .default(sql`'[]'::jsonb`),
+    // Which office processes it (legacy enum)
     office: officeEnum("office").notNull().default("registrar"),
     description: text("description"),
     // Shown to the requester before they submit
     instructions: text("instructions"),
     // fee = 0 means free, so no separate requiresPayment flag
     fee: numeric("fee", { precision: 10, scale: 2 }).notNull().default("0"),
+    feeUnit: feeUnitEnum("fee_unit").notNull().default("FLAT"),
     processingDays: integer("processing_days").notNull().default(3),
+    slaMinutes: integer("sla_minutes").notNull().default(1440),
     maxCopies: integer("max_copies").notNull().default(1),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
+    routingTemplate: jsonb("routing_template")
+      .$type<{ stepOrder: number; officeCode: string; stepType: string }[]>()
+      .default(sql`'[]'::jsonb`),
     requiredFields: jsonb("required_fields")
       .$type<RequiredField[]>()
       .notNull()
@@ -311,6 +382,7 @@ export const documentTypes = pgTable(
       "document_types_processing_days_nonneg",
       sql`${table.processingDays} >= 0`,
     ),
+    check("document_types_sla_minutes_nonneg", sql`${table.slaMinutes} >= 0`),
     check("document_types_max_copies_min", sql`${table.maxCopies} >= 1`),
   ],
 );
@@ -446,6 +518,51 @@ export const requestAttachments = pgTable(
     createdAt: tz("created_at").notNull().defaultNow(),
   },
   (table) => [index("request_attachments_request_idx").on(table.requestId)],
+);
+
+/* -------------------------------------------------------------------------- */
+/*  Request routing steps (Clearance & Multi-Office Approvals)                */
+/* -------------------------------------------------------------------------- */
+
+export const routingStepStatusEnum = pgEnum("routing_step_status", [
+  "locked",
+  "pending",
+  "approved",
+  "action_required",
+  "rejected",
+]);
+
+export const routingStepTypeEnum = pgEnum("routing_step_type", [
+  "clearance",
+  "fee_assessment",
+  "payment_verification",
+  "document_processing",
+  "executive_signature",
+  "window_release",
+]);
+
+export const requestRoutingSteps = pgTable(
+  "request_routing_steps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestId: uuid("request_id")
+      .references(() => documentRequests.id, { onDelete: "cascade" })
+      .notNull(),
+    officeId: uuid("office_id")
+      .references(() => offices.id)
+      .notNull(),
+    stepOrder: integer("step_order").notNull(),
+    stepType: routingStepTypeEnum("step_type").notNull(),
+    status: routingStepStatusEnum("status").notNull().default("locked"),
+    remarks: text("remarks"),
+    actedBy: uuid("acted_by").references(() => users.id),
+    actedAt: tz("acted_at"),
+    ...timestamps,
+  },
+  (table) => [
+    index("routing_steps_request_idx").on(table.requestId, table.stepOrder),
+    index("routing_steps_office_status_idx").on(table.officeId, table.status),
+  ],
 );
 
 /* -------------------------------------------------------------------------- */
@@ -721,7 +838,26 @@ export const documentRequestsRelations = relations(
     notifications: many(notifications),
     statusHistory: many(requestStatusHistory),
     attachments: many(requestAttachments),
+    routingSteps: many(requestRoutingSteps),
     appointments: many(appointments),
+  }),
+);
+
+export const requestRoutingStepsRelations = relations(
+  requestRoutingSteps,
+  ({ one }) => ({
+    request: one(documentRequests, {
+      fields: [requestRoutingSteps.requestId],
+      references: [documentRequests.id],
+    }),
+    office: one(offices, {
+      fields: [requestRoutingSteps.officeId],
+      references: [offices.id],
+    }),
+    actedByUser: one(users, {
+      fields: [requestRoutingSteps.actedBy],
+      references: [users.id],
+    }),
   }),
 );
 
