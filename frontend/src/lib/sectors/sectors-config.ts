@@ -580,3 +580,115 @@ export function getOffice(
     (o) => o.id === officeId.toLowerCase(),
   );
 }
+
+export interface OfficeRouteInfo {
+  sectorId: string;
+  divisionId: string;
+  officeId: string;
+  url: string;
+  office: OfficeConfig;
+}
+
+export function findOfficeRoute(query: {
+  officeId?: string | null;
+  officeCode?: string | null;
+  officeName?: string | null;
+  sector?: string | null;
+  documentTypeCode?: string | null;
+  college?: string | null;
+}): OfficeRouteInfo | undefined {
+  const code = query.officeCode?.trim().toUpperCase();
+  const id = query.officeId?.trim().toLowerCase();
+  const name = query.officeName?.trim().toLowerCase();
+  const docCode = query.documentTypeCode?.trim().toUpperCase();
+  const college = query.college?.trim().toUpperCase();
+
+  // Normalize common aliases
+  const normalizedCode =
+    code === "REGISTRAR" || code === "TOR"
+      ? "OUR"
+      : code === "HR" || code === "PERSONNEL"
+        ? "HRMO"
+        : code;
+
+  for (const sector of SECTORS) {
+    for (const division of sector.divisions) {
+      for (const office of division.offices) {
+        const offCode = office.code.toUpperCase();
+        const offId = office.id.toLowerCase();
+        const offName = office.name.toLowerCase();
+
+        // 1. Direct code or ID match
+        if (
+          normalizedCode &&
+          (offCode === normalizedCode || offId === normalizedCode.toLowerCase())
+        ) {
+          return {
+            sectorId: sector.id,
+            divisionId: division.id,
+            officeId: office.id,
+            url: `/sectors/${sector.id}/${division.id}/${office.id}`,
+            office,
+          };
+        }
+
+        // 2. ID match
+        if (id && (offId === id || offCode.toLowerCase() === id)) {
+          return {
+            sectorId: sector.id,
+            divisionId: division.id,
+            officeId: office.id,
+            url: `/sectors/${sector.id}/${division.id}/${office.id}`,
+            office,
+          };
+        }
+
+        // 3. Document type code prefix match (e.g. "OUR-001" starts with "OUR")
+        if (
+          docCode &&
+          office.docCodePrefix &&
+          docCode.startsWith(office.docCodePrefix.toUpperCase())
+        ) {
+          return {
+            sectorId: sector.id,
+            divisionId: division.id,
+            officeId: office.id,
+            url: `/sectors/${sector.id}/${division.id}/${office.id}`,
+            office,
+          };
+        }
+
+        // 4. College match (e.g. "COS" -> College of Science)
+        if (
+          college &&
+          office.collegeCode &&
+          college === office.collegeCode.toUpperCase()
+        ) {
+          return {
+            sectorId: sector.id,
+            divisionId: division.id,
+            officeId: office.id,
+            url: `/sectors/${sector.id}/${division.id}/${office.id}`,
+            office,
+          };
+        }
+
+        // 5. Name match
+        if (
+          name &&
+          (offName === name || offName.includes(name) || name.includes(offName))
+        ) {
+          return {
+            sectorId: sector.id,
+            divisionId: division.id,
+            officeId: office.id,
+            url: `/sectors/${sector.id}/${division.id}/${office.id}`,
+            office,
+          };
+        }
+      }
+    }
+  }
+
+  return undefined;
+}

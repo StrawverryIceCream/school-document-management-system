@@ -48,10 +48,16 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
               />
             </div>
 
-            <RequestDetailsField
-              label="Window"
-              value={request.course ?? "Not available"}
-            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <RequestDetailsField
+                label="Office"
+                value={request.officeName || request.officeCode || "Not available"}
+              />
+              <RequestDetailsField
+                label="Course / Program"
+                value={request.course ?? "Not available"}
+              />
+            </div>
 
             {request.purpose && (
               <div>

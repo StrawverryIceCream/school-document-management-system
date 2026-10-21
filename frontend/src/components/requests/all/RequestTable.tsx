@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Eye, FileText } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Building2, ExternalLink, Eye, FileText } from "lucide-react";
 import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
@@ -10,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useRequests } from "@/hooks/useRequest";
 import { getInitials } from "@/lib/profile";
+import { findOfficeRoute } from "@/lib/sectors/sectors-config";
 import type { RequestRow } from "@/context/DashboardContext";
 
 export default function RequestTable() {
@@ -90,15 +92,61 @@ export default function RequestTable() {
         ),
       },
       {
-        key: "window",
-        header: "Window",
-        className: "w-36",
-        cell: (req) => (
-          <TruncatedText
-            text={req.course ?? "Not available"}
-            className="text-sm text-muted-foreground max-w-32"
-          />
-        ),
+        key: "office",
+        header: "Office",
+        className: "min-w-44 max-w-xs",
+        cell: (req) => {
+          const route = findOfficeRoute({
+            officeCode: req.officeCode,
+            officeId: req.officeId,
+            officeName: req.officeName,
+            sector: req.sector,
+            documentTypeCode: req.documentTypeCode,
+            college: req.college,
+          });
+
+          const officeCode = req.officeCode || route?.office.code || "OUR";
+          const officeName =
+            req.officeName ||
+            route?.office.name ||
+            (req.officeCode ? `Office (${req.officeCode})` : "University Office");
+          const targetUrl = route?.url;
+
+          const artifact = (
+            <div className="group/office inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-card px-2.5 py-1 text-xs shadow-xs transition-colors hover:border-primary/50 hover:bg-muted/60">
+              <Building2 className="size-3.5 shrink-0 text-muted-foreground group-hover/office:text-primary transition-colors" />
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-foreground group-hover/office:text-primary transition-colors">
+                    {officeCode}
+                  </span>
+                  {targetUrl && (
+                    <ExternalLink className="size-3 text-muted-foreground/60 group-hover/office:text-primary transition-colors" />
+                  )}
+                </div>
+                <TruncatedText
+                  text={officeName}
+                  className="text-[11px] text-muted-foreground max-w-36"
+                />
+              </div>
+            </div>
+          );
+
+          if (targetUrl) {
+            return (
+              <Link
+                to={targetUrl}
+                className="inline-block rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                title={`Go to ${officeName} (${officeCode}) workspace`}
+                aria-label={`Go to ${officeName} (${officeCode}) workspace`}
+              >
+                {artifact}
+              </Link>
+            );
+          }
+
+          return artifact;
+        },
       },
       {
         key: "submitted",

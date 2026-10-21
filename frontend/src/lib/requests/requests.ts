@@ -161,12 +161,17 @@ export function normalizeRequestRow(
   const windowId =
     raw.window?.name ?? (raw.windowId ? String(raw.windowId) : undefined);
 
+  const docCode = raw.documentTypeCode ?? raw.documentType?.code;
   const officeCode =
     raw.documentType?.officeRecord?.code ??
-    (raw.documentTypeCode?.includes("-")
-      ? raw.documentTypeCode.split("-")[0]
+    (docCode?.includes("-")
+      ? docCode.split("-")[0]
+      : raw.documentType?.office);
+  const officeName =
+    raw.documentType?.officeRecord?.name ??
+    (raw.documentType?.office
+      ? raw.documentType.office.toUpperCase()
       : undefined);
-  const officeName = raw.documentType?.officeRecord?.name ?? undefined;
   const sector = raw.documentType?.officeRecord?.sector ?? undefined;
   const officeId =
     raw.documentType?.officeRecord?.id ??
