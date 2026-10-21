@@ -88,7 +88,7 @@ export default function StatsOverview() {
       topBarColor: "bg-rose-500",
       tag: {
         label: overdueCount > 0 ? "Delayed" : "On Track",
-        tone: (overdueCount > 0 ? "red" : "emerald") as const,
+        tone: overdueCount > 0 ? ("red" as const) : ("emerald" as const),
         className:
           overdueCount > 0
             ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"

@@ -63,12 +63,26 @@ function buildMonthlyPaymentData(requests: RequestRow[]): MonthlyPaymentCounts[]
 function PaymentMethodChart() {
   const { requests } = useDashboard();
   const data = buildMonthlyPaymentData(requests);
+  const cashCount = requests.filter((r) => r.paymentMethod === "cash").length;
+  const onlineCount = requests.filter((r) => r.paymentMethod === "online").length;
 
   return (
     <Card className="rounded-xl border border-border/60 bg-card shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold">Payments by Method</CardTitle>
-        <CardDescription>Cash vs. online payments processed per month</CardDescription>
+      <CardHeader className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle className="text-base font-bold">Payments by Channel</CardTitle>
+          <CardDescription>Cash counter vs. online settlements breakdown</CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-muted/70">
+            <span className="size-2 rounded-full bg-[var(--chart-1)]" />
+            <span>Cash: {cashCount}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-muted/70">
+            <span className="size-2 rounded-full bg-[var(--chart-2)]" />
+            <span>Online: {onlineCount}</span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (

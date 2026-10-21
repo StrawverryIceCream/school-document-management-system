@@ -16,13 +16,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getDateKey } from "@/lib/dashboard";
 import type { RequestRow } from "@/context/DashboardContext";   
@@ -66,7 +59,7 @@ function buildDailyCounts(requests: RequestRow[]): DailyCounts[] {
 }
 
 function RequestsStatusChart() {
-  const { requests, timeRange, setTimeRange, error } = useDashboard(); 
+  const { requests, timeRange, error } = useDashboard(); 
 
   const dailyCounts = useMemo(() => buildDailyCounts(requests), [requests]);
 
@@ -85,30 +78,30 @@ function RequestsStatusChart() {
     return dailyCounts.filter((item) => new Date(item.date) >= startDate);
   }, [dailyCounts, timeRange]);
 
-  if (error) return null; // 👈 added
+  if (error) return null;
+
+  const totalSubmitted = filteredData.reduce((acc, curr) => acc + curr.submitted, 0);
+  const totalClaimed = filteredData.reduce((acc, curr) => acc + curr.claimed, 0);
 
   return (
     <Card className="pt-0">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      <CardHeader className="flex flex-col gap-2 border-b py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Requests over time</CardTitle>
+          <CardTitle>Requests Velocity Over Time</CardTitle>
           <CardDescription>
-            Submitted vs. claimed requests for the selected period
+            Submitted vs. claimed requests throughput for the selected period
           </CardDescription>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="hidden w-40 rounded-lg sm:ml-auto sm:flex"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">Last 3 months</SelectItem>
-            <SelectItem value="30d" className="rounded-lg">Last 30 days</SelectItem>
-            <SelectItem value="7d" className="rounded-lg">Last 7 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-muted/70">
+            <span className="size-2 rounded-full bg-[var(--chart-1)]" />
+            <span>Submitted: {totalSubmitted}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-muted/70">
+            <span className="size-2 rounded-full bg-[var(--chart-2)]" />
+            <span>Claimed: {totalClaimed}</span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         {filteredData.length === 0 ? (
