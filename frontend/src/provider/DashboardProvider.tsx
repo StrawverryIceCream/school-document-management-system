@@ -60,8 +60,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     };
   }, [loadRequests]);
 
+  const [lastRefreshedAt, setLastRefreshedAt] = useState(() => Date.now());
+
   async function refreshDashboard() {
     setLoading(true);
+    setLastRefreshedAt(Date.now());
     try {
       const data = await loadRequests();
       setRequests(data);
@@ -76,7 +79,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   // Filter requests based on time range selection
   const filteredRequests = useMemo(() => {
     if (timeRange === "all") return requests;
-    const now = Date.now();
     const daysMap: Record<string, number> = {
       "24h": 1,
       today: 1,
@@ -87,12 +89,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       sem: 120,
     };
     const maxDays = daysMap[timeRange] ?? 90;
-    const cutoff = now - maxDays * 24 * 60 * 60 * 1000;
+    const cutoff = lastRefreshedAt - maxDays * 24 * 60 * 60 * 1000;
     return requests.filter((r) => {
       if (!r.submittedAt) return true;
       return new Date(r.submittedAt).getTime() >= cutoff;
     });
-  }, [requests, timeRange]);
+  }, [requests, timeRange, lastRefreshedAt]);
 
   const stats: DashboardStats | null = error
     ? null
