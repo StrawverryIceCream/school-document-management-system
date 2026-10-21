@@ -26,7 +26,7 @@ export default function CredentialsCatalog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllDocument({ isActive: true, limit: 50 })
+    getAllDocument({ isActive: true, limit: 100 })
       .then((res) => setDocuments(res.data))
       .catch(() => null)
       .finally(() => setLoading(false));

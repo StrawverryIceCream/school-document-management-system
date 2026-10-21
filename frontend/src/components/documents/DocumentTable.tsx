@@ -126,7 +126,11 @@ export default function DocumentTable() {
   );
 
   const totalPages = Math.max(1, Math.ceil(documents.length / pageSize));
-  const pagedData = documents.slice((page - 1) * pageSize, page * pageSize);
+  const currentPage = Math.min(page, totalPages);
+  const pagedData = documents.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   const customRow = (doc: DocumentType) => {
     if (editingDocument?.toString() === doc.id?.toString()) {
@@ -158,7 +162,7 @@ export default function DocumentTable() {
       }
       customRow={customRow}
       pagination={{
-        page,
+        page: currentPage,
         totalPages,
         totalItems: documents.length,
         itemsPerPage: pageSize,

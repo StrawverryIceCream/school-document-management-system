@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { DocumentType } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
-const DOCUMENTS_PAGE_SIZE = 8;
+const DOCUMENTS_PAGE_SIZE = 200;
 const FIRST_PAGE = 1;
 
 interface LoadedDocuments {
