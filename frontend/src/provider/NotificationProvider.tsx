@@ -50,10 +50,18 @@ export function NotificationProvider({
   }, [user?.id]);
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && user?.id) {
       void Promise.resolve().then(refreshNotifications);
+
+      const intervalId = window.setInterval(() => {
+        void refreshNotifications();
+      }, 30000);
+
+      return () => {
+        window.clearInterval(intervalId);
+      };
     }
-  }, [authLoading, refreshNotifications]);
+  }, [authLoading, user?.id, refreshNotifications]);
 
   const markAsRead = useCallback(
     async (id: string) => {

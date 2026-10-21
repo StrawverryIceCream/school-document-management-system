@@ -1,0 +1,29 @@
+# School Document Management System
+
+Full-stack document tracking and request fulfillment platform for students, faculty, and administrative staff.
+
+## Notifications
+
+**In-App Notification**:
+A persistent alert associated with a user account, displayed in the application navigation and tracking read status.
+_Avoid_: Popup, toast, modal alert
+
+**Email Notification**:
+A transactional email dispatched to a user's verified email address to alert them of major lifecycle events.
+_Avoid_: Marketing email, newsletter, digest
+
+**Dual Dispatch**:
+The synchronous creation of an In-App Notification paired with asynchronous dispatch of an Email Notification from a single domain event.
+_Avoid_: Broadcast, batch send
+
+**Office Staff Fan-Out**:
+The delivery of a single document request notification to all active staff members assigned to the processing office.
+_Avoid_: Department blasting, global notification
+
+**Requester**:
+A student or faculty user who creates and submits a document request.
+_Avoid_: Applicant, customer, client
+
+**Office Staff**:
+An institutional user assigned to a specific office who reviews, processes, and marks document requests.
+_Avoid_: Agent, worker, clerk

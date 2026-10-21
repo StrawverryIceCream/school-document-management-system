@@ -15,6 +15,7 @@ import {
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { sendStatusNotificationEmail } from "../services/email.service.js";
+import { notifyOfficeStaff } from "../services/notification.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -786,6 +787,20 @@ export async function createRequest(req: Request, res: Response) {
         documentTypeName: documentType.name,
       },
     });
+
+    try {
+      await notifyOfficeStaff({
+        officeId: documentType.officeId,
+        officeCode: documentType.office,
+        senderId: userId,
+        requestId: created.id,
+        type: "system",
+        title: "New Document Request",
+        message: `New request submitted for ${documentType.name} (${created.referenceNumber})`,
+      });
+    } catch (err) {
+      console.error("[createRequest] notifyOfficeStaff error:", err);
+    }
 
     return res.status(201).json(created);
   } catch (err) {
