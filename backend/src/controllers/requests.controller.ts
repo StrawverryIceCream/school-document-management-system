@@ -10,6 +10,7 @@ import {
   officeSectorEnum,
   requestRoutingSteps,
   requestStatusEnum,
+  requestStatusHistory,
   users,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
@@ -551,6 +552,14 @@ export async function updateRequestStatus(
           ...notification,
         });
       }
+
+      await tx.insert(requestStatusHistory).values({
+        requestId: id,
+        fromStatus: request.status,
+        toStatus: status,
+        changedBy: staffId,
+        note: typeof staffNotes === "string" ? staffNotes.trim() : null,
+      });
 
       return row;
     });

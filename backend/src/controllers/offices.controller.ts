@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
   documentRequests,
@@ -122,45 +122,50 @@ export async function getSectorMetrics(
           eq(table.sector, normalizedSector as (typeof SECTORS)[number]),
           eq(table.isActive, true),
         ),
+      orderBy: (table, { asc }) => [asc(table.code)],
     });
 
-    const officeMetrics = await Promise.all(
-      sectorOffices.map(async (office) => {
-        const counts = await db
-          .select({
-            status: documentRequests.status,
-            count: count(),
-          })
-          .from(documentRequests)
-          .innerJoin(
-            documentTypes,
-            eq(documentRequests.documentTypeId, documentTypes.id),
-          )
-          .where(
-            or(
-              eq(documentTypes.officeId, office.id),
-              ilike(documentRequests.documentTypeCode, `${office.code}-%`),
-            ),
-          )
-          .groupBy(documentRequests.status);
+    const officeIds = sectorOffices.map((o) => o.id);
 
-        const statusMap = Object.fromEntries(
-          counts.map((c) => [c.status, Number(c.count)]),
-        );
+    // Single aggregated query across all offices in sector
+    const counts =
+      officeIds.length > 0
+        ? await db
+            .select({
+              officeId: documentTypes.officeId,
+              status: documentRequests.status,
+              count: count(),
+            })
+            .from(documentRequests)
+            .innerJoin(
+              documentTypes,
+              eq(documentRequests.documentTypeId, documentTypes.id),
+            )
+            .where(inArray(documentTypes.officeId, officeIds))
+            .groupBy(documentTypes.officeId, documentRequests.status)
+        : [];
 
-        return {
-          officeId: office.id,
-          code: office.code,
-          name: office.name,
-          category: office.category,
-          pending: statusMap["pending"] ?? 0,
-          processing: statusMap["processing"] ?? 0,
-          ready: statusMap["ready"] ?? 0,
-          claimed: statusMap["claimed"] ?? 0,
-          total: Object.values(statusMap).reduce((acc, n) => acc + n, 0),
-        };
-      }),
-    );
+    const countMap: Record<string, Record<string, number>> = {};
+    for (const row of counts) {
+      if (!row.officeId) continue;
+      const officeMap = countMap[row.officeId] ?? (countMap[row.officeId] = {});
+      officeMap[row.status] = Number(row.count);
+    }
+
+    const officeMetrics = sectorOffices.map((office) => {
+      const statusMap = countMap[office.id] ?? {};
+      return {
+        officeId: office.id,
+        code: office.code,
+        name: office.name,
+        category: office.category,
+        pending: statusMap["pending"] ?? 0,
+        processing: statusMap["processing"] ?? 0,
+        ready: statusMap["ready"] ?? 0,
+        claimed: statusMap["claimed"] ?? 0,
+        total: Object.values(statusMap).reduce((acc, n) => acc + n, 0),
+      };
+    });
 
     return res.json({ sector: normalizedSector, offices: officeMetrics });
   } catch (err) {
