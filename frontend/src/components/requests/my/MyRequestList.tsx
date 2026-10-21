@@ -12,8 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import {
   formatClaimPeriod,
+  formatRequestCardData,
   getStepDates,
-  ID_DISPLAY_LENGTH,
   PROGRESS_WIDTH_CLASSES,
   SKELETON_COUNT,
   STATUS_CONFIGS,
@@ -53,6 +53,7 @@ export default function MyRequestList() {
         const config = STATUS_CONFIGS[request.status];
         const stepDates = getStepDates(request);
         const claimPeriod = formatClaimPeriod(request.releaseDate);
+        const cardData = formatRequestCardData(request);
         const progressPercent = Math.round(
           (config.completedSteps / STEP_LABELS.length) * 100,
         );
@@ -80,21 +81,22 @@ export default function MyRequestList() {
                       />
                       {config.label}
                     </Badge>
-                    <span className="font-mono text-sm text-muted-foreground">
-                      ID: #{request.id.slice(0, ID_DISPLAY_LENGTH)}
+                    <span className="font-mono text-sm font-semibold text-foreground">
+                      {cardData.referenceNumber}
                     </span>
-                    {request && (
-                      <Badge
-                        variant="default"
-                        className={cn(
-                          BADGE_BASE,
-
-                          TONES["neutral"].badge,
-                        )}
-                      >
-                        Express Priority
-                      </Badge>
-                    )}
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        BADGE_BASE,
+                        cardData.isPaid
+                          ? TONES["emerald"].badge
+                          : cardData.amountNumber > 0
+                            ? TONES["amber"].badge
+                            : TONES["neutral"].badge,
+                      )}
+                    >
+                      {cardData.paymentStatusText}
+                    </Badge>
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">
                     {request.documentName}
@@ -105,32 +107,24 @@ export default function MyRequestList() {
                       <span className="font-medium text-foreground">
                         {request.purpose}
                       </span>
-                      {request && " • Authenticated Seal Required"}
                     </p>
                   )}
                 </div>
 
-                {config.canClaim && request && (
-                  <div className="flex shrink-0 flex-col items-end gap-1 rounded-xl bg-muted px-6 py-4">
-                    <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                      Designated Window
+                <div className="flex shrink-0 flex-col items-end gap-1 rounded-xl bg-muted px-6 py-4">
+                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {config.canClaim ? "Pickup Office" : "Processing Office"}
+                  </span>
+                  <span className="text-base font-bold text-primary text-right max-w-[260px] truncate">
+                    {cardData.officeName}
+                  </span>
+                  {request.releaseDate && (
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      <Clock className="size-3.5" aria-hidden="true" />
+                      Target: {request.releaseDate}
                     </span>
-                    <span className="text-2xl font-bold text-primary">
-                      College of Science
-                    </span>
-                    {request != null && (
-                      <span
-                        className={cn(
-                          "flex items-center gap-2 text-sm font-medium",
-                          TONES[config.tone].value,
-                        )}
-                      >
-                        <Clock className="size-4" aria-hidden="true" />
-                        Average wait: ~ mins
-                      </span>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col gap-3 rounded-xl bg-muted px-6 py-5">
@@ -200,15 +194,24 @@ export default function MyRequestList() {
 
                 {config.canClaim && (
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="text-base"
-                      aria-label={`Download PDF for ${request.documentName}`}
-                    >
-                      <Download className="size-5" aria-hidden="true" />
-                      Download PDF
-                    </Button>
+                    {request.releasePdfUrl ? (
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="text-base"
+                        asChild
+                      >
+                        <a
+                          href={request.releasePdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Download PDF for ${request.documentName}`}
+                        >
+                          <Download className="size-5" aria-hidden="true" />
+                          Download PDF
+                        </a>
+                      </Button>
+                    ) : null}
                     <Button
                       size="lg"
                       className="text-base"

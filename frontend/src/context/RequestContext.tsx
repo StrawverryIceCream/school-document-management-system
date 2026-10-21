@@ -21,6 +21,9 @@ export interface RequestContextType {
   setSearch: (value: string) => void;
   statusFilter: StatusFilter;
   setStatusFilter: (value: StatusFilter) => void;
+  officeFilter: string;
+  setOfficeFilter: (value: string) => void;
+  officeOptions: string[];
   windowFilter: string;
   setWindowFilter: (value: string) => void;
   windowOptions: string[];

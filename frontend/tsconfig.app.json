@@ -23,5 +23,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../Boards.tsx"]
+  "include": ["src", "../Boards.tsx"],
+  "exclude": ["src/**/__tests__/*", "src/tests/*"]
 }

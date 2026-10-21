@@ -2,7 +2,7 @@ import { getAllRequests } from "@/api/requests";
 import type { RequestRow } from "@/context/DashboardContext";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
 
-import { normalizeRequestRow } from "@/lib/requests";
+import { filterRequestsByOffice, normalizeRequestRow } from "@/lib/requests";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function RequestProvider({ children }: { children: React.ReactNode }) {
@@ -12,6 +12,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [officeFilter, setOfficeFilter] = useState("all");
   const [windowFilter, setWindowFilter] = useState("all");
   const [dataSourceNote, setDataSourceNote] = useState(
     "Loading request records from the backend...",
@@ -71,6 +72,18 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     void Promise.resolve().then(refreshRequests);
   }, [refreshRequests]);
 
+  const officeOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          requests
+            .map((request) => request.officeCode || request.officeName)
+            .filter((value): value is string => Boolean(value && value.trim())),
+        ),
+      ).sort((left, right) => left.localeCompare(right)),
+    [requests],
+  );
+
   const windowOptions = useMemo(
     () =>
       Array.from(
@@ -86,7 +99,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return requests.filter((request) => {
+    const searchAndStatusFiltered = requests.filter((request) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         [request.applicant, request.document, request.id, request.course ?? ""]
@@ -100,7 +113,9 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
 
       return matchesSearch && matchesStatus && matchesWindow;
     });
-  }, [requests, search, statusFilter, windowFilter]);
+
+    return filterRequestsByOffice(searchAndStatusFiltered, officeFilter);
+  }, [requests, search, statusFilter, windowFilter, officeFilter]);
 
   const summary = useMemo(
     () => ({
@@ -127,6 +142,9 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
         setSearch,
         statusFilter,
         setStatusFilter,
+        officeFilter,
+        setOfficeFilter,
+        officeOptions,
         windowFilter,
         setWindowFilter,
         windowOptions,

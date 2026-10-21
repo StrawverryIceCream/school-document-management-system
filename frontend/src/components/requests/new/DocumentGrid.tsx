@@ -13,16 +13,20 @@ import { formatPeso } from "@/lib/format";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { CARD_HOVER_LIFT, cn } from "@/lib/utils";
 
+import { useAuth } from "@/hooks/useAuth";
+import { isDocumentEligible } from "@/lib/documents/eligibility";
+
 const CHIP_CLASS_NAME = "rounded-lg px-3 py-1.5 font-medium";
 
 export default function DocumentGrid() {
+  const { user } = useAuth();
   const { documents, loading, error, refreshDocument } = useDocument();
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Inactive document types can't be requested, so they never reach the grid
+  // Inactive or ineligible document types can't be requested
   const requestableDocuments = documents.filter(
-    (documentType) => documentType.isActive,
+    (documentType) => isDocumentEligible(documentType, user),
   );
 
   if (loading) {

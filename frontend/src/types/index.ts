@@ -287,6 +287,8 @@ export interface DocumentType extends Timestamps {
     sector: string;
   } | null;
   category: UserCategory;
+  allowedCategories?: string[] | null;
+  allowedStudentStatuses?: string[] | null;
   office: Office;
   description: string | null;
   instructions: string | null;

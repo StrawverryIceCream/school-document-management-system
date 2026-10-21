@@ -27,3 +27,17 @@ _Avoid_: Applicant, customer, client
 **Office Staff**:
 An institutional user assigned to a specific office who reviews, processes, and marks document requests.
 _Avoid_: Agent, worker, clerk
+
+## Request and Student View
+
+**Student Status**:
+The academic standing of a student user (regular, irregular, graduating, alumni) determining record entitlement.
+_Avoid_: Enrollment type, student level, year tier
+
+**Document Eligibility**:
+The role and student status criteria defining whether a document type is available for filing by a specific user.
+_Avoid_: Permission level, record accessibility
+
+**Office Shortcut**:
+A one-click filter preset that scopes the global request view to an institutional office or the user's home office.
+_Avoid_: Quick link, bookmark tab
