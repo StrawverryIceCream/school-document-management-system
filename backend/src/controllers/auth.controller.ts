@@ -377,6 +377,8 @@ export const signup = async (
     }
 
     req.session.userId = user.id;
+    req.session.role = user.role;
+    req.session.officeId = user.officeId ?? null;
     req.session.save((err) => {
       if (err) {
         return res.status(500).json({ error: "Failed to start session" });
@@ -426,6 +428,8 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
     req.session.userId = user.id;
+    req.session.role = user.role;
+    req.session.officeId = user.officeId ?? null;
     req.session.save((err) => {
       if (err) {
         return res.status(500).json({ error: "Failed to start session" });

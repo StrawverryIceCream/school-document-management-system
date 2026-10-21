@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db/db.js";
 import authRouter from "./routes/auth.routes.js";
 import usersRouter from "./routes/users.routes.js";
 import documentRouter from "./routes/documents.routes.js";
@@ -26,8 +28,15 @@ app.use(
   }),
 );
 app.use(express.json());
+const PgSession = connectPgSimple(session);
+
 app.use(
   session({
+    store: new PgSession({
+      pool: pool as any,
+      tableName: "user_sessions",
+      createTableIfMissing: true,
+    }),
     secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
