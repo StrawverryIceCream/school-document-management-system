@@ -21,6 +21,10 @@ function AvailableDocuments({
       title: document.name,
       description: document.description ?? "",
       price: Number(document.fee),
+      turnaround:
+        document.processingDays && document.processingDays > 0
+          ? `${document.processingDays} days`
+          : "Same-day",
     }),
   );
 

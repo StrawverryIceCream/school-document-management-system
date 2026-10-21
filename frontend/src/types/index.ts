@@ -279,6 +279,13 @@ export interface DocumentType extends Timestamps {
   id: UUID;
   code: string;
   name: string;
+  officeId?: UUID | null;
+  officeRecord?: {
+    id: string;
+    code: string;
+    name: string;
+    sector: string;
+  } | null;
   category: UserCategory;
   office: Office;
   description: string | null;

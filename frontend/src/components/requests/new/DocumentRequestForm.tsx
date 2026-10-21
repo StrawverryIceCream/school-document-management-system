@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   BookOpen,
+  Building2,
   Clock,
+  Copy,
   FileCheck2,
   ShieldAlert,
 } from "lucide-react";
@@ -15,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import type { DocumentType, RequiredFieldValues } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
+import { formatPeso } from "@/lib/format";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import RequestWizardHeader from "./RequestWizardHeader";
@@ -109,6 +113,28 @@ export default function DocumentRequestForm({
     }
   }
 
+  const fee = Number(document.fee);
+  const isFree = !Number.isFinite(fee) || fee <= 0;
+  const feeLabel = isFree ? "Free (No fee)" : formatPeso(fee);
+
+  const officeName =
+    document.officeRecord?.name ??
+    document.officeRecord?.code ??
+    document.office ??
+    "University Office";
+
+  const processingDays = document.processingDays ?? 3;
+  const turnaroundLabel =
+    processingDays > 0
+      ? `${processingDays} working ${processingDays === 1 ? "day" : "days"}`
+      : "Same-day issuance";
+
+  const maxCopies = document.maxCopies ?? 1;
+  const copyLabel =
+    maxCopies > 1
+      ? `Up to ${maxCopies} copies`
+      : "Single copy issuance";
+
   return (
     <div className="h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
       <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-6">
@@ -120,6 +146,8 @@ export default function DocumentRequestForm({
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
               <BookOpen className="size-3.5" />
               <span>Registry Form Engine</span>
+              <span>•</span>
+              <span className="font-mono">{document.code}</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               Document Details: {document.name}
@@ -130,12 +158,37 @@ export default function DocumentRequestForm({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" className={cn(BADGE_BASE, TONES.brand.badge)}>
-              {document.office}
+            <Badge
+              variant="secondary"
+              className={cn(BADGE_BASE, TONES.sky.badge)}
+              title={officeName}
+            >
+              <Building2 className="size-3 mr-1" />
+              {officeName}
             </Badge>
-            <Badge variant="secondary" className={cn(BADGE_BASE, TONES.sky.badge)}>
+            <Badge
+              variant="secondary"
+              className={cn(
+                BADGE_BASE,
+                isFree ? TONES.emerald.badge : TONES.amber.badge,
+              )}
+            >
+              <Banknote className="size-3 mr-1" />
+              {feeLabel}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className={cn(BADGE_BASE, TONES.neutral.badge)}
+            >
               <Clock className="size-3 mr-1" />
-              {document.processingDays} {document.processingDays === 1 ? "day" : "days"} turnaround
+              {turnaroundLabel}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className={cn(BADGE_BASE, TONES.neutral.badge)}
+            >
+              <Copy className="size-3 mr-1" />
+              {copyLabel}
             </Badge>
           </div>
         </Card>
@@ -194,6 +247,7 @@ export default function DocumentRequestForm({
             value={deliveryMethod}
             onChange={setDeliveryMethod}
             disabled={submitting}
+            officeName={officeName}
           />
 
           {/* Section E: Applicant Declaration */}

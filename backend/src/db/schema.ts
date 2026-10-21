@@ -804,9 +804,16 @@ export const staffWindowsRelations = relations(staffWindows, ({ one }) => ({
   }),
 }));
 
-export const documentTypesRelations = relations(documentTypes, ({ many }) => ({
-  requests: many(documentRequests),
-}));
+export const documentTypesRelations = relations(
+  documentTypes,
+  ({ one, many }) => ({
+    officeRecord: one(offices, {
+      fields: [documentTypes.officeId],
+      references: [offices.id],
+    }),
+    requests: many(documentRequests),
+  }),
+);
 
 export const documentRequestsRelations = relations(
   documentRequests,

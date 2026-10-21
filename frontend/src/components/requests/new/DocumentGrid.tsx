@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useDocument } from "@/hooks/useDocument";
 import {
-  DEFAULT_DOCUMENT_META,
-  DOCUMENT_META_BY_CODE,
-  FEE_PENDING_LABEL,
   getRequestFormPath,
   NO_DESCRIPTION_LABEL,
 } from "@/lib/documents";
@@ -58,21 +55,40 @@ export default function DocumentGrid() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {requestableDocuments.map((documentType) => {
-        const meta =
-          DOCUMENT_META_BY_CODE[documentType.code.toUpperCase()] ??
-          DEFAULT_DOCUMENT_META;
         const isSelected = documentType.id === selectedId;
         const fee = Number(documentType.fee);
-        const feeLabel =
-          Number.isFinite(fee) && fee > 0 ? formatPeso(fee) : FEE_PENDING_LABEL;
-        const CopyIcon = meta.copyIcon;
+        const isFree = !Number.isFinite(fee) || fee <= 0;
+        const feeLabel = isFree ? "Free (No fee)" : formatPeso(fee);
+
+        const officeName =
+          documentType.officeRecord?.name ??
+          documentType.officeRecord?.code ??
+          documentType.office ??
+          "University Office";
+        const officeCode =
+          documentType.officeRecord?.code ??
+          (documentType.code.includes("-")
+            ? documentType.code.split("-")[0]
+            : "OUR");
+
+        const processingDays = documentType.processingDays ?? 3;
+        const turnaroundLabel =
+          processingDays > 0
+            ? `${processingDays} working ${processingDays === 1 ? "day" : "days"}`
+            : "Same-day issuance";
+
+        const maxCopies = documentType.maxCopies ?? 1;
+        const copyLabel =
+          maxCopies > 1
+            ? `Up to ${maxCopies} copies`
+            : "Single copy issuance";
 
         return (
           <Card
             key={documentType.id}
             className={cn(
-              "h-100 gap-5 rounded-2xl border-2 p-6 shadow-sm transition-colors",
-              isSelected ? "border-primary" : "border-transparent",
+              "flex flex-col justify-between gap-4 rounded-2xl border-2 p-6 shadow-sm transition-colors",
+              isSelected ? "border-primary" : "border-border",
               CARD_HOVER_LIFT,
             )}
           >
@@ -81,7 +97,7 @@ export default function DocumentGrid() {
                 variant="secondary"
                 className={cn(
                   BADGE_BASE,
-                  "rounded-lg",
+                  "rounded-lg font-mono",
                   isSelected ? TONES.brand.badge : TONES.neutral.badge,
                 )}
               >
@@ -89,15 +105,16 @@ export default function DocumentGrid() {
               </Badge>
               <Badge
                 variant="secondary"
-                className={cn(BADGE_BASE, TONES[meta.officeTone].badge)}
+                className={cn(BADGE_BASE, TONES.sky.badge)}
+                title={officeName}
               >
-                {meta.office}
+                {officeCode}
               </Badge>
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="line-clamp-2 text-2xl font-bold leading-snug text-foreground">
+                <h3 className="line-clamp-2 text-xl font-bold leading-snug text-foreground">
                   {documentType.name}
                 </h3>
                 {isSelected && (
@@ -107,43 +124,49 @@ export default function DocumentGrid() {
                   />
                 )}
               </div>
-              <p className="line-clamp-3 text-base text-muted-foreground">
-                {documentType.description ?? NO_DESCRIPTION_LABEL}
+              <p className="line-clamp-2 text-sm text-muted-foreground">
+                {documentType.description || NO_DESCRIPTION_LABEL}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground/80 truncate" title={officeName}>
+                Issuing: {officeName}
               </p>
             </div>
 
-            <div className="flex flex-col items-start gap-2">
+            <div className="flex flex-col items-start gap-2 pt-2 border-t border-border/50">
               <Badge
                 variant="secondary"
                 className={cn(BADGE_BASE, CHIP_CLASS_NAME, TONES.neutral.badge)}
               >
                 <Clock className="size-4" aria-hidden="true" />
-                {meta.turnaround}
+                {turnaroundLabel}
               </Badge>
               <Badge
                 variant="secondary"
-                className={cn(BADGE_BASE, CHIP_CLASS_NAME, TONES.neutral.badge)}
+                className={cn(
+                  BADGE_BASE,
+                  CHIP_CLASS_NAME,
+                  isFree ? TONES.emerald.badge : TONES.amber.badge,
+                )}
               >
                 <Banknote className="size-4" aria-hidden="true" />
                 Fee: {feeLabel}
               </Badge>
               <Badge
-                variant="default"
+                variant="secondary"
                 className={cn(
                   BADGE_BASE,
                   CHIP_CLASS_NAME,
-                  TONES[meta.copyTone].badge,
+                  TONES.neutral.badge,
                 )}
               >
-                <CopyIcon className="size-4" aria-hidden="true" />
-                {meta.copyLabel}
+                {copyLabel}
               </Badge>
             </div>
 
             <Button
               size="lg"
               variant={isSelected ? "default" : "outline"}
-              className="mt-auto w-full text-base font-semibold h-11"
+              className="mt-2 w-full text-base font-semibold h-11"
               aria-pressed={isSelected}
               onClick={() =>
                 isSelected

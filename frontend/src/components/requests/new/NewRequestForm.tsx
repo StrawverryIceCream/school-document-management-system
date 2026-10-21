@@ -160,11 +160,16 @@ function NewRequestForm() {
     return <p className="p-6 text-muted-foreground">Document not found.</p>;
   }
 
-  const feeLabel =
-    Number.isFinite(Number(document.fee)) && Number(document.fee) > 0
-      ? formatPeso(Number(document.fee))
-      : "To be confirmed";
-  const paymentRequired = Number(document.fee) > 0;
+  const fee = Number(document.fee);
+  const isFree = !Number.isFinite(fee) || fee <= 0;
+  const feeLabel = isFree ? "Free (₱0.00)" : formatPeso(fee);
+  const paymentRequired = !isFree;
+
+  const officeName =
+    document.officeRecord?.name ??
+    document.officeRecord?.code ??
+    document.office ??
+    "University Office";
 
   if (step === "form") {
     return <DocumentRequestForm document={document} onSubmit={handleSubmit} />;
@@ -197,7 +202,7 @@ function NewRequestForm() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-base font-semibold">
-                    Payment Verification by Registrar
+                    Payment Verification by {officeName}
                   </p>
                   <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
                     Upload your receipt after payment. Staff will verify it
@@ -263,8 +268,7 @@ function NewRequestForm() {
                         Need assistance with your billing?
                       </p>
                       <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
-                        For fee or payment questions, contact the Registrar&apos;s
-                        Office before submitting your receipt.
+                        For fee or payment questions, contact the {officeName} before submitting your receipt.
                       </p>
                     </div>
                   </Card>
@@ -301,12 +305,16 @@ function NewRequestForm() {
                 documentName={document.name}
                 feeLabel={feeLabel}
                 paymentRequired={paymentRequired}
+                officeName={officeName}
+                processingDays={document.processingDays}
               />
               <PaymentRequestSummary
                 documentName={document.name}
                 feeLabel={feeLabel}
                 formData={formData ?? {}}
                 paymentRequired={paymentRequired}
+                officeName={officeName}
+                processingDays={document.processingDays}
               />
             </div>
           )}

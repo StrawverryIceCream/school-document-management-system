@@ -14,6 +14,8 @@ interface PaymentRequestSummaryProps {
   feeLabel: string;
   formData: Record<string, FormDataValue>;
   paymentRequired: boolean;
+  officeName?: string;
+  processingDays?: number;
 }
 
 function getPurpose(formData: Record<string, FormDataValue>): string {
@@ -30,12 +32,26 @@ function PaymentRequestSummary({
   feeLabel,
   formData,
   paymentRequired,
+  officeName,
+  processingDays,
 }: PaymentRequestSummaryProps) {
+  const turnaroundLabel =
+    processingDays !== undefined
+      ? processingDays > 0
+        ? `${processingDays} working ${processingDays === 1 ? "day" : "days"}`
+        : "Same-day issuance"
+      : undefined;
+
   const details = [
     ["Requested item", documentName],
+    ["Issuing office", officeName ?? "University Office"],
+    ...(turnaroundLabel ? [["Processing turnaround", turnaroundLabel]] : []),
     ["Intended purpose", getPurpose(formData)],
     ["Filing timestamp", "Created after submission"],
-    ["Target release", "Set by Registrar"],
+    [
+      "Target release",
+      turnaroundLabel ? `Estimated ${turnaroundLabel}` : "Set by Office",
+    ],
     ["Assigned counter", "To be assigned"],
   ];
 
@@ -104,7 +120,7 @@ function PaymentRequestSummary({
               paymentRequired
                 ? "Upload an official payment receipt for verification."
                 : "No payment receipt is required for this request.",
-              "Follow the Registrar's instructions when collecting your document.",
+              `Follow the ${officeName ?? "issuing office"}'s instructions when collecting your document.`,
             ].map((requirement) => (
               <li
                 key={requirement}

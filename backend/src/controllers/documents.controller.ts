@@ -45,6 +45,16 @@ export async function getAllDocument(req: Request, res: Response) {
     const [allDocuments, totalResult] = await Promise.all([
       db.query.documentTypes.findMany({
         where: whereClause,
+        with: {
+          officeRecord: {
+            columns: {
+              id: true,
+              code: true,
+              name: true,
+              sector: true,
+            },
+          },
+        },
         orderBy: (documentTypes, { desc }) => [desc(documentTypes.createdAt)],
         limit: limitNum,
         offset,
@@ -78,6 +88,16 @@ export async function getDocumentById(
 
     const document = await db.query.documentTypes.findFirst({
       where: eq(documentTypes.id, id),
+      with: {
+        officeRecord: {
+          columns: {
+            id: true,
+            code: true,
+            name: true,
+            sector: true,
+          },
+        },
+      },
     });
 
     if (!document) {

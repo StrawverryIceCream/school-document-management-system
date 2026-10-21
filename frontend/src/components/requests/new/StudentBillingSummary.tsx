@@ -6,14 +6,25 @@ interface StudentBillingSummaryProps {
   documentName: string;
   feeLabel: string;
   paymentRequired: boolean;
+  officeName?: string;
+  processingDays?: number;
 }
 
 function StudentBillingSummary({
   documentName,
   feeLabel,
   paymentRequired,
+  officeName,
+  processingDays,
 }: StudentBillingSummaryProps) {
   const { user } = useAuth();
+
+  const turnaroundLabel =
+    processingDays !== undefined
+      ? processingDays > 0
+        ? `${processingDays} working ${processingDays === 1 ? "day" : "days"}`
+        : "Same-day issuance"
+      : undefined;
 
   return (
     <Card className="gap-3 rounded-xl border-0 p-4 shadow-sm">
@@ -58,9 +69,21 @@ function StudentBillingSummary({
         <div className="flex items-start justify-between gap-3 text-sm">
           <span className="text-muted-foreground">{documentName}</span>
           <span className="shrink-0 font-medium">
-            {paymentRequired ? feeLabel : "No payment required"}
+            {paymentRequired ? feeLabel : "Free (₱0.00)"}
           </span>
         </div>
+        {officeName && (
+          <div className="flex items-center justify-between gap-3 border-t pt-2 text-sm">
+            <span className="text-muted-foreground">Issuing office</span>
+            <span className="font-medium text-foreground">{officeName}</span>
+          </div>
+        )}
+        {turnaroundLabel && (
+          <div className="flex items-center justify-between gap-3 border-t pt-2 text-sm">
+            <span className="text-muted-foreground">Processing estimate</span>
+            <span className="font-medium text-foreground">{turnaroundLabel}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between gap-3 border-t pt-2 text-sm">
           <span className="text-muted-foreground">Additional fees</span>
           <span className="font-medium">None listed</span>

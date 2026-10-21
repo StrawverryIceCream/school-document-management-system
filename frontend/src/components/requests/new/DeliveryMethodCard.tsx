@@ -11,17 +11,19 @@ interface DeliveryMethodCardProps {
   value: DeliveryMethod;
   onChange: (method: DeliveryMethod) => void;
   disabled?: boolean;
+  officeName?: string;
 }
 
 export default function DeliveryMethodCard({
   value,
   onChange,
   disabled,
+  officeName,
 }: DeliveryMethodCardProps) {
   const options = [
     {
       id: "pickup",
-      title: "Campus Window Pickup (Registrar Main Hall)",
+      title: `Campus Window Pickup (${officeName || "Registrar Main Hall"})`,
       badge: "Recommended",
       badgeTone: TONES.emerald.badge,
       desc: "Direct handoff upon presentation of mobile QR voucher and University Student ID",
