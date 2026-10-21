@@ -21,7 +21,6 @@ const MyRequest = lazy(() => import("./pages/MyRequest"));
 const Logs = lazy(() => import("./pages/Logs"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
-const WindowRequestReview = lazy(() => import("./pages/WindowRequestReview"));
 const SectorPage = lazy(() => import("./pages/SectorPage"));
 const SectorRequestReview = lazy(() => import("./pages/SectorRequestReview"));
 
@@ -116,7 +115,7 @@ export default function App() {
                 />
                 <Route
                   path="/windows/:collegeId/requests/:requestId"
-                  element={<WindowRequestReview />}
+                  element={<Navigate to="/sectors/ovpaa/colleges" replace />}
                 />
                 <Route
                   path="/administration"
