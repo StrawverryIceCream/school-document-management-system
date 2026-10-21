@@ -19,7 +19,10 @@ export default function SectorPage() {
   useEffect(() => {
     let cancelled = false;
 
-    getAllRequests({ limit: 100 })
+    getAllRequests({
+      sector: sector?.code,
+      limit: 100,
+    })
       .then((res) => {
         if (!cancelled) {
           setRequests(res.data);
@@ -40,7 +43,7 @@ export default function SectorPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sector?.code]);
 
   if (!sector) {
     return <Navigate to="/sectors/ovpaf/admin-services" replace />;

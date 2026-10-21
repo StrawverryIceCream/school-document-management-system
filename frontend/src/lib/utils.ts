@@ -1,5 +1,9 @@
-// Re-exported so components can keep importing cn from here.
-export { cn } from "cn";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 import { useLocation } from "react-router-dom";
 
 export function useCurrentRouteLabel() {

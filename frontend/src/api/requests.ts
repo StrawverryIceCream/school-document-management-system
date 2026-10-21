@@ -29,6 +29,9 @@ export interface GetAllRequestsParams {
   userId?: string;
   college?: string;
   collegeId?: string;
+  officeId?: string;
+  officeCode?: string;
+  sector?: string;
   page?: number;
   limit?: number;
 }
@@ -84,6 +87,9 @@ export async function getAllRequests(
   if (params.userId) searchParams.set("userId", params.userId);
   if (params.college) searchParams.set("college", params.college);
   if (params.collegeId) searchParams.set("collegeId", params.collegeId);
+  if (params.officeId) searchParams.set("officeId", params.officeId);
+  if (params.officeCode) searchParams.set("officeCode", params.officeCode);
+  if (params.sector) searchParams.set("sector", params.sector);
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 
