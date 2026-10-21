@@ -371,7 +371,18 @@ export async function getAllRequests(
               college: { columns: { id: true, code: true, name: true } },
             },
           },
-          documentType: true,
+          documentType: {
+            with: {
+              officeRecord: {
+                columns: {
+                  id: true,
+                  code: true,
+                  name: true,
+                  sector: true,
+                },
+              },
+            },
+          },
         },
         orderBy: [desc(documentRequests.createdAt)],
         limit: limitNum,
