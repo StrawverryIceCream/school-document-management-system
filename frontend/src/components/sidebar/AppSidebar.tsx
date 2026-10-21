@@ -1,10 +1,7 @@
 import {
-  AppWindow,
   Archive,
-  BuildingComplex,
   FileInputIcon,
   FolderCog,
-  IdCard,
   LayoutDashboard,
   Logs,
   Notebook,
@@ -26,6 +23,7 @@ import NavItems from "./NavItems";
 import NavSecondary from "./NavSecondary";
 import NavUser from "./NavUser";
 import NavMain from "./NavMain";
+import NavSectors from "./NavSectors";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/types";
 import { NavLink } from "react-router-dom";
@@ -51,24 +49,6 @@ const navItems: NavItem[] = [
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["admin", "staff"],
-  },
-  {
-    title: "Windows",
-    url: "/windows",
-    icon: AppWindow,
-    roles: ["admin", "staff"],
-  },
-  {
-    title: "Administration",
-    url: "/administration",
-    icon: BuildingComplex,
-    roles: ["admin", "staff"],
-  },
-  {
-    title: "Human Resource",
-    url: "/human-resource",
-    icon: IdCard,
     roles: ["admin", "staff"],
   },
   {
@@ -153,6 +133,7 @@ function AppSidebar() {
       <SidebarContent>
         <NavMain items={navMain} />
         {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
+        {(user.role === "admin" || user.role === "staff") && <NavSectors />}
         {permittedNavConfigs.length > 0 && (
           <NavConfig items={permittedNavConfigs} />
         )}

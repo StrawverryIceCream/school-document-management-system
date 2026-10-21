@@ -18,7 +18,6 @@ export default function SectorPage() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
     getAllRequests({ limit: 100 })
       .then((res) => {
