@@ -5,17 +5,15 @@ import {
   PackageCheck,
   AlertTriangle,
   Wallet,
-  Gauge,
-  TrendingUp,
+  Files,
 } from "lucide-react";
 import StatCard from "@/components/shared/StatCard";
 
 export default function StatsOverview() {
-  const { stats, loading, error } = useDashboard();
+  const { stats, requests, loading, error } = useDashboard();
 
   if (error) return null;
 
-  const urgentCount = stats?.immediateBacklog ?? 0;
   const overdueCount = stats?.slaWarning ?? 0;
   const revenueDisplay =
     (stats?.totalRevenue ?? 0) >= 10000
@@ -23,6 +21,20 @@ export default function StatsOverview() {
       : `₱${(stats?.totalRevenue ?? 0).toLocaleString()}`;
 
   const kpis = [
+    {
+      id: "totalVolume",
+      label: "Total Volume",
+      value: requests.length,
+      icon: Files,
+      tone: "brand" as const,
+      topBarColor: "bg-primary",
+      tag: {
+        label: `${stats?.efficiencyRate ?? 100}% Rate`,
+        tone: "emerald" as const,
+        className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+      },
+      caption: `${stats?.claimed ?? 0} completed / ${stats?.pending ?? 0} pending`,
+    },
     {
       id: "immediateBacklog",
       label: "Immediate Backlog",
@@ -35,7 +47,7 @@ export default function StatsOverview() {
         tone: "amber" as const,
         className: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
       },
-      caption: `${urgentCount} urgent / pending review`,
+      caption: `${stats?.pending ?? 0} pending review`,
     },
     {
       id: "inProduction",
@@ -49,7 +61,7 @@ export default function StatsOverview() {
         tone: "brand" as const,
         className: "bg-sky-500/10 text-sky-700 dark:text-sky-400",
       },
-      caption: "Dry seal & registrar signoff",
+      caption: "Dry seal & officer signoff",
     },
     {
       id: "readyForRelease",
@@ -59,55 +71,47 @@ export default function StatsOverview() {
       tone: "emerald" as const,
       topBarColor: "bg-emerald-500",
       tag: {
-        label: "Available",
+        label: "For Pickup",
         tone: "emerald" as const,
         className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
       },
-      caption: "Windows 1 to 6 pickup counters",
+      caption: "Counter & office release",
     },
     {
       id: "slaWarning",
-      label: "SLA Warning",
+      label: "SLA At-Risk",
       value: overdueCount,
-      valueClassName: overdueCount > 0 ? "text-rose-600 dark:text-rose-400" : undefined,
+      valueClassName:
+        overdueCount > 0 ? "text-rose-600 dark:text-rose-400" : undefined,
       icon: AlertTriangle,
       tone: "red" as const,
       topBarColor: "bg-rose-500",
       tag: {
-        label: ">3d Late",
-        tone: "red" as const,
-        className: "bg-rose-500/10 text-rose-700 dark:text-rose-400",
+        label: overdueCount > 0 ? "Delayed" : "On Track",
+        tone: (overdueCount > 0 ? "red" : "emerald") as const,
+        className:
+          overdueCount > 0
+            ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"
+            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
       },
-      caption: overdueCount > 0 ? `${overdueCount} cases past turnaround` : "Turnaround within standard",
+      caption:
+        overdueCount > 0
+          ? `${overdueCount} cases past turnaround`
+          : `Avg turnaround: ${stats?.avgTurnaroundDays ?? 1.6}d`,
     },
     {
       id: "documentRevenue",
-      label: "Document Revenue",
+      label: "Settled Revenue",
       value: revenueDisplay,
       icon: Wallet,
-      tone: "amber" as const,
-      topBarColor: "bg-orange-500",
+      tone: "emerald" as const,
+      topBarColor: "bg-emerald-600",
       tag: {
-        label: "+14.8%",
-        icon: TrendingUp,
+        label: `${stats?.settledTransactions ?? 0} Paid`,
         tone: "emerald" as const,
         className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
       },
-      caption: `${stats?.settledTransactions ?? 0} settled transactions`,
-    },
-    {
-      id: "efficiencyRate",
-      label: "Efficiency Rate",
-      value: `${stats?.efficiencyRate ?? 100}%`,
-      icon: Gauge,
-      tone: "brand" as const,
-      topBarColor: "bg-primary",
-      tag: {
-        label: "Target 95%",
-        tone: "emerald" as const,
-        className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-      },
-      caption: `Avg. turnaround: ${stats?.avgTurnaroundDays ?? 1.6}d`,
+      caption: `${stats?.settledTransactions ?? 0} verified payments`,
     },
   ];
 
