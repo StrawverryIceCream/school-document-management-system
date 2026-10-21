@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { and, count, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, asc, count, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
   documentRequests,
@@ -14,7 +14,7 @@ const CATEGORIES = officeCategoryEnum.enumValues;
 
 export async function getAllOffices(req: Request, res: Response) {
   try {
-    const { sector, category, search, isActive } = req.query;
+    const { sector, category, search, isActive, activeOnly } = req.query;
 
     const conditions = [];
 
@@ -52,10 +52,40 @@ export async function getAllOffices(req: Request, res: Response) {
 
     const whereClause = conditions.length ? and(...conditions) : undefined;
 
-    const data = await db.query.offices.findMany({
-      where: whereClause,
-      orderBy: (offices, { asc }) => [asc(offices.code)],
-    });
+    const rows = await db
+      .select({
+        id: offices.id,
+        code: offices.code,
+        name: offices.name,
+        sector: offices.sector,
+        category: offices.category,
+        officialEmail: offices.officialEmail,
+        parentOfficeId: offices.parentOfficeId,
+        isActive: offices.isActive,
+        createdAt: offices.createdAt,
+        updatedAt: offices.updatedAt,
+        activeDocumentCount: count(documentTypes.id),
+      })
+      .from(offices)
+      .leftJoin(
+        documentTypes,
+        and(
+          eq(documentTypes.officeId, offices.id),
+          eq(documentTypes.isActive, true),
+        ),
+      )
+      .where(whereClause)
+      .groupBy(offices.id)
+      .orderBy(asc(offices.code));
+
+    let data = rows.map((r) => ({
+      ...r,
+      activeDocumentCount: Number(r.activeDocumentCount) || 0,
+    }));
+
+    if (activeOnly === "true") {
+      data = data.filter((o) => o.activeDocumentCount > 0);
+    }
 
     return res.json({ data, total: data.length });
   } catch (err) {
