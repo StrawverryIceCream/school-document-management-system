@@ -15,8 +15,8 @@ export default function RequestSearchToolbar() {
     <SearchToolbar
       value={search}
       onChange={setSearch}
-      placeholder="Search student name or ID..."
-      ariaLabel="Search student name or ID"
+      placeholder="Search applicant name, ID, or reference..."
+      ariaLabel="Search applicant name, ID, or reference"
     >
       <Select
         value={status ?? "all"}
