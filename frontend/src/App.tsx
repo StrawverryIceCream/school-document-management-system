@@ -1,12 +1,11 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import AppLayout from "./components/layout/AppLayout";
 import RequireAuth from "./components/guards/RequireAuth";
 import RequireRole from "./components/guards/RequireRole";
 import { AuthProvider } from "./provider/AuthProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
-import { WindowViewProvider } from "./provider/WindowViewProvider";
 import { RequestWizardProvider } from "./provider/WixardRequestProvider";
 import type { UserRole } from "./types";
 
@@ -16,16 +15,15 @@ const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Accounts = lazy(() => import("./pages/Accounts"));
 const DocumentManager = lazy(() => import("./pages/DocumentManager"));
-const Windows = lazy(() => import("./pages/Windows"));
 const AllRequest = lazy(() => import("./pages/AllRequest"));
 const NewRequest = lazy(() => import("./pages/NewRequest"));
 const MyRequest = lazy(() => import("./pages/MyRequest"));
 const Logs = lazy(() => import("./pages/Logs"));
 const Notifications = lazy(() => import("./pages/Notifications"));
-const HumanResource = lazy(() => import("./pages/HumanResource"));
-const Administration = lazy(() => import("./pages/Administration"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const WindowRequestReview = lazy(() => import("./pages/WindowRequestReview"));
+const SectorPage = lazy(() => import("./pages/SectorPage"));
+const SectorRequestReview = lazy(() => import("./pages/SectorRequestReview"));
 
 const STAFF_ROLES: UserRole[] = ["admin", "staff"];
 const ADMIN_ROLES: UserRole[] = ["admin"];
@@ -89,38 +87,44 @@ export default function App() {
                     </RequireRole>
                   }
                 />
+                {/* Sector & Office Workspace Routes */}
                 <Route
-                  path="/windows"
+                  path="/sectors/:sectorId/:divisionId?/:officeId?"
                   element={
                     <RequireRole allowedRoles={STAFF_ROLES}>
-                      <WindowViewProvider>
-                        <Outlet />
-                      </WindowViewProvider>
-                    </RequireRole>
-                  }
-                >
-                  <Route index element={<Windows />} />
-                  <Route path=":collegeId" element={<Windows />} />
-                  <Route
-                    path=":collegeId/requests/:requestId"
-                    element={<WindowRequestReview />}
-                  />
-                </Route>
-                <Route
-                  path="/administration"
-                  element={
-                    <RequireRole allowedRoles={STAFF_ROLES}>
-                      <Administration />
+                      <SectorPage />
                     </RequireRole>
                   }
                 />
                 <Route
-                  path="/human-resource"
+                  path="/sectors/:sectorId/:divisionId/:officeId/requests/:requestId"
                   element={
                     <RequireRole allowedRoles={STAFF_ROLES}>
-                      <HumanResource />
+                      <SectorRequestReview />
                     </RequireRole>
                   }
+                />
+
+                {/* Legacy Workspace Route Redirects */}
+                <Route
+                  path="/windows"
+                  element={<Navigate to="/sectors/ovpaa/colleges" replace />}
+                />
+                <Route
+                  path="/windows/:collegeId"
+                  element={<Navigate to="/sectors/ovpaa/colleges" replace />}
+                />
+                <Route
+                  path="/windows/:collegeId/requests/:requestId"
+                  element={<WindowRequestReview />}
+                />
+                <Route
+                  path="/administration"
+                  element={<Navigate to="/sectors/oup/governance" replace />}
+                />
+                <Route
+                  path="/human-resource"
+                  element={<Navigate to="/sectors/ovpaf/admin-services/hrmo" replace />}
                 />
                 <Route
                   path="/all-request"
