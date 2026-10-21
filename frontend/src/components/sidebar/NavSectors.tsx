@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Eye, EyeOff } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -14,15 +14,20 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { SECTORS } from "@/lib/sectors/sectors-config";
+import { useSectorsVisibility } from "@/hooks/useSectorsVisibility";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function NavSectors() {
   const location = useLocation();
+  const { visibleSectors, showInactive, setShowInactive } =
+    useSectorsVisibility();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const [openSectors, setOpenSectors] = useState<Record<string, boolean>>(
     () => {
       const initial: Record<string, boolean> = {};
-      for (const sector of SECTORS) {
+      for (const sector of visibleSectors) {
         if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
           initial[sector.id] = true;
         }
@@ -33,23 +38,55 @@ export default function NavSectors() {
 
   // Auto-expand sector when navigating to it
   useEffect(() => {
-    for (const sector of SECTORS) {
+    for (const sector of visibleSectors) {
       if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
         setOpenSectors((prev) =>
           prev[sector.id] ? prev : { ...prev, [sector.id]: true },
         );
       }
     }
-  }, [location.pathname]);
+  }, [location.pathname, visibleSectors]);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="font-mono">SECTORS</SidebarGroupLabel>
+      <div className="flex items-center justify-between pr-2">
+        <SidebarGroupLabel className="font-mono">SECTORS</SidebarGroupLabel>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => setShowInactive(!showInactive)}
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-mono text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            title={
+              showInactive
+                ? "Showing all units (click to view active only)"
+                : "Showing active units only (click to view all)"
+            }
+            aria-label={
+              showInactive
+                ? "Show only active sectors and divisions"
+                : "Show all configured sectors and divisions"
+            }
+          >
+            {showInactive ? (
+              <Eye className="size-3.5 text-primary" />
+            ) : (
+              <EyeOff className="size-3.5" />
+            )}
+            <span className="hidden group-data-[collapsible=icon]:hidden lg:inline">
+              {showInactive ? "All" : "Active"}
+            </span>
+          </button>
+        )}
+      </div>
+
       <SidebarGroupContent className="flex flex-col gap-1">
         <SidebarMenu>
-          {SECTORS.map((sector) => {
+          {visibleSectors.map((sector) => {
             const Icon = sector.icon;
-            const targetUrl = `/sectors/${sector.id}/${sector.divisions[0].id}`;
+            const firstDivisionId = sector.divisions[0]?.id;
+            const targetUrl = firstDivisionId
+              ? `/sectors/${sector.id}/${firstDivisionId}`
+              : `/sectors/${sector.id}`;
             const isSectorActive = location.pathname.startsWith(
               `/sectors/${sector.id}`,
             );
@@ -79,26 +116,28 @@ export default function NavSectors() {
                   </NavLink>
                 </SidebarMenuButton>
 
-                <SidebarMenuAction
-                  aria-label={`Toggle ${sector.code} divisions`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setOpenSectors((prev) => ({
-                      ...prev,
-                      [sector.id]: !prev[sector.id],
-                    }));
-                  }}
-                >
-                  <ChevronRight
-                    className={cn(
-                      "size-4 transition-transform duration-200",
-                      isOpen && "rotate-90",
-                    )}
-                  />
-                </SidebarMenuAction>
+                {sector.divisions.length > 0 && (
+                  <SidebarMenuAction
+                    aria-label={`Toggle ${sector.code} divisions`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setOpenSectors((prev) => ({
+                        ...prev,
+                        [sector.id]: !prev[sector.id],
+                      }));
+                    }}
+                  >
+                    <ChevronRight
+                      className={cn(
+                        "size-4 transition-transform duration-200",
+                        isOpen && "rotate-90",
+                      )}
+                    />
+                  </SidebarMenuAction>
+                )}
 
-                {isOpen && (
+                {isOpen && sector.divisions.length > 0 && (
                   <SidebarMenuSub>
                     {sector.divisions.map((division) => {
                       const divisionUrl = `/sectors/${sector.id}/${division.id}`;
