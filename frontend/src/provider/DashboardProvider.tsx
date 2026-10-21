@@ -79,9 +79,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const now = Date.now();
     const daysMap: Record<string, number> = {
       "24h": 1,
+      today: 1,
       "7d": 7,
+      week: 7,
       "30d": 30,
       "90d": 90,
+      sem: 120,
     };
     const maxDays = daysMap[timeRange] ?? 90;
     const cutoff = now - maxDays * 24 * 60 * 60 * 1000;
