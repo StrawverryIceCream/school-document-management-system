@@ -4,6 +4,7 @@ import { db } from "../db/db.js";
 import {
   requestRoutingSteps,
   routingStepStatusEnum,
+  users,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
 
@@ -67,6 +68,26 @@ export async function updateRoutingStepStatus(
 
     if (!currentStep) {
       return res.status(404).json({ error: "Routing step not found" });
+    }
+
+    const callerId = req.session.userId;
+    if (!callerId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const caller = await db.query.users.findFirst({
+      where: (table, { eq }) => eq(table.id, callerId),
+      columns: { role: true, officeId: true },
+    });
+
+    if (!caller) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+
+    if (caller.role !== "admin" && caller.officeId !== currentStep.officeId) {
+      return res.status(403).json({
+        error: "You are not authorized to act on routing steps for this office",
+      });
     }
 
     const [updatedStep] = await db
