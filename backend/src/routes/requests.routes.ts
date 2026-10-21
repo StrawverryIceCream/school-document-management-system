@@ -12,6 +12,10 @@ import {
   getRequestById,
   updateRequestStatus,
 } from "../controllers/requests.controller.js";
+import {
+  getRequestRoutingSteps,
+  updateRoutingStepStatus,
+} from "../controllers/routingSteps.controller.js";
 
 const router = Router();
 
@@ -25,6 +29,18 @@ router.post("/", createRequest);
 
 router.get("/", requireRoles("admin", "staff"), getAllRequests);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getRequestById);
+router.get(
+  "/:id/steps",
+  requireRoles("admin", "staff"),
+  validateId,
+  getRequestRoutingSteps,
+);
+router.patch(
+  "/:id/steps/:stepId",
+  requireRoles("admin", "staff"),
+  validateId,
+  updateRoutingStepStatus,
+);
 router.patch(
   "/:id/status",
   requireRoles("admin", "staff"),
