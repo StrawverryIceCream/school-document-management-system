@@ -164,13 +164,31 @@ export function normalizeRequestRow(
   const windowId =
     raw.window?.name ?? (raw.windowId ? String(raw.windowId) : undefined);
 
+  const officeCode =
+    raw.documentType?.officeRecord?.code ??
+    (raw.documentTypeCode?.includes("-")
+      ? raw.documentTypeCode.split("-")[0]
+      : undefined);
+  const officeName = raw.documentType?.officeRecord?.name ?? undefined;
+  const sector = raw.documentType?.officeRecord?.sector ?? undefined;
+  const officeId =
+    raw.documentType?.officeRecord?.id ??
+    raw.documentType?.officeId ??
+    undefined;
+
   return {
     id: String(raw.id),
     referenceNumber: raw.referenceNumber,
     userId: raw.user?.id,
     applicant: raw.user?.fullName ?? "Unknown applicant",
     studentId: raw.user?.studentId,
-    document: raw.documentType?.name ?? raw.documentTypeName ?? "Unknown document",
+    document:
+      raw.documentType?.name ?? raw.documentTypeName ?? "Unknown document",
+    documentTypeCode: raw.documentTypeCode ?? raw.documentType?.code,
+    officeId: officeId ? String(officeId) : undefined,
+    officeCode,
+    officeName,
+    sector,
     status: raw.status,
     submittedAt: raw.createdAt ? new Date(raw.createdAt).toISOString() : null,
     releaseDate: raw.releaseDate,

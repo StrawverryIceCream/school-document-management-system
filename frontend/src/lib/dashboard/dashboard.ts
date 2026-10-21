@@ -85,3 +85,70 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
 
   return stats;
 }
+
+export const SECTOR_LABELS: Record<string, string> = {
+  OVPAA: "Academic Affairs",
+  OVPAF: "Administration & Finance",
+  OVPRE: "Research & Extension",
+  OVPPD: "Planning & Development",
+  OP: "Office of the President",
+};
+
+export function buildSectorWorkloadData(requests: RequestRow[]) {
+  const sectorMap: Record<
+    string,
+    { total: number; active: number; completed: number; revenue: number }
+  > = {
+    OVPAA: { total: 0, active: 0, completed: 0, revenue: 0 },
+    OVPAF: { total: 0, active: 0, completed: 0, revenue: 0 },
+    OVPRE: { total: 0, active: 0, completed: 0, revenue: 0 },
+    OVPPD: { total: 0, active: 0, completed: 0, revenue: 0 },
+  };
+
+  for (const req of requests) {
+    const rawSector = (req.sector || "").toUpperCase();
+    let targetSector = "OVPAA";
+    if (
+      rawSector.includes("AF") ||
+      rawSector.includes("FINANCE") ||
+      rawSector.includes("ADMIN")
+    ) {
+      targetSector = "OVPAF";
+    } else if (rawSector.includes("RE") || rawSector.includes("RESEARCH")) {
+      targetSector = "OVPRE";
+    } else if (rawSector.includes("PD") || rawSector.includes("PLANNING")) {
+      targetSector = "OVPPD";
+    } else if (rawSector in sectorMap) {
+      targetSector = rawSector;
+    }
+
+    const group = sectorMap[targetSector];
+    group.total += 1;
+    if (req.status === "claimed") {
+      group.completed += 1;
+    } else if (
+      req.status !== "cancelled" &&
+      (req.status as string) !== "rejected"
+    ) {
+      group.active += 1;
+    }
+
+    const fee = Number(req.amountDue) || 0;
+    if (
+      fee > 0 &&
+      req.status !== "cancelled" &&
+      (req.status as string) !== "rejected"
+    ) {
+      group.revenue += fee;
+    }
+  }
+
+  return Object.entries(sectorMap).map(([sector, counts]) => ({
+    sector,
+    label: SECTOR_LABELS[sector] || sector,
+    totalRequests: counts.total,
+    activeRequests: counts.active,
+    completedRequests: counts.completed,
+    revenue: counts.revenue,
+  }));
+}

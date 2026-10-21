@@ -38,8 +38,22 @@ export interface RequestRow {
   course?: string | null;
   section?: string | null;
   windowId?: string | null;
+  officeId?: string | null;
+  officeCode?: string | null;
+  officeName?: string | null;
+  sector?: string | null;
+  documentTypeCode?: string;
   paymentMethod?: "cash" | "online";
   feeRequired?: boolean;
+}
+
+export interface SectorWorkloadItem {
+  sector: string;
+  label: string;
+  totalRequests: number;
+  activeRequests: number;
+  completedRequests: number;
+  revenue: number;
 }
 
 export interface DashboardContextType {
@@ -51,6 +65,8 @@ export interface DashboardContextType {
   setSearch: (value: string) => void;
   status: string | undefined;
   setStatus: (value: string | undefined) => void;
+  sector: string | undefined;
+  setSector: (value: string | undefined) => void;
   timeRange: string;
   setTimeRange: (value: string) => void;
   refreshDashboard: () => Promise<void>;

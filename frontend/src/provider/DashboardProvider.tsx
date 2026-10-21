@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardContext } from "@/context/DashboardContext";
 import type { DashboardStats, RequestRow } from "@/context/DashboardContext";
 import { getAllRequests } from "@/api/requests";
@@ -12,6 +12,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [sector, setSector] = useState<string | undefined>(undefined);
   const [timeRange, setTimeRange] = useState("90d");
   const [debounceSearch, setDebounceSearch] = useState(search);
 
@@ -19,9 +20,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const response = await getAllRequests({
       search: debounceSearch,
       status: status as RequestStatus | undefined,
+      sector,
+      limit: 200,
     });
     return response.data.map(normalizeRequestRow);
-  }, [debounceSearch, status]);
+  }, [debounceSearch, status, sector]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebounceSearch(search), 250);
@@ -70,21 +73,41 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // No separate stats endpoint exists — derive counts from whatever
-  // requests we already fetched instead.
-  const stats: DashboardStats | null = error ? null : buildStatsFromRequests(requests);
+  // Filter requests based on time range selection
+  const filteredRequests = useMemo(() => {
+    if (timeRange === "all") return requests;
+    const now = Date.now();
+    const daysMap: Record<string, number> = {
+      "24h": 1,
+      "7d": 7,
+      "30d": 30,
+      "90d": 90,
+    };
+    const maxDays = daysMap[timeRange] ?? 90;
+    const cutoff = now - maxDays * 24 * 60 * 60 * 1000;
+    return requests.filter((r) => {
+      if (!r.submittedAt) return true;
+      return new Date(r.submittedAt).getTime() >= cutoff;
+    });
+  }, [requests, timeRange]);
+
+  const stats: DashboardStats | null = error
+    ? null
+    : buildStatsFromRequests(filteredRequests);
 
   return (
     <DashboardContext.Provider
       value={{
         stats,
-        requests,
+        requests: filteredRequests,
         loading,
         error,
         search,
         setSearch,
         status,
         setStatus,
+        sector,
+        setSector,
         timeRange,
         setTimeRange,
         refreshDashboard,
