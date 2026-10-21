@@ -7,6 +7,7 @@ import RequireRole from "./components/guards/RequireRole";
 import { AuthProvider } from "./provider/AuthProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { RequestWizardProvider } from "./provider/WixardRequestProvider";
+import { SectorsVisibilityProvider } from "./context/SectorsVisibilityContext";
 import type { UserRole } from "./types";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -46,7 +47,9 @@ export default function App() {
               <Route
                 element={
                   <RequireAuth>
-                    <AppLayout />
+                    <SectorsVisibilityProvider>
+                      <AppLayout />
+                    </SectorsVisibilityProvider>
                   </RequireAuth>
                 }
               >

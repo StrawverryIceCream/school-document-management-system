@@ -1,0 +1,85 @@
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { getOffices, type OfficeRecord } from "@/api/offices";
+import { SECTORS, type SectorConfig } from "@/lib/sectors/sectors-config";
+import { filterActiveSectors } from "@/lib/sectors/sectors-visibility";
+import { useAuth } from "@/hooks/useAuth";
+
+interface SectorsVisibilityContextType {
+  offices: OfficeRecord[];
+  activeOfficeCodes: Set<string>;
+  visibleSectors: SectorConfig[];
+  showInactive: boolean;
+  setShowInactive: (show: boolean) => void;
+  loading: boolean;
+  refreshOffices: () => Promise<void>;
+  isOfficeActiveByCode: (code: string) => boolean;
+}
+
+export const SectorsVisibilityContext =
+  createContext<SectorsVisibilityContextType | null>(null);
+
+export function SectorsVisibilityProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user } = useAuth();
+  const [offices, setOffices] = useState<OfficeRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
+
+  const isAdmin = user?.role === "admin";
+
+  const loadOffices = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getOffices({ withActiveDocs: true });
+      setOffices(data);
+    } catch (err) {
+      console.error("Failed to load offices for visibility:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadOffices();
+  }, [loadOffices]);
+
+  const activeOfficeCodes = useMemo(() => {
+    const set = new Set<string>();
+    for (const office of offices) {
+      if (office.isActive && office.activeDocumentCount > 0) {
+        set.add(office.code.toUpperCase());
+      }
+    }
+    return set;
+  }, [offices]);
+
+  const isOfficeActiveByCode = useCallback(
+    (code: string) => activeOfficeCodes.has(code.toUpperCase()),
+    [activeOfficeCodes],
+  );
+
+  const visibleSectors = useMemo(() => {
+    const allowInactive = isAdmin && showInactive;
+    return filterActiveSectors(SECTORS, activeOfficeCodes, allowInactive);
+  }, [activeOfficeCodes, isAdmin, showInactive]);
+
+  return (
+    <SectorsVisibilityContext.Provider
+      value={{
+        offices,
+        activeOfficeCodes,
+        visibleSectors,
+        showInactive,
+        setShowInactive,
+        loading,
+        refreshOffices: loadOffices,
+        isOfficeActiveByCode,
+      }}
+    >
+      {children}
+    </SectorsVisibilityContext.Provider>
+  );
+}
