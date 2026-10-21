@@ -64,18 +64,26 @@ export async function getAllOffices(req: Request, res: Response) {
   }
 }
 
-export async function getOfficeByIdOrCode(req: Request, res: Response) {
+export async function getOfficeByIdOrCode(
+  req: Request<{ idOrCode: string }>,
+  res: Response,
+) {
   try {
-    const { idOrCode } = req.params;
+    const idOrCode = req.params.idOrCode;
+    if (typeof idOrCode !== "string") {
+      return res.status(400).json({ error: "Invalid office identifier" });
+    }
+
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
         idOrCode,
       );
 
     const office = await db.query.offices.findFirst({
-      where: isUuid
-        ? eq(offices.id, idOrCode)
-        : eq(offices.code, idOrCode.toUpperCase()),
+      where: (table, { eq }) =>
+        isUuid
+          ? eq(table.id, idOrCode)
+          : eq(table.code, idOrCode.toUpperCase()),
       with: {
         childOffices: true,
       },
@@ -92,9 +100,16 @@ export async function getOfficeByIdOrCode(req: Request, res: Response) {
   }
 }
 
-export async function getSectorMetrics(req: Request, res: Response) {
+export async function getSectorMetrics(
+  req: Request<{ sectorId: string }>,
+  res: Response,
+) {
   try {
-    const { sectorId } = req.params;
+    const sectorId = req.params.sectorId;
+    if (typeof sectorId !== "string") {
+      return res.status(400).json({ error: "Invalid sector ID" });
+    }
+
     const normalizedSector = sectorId.toUpperCase();
 
     if (!(SECTORS as readonly string[]).includes(normalizedSector)) {
@@ -102,10 +117,11 @@ export async function getSectorMetrics(req: Request, res: Response) {
     }
 
     const sectorOffices = await db.query.offices.findMany({
-      where: and(
-        eq(offices.sector, normalizedSector as (typeof SECTORS)[number]),
-        eq(offices.isActive, true),
-      ),
+      where: (table, { and, eq }) =>
+        and(
+          eq(table.sector, normalizedSector as (typeof SECTORS)[number]),
+          eq(table.isActive, true),
+        ),
     });
 
     const officeMetrics = await Promise.all(

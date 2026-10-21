@@ -6,6 +6,9 @@ import {
   documentRequests,
   documentTypes,
   notifications,
+  offices,
+  officeSectorEnum,
+  requestRoutingSteps,
   requestStatusEnum,
   users,
 } from "../db/schema.js";
@@ -60,6 +63,9 @@ interface GetRequestsQuery {
   userId?: string;
   college?: string;
   collegeId?: string;
+  officeId?: string;
+  officeCode?: string;
+  sector?: string;
   page?: string;
   limit?: string;
 }
@@ -189,8 +195,18 @@ export async function getAllRequests(
   res: Response,
 ) {
   try {
-    const { search, status, userId, college, collegeId, page, limit } =
-      req.query;
+    const {
+      search,
+      status,
+      userId,
+      college,
+      collegeId,
+      officeId,
+      officeCode,
+      sector,
+      page,
+      limit,
+    } = req.query;
     const { pageNum, limitNum, offset } = parsePagination(page, limit);
 
     if (userId !== undefined && !isUuid(userId)) {
@@ -198,6 +214,81 @@ export async function getAllRequests(
     }
 
     const conditions = [];
+
+    if (officeId && isUuid(officeId)) {
+      conditions.push(
+        or(
+          // 1. Direct document type assignment
+          inArray(
+            documentRequests.documentTypeId,
+            db
+              .select({ id: documentTypes.id })
+              .from(documentTypes)
+              .where(eq(documentTypes.officeId, officeId)),
+          ),
+          // 2. Active routing step assigned to this office
+          inArray(
+            documentRequests.id,
+            db
+              .select({ requestId: requestRoutingSteps.requestId })
+              .from(requestRoutingSteps)
+              .where(
+                and(
+                  eq(requestRoutingSteps.officeId, officeId),
+                  eq(requestRoutingSteps.status, "pending"),
+                ),
+              ),
+          ),
+        ),
+      );
+    } else if (typeof officeCode === "string" && officeCode.trim()) {
+      const code = officeCode.trim().toUpperCase();
+      conditions.push(
+        or(
+          ilike(documentRequests.documentTypeCode, `${code}-%`),
+          // Academic colleges
+          inArray(
+            documentRequests.userId,
+            db
+              .select({ id: users.id })
+              .from(users)
+              .innerJoin(colleges, eq(users.collegeId, colleges.id))
+              .where(ilike(colleges.code, code)),
+          ),
+          // Faculty/staff department match
+          inArray(
+            documentRequests.userId,
+            db
+              .select({ id: users.id })
+              .from(users)
+              .where(ilike(users.department, `%${code}%`)),
+          ),
+        ),
+      );
+    }
+
+    if (typeof sector === "string" && sector.trim()) {
+      const normSector = sector.trim().toUpperCase();
+      if (
+        (officeSectorEnum.enumValues as readonly string[]).includes(normSector)
+      ) {
+        conditions.push(
+          inArray(
+            documentRequests.documentTypeId,
+            db
+              .select({ id: documentTypes.id })
+              .from(documentTypes)
+              .innerJoin(offices, eq(documentTypes.officeId, offices.id))
+              .where(
+                eq(
+                  offices.sector,
+                  normSector as (typeof officeSectorEnum.enumValues)[number],
+                ),
+              ),
+          ),
+        );
+      }
+    }
 
     const targetCollege = collegeId ?? college;
     if (typeof targetCollege === "string" && targetCollege.trim()) {
