@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { AppWindow, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -19,15 +19,17 @@ import { SECTORS } from "@/lib/sectors/sectors-config";
 export default function NavSectors() {
   const location = useLocation();
 
-  const [openSectors, setOpenSectors] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    for (const sector of SECTORS) {
-      if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
-        initial[sector.id] = true;
+  const [openSectors, setOpenSectors] = useState<Record<string, boolean>>(
+    () => {
+      const initial: Record<string, boolean> = {};
+      for (const sector of SECTORS) {
+        if (location.pathname.startsWith(`/sectors/${sector.id}`)) {
+          initial[sector.id] = true;
+        }
       }
-    }
-    return initial;
-  });
+      return initial;
+    },
+  );
 
   // Auto-expand sector when navigating to it
   useEffect(() => {
@@ -63,7 +65,10 @@ export default function NavSectors() {
                   <NavLink
                     to={targetUrl}
                     onClick={() => {
-                      setOpenSectors((prev) => ({ ...prev, [sector.id]: true }));
+                      setOpenSectors((prev) => ({
+                        ...prev,
+                        [sector.id]: true,
+                      }));
                     }}
                   >
                     <Icon className="size-5 shrink-0" />
@@ -99,11 +104,7 @@ export default function NavSectors() {
                       const divisionUrl = `/sectors/${sector.id}/${division.id}`;
                       const isDivisionActive =
                         location.pathname.startsWith(divisionUrl);
-                      const isWindowsDivision =
-                        sector.id === "ovpaa" && division.id === "colleges";
-                      const label = isWindowsDivision
-                        ? "Windows (Colleges)"
-                        : division.name;
+                      const label = division.name;
 
                       return (
                         <SidebarMenuSubItem key={division.id}>
@@ -115,9 +116,6 @@ export default function NavSectors() {
                               to={divisionUrl}
                               className="flex items-center gap-2"
                             >
-                              {isWindowsDivision && (
-                                <AppWindow className="size-3.5 shrink-0 text-primary" />
-                              )}
                               <span className="truncate">{label}</span>
                             </NavLink>
                           </SidebarMenuSubButton>
