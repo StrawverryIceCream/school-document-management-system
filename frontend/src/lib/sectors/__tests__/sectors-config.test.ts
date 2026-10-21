@@ -14,6 +14,7 @@ function runTests() {
   console.assert(hrmo?.code === "HRMO", `Expected HRMO code, got ${hrmo?.code}`);
 
   const ovpaa = getSector("ovpaa");
+  console.assert(ovpaa !== undefined, "OVPAA sector must exist");
   const colleges = getDivision("ovpaa", "colleges");
   console.assert(colleges?.offices.length === 6, `Expected 6 colleges, got ${colleges?.offices.length}`);
 
