@@ -175,7 +175,18 @@ export async function updateDocumentType(
 ) {
   try {
     const { id } = req.params;
-    const { code, name, description, fee, isActive, requiredFields } = req.body;
+    const {
+      code,
+      name,
+      description,
+      fee,
+      isActive,
+      requiredFields,
+      processingDays,
+      maxCopies,
+      officeId,
+      category,
+    } = req.body;
 
     const updates: Partial<typeof documentTypes.$inferInsert> = {};
 
@@ -185,6 +196,10 @@ export async function updateDocumentType(
     if (fee !== undefined) updates.fee = fee;
     if (isActive !== undefined) updates.isActive = isActive;
     if (requiredFields !== undefined) updates.requiredFields = requiredFields;
+    if (processingDays !== undefined) updates.processingDays = Number(processingDays);
+    if (maxCopies !== undefined) updates.maxCopies = Number(maxCopies);
+    if (officeId !== undefined) updates.officeId = officeId;
+    if (category !== undefined) updates.category = category;
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: "No fields provided to update" });
