@@ -59,3 +59,18 @@ _Avoid_: Window queue, counter traffic, ticket backlog
 **Scoped Workspace**:
 The role-based navigation model that restricts a staff user's sidebar sectors and divisions to their designated office and organizational unit.
 _Avoid_: Siloed view, locked tab, filtered portal
+
+## Accounts and Search
+
+**Unified Account Search**:
+The multi-field query evaluation across user identity (full name, email, student ID) and organizational placement (assigned office code/name, department) within the accounts directory.
+_Avoid_: User filtering, profile lookup, global search
+
+**Account Suspension Lifecycle**:
+The active or suspended operational state of a user account governing authentication access without deleting historical audit trails or submitted records.
+_Avoid_: User disabling, account ban, soft delete
+
+**Role Transition Sanitization**:
+The automatic cleanup and nullification of mutually exclusive role attributes (such as student program records vs. staff office assignments) during user role changes to maintain relational integrity.
+_Avoid_: Credential reset, role switching wipe
+
