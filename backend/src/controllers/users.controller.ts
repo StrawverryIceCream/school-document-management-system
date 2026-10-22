@@ -6,9 +6,17 @@ import { recordAuditLog } from "../services/audit.service.js";
 
 interface UpdateUserBody {
   fullName?: string;
-  studentId?: string;
+  studentId?: string | null;
   role?: "student" | "teacher" | "admin" | "staff";
   email?: string;
+  collegeId?: string | null;
+  courseId?: string | null;
+  section?: string | null;
+  yearLevel?: number | null;
+  studentStatus?: "regular" | "irregular" | "graduating" | "alumni" | null;
+  department?: string | null;
+  office?: "registrar" | "hr" | null;
+  officeId?: string | null;
 }
 
 export async function getAllUsers(req: Request, res: Response) {
@@ -96,9 +104,37 @@ export async function updateUserById(
 ) {
   try {
     const { id } = req.params;
-    const { fullName, studentId, role, email } = req.body;
+    const {
+      fullName,
+      studentId,
+      role,
+      email,
+      department,
+      officeId,
+      office,
+      collegeId,
+      courseId,
+      section,
+      yearLevel,
+      studentStatus,
+    } = req.body;
 
-    if (!fullName && !studentId && !role && !email) {
+    const hasAnyField = [
+      fullName,
+      studentId,
+      role,
+      email,
+      department,
+      officeId,
+      office,
+      collegeId,
+      courseId,
+      section,
+      yearLevel,
+      studentStatus,
+    ].some((f) => f !== undefined);
+
+    if (!hasAnyField) {
       return res
         .status(400)
         .json({ error: "At least one field must be provided for update" });
@@ -144,11 +180,61 @@ export async function updateUserById(
       });
     }
 
+    const targetRole = role ?? existingUser.role;
     const updateData: any = {};
+
     if (fullName !== undefined) updateData.fullName = fullName;
-    if (studentId !== undefined) updateData.studentId = studentId;
-    if (role !== undefined) updateData.role = role;
     if (email !== undefined) updateData.email = email;
+    if (role !== undefined) updateData.role = role;
+
+    if (targetRole === "staff") {
+      const targetOfficeId = officeId !== undefined ? officeId : existingUser.officeId;
+      const targetOffice = office !== undefined ? office : existingUser.office;
+
+      if (!targetOfficeId && !targetOffice) {
+        return res
+          .status(400)
+          .json({ error: "Staff role requires an assigned office" });
+      }
+
+      updateData.officeId = targetOfficeId;
+      updateData.office = targetOffice;
+      // Clear student and teacher credentials
+      updateData.studentId = null;
+      updateData.collegeId = null;
+      updateData.courseId = null;
+      updateData.section = null;
+      updateData.yearLevel = null;
+      updateData.studentStatus = null;
+      updateData.department = null;
+    } else if (targetRole === "teacher") {
+      updateData.department = department !== undefined ? department : existingUser.department;
+      // Clear staff and student credentials
+      updateData.office = null;
+      updateData.officeId = null;
+      updateData.studentId = null;
+      updateData.collegeId = null;
+      updateData.courseId = null;
+      updateData.section = null;
+      updateData.yearLevel = null;
+      updateData.studentStatus = null;
+    } else if (targetRole === "student") {
+      if (studentId !== undefined) updateData.studentId = studentId;
+      if (collegeId !== undefined) updateData.collegeId = collegeId;
+      if (courseId !== undefined) updateData.courseId = courseId;
+      if (section !== undefined) updateData.section = section;
+      if (yearLevel !== undefined) updateData.yearLevel = yearLevel;
+      if (studentStatus !== undefined) updateData.studentStatus = studentStatus;
+      // Clear staff and teacher credentials
+      updateData.office = null;
+      updateData.officeId = null;
+      updateData.department = null;
+    } else if (targetRole === "admin") {
+      updateData.office = null;
+      updateData.officeId = null;
+      updateData.studentId = null;
+      updateData.department = null;
+    }
 
     await db.update(users).set(updateData).where(eq(users.id, id));
 

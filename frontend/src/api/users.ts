@@ -6,11 +6,14 @@ export interface UpdateUserBody {
   studentId?: string | null;
   role?: UserRole;
   email?: string;
-  // null or an empty string clears the field
-  college?: string | null;
-  course?: string | null;
+  collegeId?: string | null;
+  courseId?: string | null;
   section?: string | null;
+  yearLevel?: number | null;
+  studentStatus?: "regular" | "irregular" | "graduating" | "alumni" | null;
   department?: string | null;
+  officeId?: string | null;
+  office?: "registrar" | "hr" | null;
 }
 
 export interface GetAllUsersParams {
