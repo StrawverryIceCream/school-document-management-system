@@ -113,8 +113,10 @@ export default function RequestTable() {
           const officeName =
             req.officeName ||
             route?.office.name ||
-            (req.officeCode ? `Office (${req.officeCode})` : "University Office");
-          const targetUrl = route?.url;
+            (req.officeCode
+              ? `Office (${req.officeCode})`
+              : "University Office");
+          const targetUrl = route ? `${route.url}/requests/${req.id}` : undefined;
 
           const artifact = (
             <div className="group/office inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-card px-2.5 py-1 text-xs shadow-xs transition-colors hover:border-primary/50 hover:bg-muted/60">
