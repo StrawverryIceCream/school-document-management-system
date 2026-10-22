@@ -79,6 +79,7 @@ export default function OfficeRequestTable({
   const [staffList, setStaffList] = useState<User[]>([]);
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
+  const currentUserId = currentUser?.id;
 
   const currentStaffUser = useMemo<User | null>(() => {
     if (!currentUser) return null;
@@ -86,8 +87,8 @@ export default function OfficeRequestTable({
     if (fromList) return fromList;
     return {
       ...currentUser,
-      createdAt: (currentUser as any).createdAt ?? new Date().toISOString(),
-      updatedAt: (currentUser as any).updatedAt ?? new Date().toISOString(),
+      createdAt: (currentUser as unknown as { createdAt?: string }).createdAt ?? new Date().toISOString(),
+      updatedAt: (currentUser as unknown as { updatedAt?: string }).updatedAt ?? new Date().toISOString(),
     } as User;
   }, [currentUser, staffList]);
 
@@ -253,7 +254,7 @@ export default function OfficeRequestTable({
           const isBusy = assigningId === req.id;
           const currentAssignee = req.assignee;
           const isAssignedToMe = Boolean(
-            currentUser?.id && req.assignedTo === currentUser.id,
+            currentUserId && req.assignedTo === currentUserId,
           );
 
           return (
@@ -355,7 +356,7 @@ export default function OfficeRequestTable({
                           </div>
                           <span className="truncate">
                             {staff.fullName}
-                            {staff.id === currentUser?.id ? " (You)" : ""}
+                            {staff.id === currentUserId ? " (You)" : ""}
                           </span>
                         </div>
                         {isSelected && (
@@ -414,7 +415,7 @@ export default function OfficeRequestTable({
       assigningId,
       officeStaff,
       handleAssign,
-      currentUser?.id,
+      currentUserId,
       currentStaffUser,
     ],
   );
