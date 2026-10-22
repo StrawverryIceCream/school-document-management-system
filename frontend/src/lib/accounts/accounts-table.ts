@@ -34,6 +34,7 @@ export const TABLE_COLUMNS: TableColumn[] = [
   { key: "name", label: "Name", className: "min-w-56 max-w-xs" },
   { key: "email", label: "Email", className: "min-w-56 max-w-xs" },
   { key: "role", label: "Role", className: "w-28" },
+  { key: "officeDept", label: "Office / Dept", className: "min-w-36 max-w-xs" },
   { key: "studentId", label: "Student ID", className: "w-36" },
   { key: "status", label: "Status", className: "w-28" },
 ];

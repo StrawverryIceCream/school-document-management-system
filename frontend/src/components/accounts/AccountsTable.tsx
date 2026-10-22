@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
+import { Building2 } from "lucide-react";
 import EditRow from "@/components/accounts/EditRow";
 import EditUser from "@/components/accounts/EditUser";
+import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
@@ -168,6 +170,46 @@ export default function AccountsTable() {
               {ROLE_META[user.role].label}
             </Badge>
           );
+        },
+      },
+      {
+        key: "officeDept",
+        className: "min-w-36 max-w-xs",
+        header: "Office / Dept",
+        cell: (user) => {
+          if (user.role === "staff") {
+            const office =
+              ALL_OFFICES.find((o) => o.id === user.officeId) ||
+              (user.office
+                ? { code: user.office.toUpperCase(), name: user.office }
+                : null);
+            return (
+              <Badge
+                variant="outline"
+                className="gap-1.5 py-0.5 text-xs font-medium"
+              >
+                <Building2 className="size-3 text-muted-foreground" />
+                <span className="truncate max-w-28">
+                  {office?.code || "Staff"}
+                </span>
+              </Badge>
+            );
+          }
+          if (user.role === "teacher") {
+            return (
+              <span className="text-xs text-muted-foreground truncate max-w-36 block">
+                {user.department || "—"}
+              </span>
+            );
+          }
+          if (user.role === "student") {
+            return (
+              <span className="text-xs text-muted-foreground truncate max-w-36 block capitalize">
+                {user.studentStatus || "Student"}
+              </span>
+            );
+          }
+          return <span className="text-xs text-muted-foreground">—</span>;
         },
       },
       {

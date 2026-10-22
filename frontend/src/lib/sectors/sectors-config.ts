@@ -633,6 +633,30 @@ export interface OfficeRouteInfo {
   office: OfficeConfig;
 }
 
+export interface FlatOfficeInfo {
+  id: string;
+  code: string;
+  name: string;
+  sectorId: string;
+  divisionId: string;
+  sectorName: string;
+  divisionName: string;
+}
+
+export const ALL_OFFICES: FlatOfficeInfo[] = SECTORS.flatMap((s) =>
+  s.divisions.flatMap((d) =>
+    d.offices.map((o) => ({
+      id: o.id,
+      code: o.code,
+      name: o.name,
+      sectorId: s.id,
+      divisionId: d.id,
+      sectorName: s.name,
+      divisionName: d.name,
+    })),
+  ),
+);
+
 export function findOfficeRoute(query: {
   officeId?: string | null;
   officeCode?: string | null;
