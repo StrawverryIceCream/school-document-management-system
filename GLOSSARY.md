@@ -60,6 +60,14 @@ _Avoid_: Window queue, counter traffic, ticket backlog
 The role-based navigation model that restricts a staff user's sidebar sectors and divisions to their designated office and organizational unit.
 _Avoid_: Siloed view, locked tab, filtered portal
 
+**Assigned Requests Workspace**:
+A dedicated operational queue and triage surface allowing office staff and administrators to inspect, organize by urgency/status, and review all document requests for which they hold operational custody.
+_Avoid_: My tickets, tasks tab, personal inbox
+
+**Workload Triage**:
+The categorization and prioritization of assigned document requests according to service-level agreement (SLA) deadlines, processing status, and action requirements.
+_Avoid_: Ticket sorting, backlog pruning
+
 ## Accounts and Search
 
 **Unified Account Search**:
