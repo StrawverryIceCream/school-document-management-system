@@ -125,6 +125,34 @@ export async function updateRequestStatus(
   return handleResponse<DocumentRequestRow>(res, url);
 }
 
+export async function assignRequest(
+  id: string,
+  assignedTo: string | null,
+): Promise<DocumentRequestWithRelations> {
+  const url = `/api/requests/${id}/assign`;
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assignedTo }),
+  });
+
+  return handleResponse<DocumentRequestWithRelations>(res, url);
+}
+
+export async function getOfficeStaff(
+  officeIdOrCode: string,
+): Promise<Array<{ id: string; fullName: string; email: string; role: string }>> {
+  const url = `/api/offices/${officeIdOrCode}/staff`;
+
+  const res = await fetch(url, { credentials: "include" });
+  return handleResponse<Array<{ id: string; fullName: string; email: string; role: string }>>(
+    res,
+    url,
+  );
+}
+
 // ---------- Requester (student) ----------
 
 export async function getMyRequests(

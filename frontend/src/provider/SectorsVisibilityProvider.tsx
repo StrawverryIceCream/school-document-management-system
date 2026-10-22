@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getOffices, type OfficeRecord } from "@/api/offices";
 import { SECTORS } from "@/lib/sectors/sectors-config";
-import { filterActiveSectors } from "@/lib/sectors/sectors-visibility";
+import {
+  filterActiveSectors,
+  scopeSectorsForUser,
+} from "@/lib/sectors/sectors-visibility";
 import { useAuth } from "@/hooks/useAuth";
 import { SectorsVisibilityContext } from "@/context/SectorsVisibilityContext";
 
@@ -50,8 +53,9 @@ export function SectorsVisibilityProvider({
 
   const visibleSectors = useMemo(() => {
     const allowInactive = isAdmin && showInactive;
-    return filterActiveSectors(SECTORS, activeOfficeCodes, allowInactive);
-  }, [activeOfficeCodes, isAdmin, showInactive]);
+    const active = filterActiveSectors(SECTORS, activeOfficeCodes, allowInactive);
+    return scopeSectorsForUser(active, user, offices);
+  }, [activeOfficeCodes, isAdmin, showInactive, user, offices]);
 
   return (
     <SectorsVisibilityContext.Provider

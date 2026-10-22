@@ -1,4 +1,4 @@
-import { getAllRequests } from "@/api/requests";
+import { getAllRequests, assignRequest as apiAssignRequest } from "@/api/requests";
 import type { RequestRow } from "@/context/DashboardContext";
 import { RequestContext, type StatusFilter } from "@/context/RequestContext";
 
@@ -129,6 +129,14 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     [requests],
   );
 
+  const assignRequest = useCallback(
+    async (requestId: string, assignedTo: string | null) => {
+      await apiAssignRequest(requestId, assignedTo);
+      await refreshRequests();
+    },
+    [refreshRequests],
+  );
+
   return (
     <RequestContext.Provider
       value={{
@@ -150,6 +158,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
         windowOptions,
         summary,
         refreshRequests,
+        assignRequest,
       }}
     >
       {children}

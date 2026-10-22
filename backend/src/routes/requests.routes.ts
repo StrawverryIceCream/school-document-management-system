@@ -11,6 +11,7 @@ import {
   getMyRequests,
   getRequestById,
   updateRequestStatus,
+  assignRequest,
 } from "../controllers/requests.controller.js";
 import {
   getRequestRoutingSteps,
@@ -46,6 +47,12 @@ router.patch(
   requireRoles("admin", "staff"),
   validateId,
   updateRequestStatus,
+);
+router.patch(
+  "/:id/assign",
+  requireRoles("admin", "staff"),
+  validateId,
+  assignRequest,
 );
 
 export default router;

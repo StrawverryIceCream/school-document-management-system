@@ -207,6 +207,15 @@ export function normalizeRequestRow(
     feeRequired: raw.documentType
       ? Number(raw.documentType.fee) > 0
       : undefined,
+    assignedTo: raw.assignedTo ? String(raw.assignedTo) : undefined,
+    assignee: raw.assignee
+      ? {
+          id: raw.assignee.id,
+          fullName: raw.assignee.fullName,
+          email: raw.assignee.email,
+          role: raw.assignee.role,
+        }
+      : null,
   };
 }
 

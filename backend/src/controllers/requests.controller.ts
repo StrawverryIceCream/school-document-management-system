@@ -15,7 +15,10 @@ import {
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { sendStatusNotificationEmail } from "../services/email.service.js";
-import { notifyOfficeStaff } from "../services/notification.service.js";
+import {
+  createAndDispatchNotification,
+  notifyOfficeStaff,
+} from "../services/notification.service.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -384,6 +387,16 @@ export async function getAllRequests(
               },
             },
           },
+          assignee: {
+            columns: {
+              id: true,
+              fullName: true,
+              email: true,
+              role: true,
+              office: true,
+              officeId: true,
+            },
+          },
           payments: true,
         },
         orderBy: [desc(documentRequests.createdAt)],
@@ -424,6 +437,16 @@ export async function getRequestById(
           columns: REQUESTER_COLUMNS,
           with: {
             college: { columns: { id: true, code: true, name: true } },
+          },
+        },
+        assignee: {
+          columns: {
+            id: true,
+            fullName: true,
+            email: true,
+            role: true,
+            office: true,
+            officeId: true,
           },
         },
         documentType: true,
@@ -875,3 +898,171 @@ export async function cancelMyRequest(
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export interface AssignRequestBody {
+  assignedTo?: string | null;
+  assignedToId?: string | null;
+}
+
+export async function assignRequest(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const actorId = getSessionUserId(req);
+    if (!actorId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!isUuid(id)) {
+      return res.status(400).json({ error: "Invalid request ID" });
+    }
+
+    const body = (req.body ?? {}) as AssignRequestBody;
+    const targetUserId =
+      body.assignedTo !== undefined ? body.assignedTo : body.assignedToId;
+
+    if (
+      targetUserId !== null &&
+      targetUserId !== undefined &&
+      !isUuid(targetUserId)
+    ) {
+      return res.status(400).json({ error: "assignedTo must be a valid UUID or null" });
+    }
+
+    const request = await db.query.documentRequests.findFirst({
+      where: eq(documentRequests.id, id),
+      with: {
+        documentType: {
+          columns: { name: true, officeId: true, office: true },
+        },
+      },
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    const actor = await db.query.users.findFirst({
+      where: eq(users.id, actorId),
+      columns: { id: true, role: true, officeId: true, office: true, fullName: true },
+    });
+
+    if (!actor || (actor.role !== "admin" && actor.role !== "staff")) {
+      return res.status(403).json({ error: "Forbidden: only staff and admins can assign requests" });
+    }
+
+    let targetUser: {
+      id: string;
+      fullName: string;
+      email: string;
+      role: "student" | "teacher" | "admin" | "staff";
+      isActive: boolean;
+      officeId: string | null;
+      office: any;
+    } | null = null;
+
+    if (targetUserId) {
+      const foundTarget = await db.query.users.findFirst({
+        where: eq(users.id, targetUserId),
+        columns: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+          isActive: true,
+          officeId: true,
+          office: true,
+        },
+      });
+
+      if (!foundTarget || !foundTarget.isActive) {
+        return res.status(400).json({ error: "Target staff user not found or inactive" });
+      }
+
+      if (foundTarget.role !== "staff" && foundTarget.role !== "admin") {
+        return res.status(400).json({ error: "Can only assign requests to staff or admin users" });
+      }
+
+      // If actor is staff, enforce office boundaries
+      if (actor.role === "staff") {
+        const reqOfficeId = request.documentType?.officeId;
+        const reqOffice = request.documentType?.office;
+
+        const actorMatchesOffice =
+          !reqOfficeId && !reqOffice
+            ? true
+            : (reqOfficeId && actor.officeId === reqOfficeId) ||
+              (reqOffice && actor.office === reqOffice);
+
+        if (!actorMatchesOffice) {
+          return res.status(403).json({ error: "You can only assign requests belonging to your office" });
+        }
+
+        const targetMatchesOffice =
+          !reqOfficeId && !reqOffice
+            ? true
+            : (reqOfficeId && foundTarget.officeId === reqOfficeId) ||
+              (reqOffice && foundTarget.office === reqOffice);
+
+        if (!targetMatchesOffice) {
+          return res.status(403).json({ error: "Cannot assign request to a user outside this office" });
+        }
+      }
+
+      targetUser = foundTarget;
+    }
+
+    const [updated] = await db
+      .update(documentRequests)
+      .set({
+        assignedTo: targetUserId ?? null,
+        updatedAt: new Date(),
+      })
+      .where(eq(documentRequests.id, id))
+      .returning();
+
+    void recordAuditLog({
+      actorId,
+      action: targetUserId ? "request_assigned" : "request_unassigned",
+      entityType: "request",
+      entityId: id,
+      ipAddress: req.ip,
+      metadata: {
+        previousAssignedTo: request.assignedTo,
+        newAssignedTo: targetUserId ?? null,
+        assigneeName: targetUser?.fullName ?? null,
+        referenceNumber: request.referenceNumber,
+        documentTypeName: request.documentTypeName,
+      },
+    });
+
+    if (targetUserId && targetUserId !== actorId) {
+      void createAndDispatchNotification({
+        userId: targetUserId,
+        senderId: actorId,
+        requestId: id,
+        type: "status_update",
+        title: "Request Assigned",
+        message: `You have been assigned to handle request ${request.referenceNumber} (${request.documentTypeName}).`,
+      });
+    }
+
+    return res.json({
+      ...updated,
+      assignee: targetUser
+        ? {
+            id: targetUser.id,
+            fullName: targetUser.fullName,
+            email: targetUser.email,
+            role: targetUser.role,
+            office: targetUser.office,
+            officeId: targetUser.officeId,
+          }
+        : null,
+    });
+  } catch (err) {
+    console.error("[assignRequest] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+

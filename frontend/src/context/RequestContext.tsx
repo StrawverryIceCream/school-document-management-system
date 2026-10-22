@@ -34,6 +34,7 @@ export interface RequestContextType {
     ready: number;
   };
   refreshRequests: () => Promise<void>;
+  assignRequest: (requestId: string, assignedTo: string | null) => Promise<void>;
 }
 
 export const RequestContext = createContext<RequestContextType | null>(null);

@@ -59,6 +59,17 @@ function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
               />
             </div>
 
+            <div className="grid gap-3 sm:grid-cols-2">
+              <RequestDetailsField
+                label="Assignee"
+                value={request.assignee?.fullName ?? "Unassigned"}
+              />
+              <RequestDetailsField
+                label="Tracking ID"
+                value={request.referenceNumber ?? `#${request.id}`}
+              />
+            </div>
+
             {request.purpose && (
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">

@@ -6,7 +6,9 @@ import {
   documentTypes,
   offices,
   officeCategoryEnum,
+  officeEnum,
   officeSectorEnum,
+  users,
 } from "../db/schema.js";
 
 const SECTORS = officeSectorEnum.enumValues;
@@ -203,3 +205,73 @@ export async function getSectorMetrics(
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function getOfficeStaff(
+  req: Request<{ idOrCode: string }>,
+  res: Response,
+) {
+  try {
+    const idOrCode = req.params.idOrCode;
+    if (typeof idOrCode !== "string") {
+      return res.status(400).json({ error: "Invalid office identifier" });
+    }
+
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        idOrCode,
+      );
+
+    const office = await db.query.offices.findFirst({
+      where: (table, { eq }) =>
+        isUuid
+          ? eq(table.id, idOrCode)
+          : eq(table.code, idOrCode.toUpperCase()),
+      columns: { id: true, code: true, name: true },
+    });
+
+    if (!office) {
+      return res.status(404).json({ error: "Office not found" });
+    }
+
+    const officeEnumValues = officeEnum.enumValues as readonly string[];
+    const legacyOffice =
+      office.code.toUpperCase() === "OUR"
+        ? "registrar"
+        : office.code.toUpperCase() === "HRMO"
+          ? "hr"
+          : officeEnumValues.includes(office.code.toLowerCase())
+            ? office.code.toLowerCase()
+            : null;
+
+    const officeConditions = [eq(users.officeId, office.id)];
+    if (legacyOffice) {
+      officeConditions.push(eq(users.office, legacyOffice as (typeof officeEnum.enumValues)[number]));
+    }
+
+    const staffUsers = await db.query.users.findMany({
+      where: and(
+        eq(users.role, "staff"),
+        eq(users.isActive, true),
+        officeConditions.length === 1
+          ? officeConditions[0]
+          : or(...officeConditions),
+      ),
+      columns: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        office: true,
+        officeId: true,
+        department: true,
+      },
+      orderBy: (table, { asc }) => [asc(table.fullName)],
+    });
+
+    return res.json(staffUsers);
+  } catch (err) {
+    console.error("[getOfficeStaff] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+

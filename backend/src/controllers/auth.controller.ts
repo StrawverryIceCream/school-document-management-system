@@ -56,6 +56,8 @@ function toAuthUser(user: DbUser) {
     yearLevel: user.yearLevel,
     section: user.section,
     department: user.department,
+    office: user.office,
+    officeId: user.officeId,
     contactNumber: user.contactNumber,
   };
 }

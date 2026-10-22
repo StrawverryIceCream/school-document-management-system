@@ -45,6 +45,13 @@ export interface RequestRow {
   documentTypeCode?: string;
   paymentMethod?: "cash" | "online";
   feeRequired?: boolean;
+  assignedTo?: string | null;
+  assignee?: {
+    id: string;
+    fullName: string;
+    email?: string;
+    role?: string;
+  } | null;
 }
 
 export interface SectorWorkloadItem {

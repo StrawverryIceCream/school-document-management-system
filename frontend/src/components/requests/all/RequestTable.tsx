@@ -159,6 +159,33 @@ export default function RequestTable() {
         cell: (req) => req.submittedAt ?? "Not available",
       },
       {
+        key: "assignee",
+        header: "Assignee",
+        className: "w-36 text-xs",
+        cell: (req) => {
+          if (req.assignee) {
+            return (
+              <div
+                className="flex items-center gap-1.5 min-w-0"
+                title={`Assigned to ${req.assignee.fullName}`}
+              >
+                <div className="size-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px] shrink-0">
+                  {req.assignee.fullName.charAt(0).toUpperCase()}
+                </div>
+                <span className="truncate font-medium text-foreground">
+                  {req.assignee.fullName}
+                </span>
+              </div>
+            );
+          }
+          return (
+            <span className="text-muted-foreground/60 italic text-xs">
+              Unassigned
+            </span>
+          );
+        },
+      },
+      {
         key: "status",
         header: "Status",
         className: "w-32",

@@ -4,6 +4,7 @@ import { requireRoles } from "../middleware/requireRoles.js";
 import {
   getAllOffices,
   getOfficeByIdOrCode,
+  getOfficeStaff,
   getSectorMetrics,
 } from "../controllers/offices.controller.js";
 
@@ -15,6 +16,12 @@ router.get(
   requireAuth,
   requireRoles("admin", "staff"),
   getSectorMetrics,
+);
+router.get(
+  "/:idOrCode/staff",
+  requireAuth,
+  requireRoles("admin", "staff"),
+  getOfficeStaff,
 );
 router.get("/:idOrCode", getOfficeByIdOrCode);
 
