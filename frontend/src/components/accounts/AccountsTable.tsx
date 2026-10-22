@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { Building2 } from "lucide-react";
-import EditRow from "@/components/accounts/EditRow";
 import EditUser from "@/components/accounts/EditUser";
 import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
@@ -10,7 +9,6 @@ import TruncatedText from "@/components/shared/TruncatedText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/hooks/useAuth";
 import { useUsers } from "@/hooks/useUsers";
 import {
@@ -36,7 +34,6 @@ import type { User } from "@/types";
 export default function AccountsTable() {
   const { loading, users, error, pagination, setPage } = useUsers();
   const { user: currentUser } = useAuth();
-  const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const selectedOnPage = users.filter((u) => selectedIds.includes(u.id)).length;
@@ -248,53 +245,13 @@ export default function AccountsTable() {
         header: ACTION_COLUMN_LABEL,
         cell: (user) => (
           <div className="flex justify-end">
-            <EditUser
-              user={user}
-              setEdit={(isEditing, userId) =>
-                setEditingUser(isEditing ? userId : null)
-              }
-            />
+            <EditUser user={user} />
           </div>
         ),
       },
     ],
     [users, selectedIds, headerChecked, currentUser],
   );
-
-  const renderCustomRow = (user: User) => {
-    if (editingUser !== user.id) return undefined;
-
-    return (
-      <TableRow key={user.id} className="align-middle bg-muted/20">
-        <TableCell>
-          <Checkbox
-            checked={selectedIds.includes(user.id)}
-            onCheckedChange={(checked) =>
-              setSelectedIds((prev) =>
-                checked === true
-                  ? [...prev, user.id]
-                  : prev.filter((id) => id !== user.id),
-              )
-            }
-            aria-label={`Select ${user.fullName}`}
-          />
-        </TableCell>
-        <TableCell>
-          <CopyableId
-            id={user.id}
-            displayValue={formatShortId(user.id)}
-            label={`Copy ID of ${user.fullName}`}
-          />
-        </TableCell>
-        <EditRow
-          user={user}
-          setEdit={(isEditing, userId) =>
-            setEditingUser(isEditing ? userId : null)
-          }
-        />
-      </TableRow>
-    );
-  };
 
   return (
     <DataTable
@@ -304,7 +261,6 @@ export default function AccountsTable() {
       loading={loading}
       error={error ? `${ERROR_PREFIX} ${error}` : null}
       emptyMessage={EMPTY_MESSAGE}
-      customRow={renderCustomRow}
       pagination={{
         page: pagination.page,
         totalPages: pagination.totalPages,
