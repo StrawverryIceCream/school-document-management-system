@@ -41,3 +41,21 @@ _Avoid_: Permission level, record accessibility
 **Office Shortcut**:
 A one-click filter preset that scopes the global request view to an institutional office or the user's home office.
 _Avoid_: Quick link, bookmark tab
+
+## Staff and Offices
+
+**Staff Delegation**:
+Assigning operational custody of a document request to a specific active staff member within the issuing office.
+_Avoid_: Task dispatch, ticket routing, handing over
+
+**Assignee**:
+The active office staff member currently responsible for processing, inspecting, and completing an assigned document request.
+_Avoid_: Handler, owner, processor
+
+**Office Counter Load**:
+The aggregate volume of active in-flight document requests currently awaiting review, production, or release in an operational office.
+_Avoid_: Window queue, counter traffic, ticket backlog
+
+**Scoped Workspace**:
+The role-based navigation model that restricts a staff user's sidebar sectors and divisions to their designated office and organizational unit.
+_Avoid_: Siloed view, locked tab, filtered portal
