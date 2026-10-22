@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import { db } from "../db/db.js";
 import { users, offices } from "../db/schema.js";
-import { eq, and, ilike, or, count } from "drizzle-orm";
+import { eq, and, ilike, or, count, inArray } from "drizzle-orm";
 import { recordAuditLog } from "../services/audit.service.js";
 
 interface UpdateUserBody {
@@ -9,6 +9,7 @@ interface UpdateUserBody {
   studentId?: string | null;
   role?: "student" | "teacher" | "admin" | "staff";
   email?: string;
+  isActive?: boolean;
   collegeId?: string | null;
   courseId?: string | null;
   section?: string | null;
@@ -32,14 +33,33 @@ export async function getAllUsers(req: Request, res: Response) {
 
     const conditions = [];
 
-    if (search) {
-      conditions.push(
-        or(
-          ilike(users.fullName, `%${search}%`),
-          ilike(users.email, `%${search}%`),
-          ilike(users.studentId, `%${search}%`),
-        ),
-      );
+    if (search && typeof search === "string" && search.trim()) {
+      const searchPattern = `%${search.trim()}%`;
+
+      const matchingOffices = await db
+        .select({ id: offices.id })
+        .from(offices)
+        .where(
+          or(
+            ilike(offices.code, searchPattern),
+            ilike(offices.name, searchPattern),
+          ),
+        );
+
+      const matchingOfficeIds = matchingOffices.map((o) => o.id);
+
+      const searchConditions = [
+        ilike(users.fullName, searchPattern),
+        ilike(users.email, searchPattern),
+        ilike(users.studentId, searchPattern),
+        ilike(users.department, searchPattern),
+      ];
+
+      if (matchingOfficeIds.length > 0) {
+        searchConditions.push(inArray(users.officeId, matchingOfficeIds));
+      }
+
+      conditions.push(or(...searchConditions));
     }
 
     if (role) {
@@ -109,6 +129,7 @@ export async function updateUserById(
       studentId,
       role,
       email,
+      isActive,
       department,
       officeId,
       office,
@@ -124,6 +145,7 @@ export async function updateUserById(
       studentId,
       role,
       email,
+      isActive,
       department,
       officeId,
       office,
@@ -186,6 +208,7 @@ export async function updateUserById(
     if (fullName !== undefined) updateData.fullName = fullName;
     if (email !== undefined) updateData.email = email;
     if (role !== undefined) updateData.role = role;
+    if (isActive !== undefined) updateData.isActive = isActive;
 
     if (targetRole === "staff") {
       const rawOfficeId = officeId !== undefined ? officeId : existingUser.officeId;
@@ -284,9 +307,16 @@ export async function updateUserById(
       },
     });
 
+    const actionLabel =
+      isActive === false
+        ? `Suspended account for ${updatedUser?.fullName ?? id}`
+        : isActive === true
+          ? `Activated account for ${updatedUser?.fullName ?? id}`
+          : `Updated account details for ${updatedUser?.fullName ?? id}`;
+
     void recordAuditLog({
       actorId: req.session.userId ?? null,
-      action: `Updated account details for ${updatedUser?.fullName ?? id}`,
+      action: actionLabel,
       entityType: "account",
       entityId: id,
       ipAddress: req.ip,

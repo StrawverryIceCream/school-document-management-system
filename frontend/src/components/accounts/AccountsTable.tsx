@@ -13,7 +13,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useUsers } from "@/hooks/useUsers";
 import {
-  ACCOUNT_STATUS,
   ACTION_COLUMN_LABEL,
   EMPTY_MESSAGE,
   ERROR_PREFIX,
@@ -247,18 +246,29 @@ export default function AccountsTable() {
         key: "status",
         className: "w-28",
         header: "Status",
-        cell: () => (
-          <Badge
-            variant="secondary"
-            className="gap-2 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-          >
-            <span
-              className="size-1.5 rounded-full shrink-0 bg-emerald-600"
-              aria-hidden="true"
-            />
-            {ACCOUNT_STATUS.label}
-          </Badge>
-        ),
+        cell: (user) => {
+          const isActive = user.isActive !== false;
+          return (
+            <Badge
+              variant="secondary"
+              className={cn(
+                "gap-2 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
+                isActive
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                  : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
+              )}
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full shrink-0",
+                  isActive ? "bg-emerald-600" : "bg-red-600",
+                )}
+                aria-hidden="true"
+              />
+              {isActive ? "Active" : "Suspended"}
+            </Badge>
+          );
+        },
       },
       {
         key: "actions",

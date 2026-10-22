@@ -155,6 +155,10 @@ export const me = async (req: Request, res: Response) => {
     });
 
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user.isActive) {
+      req.session.destroy(() => {});
+      return res.status(403).json({ error: "Account has been suspended" });
+    }
 
     return res.json(toAuthUser(user));
   } catch (err) {
@@ -425,6 +429,12 @@ export const login = async (req: Request, res: Response) => {
       where: eq(users.email, email),
     });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    if (!user.isActive) {
+      return res
+        .status(403)
+        .json({ error: "Account has been suspended. Please contact an administrator." });
+    }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });

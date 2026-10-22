@@ -6,6 +6,7 @@ export interface UpdateUserBody {
   studentId?: string | null;
   role?: UserRole;
   email?: string;
+  isActive?: boolean;
   collegeId?: string | null;
   courseId?: string | null;
   section?: string | null;
