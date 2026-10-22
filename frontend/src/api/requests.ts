@@ -27,6 +27,7 @@ export interface GetAllRequestsParams {
   search?: string;
   status?: RequestStatus;
   userId?: string;
+  assignedTo?: string;
   college?: string;
   collegeId?: string;
   officeId?: string;
@@ -85,6 +86,7 @@ export async function getAllRequests(
   if (params.search) searchParams.set("search", params.search);
   if (params.status) searchParams.set("status", params.status);
   if (params.userId) searchParams.set("userId", params.userId);
+  if (params.assignedTo) searchParams.set("assignedTo", params.assignedTo);
   if (params.college) searchParams.set("college", params.college);
   if (params.collegeId) searchParams.set("collegeId", params.collegeId);
   if (params.officeId) searchParams.set("officeId", params.officeId);

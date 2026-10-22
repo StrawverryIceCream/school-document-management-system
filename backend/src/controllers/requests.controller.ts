@@ -66,6 +66,7 @@ interface GetRequestsQuery {
   search?: string;
   status?: string;
   userId?: string;
+  assignedTo?: string;
   college?: string;
   collegeId?: string;
   officeId?: string;
@@ -204,6 +205,7 @@ export async function getAllRequests(
       search,
       status,
       userId,
+      assignedTo,
       college,
       collegeId,
       officeId,
@@ -361,6 +363,23 @@ export async function getAllRequests(
 
     if (userId) {
       conditions.push(eq(documentRequests.userId, userId));
+    }
+
+    if (typeof assignedTo === "string" && assignedTo.trim()) {
+      const trimmedAssignedTo = assignedTo.trim();
+      if (trimmedAssignedTo === "me") {
+        const actorId = getSessionUserId(req);
+        if (!actorId) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        conditions.push(eq(documentRequests.assignedTo, actorId));
+      } else if (trimmedAssignedTo === "unassigned") {
+        conditions.push(sql`${documentRequests.assignedTo} IS NULL`);
+      } else if (isUuid(trimmedAssignedTo)) {
+        conditions.push(eq(documentRequests.assignedTo, trimmedAssignedTo));
+      } else if (trimmedAssignedTo !== "all") {
+        return res.status(400).json({ error: "Invalid assignedTo parameter" });
+      }
     }
 
     const whereClause = conditions.length ? and(...conditions) : undefined;

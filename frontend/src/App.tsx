@@ -17,6 +17,7 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Accounts = lazy(() => import("./pages/Accounts"));
 const DocumentManager = lazy(() => import("./pages/DocumentManager"));
 const AllRequest = lazy(() => import("./pages/AllRequest"));
+const AssignedRequests = lazy(() => import("./pages/AssignedRequests"));
 const NewRequest = lazy(() => import("./pages/NewRequest"));
 const MyRequest = lazy(() => import("./pages/MyRequest"));
 const Logs = lazy(() => import("./pages/Logs"));
@@ -127,6 +128,14 @@ export default function App() {
                 <Route
                   path="/human-resource"
                   element={<Navigate to="/sectors/ovpaf/admin-services/hrmo" replace />}
+                />
+                <Route
+                  path="/assigned-request"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <AssignedRequests />
+                    </RequireRole>
+                  }
                 />
                 <Route
                   path="/all-request"

@@ -1,5 +1,6 @@
 import {
   Archive,
+  ClipboardList,
   FileInputIcon,
   FolderCog,
   LayoutDashboard,
@@ -49,6 +50,12 @@ const navItems: NavItem[] = [
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
+    roles: ["admin", "staff"],
+  },
+  {
+    title: "Assigned Request",
+    url: "/assigned-request",
+    icon: ClipboardList,
     roles: ["admin", "staff"],
   },
   {
