@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
 import { db } from "../db/db.js";
-import { users } from "../db/schema.js";
+import { users, offices } from "../db/schema.js";
 import { eq, and, ilike, or, count } from "drizzle-orm";
 import { recordAuditLog } from "../services/audit.service.js";
 
@@ -188,17 +188,56 @@ export async function updateUserById(
     if (role !== undefined) updateData.role = role;
 
     if (targetRole === "staff") {
-      const targetOfficeId = officeId !== undefined ? officeId : existingUser.officeId;
-      const targetOffice = office !== undefined ? office : existingUser.office;
+      const rawOfficeId = officeId !== undefined ? officeId : existingUser.officeId;
+      const rawOffice = office !== undefined ? office : existingUser.office;
 
-      if (!targetOfficeId && !targetOffice) {
+      if (!rawOfficeId && !rawOffice) {
         return res
           .status(400)
           .json({ error: "Staff role requires an assigned office" });
       }
 
-      updateData.officeId = targetOfficeId;
-      updateData.office = targetOffice;
+      let resolvedOffice = null;
+      if (rawOfficeId) {
+        const isUuid =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            rawOfficeId,
+          );
+        if (isUuid) {
+          resolvedOffice = await db.query.offices.findFirst({
+            where: eq(offices.id, rawOfficeId),
+          });
+        } else {
+          resolvedOffice = await db.query.offices.findFirst({
+            where: or(
+              ilike(offices.code, rawOfficeId),
+              ilike(offices.name, `%${rawOfficeId}%`),
+            ),
+          });
+        }
+      }
+
+      if (!resolvedOffice && rawOffice) {
+        const legacyCode = rawOffice === "registrar" ? "OUR" : "HRMO";
+        resolvedOffice = await db.query.offices.findFirst({
+          where: eq(offices.code, legacyCode),
+        });
+      }
+
+      if (!resolvedOffice) {
+        return res.status(400).json({
+          error: `Assigned office "${rawOfficeId || rawOffice}" could not be found.`,
+        });
+      }
+
+      updateData.officeId = resolvedOffice.id;
+      updateData.office =
+        resolvedOffice.code === "OUR"
+          ? "registrar"
+          : resolvedOffice.code === "HRMO"
+            ? "hr"
+            : null;
+
       // Clear student and teacher credentials
       updateData.studentId = null;
       updateData.collegeId = null;

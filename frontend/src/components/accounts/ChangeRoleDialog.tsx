@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
+import { getOffices, type OfficeRecord } from "@/api/offices";
 import { updateUserById, type UpdateUserBody } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
 import { ROLE_META } from "@/lib/profile";
@@ -42,8 +43,17 @@ export default function ChangeRoleDialog({
   const [studentId, setStudentId] = useState(user.studentId || "");
   const [department, setDepartment] = useState(user.department || "");
   const [officeId, setOfficeId] = useState(user.officeId || "");
+  const [dbOffices, setDbOffices] = useState<OfficeRecord[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getOffices()
+      .then((data) => {
+        if (data && data.length > 0) setDbOffices(data);
+      })
+      .catch((err) => console.error("Could not fetch offices:", err));
+  }, []);
 
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
@@ -55,6 +65,11 @@ export default function ChangeRoleDialog({
     }
     onOpenChange(isOpen);
   };
+
+  const officeOptions =
+    dbOffices.length > 0
+      ? dbOffices.map((o) => ({ id: o.id, code: o.code, name: o.name }))
+      : ALL_OFFICES.map((o) => ({ id: o.id, code: o.code, name: o.name }));
 
   async function handleConfirm(e: React.FormEvent) {
     e.preventDefault();
@@ -144,8 +159,8 @@ export default function ChangeRoleDialog({
                   <p className="font-medium">Role Transition Notice</p>
                   <p className="text-[11px] leading-relaxed text-amber-600/90 dark:text-amber-300/80">
                     Switching from <strong className="capitalize">{user.role}</strong> to{" "}
-                    <strong className="capitalize">{selectedRole}</strong> will clear any previous
-                    incompatible credentials (such as previous office assignments or student status).
+                    <strong className="capitalize">{selectedRole}</strong> will clear previous
+                    incompatible credentials (such as previous office assignments or student records).
                   </p>
                 </div>
               </div>
@@ -167,7 +182,7 @@ export default function ChangeRoleDialog({
                     <SelectValue placeholder="Select assigned office" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {ALL_OFFICES.map((off) => (
+                    {officeOptions.map((off) => (
                       <SelectItem key={off.id} value={off.id}>
                         {off.code} — {off.name}
                       </SelectItem>

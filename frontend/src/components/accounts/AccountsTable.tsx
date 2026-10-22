@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Building2 } from "lucide-react";
 import EditUser from "@/components/accounts/EditUser";
 import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
+import { getOffices, type OfficeRecord } from "@/api/offices";
 import ProfileTrigger from "@/components/profile/ProfileTrigger";
 import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
@@ -35,6 +36,15 @@ export default function AccountsTable() {
   const { loading, users, error, pagination, setPage } = useUsers();
   const { user: currentUser } = useAuth();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [dbOffices, setDbOffices] = useState<OfficeRecord[]>([]);
+
+  useEffect(() => {
+    getOffices()
+      .then((data) => {
+        if (data && data.length > 0) setDbOffices(data);
+      })
+      .catch((err) => console.error("Could not fetch offices:", err));
+  }, []);
 
   const selectedOnPage = users.filter((u) => selectedIds.includes(u.id)).length;
   const headerChecked: boolean | "indeterminate" =
@@ -175,11 +185,23 @@ export default function AccountsTable() {
         header: "Office / Dept",
         cell: (user) => {
           if (user.role === "staff") {
-            const office =
-              ALL_OFFICES.find((o) => o.id === user.officeId) ||
-              (user.office
-                ? { code: user.office.toUpperCase(), name: user.office }
-                : null);
+            const dbOffice = dbOffices.find(
+              (o) =>
+                o.id === user.officeId ||
+                o.code.toUpperCase() === user.officeId?.toUpperCase(),
+            );
+            const officeCode =
+              dbOffice?.code ||
+              ALL_OFFICES.find(
+                (o) =>
+                  o.id === user.officeId ||
+                  o.code.toUpperCase() === user.officeId?.toUpperCase(),
+              )?.code ||
+              (user.office === "registrar"
+                ? "OUR"
+                : user.office === "hr"
+                  ? "HRMO"
+                  : null);
             return (
               <Badge
                 variant="outline"
@@ -187,7 +209,7 @@ export default function AccountsTable() {
               >
                 <Building2 className="size-3 text-muted-foreground" />
                 <span className="truncate max-w-28">
-                  {office?.code || "Staff"}
+                  {officeCode || "Staff"}
                 </span>
               </Badge>
             );
@@ -250,7 +272,7 @@ export default function AccountsTable() {
         ),
       },
     ],
-    [users, selectedIds, headerChecked, currentUser],
+    [users, selectedIds, headerChecked, currentUser, dbOffices],
   );
 
   return (

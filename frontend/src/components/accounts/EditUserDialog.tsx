@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
+import { getOffices, type OfficeRecord } from "@/api/offices";
 import { updateUserById, type UpdateUserBody } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
 import type { User } from "@/types";
@@ -40,8 +41,17 @@ export default function EditUserDialog({
   const [studentId, setStudentId] = useState(user.studentId || "");
   const [department, setDepartment] = useState(user.department || "");
   const [officeId, setOfficeId] = useState(user.officeId || "");
+  const [dbOffices, setDbOffices] = useState<OfficeRecord[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getOffices()
+      .then((data) => {
+        if (data && data.length > 0) setDbOffices(data);
+      })
+      .catch((err) => console.error("Could not fetch offices:", err));
+  }, []);
 
   // Sync state if user changes or dialog opens
   const handleOpenChange = (isOpen: boolean) => {
@@ -55,6 +65,11 @@ export default function EditUserDialog({
     }
     onOpenChange(isOpen);
   };
+
+  const officeOptions =
+    dbOffices.length > 0
+      ? dbOffices.map((o) => ({ id: o.id, code: o.code, name: o.name }))
+      : ALL_OFFICES.map((o) => ({ id: o.id, code: o.code, name: o.name }));
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -181,7 +196,7 @@ export default function EditUserDialog({
                     <SelectValue placeholder="Select assigned office" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {ALL_OFFICES.map((off) => (
+                    {officeOptions.map((off) => (
                       <SelectItem key={off.id} value={off.id}>
                         {off.code} — {off.name}
                       </SelectItem>
