@@ -8,7 +8,7 @@ import InactiveOfficePlaceholder from "@/components/sectors/InactiveOfficePlaceh
 import { getSector, getDivision, getOffice } from "@/lib/sectors/sectors-config";
 import { getAllRequests } from "@/api/requests";
 import { useSectorsVisibility } from "@/hooks/useSectorsVisibility";
-import type { DocumentRequestWithRelations } from "@/types";
+import type { DocumentRequestWithRelations, User } from "@/types";
 
 export default function SectorPage() {
   const { sectorId, divisionId, officeId } = useParams();
@@ -148,6 +148,30 @@ export default function SectorPage() {
     );
   }
 
+  const handleRequestAssigned = (requestId: string, staff: User | null) => {
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === requestId
+          ? {
+              ...r,
+              assignedTo: staff ? staff.id : null,
+              assignee: staff
+                ? {
+                    id: staff.id,
+                    fullName: staff.fullName,
+                    email: staff.email,
+                    role: staff.role,
+                    studentId: staff.studentId ?? null,
+                    department: staff.department ?? null,
+                    office: staff.office ?? null,
+                  }
+                : null,
+            }
+          : r,
+      ),
+    );
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto p-4 sm:p-6">
       <SectorHeader sector={activeSector} />
@@ -164,6 +188,7 @@ export default function SectorPage() {
           requests={requests}
           loading={loading}
           error={error}
+          onRequestAssigned={handleRequestAssigned}
         />
       ) : (
         <OfficeCardsGrid

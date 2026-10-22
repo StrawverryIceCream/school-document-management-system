@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -6,9 +6,11 @@ import {
   ChevronDown,
   ExternalLink,
   Loader2,
+  UserCheck,
   UserMinus,
   UserPlus,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import CopyableId from "@/components/shared/CopyableId";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import RequestStatusBadge from "@/components/shared/RequestStatusBadge";
@@ -56,6 +58,7 @@ interface OfficeRequestTableProps {
   requests: DocumentRequestWithRelations[];
   loading: boolean;
   error: string | null;
+  onRequestAssigned?: (requestId: string, staff: User | null) => void;
 }
 
 export default function OfficeRequestTable({
@@ -65,6 +68,7 @@ export default function OfficeRequestTable({
   requests,
   loading,
   error,
+  onRequestAssigned,
 }: OfficeRequestTableProps) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
@@ -72,13 +76,20 @@ export default function OfficeRequestTable({
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const [localRequests, setLocalRequests] = useState<DocumentRequestWithRelations[]>(requests);
   const [staffList, setStaffList] = useState<User[]>([]);
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const { user: currentUser } = useAuth();
 
-  useEffect(() => {
-    setLocalRequests(requests);
-  }, [requests]);
+  const currentStaffUser = useMemo<User | null>(() => {
+    if (!currentUser) return null;
+    const fromList = staffList.find((s) => s.id === currentUser.id);
+    if (fromList) return fromList;
+    return {
+      ...currentUser,
+      createdAt: (currentUser as any).createdAt ?? new Date().toISOString(),
+      updatedAt: (currentUser as any).updatedAt ?? new Date().toISOString(),
+    } as User;
+  }, [currentUser, staffList]);
 
   useEffect(() => {
     getAllUsers({ role: "staff", limit: 100 })
@@ -93,49 +104,34 @@ export default function OfficeRequestTable({
     [staffList, office],
   );
 
-  async function handleAssign(requestId: string, staff: User | null) {
-    try {
-      setAssigningId(requestId);
-      await assignRequest(requestId, staff ? staff.id : null);
+  const handleAssign = useCallback(
+    async (requestId: string, staff: User | null) => {
+      try {
+        setAssigningId(requestId);
+        await assignRequest(requestId, staff ? staff.id : null);
 
-      setLocalRequests((prev) =>
-        prev.map((r) =>
-          r.id === requestId
-            ? {
-                ...r,
-                assignedTo: staff ? staff.id : null,
-                assignee: staff
-                  ? {
-                      id: staff.id,
-                      fullName: staff.fullName,
-                      email: staff.email,
-                      role: staff.role,
-                      studentId: staff.studentId ?? null,
-                      department: staff.department ?? null,
-                      office: staff.office ?? null,
-                    }
-                  : null,
-              }
-            : r,
-        ),
-      );
+        onRequestAssigned?.(requestId, staff);
 
-      toast.success(
-        staff
-          ? `Assigned to ${staff.fullName}`
-          : "Request unassigned successfully",
-      );
-    } catch (err: any) {
-      console.error("Failed to assign request:", err);
-      toast.error(err?.message || "Failed to update assignment");
-    } finally {
-      setAssigningId(null);
-    }
-  }
+        toast.success(
+          staff
+            ? `Assigned to ${staff.fullName}`
+            : "Request unassigned successfully",
+        );
+      } catch (err: unknown) {
+        console.error("Failed to assign request:", err);
+        const msg =
+          err instanceof Error ? err.message : "Failed to update assignment";
+        toast.error(msg);
+      } finally {
+        setAssigningId(null);
+      }
+    },
+    [onRequestAssigned],
+  );
 
   const officeRequests = useMemo(
-    () => localRequests.filter((req) => matchesOffice(req, office)),
-    [localRequests, office],
+    () => requests.filter((req) => matchesOffice(req, office)),
+    [requests, office],
   );
 
   const visibleRequests = useMemo(() => {
@@ -172,7 +168,7 @@ export default function OfficeRequestTable({
       {
         key: "requester",
         header: "Requester",
-        className: "w-40",
+        className: "w-60",
         cell: (req) => {
           const fullName = req.user?.fullName ?? "Unknown Requester";
           return (
@@ -191,14 +187,14 @@ export default function OfficeRequestTable({
                     >
                       <TruncatedText
                         text={fullName}
-                        className="font-semibold text-foreground max-w-28 text-xs"
+                        className="font-semibold text-foreground max-w-58 text-xs"
                       />
                     </button>
                   </ProfileTrigger>
                 ) : (
                   <TruncatedText
                     text={fullName}
-                    className="font-semibold text-foreground max-w-28 text-xs"
+                    className="font-semibold text-foreground max-w-58 text-xs"
                   />
                 )}
                 <span className="text-[11px] text-muted-foreground truncate max-w-28">
@@ -252,59 +248,88 @@ export default function OfficeRequestTable({
       {
         key: "assignee",
         header: "Assignee",
-        className: "w-44",
+        className: "w-48",
         cell: (req) => {
           const isBusy = assigningId === req.id;
           const currentAssignee = req.assignee;
+          const isAssignedToMe = Boolean(
+            currentUser?.id && req.assignedTo === currentUser.id,
+          );
 
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  disabled={isBusy}
-                  className={cn(
-                    "group flex h-8 w-full max-w-40 items-center justify-between rounded-lg border px-2 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring/50",
-                    currentAssignee
-                      ? "border-border/70 bg-card hover:border-primary/50 hover:bg-muted/50 text-foreground"
-                      : "border-dashed border-border/80 bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                  )}
-                  title={
-                    currentAssignee
-                      ? `Assigned to ${currentAssignee.fullName}`
-                      : "Click to assign staff"
-                  }
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    {currentAssignee ? (
-                      <>
-                        <div className="size-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[9px] shrink-0">
-                          {currentAssignee.fullName.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="truncate text-xs font-medium">
-                          {currentAssignee.fullName.split(" ")[0]}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="size-3.5 shrink-0 text-muted-foreground/70" />
-                        <span className="italic text-xs">Unassigned</span>
-                      </>
+            <div className="flex items-center gap-1.5">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={isBusy}
+                    className={cn(
+                      "group flex h-8 w-full max-w-36 items-center justify-between rounded-lg border px-2 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring/50",
+                      currentAssignee
+                        ? isAssignedToMe
+                          ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 font-medium"
+                          : "border-border/70 bg-card hover:border-primary/50 hover:bg-muted/50 text-foreground"
+                        : "border-dashed border-border/80 bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
+                    title={
+                      currentAssignee
+                        ? `Assigned to ${currentAssignee.fullName}${isAssignedToMe ? " (You)" : ""}`
+                        : "Click to assign staff"
+                    }
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {currentAssignee ? (
+                        <>
+                          <div
+                            className={cn(
+                              "size-5 rounded-full flex items-center justify-center font-bold text-[9px] shrink-0",
+                              isAssignedToMe
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-primary/10 text-primary",
+                            )}
+                          >
+                            {currentAssignee.fullName.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="truncate text-xs font-medium">
+                            {isAssignedToMe
+                              ? "Me"
+                              : currentAssignee.fullName.split(" ")[0]}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="size-3.5 shrink-0 text-muted-foreground/70" />
+                          <span className="italic text-xs">Unassigned</span>
+                        </>
+                      )}
+                    </div>
+                    {isBusy ? (
+                      <Loader2 className="size-3 animate-spin text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="size-3 shrink-0 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48 max-h-60 overflow-y-auto">
+                  <div className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Assign Staff
                   </div>
-                  {isBusy ? (
-                    <Loader2 className="size-3 animate-spin text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="size-3 shrink-0 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
+                  {currentStaffUser && (
+                    <DropdownMenuItem
+                      onClick={() => handleAssign(req.id, currentStaffUser)}
+                      disabled={isAssignedToMe}
+                      className="flex items-center justify-between text-xs font-medium text-primary focus:text-primary"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <UserCheck className="size-3.5 shrink-0" />
+                        <span>Assign to me</span>
+                      </div>
+                      {isAssignedToMe && (
+                        <Check className="size-3.5 text-primary shrink-0 ml-1" />
+                      )}
+                    </DropdownMenuItem>
                   )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 max-h-60 overflow-y-auto">
-                <div className="px-2 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Assign Staff
-                </div>
-                {currentAssignee && (
-                  <>
+                  {currentAssignee && (
                     <DropdownMenuItem
                       onClick={() => handleAssign(req.id, null)}
                       className="gap-2 text-amber-600 focus:text-amber-700 dark:text-amber-400 text-xs"
@@ -312,31 +337,51 @@ export default function OfficeRequestTable({
                       <UserMinus className="size-3.5" />
                       <span>Unassign</span>
                     </DropdownMenuItem>
+                  )}
+                  {(currentStaffUser || currentAssignee) && (
                     <DropdownMenuSeparator />
-                  </>
-                )}
-                {officeStaff.map((staff) => {
-                  const isSelected = req.assignedTo === staff.id;
-                  return (
-                    <DropdownMenuItem
-                      key={staff.id}
-                      onClick={() => handleAssign(req.id, staff)}
-                      className="flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <div className="size-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-[10px] shrink-0">
-                          {getInitials(staff.fullName)}
+                  )}
+                  {officeStaff.map((staff) => {
+                    const isSelected = req.assignedTo === staff.id;
+                    return (
+                      <DropdownMenuItem
+                        key={staff.id}
+                        onClick={() => handleAssign(req.id, staff)}
+                        className="flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="size-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-[10px] shrink-0">
+                            {getInitials(staff.fullName)}
+                          </div>
+                          <span className="truncate">
+                            {staff.fullName}
+                            {staff.id === currentUser?.id ? " (You)" : ""}
+                          </span>
                         </div>
-                        <span className="truncate">{staff.fullName}</span>
-                      </div>
-                      {isSelected && (
-                        <Check className="size-3.5 text-primary shrink-0 ml-1" />
-                      )}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                        {isSelected && (
+                          <Check className="size-3.5 text-primary shrink-0 ml-1" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {currentStaffUser && !isAssignedToMe && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  title="Assign to me"
+                  disabled={isBusy}
+                  onClick={() => handleAssign(req.id, currentStaffUser)}
+                >
+                  <UserCheck className="size-3.5" aria-hidden="true" />
+                  <span className="sr-only">Assign to me</span>
+                </Button>
+              )}
+            </div>
           );
         },
       },
@@ -361,7 +406,17 @@ export default function OfficeRequestTable({
         ),
       },
     ],
-    [navigate, sectorId, divisionId, office.id, assigningId, officeStaff],
+    [
+      navigate,
+      sectorId,
+      divisionId,
+      office.id,
+      assigningId,
+      officeStaff,
+      handleAssign,
+      currentUser?.id,
+      currentStaffUser,
+    ],
   );
 
   const totalPages = Math.max(1, Math.ceil(visibleRequests.length / pageSize));
