@@ -69,6 +69,17 @@ export const SECTORS: SectorConfig[] = [
         description: "Board of Regents and University Secretary",
         offices: [
           {
+            id: "oup",
+            code: "OUP",
+            name: "Office of the University President",
+            description: "Executive presidential orders, university memos, and high-level approvals",
+            icon: Building2,
+            bannerTone: "bronze",
+            iconTone: "neutral",
+            docCodePrefix: "OUP",
+            departmentMatch: "Office of the University President",
+          },
+          {
             id: "bor",
             code: "BOR",
             name: "Board of Regents",
@@ -221,6 +232,17 @@ export const SECTORS: SectorConfig[] = [
         description: "Registrar, admissions, student affairs, guidance, and library resources",
         offices: [
           {
+            id: "ovpaa",
+            code: "OVPAA",
+            name: "Office of the Vice President for Academic Affairs",
+            description: "Curriculum approvals, cross-enrollment permits, and academic clearances",
+            icon: GraduationCap,
+            bannerTone: "bronze",
+            iconTone: "neutral",
+            docCodePrefix: "OVPAA",
+            departmentMatch: "Office of the Vice President for Academic Affairs",
+          },
+          {
             id: "our",
             code: "OUR",
             name: "Office of the University Registrar",
@@ -308,6 +330,17 @@ export const SECTORS: SectorConfig[] = [
         name: "Administrative Services Division",
         description: "Personnel, archives, logistics, civil security, and medical clinic",
         offices: [
+          {
+            id: "ovpaf",
+            code: "OVPAF",
+            name: "Office of the Vice President for Administration and Finance",
+            description: "Executive administrative authorizations, vehicle permits, and campus logistics approvals",
+            icon: Wallet,
+            bannerTone: "mauve",
+            iconTone: "neutral",
+            docCodePrefix: "OVPAF",
+            departmentMatch: "Office of the Vice President for Administration and Finance",
+          },
           {
             id: "hrmo",
             code: "HRMO",
@@ -432,6 +465,17 @@ export const SECTORS: SectorConfig[] = [
         name: "Research & Development",
         description: "Research outputs, similarity checks, and training centers",
         offices: [
+          {
+            id: "ovpre",
+            code: "OVPRE",
+            name: "Office of the Vice President for Research and Extension",
+            description: "Research grants, ethics review clearances, and extension project approvals",
+            icon: Microscope,
+            bannerTone: "teal",
+            iconTone: "neutral",
+            docCodePrefix: "OVPRE",
+            departmentMatch: "Office of the Vice President for Research and Extension",
+          },
           {
             id: "urds",
             code: "URDS",
@@ -611,6 +655,7 @@ export function findOfficeRoute(query: {
         ? "HRMO"
         : code;
 
+  // 1. Search all configured offices across all sectors
   for (const sector of SECTORS) {
     for (const division of sector.divisions) {
       for (const office of division.offices) {
@@ -618,7 +663,7 @@ export function findOfficeRoute(query: {
         const offId = office.id.toLowerCase();
         const offName = office.name.toLowerCase();
 
-        // 1. Direct code or ID match
+        // 1a. Direct code or ID match
         if (
           normalizedCode &&
           (offCode === normalizedCode || offId === normalizedCode.toLowerCase())
@@ -632,7 +677,7 @@ export function findOfficeRoute(query: {
           };
         }
 
-        // 2. ID match
+        // 1b. ID match
         if (id && (offId === id || offCode.toLowerCase() === id)) {
           return {
             sectorId: sector.id,
@@ -643,7 +688,7 @@ export function findOfficeRoute(query: {
           };
         }
 
-        // 3. Document type code prefix match (e.g. "OUR-001" starts with "OUR")
+        // 1c. Document type code prefix match (e.g. "OUR-001" starts with "OUR")
         if (
           docCode &&
           office.docCodePrefix &&
@@ -658,8 +703,11 @@ export function findOfficeRoute(query: {
           };
         }
 
-        // 4. College match (e.g. "COS" -> College of Science)
+        // 1d. College match (e.g. "COS" -> College of Science)
+        // ONLY if the document is actually a college document (COL) or if normalizedCode is a college code!
+        // Never hijack an explicit office code like "OVPAF" to an unrelated student college!
         if (
+          (!normalizedCode || normalizedCode === "COL" || normalizedCode === office.collegeCode?.toUpperCase()) &&
           college &&
           office.collegeCode &&
           college === office.collegeCode.toUpperCase()
@@ -673,7 +721,7 @@ export function findOfficeRoute(query: {
           };
         }
 
-        // 5. Name match
+        // 1e. Name match
         if (
           name &&
           (offName === name || offName.includes(name) || name.includes(offName))
@@ -687,6 +735,38 @@ export function findOfficeRoute(query: {
           };
         }
       }
+    }
+  }
+
+  // 2. Sector-level fallback (if code or sector matches an overall sector like "OVPAF", "OUP")
+  const targetSectorCode = normalizedCode ?? query.sector?.trim().toUpperCase();
+  if (targetSectorCode) {
+    const matchedSector = SECTORS.find(
+      (s) => s.code.toUpperCase() === targetSectorCode || s.id.toUpperCase() === targetSectorCode
+    );
+    if (matchedSector && matchedSector.divisions.length > 0) {
+      const firstDiv = matchedSector.divisions[0];
+      const execOffice = firstDiv.offices.find(
+        (o) => o.code.toUpperCase() === targetSectorCode || o.id.toLowerCase() === matchedSector.id
+      ) ?? firstDiv.offices[0];
+
+      return {
+        sectorId: matchedSector.id,
+        divisionId: firstDiv.id,
+        officeId: execOffice ? execOffice.id : matchedSector.id,
+        url: execOffice
+          ? `/sectors/${matchedSector.id}/${firstDiv.id}/${execOffice.id}`
+          : `/sectors/${matchedSector.id}/${firstDiv.id}`,
+        office: execOffice ?? {
+          id: matchedSector.id,
+          code: matchedSector.code,
+          name: matchedSector.name,
+          description: matchedSector.description,
+          icon: matchedSector.icon,
+          bannerTone: matchedSector.bannerTone,
+          iconTone: "neutral",
+        },
+      };
     }
   }
 

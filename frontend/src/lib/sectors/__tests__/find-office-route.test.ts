@@ -37,7 +37,30 @@ function runTests() {
   const nameRoute = findOfficeRoute({ officeName: "Office of the University Registrar" });
   console.assert(nameRoute?.officeId === "our", `Expected name match to map to our, got ${nameRoute?.officeId}`);
 
-  // 7. Unknown office returns undefined
+  // 7. Executive Sector code: OVPAF must resolve to OVPAF admin-services even if applicant college is CAFA
+  const ovpafRoute = findOfficeRoute({
+    officeCode: "OVPAF",
+    documentTypeCode: "OVPAF-002",
+    college: "CAFA",
+  });
+  console.assert(ovpafRoute !== undefined, "OVPAF office must resolve");
+  console.assert(ovpafRoute?.sectorId === "ovpaf", `Expected sector ovpaf, got ${ovpafRoute?.sectorId}`);
+  console.assert(ovpafRoute?.divisionId === "admin-services", `Expected admin-services, got ${ovpafRoute?.divisionId}`);
+  console.assert(ovpafRoute?.officeId === "ovpaf", `Expected office id ovpaf, got ${ovpafRoute?.officeId}`);
+  console.assert(
+    ovpafRoute?.url === "/sectors/ovpaf/admin-services/ovpaf",
+    `Expected URL /sectors/ovpaf/admin-services/ovpaf, got ${ovpafRoute?.url}`,
+  );
+
+  // 8. Explicit college document: COL with CAFA
+  const collegeDocRoute = findOfficeRoute({
+    officeCode: "COL",
+    college: "CAFA",
+  });
+  console.assert(collegeDocRoute !== undefined, "COL with CAFA must resolve to CAFA");
+  console.assert(collegeDocRoute?.url === "/sectors/ovpaa/colleges/cafa", `Expected CAFA url, got ${collegeDocRoute?.url}`);
+
+  // 9. Unknown office returns undefined
   const unknownRoute = findOfficeRoute({ officeCode: "XYZ_NON_EXISTENT" });
   console.assert(unknownRoute === undefined, "Unknown office must return undefined");
 

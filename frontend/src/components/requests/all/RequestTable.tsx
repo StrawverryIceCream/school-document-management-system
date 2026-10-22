@@ -96,13 +96,17 @@ export default function RequestTable() {
         header: "Office",
         className: "min-w-44 max-w-xs",
         cell: (req) => {
+          const isCollegeDoc =
+            req.officeCode === "COL" ||
+            req.documentTypeCode?.toUpperCase().startsWith("COL-");
+
           const route = findOfficeRoute({
             officeCode: req.officeCode,
             officeId: req.officeId,
             officeName: req.officeName,
             sector: req.sector,
             documentTypeCode: req.documentTypeCode,
-            college: req.college,
+            college: isCollegeDoc ? req.college : undefined,
           });
 
           const officeCode = req.officeCode || route?.office.code || "OUR";

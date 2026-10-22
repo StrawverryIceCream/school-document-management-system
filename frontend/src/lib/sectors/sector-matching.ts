@@ -6,7 +6,18 @@ export function matchesOffice(
   request: DocumentRequestWithRelations,
   office: OfficeConfig,
 ): boolean {
-  // 1. Match by document code prefix (e.g. "OUR-001" starts with "OUR")
+  // 1. Match by explicit office record code or id
+  const docOfficeCode =
+    request.documentType?.officeRecord?.code?.toUpperCase() ??
+    (request.documentTypeCode?.includes("-")
+      ? request.documentTypeCode.split("-")[0].toUpperCase()
+      : undefined);
+
+  if (docOfficeCode && docOfficeCode === office.code.toUpperCase()) {
+    return true;
+  }
+
+  // 2. Match by document code prefix (e.g. "OUR-001" starts with "OUR")
   if (office.docCodePrefix && request.documentTypeCode) {
     if (
       request.documentTypeCode
@@ -17,11 +28,20 @@ export function matchesOffice(
     }
   }
 
-  // 2. Match by student college (e.g. for academic colleges like COS, COE, CAFA)
+  // 3. Match by student college (e.g. for academic colleges like COS, COE, CAFA)
+  // ONLY applies if the document is an academic college document (COL or matching college code)
   if (office.collegeCode) {
-    const userCollegeCode = request.user?.college?.code?.toUpperCase();
-    if (userCollegeCode === office.collegeCode.toUpperCase()) {
-      return true;
+    const isCollegeDoc =
+      docOfficeCode === "COL" ||
+      docOfficeCode === office.collegeCode.toUpperCase() ||
+      request.documentTypeCode?.toUpperCase().startsWith("COL-") ||
+      request.documentTypeCode?.toUpperCase().startsWith(`${office.collegeCode.toUpperCase()}-`);
+
+    if (isCollegeDoc) {
+      const userCollegeCode = request.user?.college?.code?.toUpperCase();
+      if (userCollegeCode === office.collegeCode.toUpperCase()) {
+        return true;
+      }
     }
   }
 
