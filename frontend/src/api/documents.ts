@@ -31,6 +31,8 @@ async function handleResponse<T>(res: Response, url: string): Promise<T> {
   return res.json();
 }
 
+export const documentNameCache = new Map<string, string>();
+
 export async function getAllDocument(
   params: GetAllDocumentParams = {},
 ): Promise<PaginatedDocumentResponse> {
@@ -46,7 +48,15 @@ export async function getAllDocument(
   const url = `/api/documents${query ? `?${query}` : ""}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return handleResponse<PaginatedDocumentResponse>(res, url);
+  const response = await handleResponse<PaginatedDocumentResponse>(res, url);
+  if (Array.isArray(response?.data)) {
+    for (const doc of response.data) {
+      if (doc?.id && doc?.name) {
+        documentNameCache.set(String(doc.id), doc.name);
+      }
+    }
+  }
+  return response;
 }
 
 export async function getDocumentById(id: string): Promise<DocumentType> {
@@ -61,7 +71,11 @@ export async function getDocumentById(id: string): Promise<DocumentType> {
     );
   }
 
-  return res.json() as Promise<DocumentType>;
+  const data = (await res.json()) as DocumentType;
+  if (data?.id && data?.name) {
+    documentNameCache.set(String(data.id), data.name);
+  }
+  return data;
 }
 
 export async function createDocument(

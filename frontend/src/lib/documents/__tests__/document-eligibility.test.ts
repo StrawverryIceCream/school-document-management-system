@@ -83,6 +83,28 @@ function runTests() {
     "Teacher must be eligible for teacher document"
   );
 
+  // 7. Admin user can request all available documents (student-only, status-restricted, teacher-only)
+  const admin: Partial<AuthUser> = {
+    id: "user-admin",
+    role: "admin",
+    studentStatus: null,
+  };
+  assert.equal(
+    isDocumentEligible(baseDoc as DocumentType, admin as AuthUser),
+    true,
+    "Admin must be eligible for student/status-restricted document"
+  );
+  assert.equal(
+    isDocumentEligible(teacherDoc as DocumentType, admin as AuthUser),
+    true,
+    "Admin must be eligible for teacher document"
+  );
+  assert.equal(
+    isDocumentEligible({ ...baseDoc, isActive: false } as DocumentType, admin as AuthUser),
+    false,
+    "Admin must not be eligible for inactive document"
+  );
+
   console.log("✅ document-eligibility tests passed!");
 }
 

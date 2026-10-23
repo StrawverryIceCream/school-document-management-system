@@ -13,6 +13,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [officeFilter, setOfficeFilter] = useState("all");
+  const [documentFilter, setDocumentFilter] = useState("all");
   const [windowFilter, setWindowFilter] = useState("all");
   const [dataSourceNote, setDataSourceNote] = useState(
     "Loading request records from the backend...",
@@ -84,6 +85,18 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
     [requests],
   );
 
+  const documentOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          requests
+            .map((request) => request.document)
+            .filter((value): value is string => Boolean(value && value.trim())),
+        ),
+      ).sort((left, right) => left.localeCompare(right)),
+    [requests],
+  );
+
   const windowOptions = useMemo(
     () =>
       Array.from(
@@ -108,14 +121,21 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
           .includes(normalizedSearch);
       const matchesStatus =
         statusFilter === "all" || request.status === statusFilter;
+      const matchesDocument =
+        documentFilter === "all" || request.document === documentFilter;
       const matchesWindow =
         windowFilter === "all" || request.course === windowFilter;
 
-      return matchesSearch && matchesStatus && matchesWindow;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesDocument &&
+        matchesWindow
+      );
     });
 
     return filterRequestsByOffice(searchAndStatusFiltered, officeFilter);
-  }, [requests, search, statusFilter, windowFilter, officeFilter]);
+  }, [requests, search, statusFilter, documentFilter, windowFilter, officeFilter]);
 
   const summary = useMemo(
     () => ({
@@ -153,6 +173,9 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
         officeFilter,
         setOfficeFilter,
         officeOptions,
+        documentFilter,
+        setDocumentFilter,
+        documentOptions,
         windowFilter,
         setWindowFilter,
         windowOptions,

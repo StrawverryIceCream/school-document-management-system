@@ -78,6 +78,8 @@ async function handleResponse<T>(res: Response, url: string): Promise<T> {
 
 // ---------- Staff / admin ----------
 
+export const requestReferenceCache = new Map<string, string>();
+
 export async function getAllRequests(
   params: GetAllRequestsParams = {},
 ): Promise<PaginatedRequestsResponse> {
@@ -99,7 +101,15 @@ export async function getAllRequests(
   const url = `/api/requests${query ? `?${query}` : ""}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return handleResponse<PaginatedRequestsResponse>(res, url);
+  const response = await handleResponse<PaginatedRequestsResponse>(res, url);
+  if (Array.isArray(response?.data)) {
+    for (const req of response.data) {
+      if (req?.id && req?.referenceNumber) {
+        requestReferenceCache.set(String(req.id), req.referenceNumber);
+      }
+    }
+  }
+  return response;
 }
 
 export async function getRequestById(
@@ -108,7 +118,11 @@ export async function getRequestById(
   const url = `/api/requests/${id}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return handleResponse<RequestReviewDetails>(res, url);
+  const data = await handleResponse<RequestReviewDetails>(res, url);
+  if (data?.id && data?.referenceNumber) {
+    requestReferenceCache.set(String(data.id), data.referenceNumber);
+  }
+  return data;
 }
 
 export async function updateRequestStatus(
@@ -170,7 +184,15 @@ export async function getMyRequests(
   const url = `/api/requests/me${query ? `?${query}` : ""}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return handleResponse<PaginatedMyRequestsResponse>(res, url);
+  const response = await handleResponse<PaginatedMyRequestsResponse>(res, url);
+  if (Array.isArray(response?.data)) {
+    for (const req of response.data) {
+      if (req?.id && req?.referenceNumber) {
+        requestReferenceCache.set(String(req.id), req.referenceNumber);
+      }
+    }
+  }
+  return response;
 }
 
 export async function getMyRequestById(id: string): Promise<MyRequest> {

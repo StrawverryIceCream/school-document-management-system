@@ -9,9 +9,9 @@ function RequestFilter() {
     setSearch,
     statusFilter,
     setStatusFilter,
-    windowFilter,
-    setWindowFilter,
-    windowOptions,
+    documentFilter,
+    setDocumentFilter,
+    documentOptions,
   } = useRequests();
 
   return (
@@ -23,15 +23,15 @@ function RequestFilter() {
     >
       <div className="flex flex-wrap items-center gap-3">
         <FilterSelect
-          ariaLabel="Filter by window"
-          value={windowFilter}
-          onChange={setWindowFilter}
-          disabled={windowOptions.length === 0}
+          ariaLabel="Filter by document type"
+          value={documentFilter}
+          onChange={setDocumentFilter}
+          disabled={documentOptions.length === 0}
           options={[
-            { value: "all", label: "All windows" },
-            ...windowOptions.map((window) => ({
-              value: window,
-              label: window,
+            { value: "all", label: "All documents" },
+            ...documentOptions.map((doc) => ({
+              value: doc,
+              label: doc,
             })),
           ]}
         />
@@ -73,7 +73,7 @@ function FilterSelect({
           aria-label={ariaLabel}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full appearance-none rounded-xl border border-input bg-background px-4 pr-10 text-base outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/40"
+          className="h-12 w-full sm:w-auto max-w-full sm:max-w-56 appearance-none rounded-xl border border-input bg-background px-4 pr-10 text-base outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/40 truncate"
           disabled={disabled}
         >
           {options.map((option) => (

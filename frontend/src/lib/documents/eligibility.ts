@@ -16,6 +16,11 @@ export function isDocumentEligible(
     return true;
   }
 
+  // Admins are authorized to request all available active documents
+  if (user.role === "admin") {
+    return true;
+  }
+
   // 1. Role / Category check
   const allowedCategories = document.allowedCategories;
   if (Array.isArray(allowedCategories) && allowedCategories.length > 0) {

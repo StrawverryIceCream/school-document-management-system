@@ -24,6 +24,9 @@ export interface RequestContextType {
   officeFilter: string;
   setOfficeFilter: (value: string) => void;
   officeOptions: string[];
+  documentFilter: string;
+  setDocumentFilter: (value: string) => void;
+  documentOptions: string[];
   windowFilter: string;
   setWindowFilter: (value: string) => void;
   windowOptions: string[];
