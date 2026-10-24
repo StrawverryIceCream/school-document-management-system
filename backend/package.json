@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx src/tests/signup-role-guard.test.ts && tsx src/tests/request-attachments-auth.test.ts && tsx src/tests/server-security-config.test.ts && tsx src/tests/error-handler.test.ts && tsx src/tests/user-deletion-guard.test.ts && tsx src/tests/env-validation.test.ts && tsx src/tests/email-transporter.test.ts && tsx src/tests/accounts-search.test.ts && tsx src/tests/assigned-requests.test.ts && tsx src/tests/user-role-transition.test.ts",
+    "test": "tsx src/tests/signup-role-guard.test.ts && tsx src/tests/request-attachments-auth.test.ts && tsx src/tests/server-security-config.test.ts && tsx src/tests/error-handler.test.ts && tsx src/tests/user-deletion-guard.test.ts && tsx src/tests/env-validation.test.ts && tsx src/tests/email-transporter.test.ts && tsx src/tests/accounts-search.test.ts && tsx src/tests/assigned-requests.test.ts && tsx src/tests/user-role-transition.test.ts && tsx src/tests/appointments-access.test.ts && tsx src/tests/requests-filter-optimization.test.ts",
     "test:e2e": "tsx src/tests/*.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/migrate.ts"
