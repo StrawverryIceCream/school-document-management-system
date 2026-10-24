@@ -34,3 +34,17 @@ export const REVIEW_ACTIONS: {
     variant: "destructive",
   },
 ];
+
+export const REJECTION_REASON_PRESETS = [
+  "Missing required attachments or unclear document scans",
+  "Unsettled academic or clearance obligations",
+  "Ineligible for requested credential under current student status",
+  "Discrepancy in applicant identification details",
+] as const;
+
+export const CANCELLATION_REASON_PRESETS = [
+  "Duplicate request submitted by requester",
+  "Requester requested cancellation / withdrawal",
+  "Administrative void due to scheduling or superseded record",
+] as const;
+

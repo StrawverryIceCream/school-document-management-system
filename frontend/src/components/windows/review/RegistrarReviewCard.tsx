@@ -41,6 +41,13 @@ export function RegistrarReviewCard({
   updating: boolean;
   onSelectAction: (status: RequestStatus) => void;
 }) {
+  const primaryActions = actions.filter(
+    (a) => a.status !== "rejected" && a.status !== "cancelled",
+  );
+  const exceptionActions = actions.filter(
+    (a) => a.status === "rejected" || a.status === "cancelled",
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -106,7 +113,7 @@ export function RegistrarReviewCard({
               </p>
             </div>
 
-            {actions.map(({ status, label, icon: Icon, variant }) => {
+            {primaryActions.map(({ status, label, icon: Icon, variant }) => {
               const paymentBlocked =
                 status === "processing" &&
                 processingRequiresPayment &&
@@ -136,6 +143,35 @@ export function RegistrarReviewCard({
                 </div>
               );
             })}
+
+            {exceptionActions.length > 0 && (
+              <div className="border-t pt-3 space-y-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Quick Terminations & Exceptions
+                </span>
+                <div
+                  className={
+                    exceptionActions.length === 2
+                      ? "grid grid-cols-2 gap-2"
+                      : "space-y-1"
+                  }
+                >
+                  {exceptionActions.map(({ status, icon: Icon }) => (
+                    <Button
+                      key={status}
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/60"
+                      disabled={updating}
+                      onClick={() => onSelectAction(status)}
+                    >
+                      <Icon className="size-3.5" aria-hidden="true" />
+                      {status === "rejected" ? "Reject Request" : "Cancel Request"}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <p className="text-sm text-muted-foreground">

@@ -13,6 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import {
+  REJECTION_REASON_PRESETS,
+  CANCELLATION_REASON_PRESETS,
+} from "@/lib/windows/review/constants";
 import type { RequestStatus } from "@/types";
 
 export function StatusChangeDialog({
@@ -44,6 +49,13 @@ export function StatusChangeDialog({
   const isReasonRequired = status === "rejected" || status === "cancelled";
   const canConfirm = !updating && (!isReasonRequired || Boolean(reason.trim()));
 
+  const presets =
+    status === "rejected"
+      ? REJECTION_REASON_PRESETS
+      : status === "cancelled"
+        ? CANCELLATION_REASON_PRESETS
+        : [];
+
   return (
     <AlertDialog
       open={status !== null}
@@ -62,17 +74,46 @@ export function StatusChangeDialog({
         </AlertDialogHeader>
 
         {isReasonRequired && (
-          <div className="space-y-2 py-2">
+          <div className="space-y-3 py-2">
             <Label htmlFor="status-change-reason">
               Reason for {statusLabel?.toLowerCase()}{" "}
               <span className="text-destructive">*</span>
             </Label>
+
+            {presets.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-xs text-muted-foreground font-medium">
+                  Quick options (click to insert):
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {presets.map((preset) => {
+                    const isSelected = reason === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setReason(preset)}
+                        className={cn(
+                          "rounded-md border px-2.5 py-1 text-xs text-left transition-colors cursor-pointer",
+                          isSelected
+                            ? "border-destructive/60 bg-destructive/15 text-destructive font-medium shadow-xs"
+                            : "border-border/70 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <Textarea
               id="status-change-reason"
-              placeholder={`Please provide the reason for ${statusLabel?.toLowerCase()}...`}
+              placeholder={`Enter reason for ${statusLabel?.toLowerCase()} or choose a quick option above...`}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="resize-none"
+              className="resize-none text-sm"
               rows={3}
             />
           </div>
