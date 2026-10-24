@@ -18,6 +18,16 @@ import requestAttachmentsRouter from "./routes/requestAttachments.routes.js";
 import logsRouter from "./routes/logs.routes.js";
 import officesRouter from "./routes/offices.routes.js";
 dotenv.config();
+
+const REQUIRED_ENV = ["DATABASE_URL", "SESSION_SECRET", "CLIENT_ORIGIN"];
+const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]?.trim());
+if (missingEnv.length > 0 && process.env.NODE_ENV === "production") {
+  console.error(
+    `[FATAL] Missing required environment variables: ${missingEnv.join(", ")}`,
+  );
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
