@@ -7,6 +7,7 @@ import {
   deleteAppointmentById,
   getAllAppointments,
   getAppointmentById,
+  getMyAppointments,
   updateAppointmentById,
 } from "../controllers/appointments.controller.js";
 
@@ -14,9 +15,10 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.get("/me", getMyAppointments);
+router.post("/", createAppointment);
 router.get("/", requireRoles("admin", "staff"), getAllAppointments);
 router.get("/:id", requireRoles("admin", "staff"), validateId, getAppointmentById);
-router.post("/", requireRoles("admin", "staff"), createAppointment);
 router.patch("/:id", requireRoles("admin", "staff"), validateId, updateAppointmentById);
 router.delete("/:id", requireRoles("admin"), validateId, deleteAppointmentById);
 

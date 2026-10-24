@@ -206,8 +206,10 @@ export const signup = async (
         .json({ error: "Email, password, and name are required" });
     }
 
-    if (!isUserRole(role)) {
-      return res.status(400).json({ error: "A valid role is required" });
+    if (!isUserRole(role) || (role !== "student" && role !== "teacher")) {
+      return res.status(400).json({
+        error: "Self-registration is only permitted for students and faculty",
+      });
     }
 
     if (!EMAIL_REGEX.test(email)) {

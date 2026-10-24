@@ -337,6 +337,12 @@ export async function deleteUserById(
   try {
     const { id } = req.params;
 
+    if (req.session.userId === id) {
+      return res.status(400).json({
+        error: "Cannot delete your own administrator account",
+      });
+    }
+
     const deletedUsers = await db
       .delete(users)
       .where(eq(users.id, id))
@@ -357,7 +363,13 @@ export async function deleteUserById(
     });
 
     return res.status(200).json({ message: "User deleted successfully" });
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === "23503" || err?.cause?.code === "23503") {
+      return res.status(409).json({
+        error:
+          "Cannot delete user with existing requests or records. Deactivate the account instead.",
+      });
+    }
     console.error("[deleteUserById] error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }

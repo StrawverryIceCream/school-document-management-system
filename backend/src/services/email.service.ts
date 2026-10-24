@@ -5,6 +5,25 @@ interface SendOtpResult {
   devMode: boolean;
 }
 
+let cachedTransporter: nodemailer.Transporter | null = null;
+
+function getSharedTransporter(
+  host: string,
+  port: number,
+  user: string,
+  pass: string,
+): nodemailer.Transporter {
+  if (!cachedTransporter) {
+    cachedTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+    });
+  }
+  return cachedTransporter;
+}
+
 export async function sendOtpEmail(
   email: string,
   otp: string,
@@ -26,12 +45,7 @@ export async function sendOtpEmail(
     return { delivered: false, devMode: true };
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
+  const transporter = getSharedTransporter(host, port, user, pass);
 
   await transporter.sendMail({
     from,
@@ -89,12 +103,7 @@ export async function sendStatusNotificationEmail(
     return { delivered: false, devMode: true };
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
+  const transporter = getSharedTransporter(host, port, user, pass);
 
   const statusTitle =
     status === "ready"

@@ -18,12 +18,24 @@ import requestAttachmentsRouter from "./routes/requestAttachments.routes.js";
 import logsRouter from "./routes/logs.routes.js";
 import officesRouter from "./routes/offices.routes.js";
 dotenv.config();
+
+const REQUIRED_ENV = ["DATABASE_URL", "SESSION_SECRET", "CLIENT_ORIGIN"];
+const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]?.trim());
+if (missingEnv.length > 0 && process.env.NODE_ENV === "production") {
+  console.error(
+    `[FATAL] Missing required environment variables: ${missingEnv.join(", ")}`,
+  );
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN!,
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -37,13 +49,13 @@ app.use(
       tableName: "user_sessions",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "arch-dev-session-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   }),
@@ -71,7 +83,24 @@ app.use("/api/logs", logsRouter);
 app.use("/api/offices", officesRouter);
 
 app.use((req, res) => {
-  res.status(404).json({ message: "Not Found" });
+  res.status(404).json({ error: "Not Found" });
 });
+
+// Global error handler - guarantees JSON responses and prevents stack trace leakage
+app.use(
+  (
+    err: unknown,
+    req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error(`[Unhandled Error] ${req.method} ${req.url}:`, err);
+    const isProd = process.env.NODE_ENV === "production";
+    return res.status(500).json({
+      error: "Internal server error",
+      ...(!isProd && err instanceof Error ? { details: err.message } : {}),
+    });
+  },
+);
 
 app.listen(PORT, () => console.log(`Server on ${PORT}`));
