@@ -21,9 +21,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN!,
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -37,13 +39,13 @@ app.use(
       tableName: "user_sessions",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "arch-dev-session-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   }),
