@@ -120,14 +120,71 @@ export async function getAppointmentById(
   }
 }
 
+// GET /appointments/me
+export async function getMyAppointments(req: Request, res: Response) {
+  try {
+    const sessionUserId = req.session.userId;
+    if (!sessionUserId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { page = "1", limit = "20" } = req.query;
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(
+      100,
+      Math.max(1, parseInt(limit as string, 10) || 20),
+    );
+    const offset = (pageNum - 1) * limitNum;
+
+    const whereClause = eq(appointments.userId, sessionUserId);
+
+    const [myAppointments, totalResult] = await Promise.all([
+      db.query.appointments.findMany({
+        where: whereClause,
+        orderBy: (appointments, { desc }) => [desc(appointments.scheduledAt)],
+        limit: limitNum,
+        offset,
+        with: {
+          window: true,
+          request: true,
+        },
+      }),
+      db.select({ total: count() }).from(appointments).where(whereClause),
+    ]);
+
+    const total = totalResult?.[0]?.total ?? 0;
+
+    res.json({
+      data: myAppointments,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (err) {
+    console.error("[getMyAppointments] error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // POST /appointments
 export async function createAppointment(req: Request, res: Response) {
   try {
-    const { userId, windowId, requestId, purpose, scheduledAt } = req.body;
+    const sessionUserId = req.session.userId;
+    const sessionRole = req.session.role;
+    if (!sessionUserId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-    if (!userId || !windowId || !scheduledAt) {
+    const { userId: bodyUserId, windowId, requestId, purpose, scheduledAt } = req.body;
+    const effectiveUserId =
+      sessionRole === "admin" && bodyUserId ? bodyUserId : sessionUserId;
+
+    if (!effectiveUserId || !windowId || !scheduledAt) {
       return res.status(400).json({
-        error: "User ID, Window ID, and scheduledAt timestamp are required",
+        error: "Window ID and scheduledAt timestamp are required",
       });
     }
 
@@ -151,7 +208,7 @@ export async function createAppointment(req: Request, res: Response) {
     const [newAppointment] = await db
       .insert(appointments)
       .values({
-        userId,
+        userId: effectiveUserId,
         windowId,
         requestId: requestId || null,
         purpose: purpose ? purpose.trim() : null,
