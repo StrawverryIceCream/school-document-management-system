@@ -2,6 +2,7 @@ import SearchToolbar from "@/components/shared/SearchToolbar";
 import { type StatusFilter } from "@/context/RequestContext";
 import { useRequests } from "@/hooks/useRequest";
 import { ChevronDown } from "lucide-react";
+import { QrScanDialog } from "./QrScanDialog";
 
 function RequestFilter() {
   const {
@@ -45,9 +46,11 @@ function RequestFilter() {
             { value: "processing", label: "Processing" },
             { value: "ready", label: "Ready" },
             { value: "claimed", label: "Claimed" },
+            { value: "rejected", label: "Rejected" },
             { value: "cancelled", label: "Cancelled" },
           ]}
         />
+        <QrScanDialog />
       </div>
     </SearchToolbar>
   );

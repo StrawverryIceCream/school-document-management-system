@@ -8,6 +8,7 @@ export type StatusFilter =
   | "processing"
   | "ready"
   | "claimed"
+  | "rejected"
   | "cancelled";
 
 export interface RequestContextType {

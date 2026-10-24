@@ -25,6 +25,7 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const SectorPage = lazy(() => import("./pages/SectorPage"));
 const SectorRequestReview = lazy(() => import("./pages/SectorRequestReview"));
+const ClaimVerification = lazy(() => import("./pages/ClaimVerification"));
 
 const STAFF_ROLES: UserRole[] = ["admin", "staff"];
 const ADMIN_ROLES: UserRole[] = ["admin"];
@@ -66,6 +67,7 @@ export default function App() {
                 />
                 <Route path="/my-request" element={<MyRequest />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/requests/claim" element={<ClaimVerification />} />
                 <Route
                   path="/dashboard"
                   element={
