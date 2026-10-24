@@ -145,16 +145,6 @@ export function RegistrarReviewCard({
           </p>
         )}
 
-        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
-          <p className="flex items-center gap-2 font-medium">
-            <Eye className="size-4" aria-hidden="true" />
-            Workflow limitations
-          </p>
-          <p className="mt-1 text-muted-foreground">
-            The current backend does not support moving requests to On Hold or
-            Rejected. Those actions are unavailable here.
-          </p>
-        </div>
       </CardContent>
     </Card>
   );
