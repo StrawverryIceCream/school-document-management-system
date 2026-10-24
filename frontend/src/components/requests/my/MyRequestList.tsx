@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CalendarDays,
   CircleCheck,
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyRequest } from "@/hooks/useMyRequest";
+import { ClaimSlipDialog } from "./ClaimSlipDialog";
+import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import {
   formatClaimPeriod,
   formatRequestCardData,
@@ -24,6 +27,8 @@ import { cn } from "@/lib/utils";
 
 export default function MyRequestList() {
   const { filteredRequests, loading, error } = useMyRequest();
+  const [selectedClaimSlipRequest, setSelectedClaimSlipRequest] =
+    useState<MyRequestWithDocumentName | null>(null);
 
   if (loading) {
     return (
@@ -216,6 +221,7 @@ export default function MyRequestList() {
                       size="lg"
                       className="text-base"
                       aria-label={`Present claim slip for ${request.documentName}`}
+                      onClick={() => setSelectedClaimSlipRequest(request)}
                     >
                       <QrCode className="size-5" aria-hidden="true" />
                       Present Claim Slip
@@ -227,6 +233,11 @@ export default function MyRequestList() {
           </li>
         );
       })}
+      <ClaimSlipDialog
+        request={selectedClaimSlipRequest}
+        open={selectedClaimSlipRequest !== null}
+        onOpenChange={(open) => !open && setSelectedClaimSlipRequest(null)}
+      />
     </ul>
   );
 }
