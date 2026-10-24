@@ -34,10 +34,10 @@ type RequestStatus = (typeof STATUSES)[number];
 
 // Requests only move forward, or get cancelled before they are claimed
 const STATUS_TRANSITIONS: Record<RequestStatus, readonly RequestStatus[]> = {
-  pending: ["processing", "cancelled"],
-  awaiting_payment: ["processing", "cancelled"],
-  processing: ["ready", "cancelled"],
-  on_hold: ["processing", "cancelled"],
+  pending: ["processing", "rejected", "cancelled"],
+  awaiting_payment: ["processing", "rejected", "cancelled"],
+  processing: ["ready", "on_hold", "rejected", "cancelled"],
+  on_hold: ["processing", "rejected", "cancelled"],
   ready: ["claimed", "cancelled"],
   claimed: [],
   rejected: [],
@@ -87,6 +87,8 @@ interface UpdateStatusBody {
   releaseDate?: unknown;
   staffNotes?: unknown;
   releasePdfUrl?: unknown;
+  claimedBy?: unknown;
+  remarks?: unknown;
 }
 
 function getSessionUserId(req: Pick<Request, "session">): string | undefined {
@@ -183,6 +185,11 @@ function buildStatusNotification(
       return {
         title: "Request claimed",
         message: `Your ${documentName} has been marked as claimed.`,
+      };
+    case "rejected":
+      return {
+        title: "Request rejected",
+        message: `Your request for ${documentName} was rejected. Check your portal for staff remarks.`,
       };
     case "cancelled":
       return {
@@ -496,7 +503,7 @@ export async function updateRequestStatus(
     if (!staffId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
-    const { status, releaseDate, staffNotes, releasePdfUrl } = (req.body ??
+    const { status, releaseDate, staffNotes, releasePdfUrl, claimedBy, remarks } = (req.body ??
       {}) as UpdateStatusBody;
 
     if (!isRequestStatus(status)) {
@@ -572,10 +579,36 @@ export async function updateRequestStatus(
     if (typeof releasePdfUrl === "string") {
       updates.releasePdfUrl = releasePdfUrl.trim() || null;
     }
-    if (typeof staffNotes === "string") {
+    if (typeof staffNotes === "string" && staffNotes.trim()) {
       updates.internalNotes = staffNotes.trim();
     }
-    if (status === "claimed") updates.claimedAt = new Date();
+    if (typeof claimedBy === "string" && claimedBy.trim()) {
+      updates.claimedBy = claimedBy.trim();
+    }
+    if (typeof remarks === "string" && remarks.trim()) {
+      updates.remarks = remarks.trim();
+    }
+    if (status === "claimed") {
+      updates.claimedAt = new Date();
+      updates.releasedBy = staffId;
+      if (!updates.claimedBy) {
+        updates.claimedBy = request.user?.fullName ?? null;
+      }
+    }
+    if (status === "cancelled") {
+      updates.cancelledAt = new Date();
+      if (typeof staffNotes === "string" && staffNotes.trim()) {
+        updates.cancellationReason = staffNotes.trim();
+      }
+    }
+    if (
+      status === "rejected" &&
+      typeof staffNotes === "string" &&
+      staffNotes.trim() &&
+      !updates.remarks
+    ) {
+      updates.remarks = staffNotes.trim();
+    }
 
     // Notification and status change succeed or fail together
     const updated = await db.transaction(async (tx) => {
