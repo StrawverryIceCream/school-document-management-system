@@ -73,7 +73,24 @@ app.use("/api/logs", logsRouter);
 app.use("/api/offices", officesRouter);
 
 app.use((req, res) => {
-  res.status(404).json({ message: "Not Found" });
+  res.status(404).json({ error: "Not Found" });
 });
+
+// Global error handler - guarantees JSON responses and prevents stack trace leakage
+app.use(
+  (
+    err: unknown,
+    req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error(`[Unhandled Error] ${req.method} ${req.url}:`, err);
+    const isProd = process.env.NODE_ENV === "production";
+    return res.status(500).json({
+      error: "Internal server error",
+      ...(!isProd && err instanceof Error ? { details: err.message } : {}),
+    });
+  },
+);
 
 app.listen(PORT, () => console.log(`Server on ${PORT}`));
