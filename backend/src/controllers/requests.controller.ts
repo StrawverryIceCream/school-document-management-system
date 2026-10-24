@@ -343,7 +343,7 @@ export async function getAllRequests(
                   ilike(users.fullName, pattern),
                   ilike(users.studentId, pattern),
                   ilike(users.email, pattern),
-                  ilike(users.role, pattern),
+                  ilike(sql`${users.role}::text`, pattern),
                 ),
               ),
           ),
