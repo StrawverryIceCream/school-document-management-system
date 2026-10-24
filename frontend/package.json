@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "test": "tsc -b --noEmit && tsx src/tests/review-actions.test.ts && tsx src/tests/qr-parser.test.ts",
+    "test": "tsc -b --noEmit && node src/tests/review-actions.test.ts && node src/tests/qr-parser.test.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
