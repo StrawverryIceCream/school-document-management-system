@@ -42,6 +42,18 @@ _Avoid_: Permission level, record accessibility
 A one-click filter preset that scopes the global request view to an institutional office or the user's home office.
 _Avoid_: Quick link, bookmark tab
 
+**Request Rejection**:
+An institutional compliance determination made by office staff denying the fulfillment of a document request due to unfulfilled prerequisites, academic ineligibility, or invalid documentation. Remarks are communicated to the requester.
+_Avoid_: Cancel, decline, drop
+
+**Request Cancellation**:
+The administrative termination or voluntary requester withdrawal of an in-flight or ready document request, stopping fulfillment without academic non-compliance fault.
+_Avoid_: Reject, delete, trash
+
+**Canned Reason Preset**:
+A standardized, selectable institutional explanation template (e.g., missing attachments, unsettled obligations, duplicate submission) that populates public remarks or cancellation reasons with consistent institutional phrasing.
+_Avoid_: Quick message, canned excuse, boilerplate text
+
 ## Staff and Offices
 
 **Staff Delegation**:
