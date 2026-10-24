@@ -158,7 +158,10 @@ export default function SectorRequestReview() {
   const statusLabel = (status: RequestStatus) =>
     REQUEST_STATUS_CONFIG[status].label;
 
-  async function confirmStatusChange() {
+  async function confirmStatusChange(details?: {
+    reason?: string;
+    claimedBy?: string;
+  }) {
     if (!requestId || !pendingAction) return;
     setUpdating(true);
 
@@ -170,7 +173,9 @@ export default function SectorRequestReview() {
           pendingAction === "ready" && releasePdfUrl.trim()
             ? releasePdfUrl.trim()
             : undefined,
-        staffNotes: staffNotes.trim() || null,
+        staffNotes: details?.reason || staffNotes.trim() || null,
+        claimedBy: details?.claimedBy || undefined,
+        remarks: details?.reason || undefined,
       });
       setPendingAction(null);
       toast.success(
@@ -330,7 +335,9 @@ export default function SectorRequestReview() {
       </div>
 
       <StatusChangeDialog
+        status={pendingAction}
         statusLabel={pendingAction ? statusLabel(pendingAction) : null}
+        defaultClaimantName={request.user?.fullName ?? ""}
         updating={updating}
         onConfirm={confirmStatusChange}
         onClose={() => setPendingAction(null)}

@@ -107,7 +107,7 @@ export function RegistrarReviewCard({
               </p>
             </div>
 
-            {actions.map(({ status, label, icon: Icon }) => {
+            {actions.map(({ status, label, icon: Icon, variant }) => {
               const paymentBlocked =
                 status === "processing" &&
                 processingRequiresPayment &&
@@ -116,6 +116,7 @@ export function RegistrarReviewCard({
               return (
                 <div key={status} className="space-y-1">
                   <Button
+                    variant={variant ?? "default"}
                     className="w-full gap-2"
                     disabled={updating || paymentBlocked || releaseDateMissing}
                     onClick={() => onSelectAction(status)}

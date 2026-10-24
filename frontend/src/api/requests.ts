@@ -66,6 +66,8 @@ export interface UpdateRequestStatusPayload {
   releaseDate?: string | null;
   releasePdfUrl?: string | null;
   staffNotes?: string | null;
+  claimedBy?: string | null;
+  remarks?: string | null;
 }
 
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
