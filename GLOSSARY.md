@@ -54,6 +54,14 @@ _Avoid_: Reject, delete, trash
 A standardized, selectable institutional explanation template (e.g., missing attachments, unsettled obligations, duplicate submission) that populates public remarks or cancellation reasons with consistent institutional phrasing.
 _Avoid_: Quick message, canned excuse, boilerplate text
 
+**Public Request Tracking**:
+An unauthenticated, privacy-preserving tracking view allowing requesters to inspect stage progression, designated counter windows, and estimated release dates using an institutional reference number (`REQ-YYYY-NNNNNN`) without exposing student identity or personal contact information.
+_Avoid_: Global lookup, ticket search, open request viewer
+
+**Academic Term Anchor**:
+The institutional academic year and semester (e.g., `AY 2026–2027`) displayed across public portals and operational dashboards to contextualize document validity, eligibility verification, and active queue cycles.
+_Avoid_: School year banner, active semester label, date tag
+
 ## Staff and Offices
 
 **Staff Delegation**:
