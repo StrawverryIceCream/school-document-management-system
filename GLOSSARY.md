@@ -102,3 +102,13 @@ _Avoid_: User disabling, account ban, soft delete
 The automatic cleanup and nullification of mutually exclusive role attributes (such as student program records vs. staff office assignments) during user role changes to maintain relational integrity.
 _Avoid_: Credential reset, role switching wipe
 
+## Request Review and Verification
+
+**In-Situ Proof Preview**:
+An in-page modal or inspection overlay allowing office staff to examine payment receipts, bank deposit slips, and supporting requirements directly within the request review card without navigating away or opening external browser tabs.
+_Avoid_: External tab viewer, artifact link, popup window
+
+**Payment Proof**:
+A digital receipt, bank confirmation slip, or electronic transaction screenshot uploaded by a requester to substantiate settlement of document assessment fees.
+_Avoid_: Payment artifact, receipt file, transaction attachment
+

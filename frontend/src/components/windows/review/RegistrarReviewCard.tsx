@@ -146,7 +146,7 @@ export function RegistrarReviewCard({
 
             {exceptionActions.length > 0 && (
               <div className="border-t pt-3 space-y-2">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Quick Terminations & Exceptions
                 </span>
                 <div
