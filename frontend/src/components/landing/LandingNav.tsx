@@ -1,20 +1,14 @@
-import { LogIn, Notebook, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { LogIn, Search } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import {
   ACCESS_PORTAL_ACTION,
-  BRAND_HOME_HREF,
-  BRAND_NAME,
-  BRAND_TAGLINE,
-  BRAND_VERSION,
-  BRAND_VERSION_TONE,
   CHECK_STATUS_ACTION,
   NAV_ARIA_LABEL,
   NAV_LINKS,
 } from "@/lib/landing/landing-nav";
-import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/shared/ModeToggle";
+import ArchLogo from "@/components/shared/ArchLogo";
 
 export default function LandingNav() {
   return (
@@ -23,30 +17,7 @@ export default function LandingNav() {
       className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md"
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-8">
-        <a href={BRAND_HOME_HREF} className="group flex items-center gap-3">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Notebook className="size-7" aria-hidden="true" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                {BRAND_NAME}
-              </span>
-              <Badge
-                className={cn(
-                  BADGE_BASE,
-                  "border-transparent",
-                  TONES[BRAND_VERSION_TONE].badge,
-                )}
-              >
-                {BRAND_VERSION}
-              </Badge>
-            </div>
-            <p className="hidden text-sm font-medium uppercase tracking-wider text-muted-foreground sm:block">
-              {BRAND_TAGLINE}
-            </p>
-          </div>
-        </a>
+        <ArchLogo />
 
         <div className="hidden items-center gap-8 lg:flex">
           {NAV_LINKS.map(({ label, href }) => (

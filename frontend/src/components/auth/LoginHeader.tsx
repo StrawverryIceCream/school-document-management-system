@@ -1,48 +1,17 @@
-import { CircleHelp, Notebook } from "lucide-react";
+import { CircleHelp } from "lucide-react";
 import { ModeToggle } from "@/components/shared/ModeToggle";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  BRAND_NAME,
-  BRAND_TAGLINE,
-  BRAND_VERSION,
-  BRAND_VERSION_TONE,
-} from "@/lib/landing/landing-nav";
 import { LOGIN_HEADER } from "@/lib/auth/login-header";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import ArchLogo from "@/components/shared/ArchLogo";
 
 export default function LoginHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a
-          href={LOGIN_HEADER.homeHref}
-          className="group flex items-center gap-3"
-        >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-md">
-            <Notebook className="size-7" aria-hidden="true" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold leading-none tracking-tight text-foreground transition-colors group-hover:text-primary">
-                {BRAND_NAME}
-              </span>
-              <Badge
-                className={cn(
-                  BADGE_BASE,
-                  "border-transparent",
-                  TONES[BRAND_VERSION_TONE].badge,
-                )}
-              >
-                {BRAND_VERSION}
-              </Badge>
-            </div>
-            <p className="mt-1 hidden text-sm font-medium uppercase tracking-wide text-muted-foreground sm:block">
-              {BRAND_TAGLINE}
-            </p>
-          </div>
-        </a>
+        <ArchLogo href={LOGIN_HEADER.homeHref} />
 
         <div className="flex items-center gap-3">
           <Badge

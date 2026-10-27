@@ -35,6 +35,7 @@ export default function CredentialsCatalog() {
   }, []);
 
   const catalogCtaHref = user ? "/new-request" : "/login";
+  const displayedDocuments = documents.slice(0, 3);
 
   return (
     <section
@@ -66,7 +67,7 @@ export default function CredentialsCatalog() {
 
         {loading ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <Card
                 key={i}
                 className="h-64 animate-pulse gap-0 overflow-hidden bg-muted py-0"
@@ -79,7 +80,7 @@ export default function CredentialsCatalog() {
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {documents.map((doc, index) => {
+            {displayedDocuments.map((doc, index) => {
               // First doc gets featured styling
               const featured = index === 0;
               const turnaroundLabel =
