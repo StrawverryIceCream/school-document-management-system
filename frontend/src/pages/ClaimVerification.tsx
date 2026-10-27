@@ -44,7 +44,8 @@ export default function ClaimVerification() {
   const refParam = searchParams.get("ref")?.trim() ?? "";
   const idParam = searchParams.get("id")?.trim() ?? "";
 
-  const [loading, setLoading] = useState(true);
+  const queryTarget = refParam || idParam;
+  const [loading, setLoading] = useState(() => Boolean(queryTarget));
   const [error, setError] = useState<string | null>(null);
   const [matchedRequest, setMatchedRequest] = useState<DocumentRequestWithRelations | null>(null);
   const [manualRef, setManualRef] = useState(refParam);
@@ -59,21 +60,12 @@ export default function ClaimVerification() {
       return;
     }
 
-    // If a student scanned this, direct them to their portal
-    if (user.role === "student") {
-      setLoading(false);
-      return;
-    }
-
-    const queryTarget = refParam || idParam;
-    if (!queryTarget) {
-      setLoading(false);
+    // If a student scanned this or no target, nothing to asynchronously resolve
+    if (user.role === "student" || !queryTarget) {
       return;
     }
 
     let isMounted = true;
-    setLoading(true);
-    setError(null);
 
     async function resolveRequest() {
       try {
@@ -105,7 +97,6 @@ export default function ClaimVerification() {
         }
 
         setMatchedRequest(req);
-        setLoading(false);
 
         // If the request is not claimed, automatically redirect staff to review
         if (req.status !== "claimed") {
@@ -119,7 +110,10 @@ export default function ClaimVerification() {
             ? err.message
             : "An unexpected error occurred while looking up the request.",
         );
-        setLoading(false);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -128,7 +122,7 @@ export default function ClaimVerification() {
     return () => {
       isMounted = false;
     };
-  }, [authLoading, user, refParam, idParam, navigate]);
+  }, [authLoading, user, refParam, idParam, navigate, queryTarget]);
 
   const handleManualSearch = (e: React.FormEvent) => {
     e.preventDefault();

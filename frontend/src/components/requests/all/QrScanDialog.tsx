@@ -123,25 +123,28 @@ export function QrScanDialog({ trigger }: QrScanDialogProps) {
     };
   }, [cameraActive, navigate]);
 
-  useEffect(() => {
-    if (!open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
       stopCamera();
       setInputVal("");
       setCameraError(null);
     }
-  }, [open]);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputVal.trim()) return;
     const resolved = parseScannedReference(inputVal);
     stopCamera();
+    setInputVal("");
+    setCameraError(null);
     setOpen(false);
     navigate(`/requests/claim?ref=${encodeURIComponent(resolved)}`);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="outline" size="sm" className="gap-2">

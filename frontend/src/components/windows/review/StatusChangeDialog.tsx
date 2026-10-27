@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import {
   AlertDialog,
@@ -36,15 +36,17 @@ export function StatusChangeDialog({
   onConfirm: (details: { reason?: string; claimedBy?: string }) => void;
   onClose: () => void;
 }) {
+  const [prevStatus, setPrevStatus] = useState(status);
   const [reason, setReason] = useState("");
   const [claimedBy, setClaimedBy] = useState(defaultClaimantName);
 
-  useEffect(() => {
+  if (status !== prevStatus) {
+    setPrevStatus(status);
     if (status !== null) {
       setReason("");
       setClaimedBy(defaultClaimantName);
     }
-  }, [status, defaultClaimantName]);
+  }
 
   const isReasonRequired = status === "rejected" || status === "cancelled";
   const canConfirm = !updating && (!isReasonRequired || Boolean(reason.trim()));

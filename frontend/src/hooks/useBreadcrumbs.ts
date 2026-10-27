@@ -47,31 +47,20 @@ export function useBreadcrumbs(): BreadcrumbCrumb[] {
       ? segments[requestsIndex + 1]
       : null;
 
-  // State to trigger re-render once async lookups resolve
-  const [docName, setDocName] = useState<string | null>(() =>
-    docId ? (documentNameCache.get(docId) ?? null) : null,
-  );
-  const [refNumber, setRefNumber] = useState<string | null>(() =>
-    requestId ? (requestReferenceCache.get(requestId) ?? null) : null,
-  );
+  // Synchronous cached / in-memory resolution with async fallback state
+  const cachedDocName = docId
+    ? (documentNameCache.get(docId) ?? documents.find((d) => String(d.id) === docId)?.name ?? null)
+    : null;
+  const [asyncDocName, setAsyncDocName] = useState<string | null>(null);
+  const docName = cachedDocName ?? (docId ? asyncDocName : null);
+
+  const cachedRefNumber = requestId ? (requestReferenceCache.get(requestId) ?? null) : null;
+  const [asyncRefNumber, setAsyncRefNumber] = useState<string | null>(null);
+  const refNumber = cachedRefNumber ?? (requestId ? asyncRefNumber : null);
 
   // Resolve document name if on /new-request/:id
   useEffect(() => {
-    if (!docId) {
-      setDocName(null);
-      return;
-    }
-
-    const cached = documentNameCache.get(docId);
-    if (cached) {
-      setDocName(cached);
-      return;
-    }
-
-    const inMemory = documents.find((d) => String(d.id) === docId);
-    if (inMemory?.name) {
-      documentNameCache.set(docId, inMemory.name);
-      setDocName(inMemory.name);
+    if (!docId || cachedDocName) {
       return;
     }
 
@@ -80,7 +69,7 @@ export function useBreadcrumbs(): BreadcrumbCrumb[] {
       .then((doc) => {
         if (active && doc?.name) {
           documentNameCache.set(docId, doc.name);
-          setDocName(doc.name);
+          setAsyncDocName(doc.name);
         }
       })
       .catch(() => {
@@ -90,18 +79,11 @@ export function useBreadcrumbs(): BreadcrumbCrumb[] {
     return () => {
       active = false;
     };
-  }, [docId, documents]);
+  }, [docId, cachedDocName]);
 
   // Resolve request reference number if on .../requests/:requestId
   useEffect(() => {
-    if (!requestId) {
-      setRefNumber(null);
-      return;
-    }
-
-    const cached = requestReferenceCache.get(requestId);
-    if (cached) {
-      setRefNumber(cached);
+    if (!requestId || cachedRefNumber) {
       return;
     }
 
@@ -110,7 +92,7 @@ export function useBreadcrumbs(): BreadcrumbCrumb[] {
       .then((req) => {
         if (active && req?.referenceNumber) {
           requestReferenceCache.set(requestId, req.referenceNumber);
-          setRefNumber(req.referenceNumber);
+          setAsyncRefNumber(req.referenceNumber);
         }
       })
       .catch(() => {
@@ -120,7 +102,7 @@ export function useBreadcrumbs(): BreadcrumbCrumb[] {
     return () => {
       active = false;
     };
-  }, [requestId]);
+  }, [requestId, cachedRefNumber]);
 
   if (segments.length === 0) return [{ label: "Dashboard", to: "/" }];
 

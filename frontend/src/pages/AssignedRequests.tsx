@@ -71,8 +71,36 @@ export default function AssignedRequests() {
   }, [assigneeFilter, debouncedSearch, statusFilter]);
 
   useEffect(() => {
-    void fetchAssignedRequests();
-  }, [fetchAssignedRequests]);
+    let ignore = false;
+    getAllRequests({
+      limit: 100,
+      assignedTo: assigneeFilter,
+      search: debouncedSearch.trim() || undefined,
+      status: statusFilter !== "all" ? (statusFilter as RequestStatus) : undefined,
+    })
+      .then((res) => {
+        if (!ignore) {
+          const normalized = res.data
+            .map((r) => normalizeRequestRow(r))
+            .filter((r): r is RequestRow => Boolean(r));
+          setRequests(normalized);
+          setError(null);
+          setLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        if (!ignore) {
+          console.error("Failed to load assigned requests:", err);
+          setError(err?.message || "Failed to load assigned requests");
+          setRequests([]);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [assigneeFilter, debouncedSearch, statusFilter]);
 
   // Compute triage counts
   const triageCounts = useMemo(() => {

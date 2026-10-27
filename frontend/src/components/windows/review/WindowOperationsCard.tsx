@@ -14,15 +14,17 @@ interface WindowOperationsCardProps {
 
 export function WindowOperationsCard({ request }: WindowOperationsCardProps) {
   const authContext = use(AuthContext);
+  const [prevAssignee, setPrevAssignee] = useState(request.assignee);
   const [currentAssignee, setCurrentAssignee] = useState(request.assignee ?? null);
   const [staffMembers, setStaffMembers] = useState<
     Array<{ id: string; fullName: string; role: string }>
   >([]);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  useEffect(() => {
+  if (request.assignee !== prevAssignee) {
+    setPrevAssignee(request.assignee);
     setCurrentAssignee(request.assignee ?? null);
-  }, [request.assignee]);
+  }
 
   useEffect(() => {
     const officeKey =
