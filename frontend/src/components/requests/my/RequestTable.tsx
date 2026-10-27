@@ -1,8 +1,9 @@
-import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import RequestActionButton from "./RequestActionButton";
 import RequestStatusBadge from "./RequestStatusBadge";
+import RequestTimelineDialog from "./RequestTimelineDialog";
+import { ClaimSlipDialog } from "./ClaimSlipDialog";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import {
@@ -28,7 +29,10 @@ export default function RequestsTable({
   onPageChange,
 }: RequestsTableProps) {
   const { filteredRequests, loading, error } = useMyRequest();
-  const navigate = useNavigate();
+  const [selectedTimelineRequest, setSelectedTimelineRequest] =
+    useState<MyRequestWithDocumentName | null>(null);
+  const [selectedClaimSlipRequest, setSelectedClaimSlipRequest] =
+    useState<MyRequestWithDocumentName | null>(null);
 
   const columns: DataTableColumn<MyRequestWithDocumentName>[] = useMemo(
     () => [
@@ -90,13 +94,13 @@ export default function RequestsTable({
         cell: (request) => (
           <RequestActionButton
             request={request}
-            onTrackTimeline={(id) => navigate(`/requests/${id}/timeline`)}
-            onClaimSlip={(id) => navigate(`/requests/${id}/timeline`)}
+            onTrackTimeline={() => setSelectedTimelineRequest(request)}
+            onClaimSlip={() => setSelectedClaimSlipRequest(request)}
           />
         ),
       },
     ],
-    [navigate],
+    [],
   );
 
   const totalPages = Math.max(
@@ -105,21 +109,37 @@ export default function RequestsTable({
   );
 
   return (
-    <DataTable
-      columns={columns}
-      data={requests}
-      keyExtractor={(request) => request.id}
-      loading={loading}
-      error={error}
-      emptyMessage="No requests match your search or filter."
-      pagination={{
-        page,
-        totalPages,
-        totalItems: filteredRequests.length,
-        itemsPerPage: REQUESTS_PAGE_SIZE,
-        itemLabel: "requests",
-        onPageChange,
-      }}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={requests}
+        keyExtractor={(request) => request.id}
+        loading={loading}
+        error={error}
+        emptyMessage="No requests match your search or filter."
+        pagination={{
+          page,
+          totalPages,
+          totalItems: filteredRequests.length,
+          itemsPerPage: REQUESTS_PAGE_SIZE,
+          itemLabel: "requests",
+          onPageChange,
+        }}
+      />
+      <RequestTimelineDialog
+        request={selectedTimelineRequest}
+        open={selectedTimelineRequest !== null}
+        onOpenChange={(open) => !open && setSelectedTimelineRequest(null)}
+        onOpenClaimSlip={(req) => {
+          setSelectedTimelineRequest(null);
+          setSelectedClaimSlipRequest(req);
+        }}
+      />
+      <ClaimSlipDialog
+        request={selectedClaimSlipRequest}
+        open={selectedClaimSlipRequest !== null}
+        onOpenChange={(open) => !open && setSelectedClaimSlipRequest(null)}
+      />
+    </>
   );
 }

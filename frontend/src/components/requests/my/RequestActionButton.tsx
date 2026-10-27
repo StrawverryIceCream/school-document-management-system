@@ -1,4 +1,4 @@
-import { Download, TrendingUp } from "lucide-react";
+import { QrCode, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 
@@ -16,12 +16,12 @@ function RequestActionButton({
   if (request.status === "ready") {
     return (
       <Button
-        size="lg"
-        className="bg-teal-900 text-white hover:bg-teal-900/90"
+        size="sm"
+        className="bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer gap-1.5 font-semibold text-xs"
         onClick={() => onClaimSlip(request.id)}
-        aria-label={`Download claim slip for ${request.documentName}`}
+        aria-label={`Present claim slip for ${request.documentName}`}
       >
-        <Download className="size-4" aria-hidden="true" />
+        <QrCode className="size-3.5" aria-hidden="true" />
         Claim Slip
       </Button>
     );
@@ -29,16 +29,17 @@ function RequestActionButton({
 
   return (
     <Button
-      size="lg"
-      variant="default"
+      size="sm"
+      variant="outline"
       onClick={() => onTrackTimeline(request.id)}
       aria-label={`Track timeline for ${request.documentName}`}
-      className="text-base"
+      className="cursor-pointer gap-1.5 font-semibold text-xs"
     >
+      <TrendingUp className="size-3.5" aria-hidden="true" />
       Track Timeline
-      <TrendingUp className="size-4" aria-hidden="true" />
     </Button>
   );
 }
 
 export default RequestActionButton;
+
