@@ -1,12 +1,17 @@
+import { useState } from "react";
 import {
+  Eye,
   FileCheck,
   FileText,
   Paperclip,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AttachmentLink } from "./AttachmentLink";
 import { displayValue, formatDate } from "@/lib/windows/review/format";
+import { formatPaymentMetaItems } from "@/lib/windows/review/preview";
+import { FilePreviewDialog } from "@/components/shared/FilePreviewDialog";
 import { cn } from "@/lib/utils";
 import type { ReviewField } from "@/lib/windows/review/types";
 import type { RequestReviewDetails } from "@/api/requests";
@@ -26,6 +31,14 @@ export function RequestDetailsCard({
   attachmentsError: string | null;
 }) {
   const documentType = request.documentType;
+  const [previewTarget, setPreviewTarget] = useState<{
+    title: string;
+    subtitle?: string;
+    fileUrl: string | null;
+    fileName?: string;
+    mimeType?: string | null;
+    metaItems?: Array<{ label: string; value: string }>;
+  } | null>(null);
 
   return (
     <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-5">
@@ -119,7 +132,18 @@ export function RequestDetailsCard({
               {field.fileField &&
                 fieldAttachments.map((attachment) => (
                   <div key={attachment.id} className="mt-2">
-                    <AttachmentLink attachment={attachment} />
+                    <AttachmentLink
+                      attachment={attachment}
+                      onPreview={(att) =>
+                        setPreviewTarget({
+                          title: att.fileName || att.label || field.label,
+                          subtitle: `Requirement Field: ${field.label}`,
+                          fileUrl: att.fileUrl,
+                          fileName: att.fileName,
+                          mimeType: att.mimeType,
+                        })
+                      }
+                    />
                   </div>
                 ))}
             </div>
@@ -173,7 +197,27 @@ export function RequestDetailsCard({
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setPreviewTarget({
+                        title: attachment.fileName || attachment.label || "Attached Requirement",
+                        subtitle: attachment.label
+                          ? `Requirement Field: ${attachment.label}`
+                          : "Student Supporting Document",
+                        fileUrl: attachment.fileUrl,
+                        fileName: attachment.fileName,
+                        mimeType: attachment.mimeType,
+                      })
+                    }
+                    className="gap-1 text-xs font-semibold text-primary cursor-pointer hover:underline"
+                  >
+                    <Eye className="size-3.5" />
+                    Preview
+                  </Button>
                   <AttachmentLink attachment={attachment} />
                 </div>
               </div>
@@ -212,21 +256,45 @@ export function RequestDetailsCard({
                   )}
                 </div>
                 {payment.paymentProofUrl && (
-                  <a
-                    href={payment.paymentProofUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
-                  >
-                    <FileText className="size-3.5" />
-                    View payment proof
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPreviewTarget({
+                          title: `Payment Proof (${payment.method.replace(/_/g, " ")})`,
+                          subtitle: `Submitted for ${documentType?.name ?? request.documentTypeName}`,
+                          fileUrl: payment.paymentProofUrl,
+                          fileName: `payment-proof-${payment.id.slice(0, 8)}`,
+                          metaItems: formatPaymentMetaItems(payment),
+                        })
+                      }
+                      className="gap-1.5 text-xs font-semibold text-primary cursor-pointer shadow-2xs hover:bg-primary/5"
+                    >
+                      <Eye className="size-3.5" />
+                      Preview proof
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <FilePreviewDialog
+        open={previewTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewTarget(null);
+        }}
+        title={previewTarget?.title ?? "Document Preview"}
+        subtitle={previewTarget?.subtitle}
+        fileUrl={previewTarget?.fileUrl ?? null}
+        fileName={previewTarget?.fileName}
+        mimeType={previewTarget?.mimeType}
+        metaItems={previewTarget?.metaItems}
+      />
     </Card>
   );
 }
