@@ -1,8 +1,9 @@
+import { ACTIVE_TERM_LABEL } from "@/lib/constants";
+
 export const LOGIN_HEADER = {
-  // Assumes the landing page lives at the root route
   homeHref: "/",
-  termLabel: "Active Academic Term: 2026–2027",
-  helpdeskLabel: "Helpdesk",
-  helpdeskAriaLabel: "Helpdesk & Guidelines",
-  helpdeskHref: "#",
+  termLabel: ACTIVE_TERM_LABEL,
+  helpdeskLabel: "Verify Slip",
+  helpdeskAriaLabel: "Verify Document Claim Slip",
+  helpdeskHref: "/requests/claim",
 };

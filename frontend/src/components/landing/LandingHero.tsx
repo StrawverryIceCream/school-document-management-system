@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
@@ -7,6 +6,7 @@ import {
   Hash,
   ScanLine,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -32,14 +32,15 @@ import {
   STAGE_PROGRESS,
   TERMINAL,
   TRACK_FORM,
-  buildTrackRoute,
 } from "@/lib/landing/landing-hero";
 import { BADGE_BASE, ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 
 export default function LandingHero() {
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [reference, setReference] = useState("");
+
+  const primaryCtaHref = user ? "/new-request" : HERO_PRIMARY_CTA.href;
 
   return (
     <section
@@ -91,7 +92,7 @@ export default function LandingHero() {
 
             <div className="flex max-w-xl flex-col items-stretch gap-4 pt-2 sm:flex-row sm:items-center">
               <a
-                href={HERO_PRIMARY_CTA.href}
+                href={primaryCtaHref}
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "h-14 gap-2.5 rounded-xl px-7 text-lg font-bold shadow-md",
@@ -244,7 +245,19 @@ export default function LandingHero() {
                       event.preventDefault();
                       const trimmed = reference.trim();
                       if (!trimmed) return;
-                      navigate(buildTrackRoute(trimmed));
+                      const trackInput = document.getElementById(
+                        "track-request-reference",
+                      ) as HTMLInputElement | null;
+                      if (trackInput) {
+                        trackInput.value = trimmed;
+                        trackInput.dispatchEvent(
+                          new Event("input", { bubbles: true }),
+                        );
+                      }
+                      const trackSection = document.getElementById("track");
+                      if (trackSection) {
+                        trackSection.scrollIntoView({ behavior: "smooth" });
+                      }
                     }}
                   >
                     <Label

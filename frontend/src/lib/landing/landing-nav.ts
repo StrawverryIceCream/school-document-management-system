@@ -1,25 +1,28 @@
 import type { Tone } from "@/lib/tones";
+import {
+  SYSTEM_NAME,
+  SYSTEM_VERSION_LABEL,
+  SYSTEM_TAGLINE,
+} from "@/lib/constants";
 
 export type NavLink = {
   label: string;
   href: string;
 };
 
-export const BRAND_NAME = "ARCH";
-export const BRAND_VERSION = "v2.4 System";
+export const BRAND_NAME = SYSTEM_NAME;
+export const BRAND_VERSION = SYSTEM_VERSION_LABEL;
 export const BRAND_VERSION_TONE: Tone = "brand";
-export const BRAND_TAGLINE = "School Docs & Credential Registry";
-export const BRAND_HOME_HREF = "#";
+export const BRAND_TAGLINE = SYSTEM_TAGLINE;
+export const BRAND_HOME_HREF = "/";
 
 export const NAV_ARIA_LABEL = "Primary";
 
-// Swap the hrefs for real routes as the sections and pages get built
 export const NAV_LINKS: NavLink[] = [
   { label: "Credentials Catalog", href: "#services" },
   { label: "College Windows", href: "#windows" },
   { label: "Track Request", href: "#track" },
-  { label: "Verification & Security", href: "#security" },
-  { label: "Help & Guidelines", href: "#faq" },
+  { label: "Verify Claim Slip", href: "/requests/claim" },
 ];
 
 export const CHECK_STATUS_ACTION: NavLink = {

@@ -22,6 +22,7 @@ import {
 } from "@/lib/auth/arch-registration";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import { ACTIVE_ACADEMIC_TERM, SYSTEM_NAME } from "@/lib/constants";
 import type { UserRole } from "@/types";
 
 export default function RegistrationForm() {
@@ -159,11 +160,11 @@ export default function RegistrationForm() {
             PostgreSQL SIS &amp; HRIS Direct Sync Active
           </Badge>
           <span className="text-sm font-medium text-muted-foreground">
-            AY 2026–2027
+            {ACTIVE_ACADEMIC_TERM}
           </span>
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          Create your ARCH Account
+          Create your {SYSTEM_NAME} Account
         </h1>
         <p className="mt-1.5 text-base leading-relaxed text-muted-foreground">
           Register to submit official credential requests, track evaluation

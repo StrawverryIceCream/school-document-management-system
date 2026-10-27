@@ -12,6 +12,7 @@ import {
   getRequestById,
   updateRequestStatus,
   assignRequest,
+  getPublicRequestStatus,
 } from "../controllers/requests.controller.js";
 import {
   getRequestRoutingSteps,
@@ -19,6 +20,9 @@ import {
 } from "../controllers/routingSteps.controller.js";
 
 const router = Router();
+
+// Public unauthenticated tracking route
+router.get("/public/:referenceNumber", getPublicRequestStatus);
 
 router.use(requireAuth);
 

@@ -1118,3 +1118,74 @@ export async function assignRequest(
   }
 }
 
+export function maskRequesterName(fullName: string | null | undefined): string {
+  if (!fullName || !fullName.trim()) return "—";
+  return fullName
+    .trim()
+    .split(/\s+/)
+    .map((part) => {
+      if (part.length <= 1) return part;
+      return part[0] + "*".repeat(Math.max(part.length - 1, 3));
+    })
+    .join(" ");
+}
+
+export async function getPublicRequestStatus(req: Request, res: Response) {
+  try {
+    const { referenceNumber } = req.params;
+    const trimmed = referenceNumber?.trim();
+
+    const REFERENCE_REGEX = /^REQ-\d{4}-\d{6}$/i;
+    if (!trimmed || !REFERENCE_REGEX.test(trimmed)) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    const request = await db.query.documentRequests.findFirst({
+      where: eq(sql`lower(${documentRequests.referenceNumber})`, trimmed.toLowerCase()),
+      with: {
+        user: {
+          columns: {
+            fullName: true,
+          },
+        },
+        documentType: {
+          columns: {
+            name: true,
+            category: true,
+            processingDays: true,
+          },
+        },
+        window: {
+          columns: {
+            name: true,
+            office: true,
+          },
+        },
+      },
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    return res.json({
+      referenceNumber: request.referenceNumber,
+      status: request.status,
+      documentTypeName:
+        request.documentTypeName || request.documentType?.name || "Official Document",
+      category: request.documentType?.category || "student",
+      maskedRequesterName: maskRequesterName(request.user?.fullName),
+      windowName: request.window?.name ?? null,
+      windowOffice: request.window?.office ?? null,
+      turnaroundDays:
+        request.turnaroundDays || request.documentType?.processingDays || 3,
+      releaseDate: request.releaseDate ?? null,
+      submittedAt: request.createdAt,
+    });
+  } catch (err) {
+    console.error("[getPublicRequestStatus] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+

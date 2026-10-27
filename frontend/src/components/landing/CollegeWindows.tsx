@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronRight, FileStack, LayoutGrid } from "lucide-react";
 import { getAllColleges } from "@/api/colleges";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import type { College } from "@/types";
 
 export default function CollegeWindows() {
+  const { user } = useAuth();
   const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,6 +28,12 @@ export default function CollegeWindows() {
       .catch(() => null)
       .finally(() => setLoading(false));
   }, []);
+
+  const queueHref = user
+    ? user.role === "admin" || user.role === "staff"
+      ? "/sectors/ovpaa/colleges"
+      : "/new-request"
+    : "/login";
 
   const activeUnitsLabel = `${colleges.length} Academic Units Active`;
 
@@ -154,7 +162,7 @@ export default function CollegeWindows() {
 
                   <CardFooter className="p-5 pt-0">
                     <a
-                      href="#login"
+                      href={queueHref}
                       className={cn(
                         buttonVariants({ variant: "outline", size: "lg" }),
                         "w-full gap-1.5 text-base font-bold",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Info, Star } from "lucide-react";
 import { getAllDocument } from "@/api/documents";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 import type { DocumentType } from "@/types";
 
 export default function CredentialsCatalog() {
+  const { user } = useAuth();
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,8 @@ export default function CredentialsCatalog() {
       .catch(() => null)
       .finally(() => setLoading(false));
   }, []);
+
+  const catalogCtaHref = user ? "/new-request" : "/login";
 
   return (
     <section
@@ -222,7 +226,7 @@ export default function CredentialsCatalog() {
                       </p>
                     </div>
                     <a
-                      href="#login"
+                      href={user ? `/new-request/${doc.id}` : "/login"}
                       className={cn(
                         buttonVariants({ size: "lg" }),
                         "text-base font-bold",
@@ -253,7 +257,7 @@ export default function CredentialsCatalog() {
               </div>
             </div>
             <a
-              href={CATALOG_CALLOUT.ctaHref}
+              href={catalogCtaHref}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "shrink-0 rounded-xl px-6 text-base font-bold",

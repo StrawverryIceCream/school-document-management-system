@@ -101,8 +101,8 @@ export const TERMINAL: {
 };
 
 export const SAMPLE_TICKET: SampleTicket = {
-  tokenLabel: "Claim Token",
-  token: "ARCH-8B1A21FC",
+  tokenLabel: "Reference Code",
+  token: "REQ-2026-000018",
   type: "TOR-OFFICIAL",
   typeTone: "brand",
   fields: [
@@ -139,15 +139,14 @@ export const TRACK_FORM = {
   inputId: "quick-track-reference",
   ariaLabel: "Quick track a request",
   label: "Track your submitted slip right now:",
-  placeholder: "e.g. REQ-2026-COS-0842",
-  hint: "Enter your Reference ID or 8-digit tracking alphanumeric slip code.",
+  placeholder: "e.g. REQ-2026-000018",
+  hint: "Enter your official institutional reference code (e.g. REQ-2026-000018).",
   submitLabel: "Check",
   progressLabel: "Release pipeline progress",
 };
 
-// Assumed route for the tracking page; change it to match your router
-export const TRACK_ROUTE = "/track";
+export const TRACK_ROUTE = "#track";
 
 export function buildTrackRoute(reference: string): string {
-  return `${TRACK_ROUTE}?ref=${encodeURIComponent(reference)}`;
+  return `#track?ref=${encodeURIComponent(reference)}`;
 }

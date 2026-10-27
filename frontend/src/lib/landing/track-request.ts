@@ -37,13 +37,13 @@ export const TRACK_SEARCH = {
   inputId: "track-request-reference",
   ariaLabel: "Track a document request",
   inputLabel: "Reference ID",
-  defaultReference: "REQ-2026-COS-0842",
+  defaultReference: "REQ-2026-000018",
   submitLabel: "Inspect Workflow",
 };
 
 // Sample result shown on the landing page; replace with a real lookup later
 export const TRACK_RESULT = {
-  reference: "REQ-2026-COS-0842",
+  reference: "REQ-2026-000018",
   status: "Pending Staff Verification",
   statusTone: "amber" as Tone,
   title: "Transcript of Records (TOR)",

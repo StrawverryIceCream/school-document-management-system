@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Calendar, RefreshCw, Search, ShieldCheck, Store } from "lucide-react";
-import { getRequestById } from "@/api/requests";
+import { getPublicRequestStatus, type PublicRequestStatus } from "@/api/requests";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import {
 } from "@/lib/landing/track-request";
 import { BADGE_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
+import type { RequestStatus } from "@/types";
 import { requestStatusLabels } from "@/types";
 
 // Map request statuses to pipeline stage indices so we can show done/active/upcoming
@@ -51,9 +51,7 @@ function getStatusTone(status: RequestStatus) {
 export default function TrackRequest() {
   const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<DocumentRequestWithRelations | null>(
-    null,
-  );
+  const [result, setResult] = useState<PublicRequestStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,12 +64,12 @@ export default function TrackRequest() {
     setResult(null);
 
     try {
-      // The API accepts the reference number as the ID path param
-      // shortcut: using reference number as ID — works only if backend supports it, upgrade to search endpoint if needed
-      const data = await getRequestById(trimmed);
+      const data = await getPublicRequestStatus(trimmed);
       setResult(data);
     } catch {
-      setError("No request found for that reference number. Please try again.");
+      setError(
+        "No document request found for that reference number. Please check your reference code format (e.g. REQ-2026-000018) and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -180,9 +178,7 @@ export default function TrackRequest() {
                       {result.documentTypeName}
                     </CardTitle>
                     <CardDescription className="text-sm">
-                      Requester:{" "}
-                      {result.user?.fullName ?? "—"} •{" "}
-                      {result.user?.role ?? ""}
+                      Requester: {result.maskedRequesterName} • Category: {result.category}
                     </CardDescription>
                   </div>
                   <div className="text-left sm:text-right">
@@ -197,7 +193,9 @@ export default function TrackRequest() {
                       )}
                     >
                       <Store className="size-5" aria-hidden="true" />
-                      {result.window?.name ?? "Not yet assigned"}
+                      {result.windowName
+                        ? `${result.windowName}${result.windowOffice ? ` (${result.windowOffice.toUpperCase()})` : ""}`
+                        : "Counter Assignment in Progress"}
                     </span>
                   </div>
                 </CardHeader>

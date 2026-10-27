@@ -70,12 +70,35 @@ export interface UpdateRequestStatusPayload {
   remarks?: string | null;
 }
 
+export interface PublicRequestStatus {
+  referenceNumber: string;
+  status: RequestStatus;
+  documentTypeName: string;
+  category: string;
+  maskedRequesterName: string;
+  windowName: string | null;
+  windowOffice: string | null;
+  turnaroundDays: number;
+  releaseDate: string | null;
+  submittedAt: string;
+}
+
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`${url} responded ${res.status}${text ? `: ${text}` : ""}`);
   }
   return res.json();
+}
+
+// ---------- Public Tracking ----------
+
+export async function getPublicRequestStatus(
+  referenceNumber: string,
+): Promise<PublicRequestStatus> {
+  const url = `/api/requests/public/${encodeURIComponent(referenceNumber.trim())}`;
+  const res = await fetch(url);
+  return handleResponse<PublicRequestStatus>(res, url);
 }
 
 // ---------- Staff / admin ----------

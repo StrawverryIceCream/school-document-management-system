@@ -1,8 +1,12 @@
 import type { Tone } from "@/lib/tones";
+import {
+  SYSTEM_NAME,
+  SYSTEM_TAGLINE,
+  SYSTEM_VERSION,
+} from "@/lib/constants";
 
 export type FooterItem = {
   label: string;
-  // Items without an href render as plain text
   href?: string;
   tone?: Tone;
 };
@@ -19,14 +23,13 @@ export type FooterLink = {
 };
 
 export const FOOTER_BRAND = {
-  name: "ARCH System",
-  tagline: "School Documents & Credential Registry",
+  name: `${SYSTEM_NAME} System`,
+  tagline: SYSTEM_TAGLINE,
   description:
-    "The automated scholastic records repository powering document processing, anti-tamper QR validation, and university registrar window queues.",
-  build: "Current Build: v2.4.0 • Academic Registry Schema v3.2",
+    "The official scholastic records repository powering document processing, anti-tamper QR verification, and designated college window queues.",
+  build: `Current Build: ${SYSTEM_VERSION} • Production Grade`,
 };
 
-// Swap the hrefs for real routes as the sections and pages get built
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     id: "services",
@@ -35,8 +38,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Transcript of Records (TOR)", href: "#services" },
       { label: "Certificate of Registration (COR)", href: "#services" },
       { label: "True Copy of Grades (TCG)", href: "#services" },
-      { label: "Honorable Dismissal", href: "#services" },
-      { label: "Faculty Credentials", href: "#services" },
+      { label: "Verify Claim Slip", href: "/requests/claim" },
+      { label: "Access Student Portal", href: "/login" },
     ],
   },
   {
@@ -57,17 +60,17 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Main Campus Hall, 1st Floor" },
       { label: "registrar@university.edu.ph" },
       { label: "+63 (02) 8301-3000 local 412" },
-      { label: "Windows: 8:00 AM – 5:00 PM", tone: "emerald" },
+      { label: "Counters: 8:00 AM – 5:00 PM", tone: "emerald" },
     ],
   },
 ];
 
 export const FOOTER_COPYRIGHT =
-  "© 2026 Office of the University Registrar. All rights reserved. System powered by ARCH.";
+  `© 2026 Office of the University Registrar. All rights reserved. System powered by ${SYSTEM_NAME}.`;
 
 export const LEGAL_LINKS: FooterLink[] = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Registrar Guidelines", href: "#" },
-  { label: "Helpdesk", href: "#" },
+  { label: "Terms of Service", href: "#services" },
+  { label: "Registrar Guidelines", href: "#windows" },
+  { label: "Track Document", href: "#track" },
+  { label: "Verify QR Code", href: "/requests/claim" },
 ];
