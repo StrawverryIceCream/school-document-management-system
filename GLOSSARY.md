@@ -112,3 +112,16 @@ _Avoid_: External tab viewer, artifact link, popup window
 A digital receipt, bank confirmation slip, or electronic transaction screenshot uploaded by a requester to substantiate settlement of document assessment fees.
 _Avoid_: Payment artifact, receipt file, transaction attachment
 
+**Official Receipt (OR) Slip**:
+A formal institutional voucher generated upon payment verification displaying university transaction reference numbers, official receipt serials, breakdown of assessed fees, payer identity, and cashier verification stamps.
+_Avoid_: Payment summary, invoice card, billing ticket
+
+**Claim Hand-Off**:
+The in-person counter verification procedure where office staff records recipient identity, inspects valid identification, and logs release custody before moving a request status to claimed.
+_Avoid_: Pickup finish, handover close, physical dispatch
+
+**Table CSV Export**:
+The client-side generation and download of an RFC 4180-compliant CSV spreadsheet reflecting the active search, filter criteria, and column formatting of an operational table view.
+_Avoid_: Dump file, raw data export, sheet rip
+
+
