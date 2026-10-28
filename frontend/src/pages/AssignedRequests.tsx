@@ -10,6 +10,7 @@ import AssignedRequestTriageTabs from "@/components/requests/assigned/AssignedRe
 import type { RequestRow } from "@/context/DashboardContext";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeRequestRow } from "@/lib/requests";
+import { exportToCsv, requestRowExportColumns } from "@/lib/export/csv-export";
 import type { TriageTab } from "@/lib/sectors/__tests__/assigned-request-route.test";
 import type { RequestStatus } from "@/types";
 
@@ -200,6 +201,11 @@ export default function AssignedRequests() {
     });
   }, [tabFilteredRequests, urgencySort]);
 
+  const handleExport = () => {
+    const filename = `assigned-requests-${new Date().toISOString().slice(0, 10)}`;
+    exportToCsv(filename, sortedRequests, requestRowExportColumns);
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4 sm:p-6">
       <AssignedRequestHeader totalCount={requests.length} />
@@ -221,6 +227,7 @@ export default function AssignedRequests() {
         assigneeFilter={assigneeFilter}
         onAssigneeChange={setAssigneeFilter}
         staffOptions={staffUsers}
+        onExport={handleExport}
       />
 
       <div className="flex min-h-0 flex-1 flex-col">

@@ -4,6 +4,7 @@ import {
   FileCheck,
   FileText,
   Paperclip,
+  Receipt,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { AttachmentLink } from "./AttachmentLink";
 import { displayValue, formatDate } from "@/lib/windows/review/format";
 import { formatPaymentMetaItems } from "@/lib/windows/review/preview";
 import { FilePreviewDialog } from "@/components/shared/FilePreviewDialog";
+import { OfficialReceiptDialog } from "@/components/payments/OfficialReceiptDialog";
+import { hasOfficialReceipt } from "@/lib/payments/official-receipt";
 import { cn } from "@/lib/utils";
 import type { ReviewField } from "@/lib/windows/review/types";
 import type { RequestReviewDetails } from "@/api/requests";
@@ -39,6 +42,7 @@ export function RequestDetailsCard({
     mimeType?: string | null;
     metaItems?: Array<{ label: string; value: string }>;
   } | null>(null);
+  const [showReceiptDialog, setShowReceiptDialog] = useState(false);
 
   return (
     <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-5">
@@ -87,9 +91,23 @@ export function RequestDetailsCard({
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
             Payment Status
           </span>
-          <p className="text-sm font-medium text-foreground">
-            {paymentStatus || (Number(request.amountDue) === 0 ? "Free Assessment / Cleared" : "Pending Verification")}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">
+              {paymentStatus || (Number(request.amountDue) === 0 ? "Free Assessment / Cleared" : "Pending Verification")}
+            </p>
+            {hasOfficialReceipt(request) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReceiptDialog(true)}
+                className="h-6 gap-1 px-2 text-xs font-semibold text-emerald-600 hover:text-emerald-700 cursor-pointer"
+              >
+                <Receipt className="size-3" />
+                Receipt
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="bg-muted/30 p-3.5 rounded-xl border flex flex-col">
@@ -255,8 +273,20 @@ export function RequestDetailsCard({
                     <p className="text-destructive">Reason: {payment.rejectionReason}</p>
                   )}
                 </div>
-                {payment.paymentProofUrl && (
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  {payment.status === "verified" && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowReceiptDialog(true)}
+                      className="gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 cursor-pointer shadow-2xs"
+                    >
+                      <Receipt className="size-3.5" />
+                      Official Receipt
+                    </Button>
+                  )}
+                  {payment.paymentProofUrl && (
                     <Button
                       type="button"
                       variant="outline"
@@ -275,8 +305,8 @@ export function RequestDetailsCard({
                       <Eye className="size-3.5" />
                       Preview proof
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -294,6 +324,12 @@ export function RequestDetailsCard({
         fileName={previewTarget?.fileName}
         mimeType={previewTarget?.mimeType}
         metaItems={previewTarget?.metaItems}
+      />
+
+      <OfficialReceiptDialog
+        request={request}
+        open={showReceiptDialog}
+        onOpenChange={setShowReceiptDialog}
       />
     </Card>
   );

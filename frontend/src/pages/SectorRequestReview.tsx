@@ -10,6 +10,7 @@ import { ComplianceChecklistCard } from "@/components/windows/review/ComplianceC
 import { RegistrarReviewCard } from "@/components/windows/review/RegistrarReviewCard";
 import { RequestDetailsCard } from "@/components/windows/review/RequestDetailsCard";
 import { StatusChangeDialog } from "@/components/windows/review/StatusChangeDialog";
+import { ClaimHandoffDialog } from "@/components/requests/review/ClaimHandoffDialog";
 import { StudentInfoCard } from "@/components/windows/review/StudentInfoCard";
 import { WindowOperationsCard } from "@/components/windows/review/WindowOperationsCard";
 import { WorkflowPipelineCard } from "@/components/windows/review/WorkflowPipelineCard";
@@ -334,14 +335,29 @@ export default function SectorRequestReview() {
         </div>
       </div>
 
-      <StatusChangeDialog
-        status={pendingAction}
-        statusLabel={pendingAction ? statusLabel(pendingAction) : null}
-        defaultClaimantName={request.user?.fullName ?? ""}
-        updating={updating}
-        onConfirm={confirmStatusChange}
-        onClose={() => setPendingAction(null)}
-      />
+      {pendingAction === "claimed" ? (
+        <ClaimHandoffDialog
+          open={pendingAction === "claimed"}
+          onOpenChange={(open) => {
+            if (!open) setPendingAction(null);
+          }}
+          studentName={request.user?.fullName ?? ""}
+          studentId={request.user?.studentId ?? ""}
+          referenceNumber={request.referenceNumber}
+          documentTitle={request.documentTypeName}
+          updating={updating}
+          onConfirm={confirmStatusChange}
+        />
+      ) : (
+        <StatusChangeDialog
+          status={pendingAction}
+          statusLabel={pendingAction ? statusLabel(pendingAction) : null}
+          defaultClaimantName={request.user?.fullName ?? ""}
+          updating={updating}
+          onConfirm={confirmStatusChange}
+          onClose={() => setPendingAction(null)}
+        />
+      )}
     </main>
   );
 }

@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Receipt } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { OfficialReceiptDialog } from "@/components/payments/OfficialReceiptDialog";
+import { hasOfficialReceipt } from "@/lib/payments/official-receipt";
 import type { DocumentRequest } from "@/types";
 
 const getStatusBadgeClasses = (status: DocumentRequest["status"]) => {
@@ -41,6 +44,7 @@ function MyRequestDetails({
   request: DocumentRequest;
   onOpen?: () => void;
 }) {
+  const [showReceipt, setShowReceipt] = useState(false);
   const documentName =
     documentNames[request.documentTypeId] ??
     `Document #${request.documentTypeId}`;
@@ -131,10 +135,28 @@ function MyRequestDetails({
           </div>
         </div>
 
-        <DialogFooter className="mt-2">
+        <DialogFooter className="mt-2 flex flex-row items-center justify-between gap-2">
+          {hasOfficialReceipt(request as any) ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReceipt(true)}
+              className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 font-semibold cursor-pointer"
+            >
+              <Receipt className="size-4" />
+              View Official Receipt
+            </Button>
+          ) : <div />}
           <Button variant="outline">Close</Button>
         </DialogFooter>
       </DialogContent>
+
+      <OfficialReceiptDialog
+        request={request as any}
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+      />
     </Dialog>
   );
 }

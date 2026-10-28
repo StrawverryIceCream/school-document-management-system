@@ -9,7 +9,7 @@ import {
 } from "@/lib/accounts/search-toolbar";
 
 export default function AccountsSearchToolbar() {
-  const { search, setSearch, role, setRole, counts } = useUsers();
+  const { search, setSearch, role, setRole, counts, exportAccounts } = useUsers();
   const activeTab =
     ROLE_TABS.find((tab) => tab.role === role)?.value ?? ALL_TAB_VALUE;
 
@@ -32,6 +32,7 @@ export default function AccountsSearchToolbar() {
         if (tab) setRole(tab.role);
       }}
       tabsAriaLabel={TABS_ARIA_LABEL}
+      onExport={exportAccounts}
     />
   );
 }

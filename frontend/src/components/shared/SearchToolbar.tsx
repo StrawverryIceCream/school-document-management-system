@@ -1,5 +1,6 @@
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +26,8 @@ export interface SearchToolbarProps {
   activeTab?: string;
   onTabChange?: (value: string) => void;
   tabsAriaLabel?: string;
+  onExport?: () => void;
+  exportLabel?: string;
   children?: React.ReactNode;
 }
 
@@ -42,6 +45,8 @@ export default function SearchToolbar({
   activeTab,
   onTabChange,
   tabsAriaLabel = "Filter tabs",
+  onExport,
+  exportLabel,
   children,
 }: SearchToolbarProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -114,6 +119,20 @@ export default function SearchToolbar({
             ))}
           </TabsList>
         </Tabs>
+      )}
+
+      {onExport && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onExport}
+          className="h-10 gap-2 shrink-0 rounded-xl px-3.5 text-xs font-semibold border-border hover:bg-muted/60"
+          title="Export current records to CSV"
+        >
+          <Download className="size-4 text-muted-foreground" aria-hidden="true" />
+          <span>{exportLabel ?? "Export CSV"}</span>
+        </Button>
       )}
 
       {children}

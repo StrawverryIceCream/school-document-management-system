@@ -35,6 +35,7 @@ import { getInitials } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 import { getAllUsers } from "@/api/users";
 import { assignRequest } from "@/api/requests";
+import { exportToCsv, requestExportColumns } from "@/lib/export/csv-export";
 import { toast } from "sonner";
 import type { DocumentRequestWithRelations, RequestStatus, User } from "@/types";
 
@@ -426,6 +427,11 @@ export default function OfficeRequestTable({
     page * pageSize,
   );
 
+  const handleExport = () => {
+    const filename = `${office.code.toLowerCase()}-requests-${new Date().toISOString().slice(0, 10)}`;
+    exportToCsv(filename, visibleRequests, requestExportColumns);
+  };
+
   return (
     <section
       aria-label={`${office.code} requests`}
@@ -466,6 +472,7 @@ export default function OfficeRequestTable({
           setPage(1);
         }}
         tabsAriaLabel="Filter requests by status"
+        onExport={handleExport}
       />
 
       <DataTable

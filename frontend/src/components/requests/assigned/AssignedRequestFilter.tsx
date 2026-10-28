@@ -14,6 +14,7 @@ interface AssignedRequestFilterProps {
   assigneeFilter: string;
   onAssigneeChange: (assignee: string) => void;
   staffOptions?: { id: string; fullName: string }[];
+  onExport?: () => void;
 }
 
 export default function AssignedRequestFilter({
@@ -27,6 +28,7 @@ export default function AssignedRequestFilter({
   assigneeFilter,
   onAssigneeChange,
   staffOptions = [],
+  onExport,
 }: AssignedRequestFilterProps) {
   return (
     <SearchToolbar
@@ -34,6 +36,7 @@ export default function AssignedRequestFilter({
       onChange={onSearchChange}
       placeholder="Search applicant, reference number, or document..."
       ariaLabel="Search assigned requests"
+      onExport={onExport}
     >
       <div className="flex flex-wrap items-center gap-2.5">
         {isAdmin && (

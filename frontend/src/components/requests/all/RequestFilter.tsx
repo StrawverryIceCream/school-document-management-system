@@ -1,6 +1,7 @@
 import SearchToolbar from "@/components/shared/SearchToolbar";
 import { type StatusFilter } from "@/context/RequestContext";
 import { useRequests } from "@/hooks/useRequest";
+import { exportToCsv, requestRowExportColumns } from "@/lib/export/csv-export";
 import { ChevronDown } from "lucide-react";
 import { QrScanDialog } from "./QrScanDialog";
 
@@ -13,7 +14,13 @@ function RequestFilter() {
     documentFilter,
     setDocumentFilter,
     documentOptions,
+    filteredRows,
   } = useRequests();
+
+  const handleExport = () => {
+    const filename = `all-requests-${new Date().toISOString().slice(0, 10)}`;
+    exportToCsv(filename, filteredRows, requestRowExportColumns);
+  };
 
   return (
     <SearchToolbar
@@ -21,6 +28,7 @@ function RequestFilter() {
       onChange={setSearch}
       placeholder="Search applicant, document, or request ID"
       ariaLabel="Search requests"
+      onExport={handleExport}
     >
       <div className="flex flex-wrap items-center gap-3">
         <FilterSelect

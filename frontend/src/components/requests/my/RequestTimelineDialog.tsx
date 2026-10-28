@@ -1,4 +1,5 @@
-import { Check, Clock, QrCode } from "lucide-react";
+import { useState } from "react";
+import { Check, Clock, QrCode, Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { OfficialReceiptDialog } from "@/components/payments/OfficialReceiptDialog";
+import { hasOfficialReceipt } from "@/lib/payments/official-receipt";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import {
   formatClaimPeriod,
@@ -33,6 +36,7 @@ export function RequestTimelineDialog({
   onOpenChange,
   onOpenClaimSlip,
 }: RequestTimelineDialogProps) {
+  const [showReceipt, setShowReceipt] = useState(false);
   if (!request) return null;
 
   const config = STATUS_CONFIGS[request.status];
@@ -154,18 +158,32 @@ export function RequestTimelineDialog({
         </div>
 
         <DialogFooter className="sm:justify-between items-center gap-2 pt-2">
-          {config.canClaim && onOpenClaimSlip ? (
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={() => onOpenClaimSlip(request)}
-              className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer"
-            >
-              <QrCode className="size-4" />
-              Present Claim Slip QR
-            </Button>
-          ) : <div />}
+          <div className="flex flex-wrap items-center gap-2">
+            {config.canClaim && onOpenClaimSlip ? (
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => onOpenClaimSlip(request)}
+                className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer"
+              >
+                <QrCode className="size-4" />
+                Present Claim Slip QR
+              </Button>
+            ) : null}
+            {hasOfficialReceipt(request) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReceipt(true)}
+                className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 font-semibold cursor-pointer"
+              >
+                <Receipt className="size-4" />
+                Official Receipt
+              </Button>
+            )}
+          </div>
 
           <Button
             type="button"
@@ -177,6 +195,12 @@ export function RequestTimelineDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <OfficialReceiptDialog
+        request={request}
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+      />
     </Dialog>
   );
 }
