@@ -184,5 +184,73 @@
   }
   body {
     @apply bg-background text-foreground;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
+
+  /* 16. Tabular numbers on tables, prices, counters, timestamps */
+  table,
+  .tabular-nums,
+  [data-slot="table-cell"],
+  [data-slot="badge"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 17. Balanced headlines & pretty body typography */
+  h1, h2, h3, h4, h5, h6, [role="heading"] {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* 18. Continuous corners (Apple squircle on supporting Chromium browsers) */
+  @supports (corner-shape: squircle) {
+    * {
+      corner-shape: squircle;
+    }
+  }
+
+  /* 13. Hit slop: ensure minimum 44x44px touch targets on mobile touch devices */
+  @media (pointer: coarse) {
+    button,
+    [role="button"],
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* 11. Interruptible animations & Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+}
+
+/* 9. Chrome View Transitions under 200ms */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }

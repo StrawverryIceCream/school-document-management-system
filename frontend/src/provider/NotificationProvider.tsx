@@ -6,6 +6,7 @@ import {
 import { NotificationContext } from "@/context/NotificationContext";
 import type { Notification } from "@/context/NotificationContext";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function NotificationProvider({
@@ -68,6 +69,24 @@ export function NotificationProvider({
       const notification = notifications.find((item) => item.id === id);
       if (!notification || notification.isRead) return;
 
+      const previous = [...notifications];
+
+      // Optimistic update: instantly flip status in UI
+      setNotifications((current) =>
+        current.map((item) => (item.id === id ? { ...item, isRead: true } : item)),
+      );
+
+      // Undo toast (Detail 5)
+      toast("Marked as read", {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setNotifications(previous);
+          },
+        },
+        duration: 5000,
+      });
+
       try {
         const updated = await markNotificationAsRead(id);
         setNotifications((current) =>
@@ -75,33 +94,54 @@ export function NotificationProvider({
         );
         setError(null);
       } catch (notificationError) {
+        // Rollback on failure (Detail 2)
+        setNotifications(previous);
         console.error("Failed to mark notification as read:", notificationError);
         setError(
           notificationError instanceof Error
             ? notificationError.message
             : "Failed to mark notification as read",
         );
+        toast.error("Could not sync read status");
       }
     },
     [notifications],
   );
 
   const markAllAsRead = useCallback(async () => {
+    const previous = [...notifications];
+
+    // Optimistic update: instantly clear all badges
+    setNotifications((current) =>
+      current.map((notification) => ({ ...notification, isRead: true })),
+    );
+
+    // Undo toast (Detail 5)
+    toast("All notifications marked as read", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setNotifications(previous);
+        },
+      },
+      duration: 5000,
+    });
+
     try {
       await markAllNotificationsAsRead();
-      setNotifications((current) =>
-        current.map((notification) => ({ ...notification, isRead: true })),
-      );
       setError(null);
     } catch (notificationError) {
+      // Rollback on failure (Detail 2)
+      setNotifications(previous);
       console.error("Failed to mark all notifications as read:", notificationError);
       setError(
         notificationError instanceof Error
           ? notificationError.message
           : "Failed to mark all notifications as read",
       );
+      toast.error("Could not sync read status");
     }
-  }, []);
+  }, [notifications]);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.isRead).length,

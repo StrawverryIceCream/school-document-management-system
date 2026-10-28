@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import SiteHeader from "@/components/sidebar/SiteHeader";
+import { CommandMenu } from "@/components/shared/CommandMenu";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DocumentProvider } from "@/provider/DocumentProvider";
 import { MyRequestProvider } from "@/provider/MyRequestProvider";
@@ -31,6 +32,7 @@ function AppLayout() {
                   </Suspense>
                 </main>
               </SidebarInset>
+              <CommandMenu />
             </SidebarProvider>
           </ProfileProvider>
         </MyRequestProvider>

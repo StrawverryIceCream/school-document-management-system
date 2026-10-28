@@ -1,6 +1,7 @@
 import { getAllDocument } from "@/api/documents";
 import { DocumentContext } from "@/context/DocumentContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useSWRRevalidate } from "@/hooks/useSWRRevalidate";
 import type { DocumentType } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -103,6 +104,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   }
+
+  // Stale-while-revalidate: background refresh on focus or reconnect
+  useSWRRevalidate(refreshDocument, { enabled: Boolean(user) });
 
   return (
     <DocumentContext.Provider

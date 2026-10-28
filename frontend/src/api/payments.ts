@@ -70,13 +70,22 @@ async function handleResponse<T>(res: Response, url: string): Promise<T> {
 // The backend takes the amount from the document type's fee, so it is not sent
 export async function createPayment(
   payload: CreatePaymentPayload,
+  idempotencyKey?: string,
 ): Promise<Payment> {
   const url = "/api/payments";
+  const key =
+    idempotencyKey ||
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : undefined);
 
   const res = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(key ? { "Idempotency-Key": key } : {}),
+    },
     body: JSON.stringify(payload),
   });
 

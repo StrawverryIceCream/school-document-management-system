@@ -229,13 +229,22 @@ export async function getMyRequestById(id: string): Promise<MyRequest> {
 
 export async function createRequest(
   payload: CreateRequestPayload,
+  idempotencyKey?: string,
 ): Promise<DocumentRequestRow> {
   const url = "/api/requests";
+  const key =
+    idempotencyKey ||
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : undefined);
 
   const res = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(key ? { "Idempotency-Key": key } : {}),
+    },
     body: JSON.stringify(payload),
   });
 

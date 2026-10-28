@@ -2,6 +2,8 @@ import { useBreadcrumbs } from "@/lib/utils";
 import { ModeToggle } from "@/components/shared/ModeToggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Kbd } from "@/components/ui/kbd";
+import { Search } from "lucide-react";
 import Notification from "@/components/notifications/Notification";
 import {
   Breadcrumb,
@@ -46,7 +48,21 @@ function SiteHeader() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-command-menu"))}
+            className="hidden sm:flex items-center gap-2 rounded-xl border border-input bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            title="Open command menu"
+          >
+            <Search className="size-3.5" />
+            <span className="hidden md:inline">Quick Jump</span>
+            <Kbd className="h-4.5 px-1 font-mono text-[10px]">
+              {typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+                ? "⌘K"
+                : "Ctrl+K"}
+            </Kbd>
+          </button>
           <Notification />
           <ModeToggle />
         </div>
