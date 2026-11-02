@@ -67,6 +67,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/", (req, res) => res.send("hello"));
+app.get("/health", (req, res) => res.json({ ok: true }));
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
