@@ -25,18 +25,20 @@ yarn-debug.log*
 yarn-error.log*
 /logs/
 *.log
+docs/logs/
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Editor
+# Editor and Tooling
 .vscode/
 .idea/
 *.swp
 .agents/
+.claude/
+.scratch/
 tasks/
-docs/
 
 # Drizzle
 drizzle/
