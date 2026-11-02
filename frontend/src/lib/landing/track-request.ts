@@ -49,8 +49,8 @@ export const TRACK_RESULT = {
   title: "Transcript of Records (TOR)",
   requester:
     "Requester: Flores Benerao • BS Biology (College of Science, 3rd Year)",
-  counterLabel: "Designated Counter",
-  counter: "Window 1 (Main Hall)",
+  counterLabel: "Processing Office",
+  counter: "Academic Records Office (Main Hall)",
   releaseLabel: "Estimated Release Target:",
   release: "October 14, 2026 (3–5 business days)",
   reminder: "Bring 1 Valid Institutional ID or delegation letter",
@@ -86,9 +86,9 @@ export const STAGES: Stage[] = [
     status: "upcoming",
   },
   {
-    id: "window-claim",
-    label: "Window Claim",
-    note: "Counter Window 1 Pickup",
+    id: "office-claim",
+    label: "Office Claim",
+    note: "Designated Office Pickup",
     icon: PackageCheck,
     status: "upcoming",
   },

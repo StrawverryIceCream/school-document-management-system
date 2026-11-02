@@ -1,4 +1,3 @@
-
 import {
   Award,
   Briefcase,
@@ -32,14 +31,17 @@ export type College = {
 // A queue at or above this size is shown as busy (amber), below it as light (emerald)
 const QUEUE_BUSY_THRESHOLD = 5;
 
-export const WINDOWS_SECTION = {
-  id: "windows",
-  headingId: "college-windows-heading",
-  eyebrow: "Live Academic Counter Hub",
-  title: "College Counter Windows",
+export const OFFICES_SECTION = {
+  id: "offices",
+  headingId: "college-offices-heading",
+  eyebrow: "Live Academic Office Hub",
+  title: "College Academic Offices",
   description:
-    "Every academic department operates dedicated evaluation windows for specialized clearances, grade audits, and claim counters.",
+    "Every academic department operates dedicated offices for specialized clearances, grade audits, and document releases.",
 };
+
+// Backwards-compatible alias for existing imports
+export const WINDOWS_SECTION = OFFICES_SECTION;
 
 export const COLLEGES: College[] = [
   {
@@ -50,7 +52,7 @@ export const COLLEGES: College[] = [
     icon: Microscope,
     tone: "brand",
     pending: 6,
-    counters: "Window 1 & 2 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "TOR", count: 3 },
       { label: "Enrollment Cert", count: 2 },
@@ -67,7 +69,7 @@ export const COLLEGES: College[] = [
     icon: Cog,
     tone: "amber",
     pending: 8,
-    counters: "Window 3 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "TOR", count: 4 },
       { label: "Clearance", count: 3 },
@@ -84,7 +86,7 @@ export const COLLEGES: College[] = [
     icon: Compass,
     tone: "neutral",
     pending: 4,
-    counters: "Window 1 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "Portfolio Cert", count: 2 },
       { label: "TCG", count: 2 },
@@ -100,7 +102,7 @@ export const COLLEGES: College[] = [
     icon: Briefcase,
     tone: "rose",
     pending: 7,
-    counters: "Window 2 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "Honorable Dismissal", count: 3 },
       { label: "TOR", count: 2 },
@@ -116,7 +118,7 @@ export const COLLEGES: College[] = [
     icon: Terminal,
     tone: "sky",
     pending: 5,
-    counters: "Window 4 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "Enrollment Cert", count: 2 },
       { label: "Capstone Clearance", count: 2 },
@@ -132,7 +134,7 @@ export const COLLEGES: College[] = [
     icon: Award,
     tone: "emerald",
     pending: 4,
-    counters: "Window 2 Active",
+    counters: "Academic Office Active",
     documents: [
       { label: "Teacher Clearance", count: 2 },
       { label: "Cert of Reg", count: 2 },

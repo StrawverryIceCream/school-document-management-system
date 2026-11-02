@@ -68,6 +68,10 @@ _Avoid_: School year banner, active semester label, date tag
 The academic or administrative organizational unit (e.g. Office of the University Registrar, HRMO, College Dean's Office) responsible for reviewing, endorsing, and releasing a requested document.
 _Avoid_: Service window, counter window, releasing window
 
+**College Academic Offices**:
+The public directory and navigational section highlighting academic unit headquarters, processing hours, and document queue load across degree-granting colleges.
+_Avoid_: College windows, evaluation windows, counter windows
+
 **Staff Delegation**:
 Assigning operational custody of a document request to a specific active staff member within the issuing office.
 _Avoid_: Task dispatch, ticket routing, handing over

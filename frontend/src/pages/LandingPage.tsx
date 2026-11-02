@@ -1,5 +1,5 @@
 import AnnouncementBar from "@/components/landing/AnnouncementBar";
-import CollegeWindows from "@/components/landing/CollegeWindows";
+import CollegeOffices from "@/components/landing/CollegeWindows";
 import CredentialsCatalog from "@/components/landing/CredentialsCatalog";
 import LandingFooter from "@/components/landing/LandingFooter";
 import LandingHero from "@/components/landing/LandingHero";
@@ -13,7 +13,7 @@ export default function LandingPage() {
       <LandingNav />
       <main>
         <LandingHero />
-        <CollegeWindows />
+        <CollegeOffices />
         <CredentialsCatalog />
         <TrackRequest />
       </main>

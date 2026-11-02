@@ -87,7 +87,7 @@ export default function LandingNav() {
                 <SheetHeader className="p-0 text-left">
                   <SheetTitle className="text-lg font-bold">Menu</SheetTitle>
                   <SheetDescription className="text-sm text-muted-foreground">
-                    Quick access to document services, college windows, and
+                    Quick access to document services, college offices, and
                     tracking.
                   </SheetDescription>
                 </SheetHeader>

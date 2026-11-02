@@ -183,7 +183,7 @@ export default function TrackRequest() {
                   </div>
                   <div className="text-left sm:text-right">
                     <span className="block text-sm text-muted-foreground">
-                      Designated Counter
+                      Processing Office
                     </span>
                     <span
                       className={cn(
@@ -195,7 +195,7 @@ export default function TrackRequest() {
                       <Store className="size-5" aria-hidden="true" />
                       {result.windowName
                         ? `${result.windowName}${result.windowOffice ? ` (${result.windowOffice.toUpperCase()})` : ""}`
-                        : "Counter Assignment in Progress"}
+                        : "Office Assignment in Progress"}
                     </span>
                   </div>
                 </CardHeader>

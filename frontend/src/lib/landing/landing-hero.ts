@@ -54,7 +54,7 @@ export const HERO_TITLE = {
 };
 
 export const HERO_DESCRIPTION =
-  "Request official Transcripts of Records (TOR), Certificates of Registration (COR), True Copy of Grades, and faculty clearances. Track your requests in real-time, pay online or on-site, and pick up your documents through designated college service windows.";
+  "Request official Transcripts of Records (TOR), Certificates of Registration (COR), True Copy of Grades, and faculty clearances. Track your requests in real-time, pay online or on-site, and pick up your documents through designated college academic offices.";
 
 // Swap the hrefs for real routes as the sections and pages get built
 export const HERO_PRIMARY_CTA: HeroLink = {
@@ -69,9 +69,9 @@ export const HERO_SECONDARY_CTA: HeroLink = {
 
 export const HERO_STATS: HeroStat[] = [
   {
-    id: "release-window",
+    id: "release-office",
     value: "Instant – 3d",
-    caption: "Automated release window",
+    caption: "Automated release office",
     tone: "neutral",
   },
   {
@@ -95,7 +95,7 @@ export const TERMINAL: {
   tone: Tone;
 } = {
   title: "Live Release Terminal",
-  location: "Main Registrar Hall • Window 3",
+  location: "Main Registrar Hall • Academic Records Office",
   status: "Active Calling",
   tone: "emerald",
 };
@@ -117,8 +117,8 @@ export const SAMPLE_TICKET: SampleTicket = {
       tone: "neutral",
     },
     {
-      label: "Target Window",
-      value: "Window 1 (Registrar Evaluation)",
+      label: "Target Office",
+      value: "Academic Records Evaluation Office",
       tone: "brand",
     },
   ],

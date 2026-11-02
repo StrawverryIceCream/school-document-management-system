@@ -26,7 +26,7 @@ export const FOOTER_BRAND = {
   name: `${SYSTEM_NAME} System`,
   tagline: SYSTEM_TAGLINE,
   description:
-    "The official scholastic records repository powering document processing, anti-tamper QR verification, and designated college window queues.",
+    "The official scholastic records repository powering document processing, anti-tamper QR verification, and designated college office queues.",
   build: `Current Build: ${SYSTEM_VERSION} • Production Grade`,
 };
 
@@ -43,14 +43,14 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    id: "windows",
-    heading: "Academic Windows",
+    id: "offices",
+    heading: "Academic Offices",
     items: [
-      { label: "College of Science (Window 1 & 2)", href: "#windows" },
-      { label: "College of Engineering (Window 3)", href: "#windows" },
-      { label: "Architecture & Fine Arts (Window 1)", href: "#windows" },
-      { label: "Management & MS (Window 2)", href: "#windows" },
-      { label: "Information Tech (Window 4)", href: "#windows" },
+      { label: "College of Science Office", href: "#offices" },
+      { label: "College of Engineering Office", href: "#offices" },
+      { label: "Architecture & Fine Arts Office", href: "#offices" },
+      { label: "Management & MS Office", href: "#offices" },
+      { label: "Information Tech Office", href: "#offices" },
     ],
   },
   {
@@ -70,7 +70,7 @@ export const FOOTER_COPYRIGHT =
 
 export const LEGAL_LINKS: FooterLink[] = [
   { label: "Terms of Service", href: "#services" },
-  { label: "Registrar Guidelines", href: "#windows" },
+  { label: "Registrar Guidelines", href: "#offices" },
   { label: "Track Document", href: "#track" },
   { label: "Verify QR Code", href: "/requests/claim" },
 ];

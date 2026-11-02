@@ -12,12 +12,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { WINDOWS_SECTION } from "@/lib/landing/college-window";
+import { OFFICES_SECTION } from "@/lib/landing/college-window";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import type { College } from "@/types";
 
-export default function CollegeWindows() {
+export function CollegeOffices() {
   const { user } = useAuth();
   const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,10 +39,12 @@ export default function CollegeWindows() {
 
   return (
     <section
-      id={WINDOWS_SECTION.id}
-      aria-labelledby={WINDOWS_SECTION.headingId}
-      className="border-b border-border bg-card py-16"
+      id={OFFICES_SECTION.id}
+      aria-labelledby={OFFICES_SECTION.headingId}
+      className="relative border-b border-border bg-card py-16"
     >
+      {/* Backwards-compatible anchor for legacy #windows navigation */}
+      <div id="windows" className="sr-only" aria-hidden="true" />
       <div className="mx-auto max-w-7xl space-y-10 px-4 sm:px-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div className="space-y-3">
@@ -54,16 +56,16 @@ export default function CollegeWindows() {
               )}
             >
               <LayoutGrid className="size-4" aria-hidden="true" />
-              {WINDOWS_SECTION.eyebrow}
+              {OFFICES_SECTION.eyebrow}
             </Badge>
             <h2
-              id={WINDOWS_SECTION.headingId}
+              id={OFFICES_SECTION.headingId}
               className="text-4xl font-bold tracking-tight text-foreground"
             >
-              {WINDOWS_SECTION.title}
+              {OFFICES_SECTION.title}
             </h2>
             <p className="max-w-xl text-base text-muted-foreground">
-              {WINDOWS_SECTION.description}
+              {OFFICES_SECTION.description}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -181,3 +183,7 @@ export default function CollegeWindows() {
     </section>
   );
 }
+
+// Backwards-compatible export alias
+export const CollegeWindows = CollegeOffices;
+export default CollegeOffices;
