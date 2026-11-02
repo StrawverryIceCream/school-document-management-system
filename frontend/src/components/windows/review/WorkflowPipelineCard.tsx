@@ -38,8 +38,13 @@ export function WorkflowPipelineCard({ request }: WorkflowPipelineCardProps) {
     },
     {
       id: "ready",
-      title: "5. Ready for Window Claiming",
-      detail: request.releaseDate ? `Target: ${formatDate(request.releaseDate)}` : "Window Counter 1",
+      title: "5. Ready for Office Pickup",
+      detail: request.releaseDate
+        ? `Target: ${formatDate(request.releaseDate)}`
+        : request.documentType?.officeRecord?.name ||
+          (typeof request.documentType?.office === "string"
+            ? request.documentType.office.toUpperCase()
+            : "Office Release Desk"),
       done: request.status === "claimed",
       active: request.status === "ready",
     },

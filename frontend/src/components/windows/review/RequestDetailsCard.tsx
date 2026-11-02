@@ -115,7 +115,7 @@ export function RequestDetailsCard({
             Target Claiming Method
           </span>
           <p className="text-sm font-medium text-foreground">
-            Campus Window Counter Pickup (Window 1 — Registrar Main Hall)
+            In-Person Office Pickup ({request.documentType?.officeRecord?.name || (typeof request.documentType?.office === "string" ? request.documentType.office.toUpperCase() : "Designated Office Counter")})
           </p>
         </div>
 

@@ -35,7 +35,7 @@ export function ComplianceChecklistCard({
       passed: isPaid,
     },
     {
-      title: "Registrar Window Desk Endorsement",
+      title: "Office Desk Endorsement",
       description: "Staff audit of submitted parameters and document authenticity.",
       passed: request.status === "ready" || request.status === "claimed",
       pending: request.status === "pending" || request.status === "processing",

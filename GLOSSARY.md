@@ -55,7 +55,7 @@ A standardized, selectable institutional explanation template (e.g., missing att
 _Avoid_: Quick message, canned excuse, boilerplate text
 
 **Public Request Tracking**:
-An unauthenticated, privacy-preserving tracking view allowing requesters to inspect stage progression, designated counter windows, and estimated release dates using an institutional reference number (`REQ-YYYY-NNNNNN`) without exposing student identity or personal contact information.
+An unauthenticated, privacy-preserving tracking view allowing requesters to inspect stage progression, designated processing offices, and estimated release dates using an institutional reference number (`REQ-YYYY-NNNNNN`) without exposing student identity or personal contact information.
 _Avoid_: Global lookup, ticket search, open request viewer
 
 **Academic Term Anchor**:
@@ -63,6 +63,10 @@ The institutional academic year and semester (e.g., `AY 2026–2027`) displayed 
 _Avoid_: School year banner, active semester label, date tag
 
 ## Staff and Offices
+
+**Processing Office**:
+The academic or administrative organizational unit (e.g. Office of the University Registrar, HRMO, College Dean's Office) responsible for reviewing, endorsing, and releasing a requested document.
+_Avoid_: Service window, counter window, releasing window
 
 **Staff Delegation**:
 Assigning operational custody of a document request to a specific active staff member within the issuing office.

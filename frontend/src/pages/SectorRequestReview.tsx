@@ -12,7 +12,7 @@ import { RequestDetailsCard } from "@/components/windows/review/RequestDetailsCa
 import { StatusChangeDialog } from "@/components/windows/review/StatusChangeDialog";
 import { ClaimHandoffDialog } from "@/components/requests/review/ClaimHandoffDialog";
 import { StudentInfoCard } from "@/components/windows/review/StudentInfoCard";
-import { WindowOperationsCard } from "@/components/windows/review/WindowOperationsCard";
+import { OfficeOperationsCard } from "@/components/windows/review/OfficeOperationsCard";
 import { WorkflowPipelineCard } from "@/components/windows/review/WorkflowPipelineCard";
 import { getOffice } from "@/lib/sectors/sectors-config";
 import { updateRequestStatus } from "@/api/requests";
@@ -326,7 +326,7 @@ export default function SectorRequestReview() {
             onSelectAction={setPendingAction}
           />
           <WorkflowPipelineCard request={request} />
-          <WindowOperationsCard request={request} />
+          <OfficeOperationsCard request={request} />
           <AuditTrailCard
             request={request}
             staffNotes={staffNotes}
