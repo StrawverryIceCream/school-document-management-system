@@ -103,4 +103,9 @@ app.use(
   },
 );
 
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Server on ${PORT}`));
+}
+
+export default app;
+export { app };

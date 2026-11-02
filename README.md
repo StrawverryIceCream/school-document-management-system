@@ -202,6 +202,36 @@ school-document-management-system/
 
 ---
 
+## Deployment on Vercel
+
+### 1. Frontend (Vite SPA)
+1. Import the repository in [Vercel](https://vercel.com).
+2. Configure project settings:
+   - **Root Directory:** `frontend` (or root; both include preconfigured `vercel.json` SPA routing).
+   - **Framework Preset:** Vite
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. When routing requests to your production backend, update the `/api` rewrite destination in `vercel.json`:
+   ```json
+   {
+     "rewrites": [
+       { "source": "/api/:path*", "destination": "https://your-backend-api.com/api/:path*" },
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
+   ```
+   *Note:* Proxying `/api` through Vercel keeps session cookies (`connect.sid`) first-party on the same origin, avoiding Safari and Chrome cross-site cookie restrictions.
+
+### 2. Production Backend Environment Variables
+Set the following on your backend host:
+- `DATABASE_URL`: Neon PostgreSQL connection string (`?sslmode=require`)
+- `SESSION_SECRET`: 64-character random hex string
+- `CLIENT_ORIGIN`: Your Vercel frontend URL (e.g. `https://your-app.vercel.app`)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
+
+---
+
 ## Troubleshooting
 
 - **Port in use (`5000` or `5173`):**

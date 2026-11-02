@@ -1133,7 +1133,7 @@ export function maskRequesterName(fullName: string | null | undefined): string {
 export async function getPublicRequestStatus(req: Request, res: Response) {
   try {
     const { referenceNumber } = req.params;
-    const trimmed = referenceNumber?.trim();
+    const trimmed = typeof referenceNumber === "string" ? referenceNumber.trim() : undefined;
 
     const REFERENCE_REGEX = /^REQ-\d{4}-\d{6}$/i;
     if (!trimmed || !REFERENCE_REGEX.test(trimmed)) {

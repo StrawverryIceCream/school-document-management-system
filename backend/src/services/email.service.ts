@@ -1,18 +1,18 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 
 interface SendOtpResult {
   delivered: boolean;
   devMode: boolean;
 }
 
-let cachedTransporter: nodemailer.Transporter | null = null;
+let cachedTransporter: Transporter | null = null;
 
 function getSharedTransporter(
   host: string,
   port: number,
   user: string,
   pass: string,
-): nodemailer.Transporter {
+): Transporter {
   if (!cachedTransporter) {
     cachedTransporter = nodemailer.createTransport({
       host,
