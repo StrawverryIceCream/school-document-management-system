@@ -87,6 +87,10 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
     request.window?.office ||
     "Designated Office";
 
+  if (request.status === "cancelled") {
+    return null;
+  }
+
   return (
     <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-4">
       <div className="flex items-center justify-between pb-1">

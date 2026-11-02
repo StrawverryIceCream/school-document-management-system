@@ -326,7 +326,9 @@ export default function SectorRequestReview() {
             onSelectAction={setPendingAction}
           />
           <WorkflowPipelineCard request={request} />
-          <OfficeOperationsCard request={request} />
+          {request.status !== "cancelled" && (
+            <OfficeOperationsCard request={request} />
+          )}
           <AuditTrailCard
             request={request}
             staffNotes={staffNotes}
