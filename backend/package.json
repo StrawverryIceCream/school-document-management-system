@@ -18,6 +18,15 @@
   "type": "module",
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.19.0",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.5.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/ws": "^8.18.1",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
     "connect-pg-simple": "^10.0.0",
@@ -28,20 +37,11 @@
     "express-session": "^1.19.0",
     "multer": "^2.4.0",
     "nodemailer": "^10.1.1",
+    "typescript": "^7.0.2",
     "ws": "^8.21.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/connect-pg-simple": "^7.0.3",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/express-session": "^1.19.0",
-    "@types/multer": "^2.3.0",
-    "@types/node": "^26.5.0",
-    "@types/nodemailer": "^8.0.2",
-    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "tsx": "^4.23.15"
   }
 }
