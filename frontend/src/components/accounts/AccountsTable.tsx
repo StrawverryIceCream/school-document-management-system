@@ -9,7 +9,6 @@ import DataTable, { type DataTableColumn } from "@/components/shared/DataTable";
 import TruncatedText from "@/components/shared/TruncatedText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useUsers } from "@/hooks/useUsers";
 import {
@@ -19,7 +18,6 @@ import {
   formatShortId,
   getAccountSubtitle,
   ROLE_TONES,
-  SELECT_ALL_LABEL,
   YOU_LABEL,
 } from "@/lib/accounts/accounts-table";
 import {
@@ -34,7 +32,6 @@ import type { User } from "@/types";
 export default function AccountsTable() {
   const { loading, users, error, pagination, setPage } = useUsers();
   const { user: currentUser } = useAuth();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [dbOffices, setDbOffices] = useState<OfficeRecord[]>([]);
 
   useEffect(() => {
@@ -45,42 +42,8 @@ export default function AccountsTable() {
       .catch((err) => console.error("Could not fetch offices:", err));
   }, []);
 
-  const selectedOnPage = users.filter((u) => selectedIds.includes(u.id)).length;
-  const headerChecked: boolean | "indeterminate" =
-    selectedOnPage === 0
-      ? false
-      : selectedOnPage === users.length
-        ? true
-        : "indeterminate";
-
   const columns = useMemo<DataTableColumn<User>[]>(
     () => [
-      {
-        key: "select",
-        className: "w-12",
-        header: (
-          <Checkbox
-            checked={headerChecked}
-            onCheckedChange={(checked) =>
-              setSelectedIds(checked === true ? users.map((u) => u.id) : [])
-            }
-            aria-label={SELECT_ALL_LABEL}
-          />
-        ),
-        cell: (user) => (
-          <Checkbox
-            checked={selectedIds.includes(user.id)}
-            onCheckedChange={(checked) =>
-              setSelectedIds((prev) =>
-                checked === true
-                  ? [...prev, user.id]
-                  : prev.filter((id) => id !== user.id),
-              )
-            }
-            aria-label={`Select ${user.fullName}`}
-          />
-        ),
-      },
       {
         key: "id",
         className: "w-36",
@@ -282,7 +245,7 @@ export default function AccountsTable() {
         ),
       },
     ],
-    [users, selectedIds, headerChecked, currentUser, dbOffices],
+    [users, currentUser, dbOffices],
   );
 
   return (

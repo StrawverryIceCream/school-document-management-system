@@ -35,7 +35,7 @@ export default function OfficeShortcuts() {
     <div
       role="region"
       aria-label="Office shortcuts"
-      className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-none pb-1 min-w-0"
+      className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-none pb-1 min-w-0 w-full"
     >
       <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">
         Offices:
@@ -62,18 +62,18 @@ export default function OfficeShortcuts() {
             type="button"
             onClick={() => setOfficeFilter(isSelected && id !== "all" ? "all" : id)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors",
+              "inline-flex shrink-0 whitespace-nowrap items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
-            {Icon && <Icon className="size-3.5" aria-hidden="true" />}
-            <span>{isMyOffice ? `${label} (${userOffice})` : label}</span>
+            {Icon && <Icon className="size-3.5 shrink-0" aria-hidden="true" />}
+            <span className="shrink-0">{isMyOffice ? `${label} (${userOffice})` : label}</span>
             <Badge
               variant={isSelected ? "secondary" : "outline"}
               className={cn(
-                "h-4 px-1.5 text-[10px] font-semibold",
+                "h-4 px-1.5 text-[10px] font-semibold shrink-0",
                 isSelected
                   ? "bg-primary-foreground/20 text-primary-foreground border-none"
                   : "bg-background text-muted-foreground",

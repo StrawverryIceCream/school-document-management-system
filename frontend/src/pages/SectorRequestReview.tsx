@@ -110,10 +110,10 @@ export default function SectorRequestReview() {
 
   if (reviewData.error || !request || !request.user) {
     return (
-      <main className="space-y-5 p-6 sm:p-10">
+      <main className="space-y-5 p-6 sm:p-10 max-w-7xl mx-auto flex flex-col items-start">
         <Button
           variant="ghost"
-          className="-ml-3 gap-2"
+          className="w-fit self-start justify-start -ml-3 gap-2"
           onClick={() => navigate(backUrl)}
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
@@ -214,11 +214,11 @@ export default function SectorRequestReview() {
 
   return (
     <main className="space-y-6 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-3 sm:gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="-ml-3 gap-2"
+          className="w-fit self-start justify-start -ml-3 gap-2"
           onClick={() => navigate(backUrl)}
         >
           <ArrowLeft className="size-4" aria-hidden="true" />

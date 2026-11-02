@@ -16,6 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useSectorsVisibility } from "@/hooks/useSectorsVisibility";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebarCounts } from "@/hooks/useSidebarCounts";
+import { Badge } from "@/components/ui/badge";
 
 export default function NavSectors() {
   const location = useLocation();
@@ -23,6 +25,7 @@ export default function NavSectors() {
     useSectorsVisibility();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const { sectorCounts, divisionCounts } = useSidebarCounts();
 
   const [openSectors, setOpenSectors] = useState<Record<string, boolean>>(
     () => {
@@ -112,9 +115,20 @@ export default function NavSectors() {
                   >
                     <Icon className="size-5 shrink-0" />
                     <span>{sector.code}</span>
-                    <span className="text-xs text-muted-foreground ml-auto hidden group-data-[collapsible=icon]:hidden lg:inline truncate max-w-20 text-right pr-6">
+                    <span className="text-xs text-muted-foreground ml-auto hidden group-data-[collapsible=icon]:hidden lg:inline truncate max-w-16 text-right">
                       {sector.shortName}
                     </span>
+                    {(sectorCounts[sector.code] ?? 0) > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "shrink-0 h-4 px-1.5 text-[10px] font-semibold rounded-full group-data-[collapsible=icon]:hidden",
+                          sector.divisions.length > 0 ? "mr-6" : "mr-0",
+                        )}
+                      >
+                        {sectorCounts[sector.code]}
+                      </Badge>
+                    )}
                   </NavLink>
                 </SidebarMenuButton>
 
@@ -146,6 +160,7 @@ export default function NavSectors() {
                       const isDivisionActive =
                         location.pathname.startsWith(divisionUrl);
                       const label = division.name;
+                      const dCount = divisionCounts[division.id] ?? 0;
 
                       return (
                         <SidebarMenuSubItem key={division.id}>
@@ -155,9 +170,17 @@ export default function NavSectors() {
                           >
                             <NavLink
                               to={divisionUrl}
-                              className="flex items-center gap-2"
+                              className="flex items-center justify-between gap-2 w-full pr-1"
                             >
                               <span className="truncate">{label}</span>
+                              {dCount > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="shrink-0 h-3.5 px-1 text-[9px] font-mono rounded-full bg-muted-foreground/10 text-muted-foreground"
+                                >
+                                  {dCount}
+                                </Badge>
+                              )}
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
