@@ -23,7 +23,7 @@ export default function DeliveryMethodCard({
   const options = [
     {
       id: "pickup",
-      title: `Campus Window Pickup (${officeName || "Registrar Main Hall"})`,
+      title: `Campus Office Pickup (${officeName || "Registrar Main Hall"})`,
       badge: "Recommended",
       badgeTone: TONES.emerald.badge,
       desc: "Direct handoff upon presentation of mobile QR voucher and University Student ID",
@@ -80,7 +80,7 @@ export default function DeliveryMethodCard({
               />
               <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-foreground">
                       {opt.title}
                     </span>

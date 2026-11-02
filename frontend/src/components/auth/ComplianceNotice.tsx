@@ -19,17 +19,21 @@ function ComplianceNotice({
     <div className="pt-2" data-purpose="terms-and-compliance">
       <div
         className={cn(
-          "mb-4 flex items-start gap-2.5 rounded-xl border p-3.5 text-sm leading-relaxed",
+          "mb-4 flex items-start gap-3 rounded-xl border p-3.5 text-sm leading-relaxed",
           TONES[COMPLIANCE_NOTICE_TONE].badge,
         )}
       >
-        <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-        <span>
-          <strong>Official Academic Integrity Policy:</strong> All records are
-          validated against cryptographic university registrar hashes.
-          Falsification of student numbers or institutional identity triggers
-          automatic account restriction and Dean referral.
-        </span>
+        <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className="flex flex-col gap-1 text-xs sm:text-sm">
+          <p className="font-semibold text-foreground">
+            Official Academic Integrity Policy
+          </p>
+          <p className="opacity-90 leading-relaxed">
+            All records are validated against cryptographic university registrar hashes.
+            Falsification of student numbers or institutional identity triggers
+            automatic account restriction and Dean referral.
+          </p>
+        </div>
       </div>
       <div className="flex items-start gap-2.5">
         <Checkbox

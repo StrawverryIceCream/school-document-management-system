@@ -145,34 +145,39 @@ export default function RegistrationForm() {
 
   return (
     <Card className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl p-0 shadow-sm">
-      <div className="border-b bg-muted/40 px-8 pb-6 pt-8">
-        <div className="mb-2 flex items-center justify-between">
+      <div className="border-b bg-muted/40 px-4 py-6 sm:px-8 sm:py-8">
+        <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 min-w-0">
           <Badge
-            className={cn(BADGE_BASE, "gap-1.5", TONES[SYNC_BADGE_TONE].badge)}
+            className={cn(
+              BADGE_BASE,
+              "gap-1.5 shrink-0 max-w-full truncate whitespace-nowrap",
+              TONES[SYNC_BADGE_TONE].badge,
+            )}
           >
             <span
               aria-hidden="true"
               className={cn(
-                "size-1.5 animate-pulse motion-reduce:animate-none rounded-full",
+                "size-1.5 animate-pulse motion-reduce:animate-none rounded-full shrink-0",
                 TONES[SYNC_BADGE_TONE].dot,
               )}
             />
-            PostgreSQL SIS &amp; HRIS Direct Sync Active
+            <span className="sm:hidden truncate">SIS &amp; HRIS Direct Sync Active</span>
+            <span className="hidden sm:inline truncate">PostgreSQL SIS &amp; HRIS Direct Sync Active</span>
           </Badge>
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
             {ACTIVE_ACADEMIC_TERM}
           </span>
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl break-words">
           Create your {SYSTEM_NAME} Account
         </h1>
-        <p className="mt-1.5 text-base leading-relaxed text-muted-foreground">
+        <p className="mt-1.5 text-sm sm:text-base leading-relaxed text-muted-foreground">
           Register to submit official credential requests, track evaluation
           status, and receive cryptographic release slips.
         </p>
       </div>
 
-      <form className="space-y-7 p-8" onSubmit={handleSubmit} aria-describedby={error ? "registration-error" : undefined}>
+      <form className="space-y-6 sm:space-y-7 p-4 sm:p-8" onSubmit={handleSubmit} aria-describedby={error ? "registration-error" : undefined}>
         <RoleSelector onRoleChange={setRole} role={role} />
 
         <CredentialsFields
@@ -194,11 +199,11 @@ export default function RegistrationForm() {
           className="space-y-4 border-t pt-3"
           data-purpose="academic-verification-section"
         >
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="mb-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 min-w-0">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Academic Verification Details
             </h2>
-            <span className="rounded border border-primary/20 bg-primary/5 px-2 py-0.5 text-sm font-medium text-primary">
+            <span className="w-fit rounded border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs sm:text-sm font-medium text-primary shrink-0">
               {role === "student" ? "Student SIS Check" : "Faculty HRIS Check"}
             </span>
           </div>

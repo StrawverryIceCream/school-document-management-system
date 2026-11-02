@@ -57,8 +57,8 @@ export default function LoginCard({
         className="absolute inset-x-0 top-0 h-1.5 bg-linear-to-r from-primary via-primary/70 to-secondary"
       />
 
-      <CardHeader className="gap-2 px-7 sm:px-9">
-        <div className="flex items-center justify-between gap-3">
+      <CardHeader className="gap-2 px-5 sm:px-9">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
           <CardTitle
             role="heading"
             aria-level={2}
@@ -81,7 +81,7 @@ export default function LoginCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-5 px-7 sm:px-9">
+      <CardContent className="space-y-5 px-5 sm:px-9">
         <form
           aria-label={LOGIN_CARD.formAriaLabel}
           className="space-y-5"
@@ -207,7 +207,7 @@ export default function LoginCard({
         </form>
       </CardContent>
 
-      <CardFooter className="flex-col items-stretch gap-5 px-7 sm:px-9">
+      <CardFooter className="flex-col items-stretch gap-5 px-5 sm:px-9">
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
           {SIGN_UP.prompt}{" "}

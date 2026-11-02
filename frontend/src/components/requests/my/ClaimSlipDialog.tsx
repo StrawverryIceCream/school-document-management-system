@@ -40,17 +40,17 @@ export function ClaimSlipDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md sm:max-w-lg p-6">
         <DialogHeader className="text-center sm:text-left space-y-1">
-          <div className="flex items-center justify-between">
-            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1.5 py-1">
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1.5 py-1 shrink-0">
               <CheckCircle2 className="size-3.5" /> Ready for Claiming
             </Badge>
-            <span className="text-xs font-mono text-muted-foreground">ARCH System</span>
+            <span className="text-xs font-mono text-muted-foreground shrink-0">ARCH System</span>
           </div>
           <DialogTitle className="text-xl font-bold tracking-tight">
             Official Document Claim Slip
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Present this QR slip at the releasing window along with a valid ID.
+            Present this QR slip at the releasing office along with a valid ID.
           </DialogDescription>
         </DialogHeader>
 

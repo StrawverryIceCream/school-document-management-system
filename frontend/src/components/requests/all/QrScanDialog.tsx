@@ -204,8 +204,8 @@ export function QrScanDialog({ trigger }: QrScanDialogProps) {
           )}
 
           {cameraError && (
-            <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">
-              <AlertCircle className="size-4 shrink-0" />
+            <div className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">
+              <AlertCircle className="size-4 shrink-0 mt-0.5" />
               <span>{cameraError}</span>
             </div>
           )}

@@ -25,7 +25,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Secondary Analytics: Payment Channels Breakdown & Counter Window Queues */}
+        {/* Secondary Analytics: Payment Channels Breakdown & Office Queues */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <PaymentMethodChart />

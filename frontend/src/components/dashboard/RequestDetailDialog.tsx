@@ -28,9 +28,9 @@ function DetailRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-b-0">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="text-sm font-semibold text-foreground text-right">{value ?? "—"}</span>
+    <div className="flex items-start justify-between gap-3 py-2 border-b border-border/50 last:border-b-0 text-xs sm:text-sm">
+      <span className="shrink-0 font-medium text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground text-right break-words">{value ?? "—"}</span>
     </div>
   );
 }
@@ -48,7 +48,7 @@ function RequestDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between pr-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pr-6">
             <DialogTitle>Request Inspection</DialogTitle>
             <RequestStatusBadge status={request.status} />
           </div>

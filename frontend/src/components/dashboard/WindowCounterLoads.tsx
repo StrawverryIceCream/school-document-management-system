@@ -21,14 +21,14 @@ export default function WindowCounterLoads() {
 
   return (
     <Card className="flex flex-col justify-between rounded-xl border border-border/60 bg-card shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 pb-3">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 pb-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-primary" />
+          <Building2 className="h-4 w-4 text-primary shrink-0" />
           <CardTitle className="text-sm font-bold">Office Counter Loads</CardTitle>
         </div>
         <Badge
           variant="secondary"
-          className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+          className="shrink-0 w-fit rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
         >
           {totalInQueue > 0 ? `${totalInQueue} Active in Queue` : "Offices Idle"}
         </Badge>

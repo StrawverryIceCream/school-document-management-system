@@ -48,7 +48,7 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
       setDataSourceNote(
         rows.length === 0
           ? "No request records are available from the current backend data source yet."
-          : "Live request data is active. Window filters are derived from the available request fields.",
+          : "Live request data is active. Office filters are derived from the available request fields.",
       );
     } catch (requestError) {
       if (loadId !== latestLoadId.current) return;

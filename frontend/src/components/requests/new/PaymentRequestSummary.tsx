@@ -52,7 +52,7 @@ function PaymentRequestSummary({
       "Target release",
       turnaroundLabel ? `Estimated ${turnaroundLabel}` : "Set by Office",
     ],
-    ["Assigned counter", "To be assigned"],
+    ["Processing Office", "To be assigned"],
   ];
 
   return (
