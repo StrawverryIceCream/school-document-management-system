@@ -105,7 +105,7 @@ export function ArchLogo({
       <a
         href={href}
         className={cn(
-          "group flex items-center transition-opacity hover:opacity-95 focus-visible:outline-hidden",
+          "group flex items-center transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg",
           sizeStyles.container,
           className,
         )}

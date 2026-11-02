@@ -55,22 +55,22 @@ export default function LandingHero() {
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-linear-to-r from-background/10 via-background/80 to-background/90"
+        className="absolute inset-0 -z-10 bg-linear-to-r rtl:bg-linear-to-l from-background/95 via-background/85 to-background/40"
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
-          <div className="space-y-6 lg:col-span-7">
+          <div className="min-w-0 space-y-6 lg:col-span-7">
             <Badge
               variant="outline"
               className={cn(
                 BADGE_BASE,
-                "gap-2.5 whitespace-normal bg-card px-4 py-2 text-left shadow-sm",
+                "gap-2.5 whitespace-normal bg-card px-4 py-2 text-start shadow-sm",
                 TONES.brand.value,
               )}
             >
               <span
                 className={cn(
-                  "size-2 shrink-0 animate-pulse rounded-full",
+                  "size-2 shrink-0 animate-pulse motion-reduce:animate-none rounded-full",
                   TONES[HERO_PILL.dotTone].dot,
                 )}
                 aria-hidden="true"
@@ -80,9 +80,9 @@ export default function LandingHero() {
 
             <h1
               id={HERO_HEADING_ID}
-              className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+              className="text-4xl font-extrabold leading-tight tracking-tight text-foreground text-balance sm:text-5xl lg:text-6xl"
             >
-              {HERO_TITLE.lead} <br className="hidden sm:inline" />
+              {HERO_TITLE.lead}{" "}
               <span className={TONES.brand.value}>{HERO_TITLE.accent}</span>
             </h1>
 
@@ -95,7 +95,7 @@ export default function LandingHero() {
                 href={primaryCtaHref}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "h-14 gap-2.5 rounded-xl px-7 text-lg font-bold shadow-md",
+                  "min-h-14 h-auto py-3.5 gap-2.5 rounded-xl pl-6 pr-7 text-lg font-bold shadow-md",
                 )}
               >
                 <CirclePlus className="size-6" aria-hidden="true" />
@@ -105,7 +105,7 @@ export default function LandingHero() {
                 href={HERO_SECONDARY_CTA.href}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-14 gap-2.5 rounded-xl bg-card px-7 text-lg font-semibold shadow-sm",
+                  "min-h-14 h-auto py-3.5 gap-2.5 rounded-xl bg-card pl-6 pr-7 text-lg font-semibold shadow-sm",
                 )}
               >
                 <ScanLine
@@ -116,7 +116,7 @@ export default function LandingHero() {
               </a>
             </div>
 
-            <div className="grid max-w-3xl grid-cols-1 gap-6 border-t border-border pt-6 sm:grid-cols-3">
+            <div className="grid max-w-3xl grid-cols-1 gap-4 border-t border-border pt-6 sm:grid-cols-3 sm:gap-6">
               {HERO_STATS.map(({ id, value, caption, tone }) => (
                 <div key={id} className="flex flex-col gap-2">
                   <p className={cn(VALUE_BASE, "text-3xl", TONES[tone].value)}>
@@ -130,7 +130,7 @@ export default function LandingHero() {
             </div>
           </div>
 
-          <div className="lg:col-span-5">
+          <div className="min-w-0 lg:col-span-5">
             <div className="relative">
               <div
                 aria-hidden="true"
@@ -197,14 +197,19 @@ export default function LandingHero() {
                       </Badge>
                     </div>
 
-                    <dl className="space-y-2 text-base">
+                    <dl className="space-y-2.5 text-base">
                       {SAMPLE_TICKET.fields.map(({ label, value, tone }) => (
-                        <div key={label} className="flex justify-between gap-4">
-                          <dt className="text-muted-foreground">{label}:</dt>
+                        <div
+                          key={label}
+                          className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4 min-w-0"
+                        >
+                          <dt className="shrink-0 text-muted-foreground">
+                            {label}:
+                          </dt>
                           <dd
                             className={cn(
                               VALUE_BASE,
-                              "text-right text-base leading-snug",
+                              "text-start sm:text-end text-base leading-snug",
                               TONES[tone].value,
                             )}
                           >
@@ -215,14 +220,14 @@ export default function LandingHero() {
                     </dl>
 
                     <div className="space-y-2 pt-1">
-                      <div className="flex justify-between gap-3 text-sm font-semibold text-muted-foreground">
-                        <span>
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3 text-sm font-semibold text-muted-foreground">
+                        <span className="min-w-0">
                           {`Stage ${SAMPLE_TICKET.stage.current} of ${SAMPLE_TICKET.stage.total}: ${SAMPLE_TICKET.stage.label}`}
                         </span>
                         <span
                           className={cn(
                             VALUE_BASE,
-                            "shrink-0 text-sm",
+                            "shrink-0 text-start sm:text-end text-sm",
                             TONES[SAMPLE_TICKET.stage.statusTone].value,
                           )}
                         >
@@ -253,6 +258,7 @@ export default function LandingHero() {
                         trackInput.dispatchEvent(
                           new Event("input", { bubbles: true }),
                         );
+                        trackInput.focus({ preventScroll: true });
                       }
                       const trackSection = document.getElementById("track");
                       if (trackSection) {
@@ -266,10 +272,10 @@ export default function LandingHero() {
                     >
                       {TRACK_FORM.label}
                     </Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <div className="relative flex-1">
                         <Hash
-                          className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+                          className="absolute start-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
                           aria-hidden="true"
                         />
                         <Input
@@ -278,7 +284,7 @@ export default function LandingHero() {
                           value={reference}
                           onChange={(event) => setReference(event.target.value)}
                           placeholder={TRACK_FORM.placeholder}
-                          className="h-11 pl-10 text-base md:text-base"
+                          className="h-11 ps-10 text-base md:text-base"
                         />
                       </div>
                       <Button

@@ -98,7 +98,7 @@ export default function CollegeWindows() {
             {Array.from({ length: 6 }).map((_, i) => (
               <Card
                 key={i}
-                className="h-48 animate-pulse gap-0 overflow-hidden bg-muted py-0"
+                className="h-48 animate-pulse motion-reduce:animate-none gap-0 overflow-hidden bg-muted py-0"
               />
             ))}
           </div>

@@ -12,6 +12,18 @@ type RoleSelectorProps = {
 };
 
 function RoleSelector({ role, onRoleChange }: RoleSelectorProps) {
+  const handleKeyDown = (e: React.KeyboardEvent, currentIdx: number) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIdx = (currentIdx + 1) % ROLE_OPTIONS.length;
+      onRoleChange(ROLE_OPTIONS[nextIdx].role);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIdx = (currentIdx - 1 + ROLE_OPTIONS.length) % ROLE_OPTIONS.length;
+      onRoleChange(ROLE_OPTIONS[prevIdx].role);
+    }
+  };
+
   return (
     <div data-purpose="role-selection-section">
       <Label className="mb-3 block text-sm font-bold uppercase tracking-wider text-muted-foreground">
@@ -22,14 +34,17 @@ function RoleSelector({ role, onRoleChange }: RoleSelectorProps) {
         className="grid grid-cols-1 gap-3 sm:grid-cols-2"
         role="radiogroup"
       >
-        {ROLE_OPTIONS.map(({ role: optionRole, label, description, icon: Icon }) => {
+        {ROLE_OPTIONS.map(({ role: optionRole, label, description, icon: Icon }, index) => {
           const selected = role === optionRole;
           return (
             <button
               key={optionRole}
               aria-checked={selected}
+              tabIndex={selected ? 0 : -1}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
-                "relative flex items-start gap-3.5 rounded-xl border-2 p-4 text-left transition-all",
+                "relative flex items-start gap-3.5 rounded-xl border-2 p-4 text-start transition-all cursor-pointer",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden",
                 selected
                   ? "border-primary bg-primary/5 shadow-sm"
                   : "border-border bg-card hover:border-muted-foreground/30",

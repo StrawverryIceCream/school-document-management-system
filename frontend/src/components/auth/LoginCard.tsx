@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ export default function LoginCard({
             </Label>
             <div className="relative">
               <UserRound
-                className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -107,7 +108,9 @@ export default function LoginCard({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder={IDENTIFIER_FIELD.placeholder}
-                className="h-11 rounded-xl pl-11 text-base md:text-base"
+                className="h-11 rounded-xl ps-11 text-base md:text-base"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "login-card-error" : undefined}
               />
             </div>
           </div>
@@ -121,7 +124,7 @@ export default function LoginCard({
             </Label>
             <div className="relative">
               <Lock
-                className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -133,7 +136,9 @@ export default function LoginCard({
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder={PASSWORD_FIELD.placeholder}
-                className="h-11 rounded-xl pl-11 pr-12 text-base md:text-base"
+                className="h-11 rounded-xl ps-11 pe-12 text-base md:text-base"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "login-card-error" : undefined}
               />
               <Button
                 type="button"
@@ -146,7 +151,7 @@ export default function LoginCard({
                 }
                 aria-pressed={showPassword}
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute right-1 top-1/2 size-9 -translate-y-1/2 text-muted-foreground"
+                className="absolute end-1 top-1/2 size-9 -translate-y-1/2 text-muted-foreground cursor-pointer"
               >
                 {showPassword ? (
                   <EyeOff className="size-5" aria-hidden="true" />
@@ -179,16 +184,26 @@ export default function LoginCard({
           <Button
             type="submit"
             size="lg"
+            aria-busy={loading}
             className="group h-12 w-full gap-2 rounded-xl text-base font-bold shadow-md cursor-pointer"
             disabled={loading}
           >
             {loading ? LOADING_SUBMIT_LABEL : SUBMIT_LABEL}
             <ArrowRight
-              className="size-5 transition-transform group-hover:translate-x-1"
+              className="size-5 transition-transform group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0"
               aria-hidden="true"
             />
           </Button>
-          {error && <p className="text-base text-destructive font-medium">{error}</p>}
+          {error && (
+            <p
+              id="login-card-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm font-medium text-destructive"
+            >
+              {error}
+            </p>
+          )}
         </form>
       </CardContent>
 
@@ -196,8 +211,8 @@ export default function LoginCard({
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
           {SIGN_UP.prompt}{" "}
-          <a
-            href={SIGN_UP.href}
+          <Link
+            to={SIGN_UP.href}
             className={cn(
               "inline-flex items-center gap-1 font-bold hover:underline",
               TONES.brand.value,
@@ -205,14 +220,14 @@ export default function LoginCard({
           >
             {SIGN_UP.label}
             <ArrowRight className="size-4" aria-hidden="true" />
-          </a>
+          </Link>
         </p>
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-dashed border-border bg-muted/50 p-3 text-sm">
           <span className="font-medium text-muted-foreground">
             {TRACK_SLIP.prompt}
           </span>
-          <a
-            href={TRACK_SLIP.href}
+          <Link
+            to={TRACK_SLIP.href}
             className={cn(
               "inline-flex items-center gap-1 font-bold hover:underline",
               TONES.brand.value,
@@ -220,7 +235,7 @@ export default function LoginCard({
           >
             {TRACK_SLIP.label}
             <ArrowRight className="size-4" aria-hidden="true" />
-          </a>
+          </Link>
         </div>
       </CardFooter>
     </Card>

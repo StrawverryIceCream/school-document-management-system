@@ -23,7 +23,7 @@ export default function LoginHeader() {
           >
             <span
               className={cn(
-                "size-2 animate-pulse rounded-full",
+                "size-2 animate-pulse motion-reduce:animate-none rounded-full",
                 TONES.emerald.dot,
               )}
               aria-hidden="true"

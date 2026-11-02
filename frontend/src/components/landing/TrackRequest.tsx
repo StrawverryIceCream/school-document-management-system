@@ -139,7 +139,7 @@ export default function TrackRequest() {
                 className="h-12 gap-2 rounded-xl px-7 text-base font-bold shadow-sm"
               >
                 <RefreshCw
-                  className={cn("size-5", loading && "animate-spin")}
+                  className={cn("size-5", loading && "animate-spin motion-reduce:animate-none")}
                   aria-hidden="true"
                 />
                 {loading ? "Searching…" : TRACK_SEARCH.submitLabel}
@@ -216,6 +216,12 @@ export default function TrackRequest() {
                                 : index === activeStageIndex
                                   ? "active"
                                   : "upcoming";
+                          const statusText =
+                            status === "done"
+                              ? "Completed"
+                              : status === "active"
+                                ? "In progress"
+                                : "Upcoming";
                           return (
                             <li
                               key={id}
@@ -236,11 +242,12 @@ export default function TrackRequest() {
                                 <Icon
                                   className={cn(
                                     "size-5 shrink-0",
-                                    status === "active" && "animate-spin",
+                                    status === "active" && "animate-spin motion-reduce:animate-none",
                                   )}
                                   aria-hidden="true"
                                 />
                                 {`${index + 1}. ${label}`}
+                                <span className="sr-only">({statusText})</span>
                               </div>
                               <p className="text-sm opacity-80">{note}</p>
                             </li>

@@ -70,7 +70,7 @@ export default function CredentialsCatalog() {
             {Array.from({ length: 3 }).map((_, i) => (
               <Card
                 key={i}
-                className="h-64 animate-pulse gap-0 overflow-hidden bg-muted py-0"
+                className="h-64 animate-pulse motion-reduce:animate-none gap-0 overflow-hidden bg-muted py-0"
               />
             ))}
           </div>

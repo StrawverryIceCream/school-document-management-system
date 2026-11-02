@@ -22,7 +22,9 @@ function Login() {
       await login(email, password);
       navigate("/home");
     } catch {
-      setError("Invalid email or password");
+      setError(
+        "Invalid credentials. Please verify your email and password, or contact the university registrar if you need assistance.",
+      );
     } finally {
       setLoading(false);
     }

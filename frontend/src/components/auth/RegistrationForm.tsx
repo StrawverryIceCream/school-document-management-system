@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { signup, sendSignupOtp } from "@/api/auth";
 import { Badge } from "@/components/ui/badge";
@@ -70,29 +70,29 @@ export default function RegistrationForm() {
     setError(null);
 
     if (!agreedToPolicy) {
-      setError("You must agree to the Data Privacy Policy to continue");
+      setError("You must agree to the Data Privacy Policy to continue registration.");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match. Please re-enter your password confirmation.");
       return;
     }
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`,
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
       );
       return;
     }
     if (role === "student" && studentId === STUDENT_ID_PREFIX) {
-      setError("Student ID is required for students");
+      setError("Please enter your complete Student ID number as shown on your university RFID.");
       return;
     }
     if (role === "student" && (!collegeId || !courseId)) {
-      setError("Select your college and degree program");
+      setError("Please select both your college and your degree program.");
       return;
     }
     if (role === "teacher" && !selectedDepartment) {
-      setError("Select your assigned college / department");
+      setError("Please select your assigned college or academic department.");
       return;
     }
 
@@ -101,7 +101,7 @@ export default function RegistrationForm() {
       await sendSignupOtp(email);
       setShowOtpModal(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send verification code");
+      setError(err instanceof Error ? err.message : "Failed to send verification code. Please check your email address and try again.");
     } finally {
       setLoading(false);
     }
@@ -153,7 +153,7 @@ export default function RegistrationForm() {
             <span
               aria-hidden="true"
               className={cn(
-                "size-1.5 animate-pulse rounded-full",
+                "size-1.5 animate-pulse motion-reduce:animate-none rounded-full",
                 TONES[SYNC_BADGE_TONE].dot,
               )}
             />
@@ -172,7 +172,7 @@ export default function RegistrationForm() {
         </p>
       </div>
 
-      <form className="space-y-7 p-8" onSubmit={handleSubmit}>
+      <form className="space-y-7 p-8" onSubmit={handleSubmit} aria-describedby={error ? "registration-error" : undefined}>
         <RoleSelector onRoleChange={setRole} role={role} />
 
         <CredentialsFields
@@ -239,13 +239,22 @@ export default function RegistrationForm() {
           setAgreedToPolicy={setAgreedToPolicy}
         />
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <p
+            id="registration-error"
+            role="alert"
+            aria-live="assertive"
+            className="text-sm font-medium text-destructive"
+          >
+            {error}
+          </p>
+        )}
 
         <div className="space-y-3 pt-2" data-purpose="submission-cta">
-          <Button className="w-full" disabled={loading} size="lg" type="submit">
+          <Button className="w-full cursor-pointer" disabled={loading} size="lg" type="submit">
             {loading ? (
               <>
-                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
                 Creating account...
               </>
             ) : (
@@ -259,12 +268,12 @@ export default function RegistrationForm() {
             <span className="text-sm text-muted-foreground">
               Already registered with your institutional ID?{" "}
             </span>
-            <a
+            <Link
               className="text-sm font-semibold text-primary hover:underline"
-              href="/login"
+              to="/login"
             >
               Log in to your portal
-            </a>
+            </Link>
           </div>
         </div>
       </form>

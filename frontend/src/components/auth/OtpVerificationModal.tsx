@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface OtpVerificationModalProps {
   open: boolean;
@@ -50,7 +51,6 @@ export default function OtpVerificationModal({
     onClose();
   }
 
-
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -85,7 +85,7 @@ export default function OtpVerificationModal({
   return (
     <Dialog open={open} onOpenChange={(val) => !val && !loading && handleClose()}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center sm:text-left">
+        <DialogHeader className="text-center sm:text-start">
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:mx-0">
             <MailCheck className="size-6" />
           </div>
@@ -99,6 +99,9 @@ export default function OtpVerificationModal({
 
         <form onSubmit={handleVerify} className="space-y-4 py-2">
           <div className="space-y-2">
+            <Label htmlFor="otp-input" className="sr-only">
+              6-digit verification code
+            </Label>
             <Input
               id="otp-input"
               type="text"
@@ -116,11 +119,20 @@ export default function OtpVerificationModal({
               }}
               className="h-12 text-center font-mono text-2xl font-bold tracking-[0.4em]"
               disabled={loading}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? "otp-error" : undefined}
             />
           </div>
 
           {error && (
-            <p className="text-center text-sm font-medium text-destructive">{error}</p>
+            <p
+              id="otp-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-center text-sm font-medium text-destructive"
+            >
+              {error}
+            </p>
           )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -135,7 +147,7 @@ export default function OtpVerificationModal({
             >
               {resending ? (
                 <>
-                  <Loader2 className="mr-1 size-3 animate-spin" />
+                  <Loader2 className="mr-1 size-3 animate-spin motion-reduce:animate-none" />
                   Sending...
                 </>
               ) : resendCooldown > 0 ? (
@@ -160,7 +172,7 @@ export default function OtpVerificationModal({
             <Button type="submit" disabled={loading || otp.length !== 6}>
               {loading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
                   Verifying...
                 </>
               ) : (

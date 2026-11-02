@@ -19,8 +19,8 @@ export const BRAND_HOME_HREF = "/";
 export const NAV_ARIA_LABEL = "Primary";
 
 export const NAV_LINKS: NavLink[] = [
-  { label: "Credentials Catalog", href: "#services" },
   { label: "College Windows", href: "#windows" },
+  { label: "Credentials Catalog", href: "#services" },
   { label: "Track Request", href: "#track" },
   { label: "Verify Claim Slip", href: "/requests/claim" },
 ];
