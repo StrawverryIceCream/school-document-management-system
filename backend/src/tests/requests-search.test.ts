@@ -10,6 +10,11 @@ import { or, and, ilike, inArray, desc, count, sql } from "drizzle-orm";
 
 console.log("Running requests search query tests with reference number and role casting...");
 
+if (!process.env.DATABASE_URL?.trim()) {
+  console.log("Skipping DB integration test: DATABASE_URL not configured.");
+  process.exit(0);
+}
+
 async function runSearchQuery(searchTerm: string) {
   const pattern = `%${searchTerm.trim()}%`;
   const conditions = [
