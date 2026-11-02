@@ -202,33 +202,83 @@ school-document-management-system/
 
 ---
 
-## Deployment on Vercel
+## Development Workflow (Start to Finish)
 
-### 1. Frontend (Vite SPA)
-1. Import the repository in [Vercel](https://vercel.com).
-2. Configure project settings:
-   - **Root Directory:** `frontend` (or root; both include preconfigured `vercel.json` SPA routing).
-   - **Framework Preset:** Vite
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-3. When routing requests to your production backend, update the `/api` rewrite destination in `vercel.json`:
+Follow this lifecycle for day-to-day development:
+
+1. **Local Development (Daily Loop):**
+   - **Terminal 1 (Backend API):** `cd backend && npm run dev` (Runs on `http://localhost:5000`)
+   - **Terminal 2 (Frontend Client):** `cd frontend && npm run dev` (Runs on `http://localhost:5173`, Vite dev proxy routes `/api` to port 5000)
+
+2. **Schema & Migration Updates (When changing database tables):**
+   - Modify tables in `backend/src/db/schema.ts`
+   - Generate migration files: `cd backend && npm run db:generate`
+   - Execute against database: `cd backend && npm run db:migrate`
+
+3. **Pre-commit Verification (Local Quality Check):**
+   Run local builds and tests before pushing to ensure zero CI breaks:
+   ```bash
+   # Backend verification
+   cd backend && npm run build && npm test
+
+   # Frontend verification
+   cd ../frontend && npm run build && npm test
+   ```
+
+4. **Branching & Pull Request:**
+   - Create a feature branch: `git checkout -b feat/my-feature`
+   - Commit changes: `git commit -m "feat(scope): describe changes"`
+   - Push and open a Pull Request: `git push -u origin feat/my-feature`
+
+5. **Automated CI & Preview Checks:**
+   - **GitHub Actions** runs `.github/workflows/ci.yml` (parallel Backend and Frontend typecheck + test suites).
+   - **Vercel** automatically attaches an isolated **Preview URL** to your Pull Request for visual verification.
+
+6. **Merge & Continuous Deployment (CD):**
+   - Once CI passes, merge into `main`.
+   - **Vercel** automatically builds and pushes the frontend bundle to the edge CDN.
+   - **Render** automatically pulls `main`, compiles TypeScript, verifies `/health`, and restarts the production backend container.
+
+---
+
+## Deployment & CI/CD Architecture
+
+The system uses a decoupled hosting model:
+
+| Component | Platform | Configuration & Details |
+| :--- | :--- | :--- |
+| **Frontend** | [Vercel](https://vercel.com) | Static Vite SPA bundle with edge CDN distribution and client-side SPA routing (`vercel.json`). |
+| **Backend** | [Render](https://render.com) | Continuous Node.js web service running Express 5, session management, and Cloudinary uploads. |
+| **Database** | [Neon](https://neon.tech) | Serverless PostgreSQL connected over TLS (`?sslmode=require`). |
+| **CI Automation** | [GitHub Actions](https://github.com/features/actions) | Automated parallel build and unit test matrix on all PRs and pushes to `main`. |
+
+### 1. Frontend Setup (Vercel)
+1. Import repository in Vercel with **Framework Preset:** `Vite` and **Root Directory:** `frontend` (or root).
+2. Configure the `/api` reverse proxy in `vercel.json` to keep `connect.sid` session cookies first-party (avoiding cross-origin cookie restrictions):
    ```json
    {
      "rewrites": [
-       { "source": "/api/:path*", "destination": "https://your-backend-api.com/api/:path*" },
+       { "source": "/api/:path*", "destination": "https://<your-render-app>.onrender.com/api/:path*" },
        { "source": "/(.*)", "destination": "/index.html" }
      ]
    }
    ```
-   *Note:* Proxying `/api` through Vercel keeps session cookies (`connect.sid`) first-party on the same origin, avoiding Safari and Chrome cross-site cookie restrictions.
 
-### 2. Production Backend Environment Variables
-Set the following on your backend host:
-- `DATABASE_URL`: Neon PostgreSQL connection string (`?sslmode=require`)
-- `SESSION_SECRET`: 64-character random hex string
-- `CLIENT_ORIGIN`: Your Vercel frontend URL (e.g. `https://your-app.vercel.app`)
-- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
+### 2. Backend Setup (Render)
+1. Create a Web Service connected to your repo with **Root Directory:** `backend`.
+2. Service Settings:
+   - **Build Command:** `npm install && npm run build`
+   - **Start Command:** `npm start`
+   - **Health Check Path:** `/health` (responds with `{ ok: true }`)
+3. Required Environment Variables:
+   - `DATABASE_URL`: Neon PostgreSQL connection string (`?sslmode=require`)
+   - `SESSION_SECRET`: 64-character random hex string
+   - `CLIENT_ORIGIN`: Your Vercel frontend URL (e.g., `https://your-app.vercel.app` without a trailing slash)
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` (optional for local/test console fallback)
+
+### 3. Continuous Integration (GitHub Actions)
+Configured in `.github/workflows/ci.yml`. Runs parallel test and build verification on all PRs and commits before reaching production.
 
 ---
 
