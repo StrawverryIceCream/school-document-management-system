@@ -74,12 +74,12 @@ export function ComplianceChecklistCard({
               <Clock className="size-4 text-muted-foreground shrink-0 mt-0.5" />
             )}
             <div className="flex flex-col flex-1">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
                 <span className="text-xs font-semibold text-foreground">
                   {item.title}
                 </span>
                 {item.pending && (
-                  <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
+                  <Badge variant="outline" className="text-[10px] shrink-0 w-fit bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
                     Awaiting Staff Signoff
                   </Badge>
                 )}

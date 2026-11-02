@@ -27,8 +27,8 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
   const isCleared = Number(amountDue ?? 0) === 0;
 
   return (
-    <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-4">
-      <div className="flex items-center justify-between pb-1">
+    <Card className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
         <div className="flex items-center gap-3">
           <div
             className="size-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-base shrink-0"
@@ -48,7 +48,7 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
         </div>
         <Badge
           variant="secondary"
-          className={cn(BADGE_BASE, TONES.emerald.badge)}
+          className={cn(BADGE_BASE, "shrink-0 w-fit", TONES.emerald.badge)}
         >
           <Check className="size-3 mr-1" />
           Active Student
@@ -113,7 +113,7 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
             <span>{student.contactNumber || "+63 917 000 0000"}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Badge variant="outline" className="text-xs font-medium">
             Good Standing
           </Badge>

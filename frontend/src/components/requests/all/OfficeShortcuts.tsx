@@ -35,9 +35,9 @@ export default function OfficeShortcuts() {
     <div
       role="region"
       aria-label="Office shortcuts"
-      className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1"
+      className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-none pb-1 min-w-0"
     >
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1 shrink-0">
         Offices:
       </span>
       {shortcuts.map(({ id, label, icon: Icon, isMyOffice }) => {

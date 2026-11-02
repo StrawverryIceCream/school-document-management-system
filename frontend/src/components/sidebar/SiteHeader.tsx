@@ -23,29 +23,35 @@ function SiteHeader() {
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 h-8 self-center" />
-        <Breadcrumb>
-          <BreadcrumbList className="text-base">
-            <BreadcrumbItem>
+        <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
+          <BreadcrumbList className="flex-nowrap overflow-hidden text-xs sm:text-sm">
+            <BreadcrumbItem className="shrink-0">
               <BreadcrumbLink asChild>
                 <Link to="/home">ARCH</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {crumbs.map((crumb, index) => (
-              <Fragment key={crumb.to}>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  {index === crumbs.length - 1 ? (
-                    <BreadcrumbPage className="font-medium">
-                      {crumb.label}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link to={crumb.to}>{crumb.label}</Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-              </Fragment>
-            ))}
+            {crumbs.map((crumb, index) => {
+              const isLast = index === crumbs.length - 1;
+              const isIntermediate = index > 0 && index < crumbs.length - 1 && crumbs.length > 2;
+              return (
+                <Fragment key={crumb.to}>
+                  <BreadcrumbSeparator className={isIntermediate ? "hidden sm:inline-flex shrink-0" : "shrink-0"} />
+                  <BreadcrumbItem className={isIntermediate ? "hidden sm:inline-flex min-w-0 shrink" : "min-w-0 shrink"}>
+                    {isLast ? (
+                      <BreadcrumbPage className="font-medium truncate max-w-[110px] sm:max-w-[200px] md:max-w-none">
+                        {crumb.label}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link to={crumb.to} className="truncate max-w-[80px] sm:max-w-[140px] md:max-w-none">
+                          {crumb.label}
+                        </Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </Fragment>
+              );
+            })}
           </BreadcrumbList>
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">

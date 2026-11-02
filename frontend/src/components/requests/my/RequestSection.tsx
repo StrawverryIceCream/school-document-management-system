@@ -57,14 +57,14 @@ function RequestsSection() {
         <Tabs
           value={statusFilter}
           onValueChange={(value) => handleFilterChange(value as RequestFilter)}
-          className="max-w-full overflow-x-auto"
+          className="w-full sm:w-auto min-w-0 overflow-x-auto scrollbar-none pb-1"
         >
-          <TabsList className="h-auto justify-start rounded-full bg-muted p-1">
+          <TabsList className="h-auto justify-start rounded-full bg-muted p-1 inline-flex w-max shrink-0 sm:w-fit">
             {REQUEST_FILTERS.map((option) => (
               <TabsTrigger
                 key={option}
                 value={option}
-                className="rounded-full px-4 py-1.5 text-sm font-medium data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                className="rounded-full px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-medium data-[state=active]:bg-card data-[state=active]:shadow-sm shrink-0"
               >
                 {REQUEST_FILTER_LABELS[option]} ({filterCounts[option]})
               </TabsTrigger>

@@ -49,8 +49,8 @@ export default function PageHeader({
       </div>
 
       {children && (
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex flex-wrap items-center gap-3">{children}</div>
+        <div className="flex w-full sm:w-auto flex-col items-start sm:items-end gap-2 min-w-0">
+          <div className="flex w-full sm:w-auto flex-wrap items-center gap-3 min-w-0">{children}</div>
         </div>
       )}
     </header>

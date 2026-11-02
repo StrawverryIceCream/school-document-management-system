@@ -40,19 +40,20 @@ function DashboardHero({
           <div className="flex w-full flex-col gap-3">
             <Badge
               variant="secondary"
-              className="w-fit gap-2 rounded-full bg-muted/80 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+              className="w-fit max-w-full truncate gap-2 rounded-full bg-muted/80 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
             >
               <span
-                className="size-3 rounded-full bg-teal-600"
+                className="size-2.5 sm:size-3 rounded-full bg-teal-600 shrink-0"
                 aria-hidden="true"
               />
-              {portalLabel} &bull; {academicYear}
+              <span className="sm:hidden truncate">ARCH &bull; {academicYear}</span>
+              <span className="hidden sm:inline truncate">{portalLabel} &bull; {academicYear}</span>
             </Badge>
-            <h1 className="whitespace-nowrap text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl break-words text-balance">
               {greeting}, {userName}! Welcome to ARCH
             </h1>
             <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
-              Request official academic credentials, track document window
+              Request official academic credentials, track document processing
               queues, and access authenticated digital copies seamlessly.
             </p>
           </div>

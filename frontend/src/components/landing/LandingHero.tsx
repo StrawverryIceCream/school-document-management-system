@@ -64,7 +64,7 @@ export default function LandingHero() {
               variant="outline"
               className={cn(
                 BADGE_BASE,
-                "gap-2.5 whitespace-normal bg-card px-4 py-2 text-start shadow-sm",
+                "gap-2.5 whitespace-nowrap max-w-full truncate bg-card px-3.5 py-1.5 sm:px-4 sm:py-2 text-start shadow-sm",
                 TONES.brand.value,
               )}
             >
@@ -75,7 +75,8 @@ export default function LandingHero() {
                 )}
                 aria-hidden="true"
               />
-              {HERO_PILL.label}
+              <span className="sm:hidden truncate">Official Records Gateway</span>
+              <span className="hidden sm:inline truncate">{HERO_PILL.label}</span>
             </Badge>
 
             <h1

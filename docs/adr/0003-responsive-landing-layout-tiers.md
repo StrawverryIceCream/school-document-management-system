@@ -1,4 +1,4 @@
-# 3. Responsive Landing Layout Tiers and Mobile Component Suppression
+# 3. Responsive Application Layout Tiers and Mobile Component Refactoring
 
 Date: 2026-11-02
 
@@ -8,24 +8,29 @@ Accepted
 
 ## Context
 
-On mobile viewports (<768px), the public document portal's landing page suffered from severe vertical bloat and visual competition:
-1. The multi-line `AnnouncementBar` combined with a fixed 80px (`h-20`) sticky navbar consumed over 140px of vertical space before any hero headline was reached.
-2. Inside `LandingHero`, the right-hand column rendered a simulated live release terminal ticket card and a secondary tracking form. When stacked vertically on phone screens, this pushed the actual core interactive components (`CollegeOffices`, `CredentialsCatalog`, and the live `TrackRequest` engine) over 900px down the page.
-3. Call-to-action buttons had fixed inline padding rather than adaptive full-width containers, risking mis-taps on small (320px–375px) devices.
+Across both the public landing portal and authenticated operational workflows, several UI components suffered from mobile layout failures on narrow (<768px and <640px) viewports:
+1. **Pill Badges Wrapping:** Long badge copy (55–65 characters) combined with `whitespace-normal` in `LandingHero` and `DashboardHero` caused pill badges with status indicator dots to break into irregular 3-to-4 line blobs.
+2. **Unconstrained Headlines:** `DashboardHero` locked its greeting H1 with `whitespace-nowrap`, causing any dynamic student name to blow out the horizontal viewport and trigger page-wide horizontal scrolling.
+3. **Overextended Tabs & Page Headers:** `PageHeader` placed action children inside a right-aligned flex column without `w-full min-w-0`. Filter tabs in `RequestSection` expanded past the viewport boundary rather than scrolling horizontally.
+4. **Breadcrumb Bleeding:** `SiteHeader` breadcrumb lists used default wrapping classes (`flex-wrap break-words`). In fixed-height navbar chrome, multi-segment routes wrapped onto 2–3 rows, overflowing and obscuring page content below.
+5. **Badge & Text Collisions in Review Cards:** `SectorRequestReview`, `StudentInfoCard`, `RequestDetailsCard`, `ComplianceChecklistCard`, and `OfficeOperationsCard` trapped long titles and multi-word status badges on single unyielding `flex items-center justify-between` rows.
 
 ## Decision
 
-1. **Mobile Announcement Suppression:** Hide `AnnouncementBar` on viewports below the `md:` breakpoint (`hidden md:block`). Essential counter operational hours and quick tracking shortcuts remain accessible inside the mobile navigation drawer (`Sheet`) and footer directory.
-2. **Hero Terminal Suppression:** Suppress the simulated ticket terminal card in `LandingHero` on viewports below `lg:` (`hidden lg:block`), keeping the mobile hero tightly focused on the core headline, description, primary CTA buttons, and trust metrics.
-3. **Adaptive Sticky Header Height:** Scale `LandingNav` from `h-16` (64px) on mobile to `h-20` (80px) on `sm:`/`md:` and above, reclaiming vertical reading space on smaller screens while maintaining 44px+ touch targets.
-4. **Adaptive Touch Targets & Section Density:** Enforce full-width button layouts on mobile (`w-full sm:w-auto`, min 48px height) and reduce card/section padding on mobile (`py-12 sm:py-20`, `p-4 sm:p-5`) across `CollegeOffices`, `CredentialsCatalog`, and `TrackRequest`.
+1. **Responsive Badges & Truncation:** Enforce `whitespace-nowrap max-w-full truncate` across pill badges. Render shortened labels on small screens (`sm:hidden`) with full labels on `sm:`+ (e.g. `<span className="sm:hidden">Official Records Gateway</span>` and `<span className="sm:hidden">ARCH • AY 2026–2027</span>`).
+2. **Responsive Headline Wrapping:** Remove `whitespace-nowrap` on dashboard greetings in favor of `break-words text-balance`, and align paragraph copy with institutional office terminology.
+3. **Full-Width Action Headers & Swipeable Tab Strips:** Update `PageHeader`'s children container to `w-full sm:w-auto items-start sm:items-end min-w-0`, and wrap filter tabs in `overflow-x-auto scrollbar-none pb-1` with `w-max shrink-0 sm:w-fit`.
+4. **Single-Row Non-Wrapping Breadcrumbs:** Enforce `flex-nowrap overflow-hidden` on `BreadcrumbList`, apply item truncation (`truncate max-w-[110px] sm:max-w-[200px] md:max-w-none`), and collapse intermediate segments on mobile (`hidden sm:inline-flex`) when crumbs exceed 2 levels.
+5. **Responsive Subheader Stacking:** Convert rigid `flex items-center justify-between` card headers into responsive stacks (`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 min-w-0`) with `shrink-0` badges and `break-words` titles.
+6. **Swipeable Office Shortcuts:** Convert `OfficeShortcuts` to `flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-none min-w-0` with `shrink-0` pills.
 
 ## Consequences
 
 ### Positive
-- Reclaims critical above-the-fold vertical space on mobile devices, immediately showcasing the institutional gateway brand, value proposition, and primary CTAs.
-- Eliminates duplicate tracking inputs on phone screens, guiding requesters directly to the dedicated `TrackRequest` section.
-- Enforces WCAG 2.2 compliant touch targets (>= 44px) and edge-to-edge mobile button insets adhering to `/better-layout` principles.
+- Completely eliminates horizontal page blow-outs caused by user names, wide tabs, or multi-crumb breadcrumbs.
+- Badges maintain strict pill geometry without multi-line text folding.
+- Fixed-height top navigation chrome never bleeds or wraps onto page content.
+- Adheres strictly to WCAG 2.2 touch target minimums (>= 44px) and `/better-layout` container query principles.
 
 ### Negative / Trade-offs
-- The decorative simulated release ticket terminal card is not visible on mobile or tablet devices (< 1024px), though full tracking functionality remains available in the dedicated tracking component.
+- Intermediate breadcrumb hierarchy is hidden on narrow mobile devices (<640px) in favor of showing the root and the active leaf page.

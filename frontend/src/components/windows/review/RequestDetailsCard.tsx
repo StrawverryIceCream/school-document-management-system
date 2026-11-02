@@ -45,8 +45,8 @@ export function RequestDetailsCard({
   const [showReceiptDialog, setShowReceiptDialog] = useState(false);
 
   return (
-    <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-5">
-      <div className="flex items-center justify-between pb-1">
+    <Card className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
         <div className="flex items-center gap-3">
           <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <FileCheck className="size-4" />
@@ -60,7 +60,7 @@ export function RequestDetailsCard({
             </span>
           </div>
         </div>
-        <Badge variant="secondary" className="font-mono text-xs">
+        <Badge variant="secondary" className="font-mono text-xs shrink-0 w-fit">
           Doc Type: {request.documentTypeCode}
         </Badge>
       </div>

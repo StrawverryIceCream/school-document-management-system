@@ -213,8 +213,8 @@ export default function SectorRequestReview() {
   ];
 
   return (
-    <main className="space-y-6 p-6 sm:p-10 max-w-7xl mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <main className="space-y-6 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <Button
           variant="ghost"
           size="sm"
@@ -236,16 +236,16 @@ export default function SectorRequestReview() {
         </div>
       </div>
 
-      <Card className="rounded-2xl border bg-card p-6 shadow-sm">
+      <Card className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 items-start">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words">
                 Request Review: {documentType?.name ?? request.documentTypeName}
               </h1>
               <Badge
                 variant="outline"
-                className={`gap-1.5 rounded-full px-2.5 py-1 font-medium ${statusStyles[request.status]}`}
+                className={`shrink-0 gap-1.5 rounded-full px-2.5 py-1 font-medium ${statusStyles[request.status]}`}
               >
                 <statusConfig.icon className="size-3.5" aria-hidden="true" />
                 {statusConfig.label}
@@ -261,7 +261,7 @@ export default function SectorRequestReview() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:shrink-0 w-full lg:w-auto">
             <Button
               type="button"
               variant="outline"

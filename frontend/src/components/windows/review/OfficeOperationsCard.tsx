@@ -128,12 +128,12 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
 
         {/* Staff Delegation & Assignee */}
         <div className="p-3 rounded-xl bg-muted/30 border space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Assigned Staff
             </span>
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold truncate max-w-[160px] ${
                 currentAssignee
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "bg-muted text-muted-foreground"
