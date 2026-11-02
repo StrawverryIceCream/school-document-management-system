@@ -62,6 +62,10 @@ _Avoid_: Global lookup, ticket search, open request viewer
 The institutional academic year and semester (e.g., `AY 2026–2027`) displayed across public portals and operational dashboards to contextualize document validity, eligibility verification, and active queue cycles.
 _Avoid_: School year banner, active semester label, date tag
 
+**Responsive Viewport Tiers**:
+The design and layout adaptation strategy that prioritizes actionable workflows, suppresses non-critical decorative cards on mobile viewports (<768px), and scales navigation chrome to maximize viewport usability.
+_Avoid_: Mobile stripping, selective hiding, responsive cutting
+
 ## Staff and Offices
 
 **Processing Office**:

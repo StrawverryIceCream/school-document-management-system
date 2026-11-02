@@ -41,9 +41,9 @@ export default function CredentialsCatalog() {
     <section
       id={CATALOG_SECTION.id}
       aria-labelledby={CATALOG_SECTION.headingId}
-      className="border-b border-border bg-background py-20"
+      className="border-b border-border bg-background py-12 sm:py-20"
     >
-      <div className="mx-auto max-w-7xl space-y-12 px-4 sm:px-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:space-y-12 sm:px-8">
         <div className="mx-auto max-w-3xl space-y-3 text-center">
           <Badge
             className={cn(
@@ -261,7 +261,7 @@ export default function CredentialsCatalog() {
               href={catalogCtaHref}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
-                "shrink-0 rounded-xl px-6 text-base font-bold",
+                "w-full min-h-12 shrink-0 rounded-xl px-6 text-center justify-center text-base font-bold sm:w-auto",
               )}
             >
               {loading

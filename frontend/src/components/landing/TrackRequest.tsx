@@ -82,9 +82,9 @@ export default function TrackRequest() {
     <section
       id={TRACK_SECTION.id}
       aria-labelledby={TRACK_SECTION.headingId}
-      className="border-b border-border bg-card py-20"
+      className="border-b border-border bg-card py-12 sm:py-20"
     >
-      <div className="mx-auto max-w-5xl space-y-10 px-4 sm:px-8">
+      <div className="mx-auto max-w-5xl space-y-8 px-4 sm:space-y-10 sm:px-8">
         <div className="space-y-3 text-center">
           <Badge
             className={cn(
@@ -136,7 +136,7 @@ export default function TrackRequest() {
                 type="submit"
                 size="lg"
                 disabled={loading || !reference.trim()}
-                className="h-12 gap-2 rounded-xl px-7 text-base font-bold shadow-sm"
+                className="h-12 w-full sm:w-auto min-h-12 justify-center gap-2 rounded-xl px-7 text-base font-bold shadow-sm"
               >
                 <RefreshCw
                   className={cn("size-5", loading && "animate-spin motion-reduce:animate-none")}

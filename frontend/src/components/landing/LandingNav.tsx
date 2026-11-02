@@ -25,7 +25,7 @@ export default function LandingNav() {
       aria-label={NAV_ARIA_LABEL}
       className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md"
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-8">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-8">
         <ArchLogo />
 
         <div className="hidden items-center gap-8 lg:flex">

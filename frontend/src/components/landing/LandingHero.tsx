@@ -45,7 +45,7 @@ export default function LandingHero() {
   return (
     <section
       aria-labelledby={HERO_HEADING_ID}
-      className="relative isolate overflow-hidden border-b border-border bg-background pb-20 pt-14 sm:pb-28 sm:pt-20"
+      className="relative isolate overflow-hidden border-b border-border bg-background pb-12 pt-10 sm:pb-28 sm:pt-20"
     >
       <img
         src={HERO_BACKGROUND.src}
@@ -95,7 +95,7 @@ export default function LandingHero() {
                 href={primaryCtaHref}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "min-h-14 h-auto py-3.5 gap-2.5 rounded-xl pl-6 pr-7 text-lg font-bold shadow-md",
+                  "min-h-14 h-auto w-full py-3.5 gap-2.5 rounded-xl px-6 text-center justify-center text-lg font-bold shadow-md sm:w-auto",
                 )}
               >
                 <CirclePlus className="size-6" aria-hidden="true" />
@@ -105,7 +105,7 @@ export default function LandingHero() {
                 href={HERO_SECONDARY_CTA.href}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
-                  "min-h-14 h-auto py-3.5 gap-2.5 rounded-xl bg-card pl-6 pr-7 text-lg font-semibold shadow-sm",
+                  "min-h-14 h-auto w-full py-3.5 gap-2.5 rounded-xl bg-card px-6 text-center justify-center text-lg font-semibold shadow-sm sm:w-auto",
                 )}
               >
                 <ScanLine
@@ -130,7 +130,7 @@ export default function LandingHero() {
             </div>
           </div>
 
-          <div className="min-w-0 lg:col-span-5">
+          <div className="hidden min-w-0 lg:col-span-5 lg:block">
             <div className="relative">
               <div
                 aria-hidden="true"

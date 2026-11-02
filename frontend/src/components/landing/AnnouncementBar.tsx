@@ -28,7 +28,7 @@ export default function AnnouncementBar() {
   return (
     <aside
       aria-label={ANNOUNCEMENT_ARIA_LABEL}
-      className="w-full border-b border-primary-foreground/10 bg-primary px-4 py-2.5 text-sm text-primary-foreground/90 sm:px-8"
+      className="hidden w-full border-b border-primary-foreground/10 bg-primary px-4 py-2.5 text-sm text-primary-foreground/90 md:block sm:px-8"
     >
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
         <div className="flex flex-wrap items-center gap-2">

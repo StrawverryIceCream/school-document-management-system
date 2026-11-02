@@ -41,11 +41,11 @@ export function CollegeOffices() {
     <section
       id={OFFICES_SECTION.id}
       aria-labelledby={OFFICES_SECTION.headingId}
-      className="relative border-b border-border bg-card py-16"
+      className="relative border-b border-border bg-card py-12 sm:py-16"
     >
       {/* Backwards-compatible anchor for legacy #windows navigation */}
       <div id="windows" className="sr-only" aria-hidden="true" />
-      <div className="mx-auto max-w-7xl space-y-10 px-4 sm:px-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 sm:space-y-10 sm:px-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div className="space-y-3">
             <Badge
@@ -127,7 +127,7 @@ export function CollegeOffices() {
                   key={college.id}
                   className="gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md"
                 >
-                  <CardHeader className={cn("gap-0 p-5", TONES[tone].icon)}>
+                  <CardHeader className={cn("gap-0 p-4 sm:p-5", TONES[tone].icon)}>
                     <div className="flex items-center justify-between gap-3">
                       <Badge className="rounded-md border-transparent bg-card/70 text-sm font-semibold uppercase tracking-wider text-foreground">
                         {college.code}
@@ -141,7 +141,7 @@ export function CollegeOffices() {
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="flex-1 space-y-4 p-5">
+                  <CardContent className="flex-1 space-y-4 p-4 sm:p-5">
                     <dl className="space-y-2.5 text-base">
                       <div className="flex items-center justify-between gap-3">
                         <dt className="text-muted-foreground">Status:</dt>
@@ -162,12 +162,12 @@ export function CollegeOffices() {
                     </dl>
                   </CardContent>
 
-                  <CardFooter className="p-5 pt-0">
+                  <CardFooter className="p-4 pt-0 sm:p-5 sm:pt-0">
                     <a
                       href={queueHref}
                       className={cn(
                         buttonVariants({ variant: "outline", size: "lg" }),
-                        "w-full gap-1.5 text-base font-bold",
+                        "w-full min-h-12 justify-center gap-1.5 text-base font-bold",
                       )}
                     >
                       View {college.code} Queue
