@@ -98,7 +98,7 @@ export default function RegistrationForm() {
 
     setLoading(true);
     try {
-      await sendSignupOtp(email);
+      await sendSignupOtp(email.trim().toLowerCase());
       setShowOtpModal(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send verification code. Please check your email address and try again.");
@@ -114,8 +114,10 @@ export default function RegistrationForm() {
         .filter(Boolean)
         .join(" ");
 
+      const cleanEmail = email.trim().toLowerCase();
+
       await signup({
-        email,
+        email: cleanEmail,
         password,
         fullName,
         role,
@@ -132,7 +134,7 @@ export default function RegistrationForm() {
             : undefined,
         otp,
       });
-      await login(email, password);
+      await login(cleanEmail, password);
       navigate("/home");
     } finally {
       setVerifyingOtp(false);
@@ -140,7 +142,7 @@ export default function RegistrationForm() {
   }
 
   async function handleResendOtp() {
-    await sendSignupOtp(email);
+    await sendSignupOtp(email.trim().toLowerCase());
   }
 
   return (

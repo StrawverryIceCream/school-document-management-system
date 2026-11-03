@@ -109,32 +109,40 @@ export const sendSignupOtp = async (req: Request, res: Response) => {
     });
 
     const now = new Date();
-    if (recent && now.getTime() - recent.createdAt.getTime() < 60 * 1000) {
+    if (recent && now.getTime() - new Date(recent.createdAt).getTime() < 60 * 1000) {
       const waitSeconds = Math.ceil(
-        (60 * 1000 - (now.getTime() - recent.createdAt.getTime())) / 1000,
+        (60 * 1000 - (now.getTime() - new Date(recent.createdAt).getTime())) / 1000,
       );
       return res.status(429).json({
         error: `Please wait ${waitSeconds} seconds before requesting a new code`,
       });
     }
 
-    // Clear older OTPs for this email
-    await db
-      .delete(emailVerifications)
-      .where(eq(emailVerifications.email, email));
-
     // Generate 6-digit OTP
     const otp = crypto.randomInt(100000, 1000000).toString();
     const otpHash = await bcrypt.hash(otp, BCRYPT_SALT_ROUNDS);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Deliver email before recording verification row so delivery failures never trigger false cooldowns
+    try {
+      await sendOtpEmail(email, otp);
+    } catch (sendErr) {
+      console.error("[sendSignupOtp] Failed to deliver verification email:", sendErr);
+      return res.status(502).json({
+        error: "Failed to deliver verification email. Please check your email address or try again.",
+      });
+    }
+
+    // Clear older OTPs for this email and record the active verification
+    await db
+      .delete(emailVerifications)
+      .where(eq(emailVerifications.email, email));
 
     await db.insert(emailVerifications).values({
       email,
       otpHash,
       expiresAt,
     });
-
-    await sendOtpEmail(email, otp);
 
     return res.json({ message: "Verification code sent to your email" });
   } catch (err) {
@@ -173,7 +181,9 @@ export const signup = async (
 ) => {
   try {
     const body: Partial<SignupBody> = req.body ?? {};
-    const { email, password, role } = body;
+    const rawEmail = typeof body.email === "string" ? body.email.trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
+    const role = body.role;
     const fullName = cleanText(body.fullName);
     const studentId = cleanText(body.studentId);
     const rawStudentStatus = cleanText(body.studentStatus);
@@ -195,9 +205,7 @@ export const signup = async (
     const isAlumni = role === "student" && studentStatus === "alumni";
 
     if (
-      typeof email !== "string" ||
-      typeof password !== "string" ||
-      !email ||
+      !rawEmail ||
       !password ||
       !fullName
     ) {
@@ -212,9 +220,11 @@ export const signup = async (
       });
     }
 
-    if (!EMAIL_REGEX.test(email)) {
+    if (!EMAIL_REGEX.test(rawEmail)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
+
+    const normalizedEmail = rawEmail.toLowerCase();
 
     if (!otp || !/^\d{6}$/.test(otp)) {
       return res
@@ -260,7 +270,6 @@ export const signup = async (
       });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
 
     const existing = await db.query.users.findFirst({
       where: eq(users.email, normalizedEmail),

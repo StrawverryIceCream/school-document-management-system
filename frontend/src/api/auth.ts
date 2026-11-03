@@ -37,7 +37,7 @@ export async function sendSignupOtp(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email: email.trim().toLowerCase() }),
   });
 
   if (!res.ok) {
@@ -54,7 +54,7 @@ export async function login(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
   });
 
   if (!res.ok) throw new Error(await getErrorMessage(res, "Login failed"));
@@ -87,6 +87,7 @@ export async function signup(payload: SignupPayload): Promise<AuthUser> {
   // Optional fields are only sent when they have a value
   const body = {
     ...required,
+    email: required.email.trim().toLowerCase(),
     ...(studentId?.trim() ? { studentId: studentId.trim() } : {}),
     ...(section?.trim() ? { section: section.trim() } : {}),
     ...(contactNumber?.trim() ? { contactNumber: contactNumber.trim() } : {}),
