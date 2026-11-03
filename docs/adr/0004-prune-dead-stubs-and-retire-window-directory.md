@@ -36,3 +36,4 @@ Following the adoption of ADR 0002 ("Retire Physical Service Windows in Favor of
 
 ### Negative / Trade-offs
 - Historical documentation plans referencing `components/windows/` now refer to retired directory locations.
+

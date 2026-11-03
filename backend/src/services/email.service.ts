@@ -1,5 +1,3 @@
-import nodemailer, { type Transporter } from "nodemailer";
-
 interface SendOtpResult {
   delivered: boolean;
   devMode: boolean;
@@ -12,29 +10,7 @@ interface EmailPayload {
   html: string;
 }
 
-let cachedTransporter: Transporter | null = null;
-
-function getSharedTransporter(
-  host: string,
-  port: number,
-  user: string,
-  pass: string,
-): Transporter {
-  if (!cachedTransporter) {
-    cachedTransporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-  }
-  return cachedTransporter;
-}
-
-function parseSender(from: string): { name: string; email: string } {
+export function parseSender(from: string): { name: string; email: string } {
   const match = from.match(/^(?:["']?([^"']*)["']?\s+)?<?([^>]+)>?$/);
   if (match && match[2]) {
     return {
@@ -47,74 +23,10 @@ function parseSender(from: string): { name: string; email: string } {
 
 async function dispatchEmail(payload: EmailPayload): Promise<SendOtpResult> {
   const brevoApiKey = process.env.BREVO_API_KEY?.trim();
-  const resendApiKey = process.env.RESEND_API_KEY?.trim();
-  const defaultFrom = process.env.SMTP_USER?.trim()
-    ? `ARCH Support <${process.env.SMTP_USER.trim()}>`
-    : "ARCH Support <noreply@arch.edu>";
-  const from = process.env.EMAIL_FROM?.trim() || defaultFrom;
+  const from = process.env.EMAIL_FROM?.trim() || "ARCH Support <noreply@arch.edu>";
 
-  // 1. Brevo HTTPS API (Port 443 - supports personal @gmail.com senders with no custom domain required!)
-  if (brevoApiKey) {
-    const sender = parseSender(from);
-    console.log(`[EMAIL SERVICE] Dispatching via Brevo to ${payload.to} (from: ${sender.email})`);
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "api-key": brevoApiKey,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        sender,
-        to: [{ email: payload.to }],
-        subject: payload.subject,
-        textContent: payload.text,
-        htmlContent: payload.html,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text().catch(() => "");
-      throw new Error(`Brevo email delivery failed (${res.status}): ${err}`);
-    }
-
-    console.log(`[EMAIL SERVICE] Brevo successfully accepted email for ${payload.to}`);
-    return { delivered: true, devMode: false };
-  }
-
-  // 2. Resend HTTPS API (Port 443 - for verified custom domains)
-  if (resendApiKey) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: from.includes("<") ? from : `ARCH Support <${from}>`,
-        to: [payload.to],
-        subject: payload.subject,
-        text: payload.text,
-        html: payload.html,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text().catch(() => "");
-      throw new Error(`Resend email delivery failed (${res.status}): ${err}`);
-    }
-
-    return { delivered: true, devMode: false };
-  }
-
-  // 3. SMTP Transport (fallback for local dev or unblocked servers)
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const port = Number(process.env.SMTP_PORT) || 587;
-
-  // Development / test fallback when neither HTTP service nor SMTP is configured
-  if (!host || !user || !pass) {
+  // Development / test fallback when BREVO_API_KEY is not configured
+  if (!brevoApiKey) {
     console.log("\n========================================================");
     console.log(`[EMAIL SERVICE - DEV MODE]`);
     console.log(`To: ${payload.to}`);
@@ -124,15 +36,32 @@ async function dispatchEmail(payload: EmailPayload): Promise<SendOtpResult> {
     return { delivered: false, devMode: true };
   }
 
-  const transporter = getSharedTransporter(host, port, user, pass);
-  await transporter.sendMail({
-    from,
-    to: payload.to,
-    subject: payload.subject,
-    text: payload.text,
-    html: payload.html,
+  // Brevo HTTPS API (Port 443 - supports personal @gmail.com senders with no custom domain required)
+  const sender = parseSender(from);
+  console.log(`[EMAIL SERVICE] Dispatching via Brevo to ${payload.to} (from: ${sender.email})`);
+
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": brevoApiKey,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender,
+      to: [{ email: payload.to }],
+      subject: payload.subject,
+      textContent: payload.text,
+      htmlContent: payload.html,
+    }),
   });
 
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`Brevo email delivery failed (${res.status}): ${err}`);
+  }
+
+  console.log(`[EMAIL SERVICE] Brevo successfully accepted email for ${payload.to}`);
   return { delivered: true, devMode: false };
 }
 
