@@ -34,12 +34,51 @@ function getSharedTransporter(
   return cachedTransporter;
 }
 
+function parseSender(from: string): { name: string; email: string } {
+  const match = from.match(/^(?:["']?([^"']*)["']?\s+)?<?([^>]+)>?$/);
+  if (match && match[2]) {
+    return {
+      name: (match[1] || "ARCH Support").trim(),
+      email: match[2].trim(),
+    };
+  }
+  return { name: "ARCH Support", email: from.trim() };
+}
+
 async function dispatchEmail(payload: EmailPayload): Promise<SendOtpResult> {
+  const brevoApiKey = process.env.BREVO_API_KEY?.trim();
   const resendApiKey = process.env.RESEND_API_KEY?.trim();
   const defaultFrom = "ARCH Support <noreply@arch.edu>";
   const from = process.env.EMAIL_FROM || defaultFrom;
 
-  // 1. Resend HTTPS API (Port 443 - works everywhere, immune to cloud host SMTP port blocking)
+  // 1. Brevo HTTPS API (Port 443 - supports personal @gmail.com senders with no custom domain required!)
+  if (brevoApiKey) {
+    const sender = parseSender(from);
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": brevoApiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: payload.to }],
+        subject: payload.subject,
+        textContent: payload.text,
+        htmlContent: payload.html,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => "");
+      throw new Error(`Brevo email delivery failed (${res.status}): ${err}`);
+    }
+
+    return { delivered: true, devMode: false };
+  }
+
+  // 2. Resend HTTPS API (Port 443 - for verified custom domains)
   if (resendApiKey) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -64,13 +103,13 @@ async function dispatchEmail(payload: EmailPayload): Promise<SendOtpResult> {
     return { delivered: true, devMode: false };
   }
 
-  // 2. SMTP Transport (fallback for local dev or unblocked servers)
+  // 3. SMTP Transport (fallback for local dev or unblocked servers)
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const port = Number(process.env.SMTP_PORT) || 587;
 
-  // Development / test fallback when neither Resend nor SMTP is configured
+  // Development / test fallback when neither HTTP service nor SMTP is configured
   if (!host || !user || !pass) {
     console.log("\n========================================================");
     console.log(`[EMAIL SERVICE - DEV MODE]`);
