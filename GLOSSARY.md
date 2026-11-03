@@ -62,6 +62,14 @@ _Avoid_: Global lookup, ticket search, open request viewer
 The institutional academic year and semester (e.g., `AY 2026–2027`) displayed across public portals and operational dashboards to contextualize document validity, eligibility verification, and active queue cycles.
 _Avoid_: School year banner, active semester label, date tag
 
+**Academic Term Verification**:
+A student-submitted request containing updated academic standing (`yearLevel`, `section`, `studentStatus`) and a Certificate of Registration (COR) Proof image to synchronize their account with the active Academic Term Anchor.
+_Avoid_: Profile update ticket, year level bump, account renewal
+
+**Certificate of Registration (COR) Proof**:
+An official enrollment record image uploaded by a student to substantiate their year level, section, and student status for a new academic term.
+_Avoid_: Enrollment slip, registration attachment, schedule screenshot
+
 **Responsive Viewport Tiers**:
 The design and layout adaptation strategy that prioritizes actionable workflows, suppresses non-critical decorative cards on mobile viewports (<768px), and scales navigation chrome to maximize viewport usability.
 _Avoid_: Mobile stripping, selective hiding, responsive cutting

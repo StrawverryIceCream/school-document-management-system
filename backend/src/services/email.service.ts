@@ -5,6 +5,13 @@ interface SendOtpResult {
   devMode: boolean;
 }
 
+interface EmailPayload {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}
+
 let cachedTransporter: Transporter | null = null;
 
 function getSharedTransporter(
@@ -27,31 +34,70 @@ function getSharedTransporter(
   return cachedTransporter;
 }
 
-export async function sendOtpEmail(
-  email: string,
-  otp: string,
-): Promise<SendOtpResult> {
+async function dispatchEmail(payload: EmailPayload): Promise<SendOtpResult> {
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
+  const defaultFrom = "ARCH Support <noreply@arch.edu>";
+  const from = process.env.EMAIL_FROM || defaultFrom;
+
+  // 1. Resend HTTPS API (Port 443 - works everywhere, immune to cloud host SMTP port blocking)
+  if (resendApiKey) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: from.includes("<") ? from : `ARCH Support <${from}>`,
+        to: [payload.to],
+        subject: payload.subject,
+        text: payload.text,
+        html: payload.html,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => "");
+      throw new Error(`Resend email delivery failed (${res.status}): ${err}`);
+    }
+
+    return { delivered: true, devMode: false };
+  }
+
+  // 2. SMTP Transport (fallback for local dev or unblocked servers)
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const port = Number(process.env.SMTP_PORT) || 587;
-  const from = process.env.EMAIL_FROM || "ARCH Support <noreply@arch.edu>";
 
-  // Development / test fallback when SMTP is not configured
+  // Development / test fallback when neither Resend nor SMTP is configured
   if (!host || !user || !pass) {
     console.log("\n========================================================");
     console.log(`[EMAIL SERVICE - DEV MODE]`);
-    console.log(`To: ${email}`);
-    console.log(`Your ARCH Verification OTP: ${otp}`);
-    console.log(`Valid for 10 minutes.`);
+    console.log(`To: ${payload.to}`);
+    console.log(`Subject: ${payload.subject}`);
+    console.log(payload.text);
     console.log("========================================================\n");
     return { delivered: false, devMode: true };
   }
 
   const transporter = getSharedTransporter(host, port, user, pass);
-
   await transporter.sendMail({
     from,
+    to: payload.to,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+  });
+
+  return { delivered: true, devMode: false };
+}
+
+export async function sendOtpEmail(
+  email: string,
+  otp: string,
+): Promise<SendOtpResult> {
+  return dispatchEmail({
     to: email,
     subject: `Your ARCH Account Verification Code: ${otp}`,
     text: `Your verification code is ${otp}. It expires in 10 minutes. If you did not request this, please ignore this email.`,
@@ -68,8 +114,6 @@ export async function sendOtpEmail(
       </div>
     `,
   });
-
-  return { delivered: true, devMode: false };
 }
 
 interface StatusEmailDetails {
@@ -86,28 +130,6 @@ export async function sendStatusNotificationEmail(
   status: string,
   details?: StatusEmailDetails,
 ): Promise<SendOtpResult> {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const from = process.env.EMAIL_FROM || "ARCH Support <noreply@arch.edu>";
-
-  // Development / test fallback when SMTP is not configured
-  if (!host || !user || !pass) {
-    console.log("\n========================================================");
-    console.log(`[EMAIL SERVICE - DEV MODE: STATUS UPDATE]`);
-    console.log(`To: ${email} (${recipientName})`);
-    console.log(`Request: ${referenceNumber} - ${documentName}`);
-    console.log(`New Status: ${status.toUpperCase()}`);
-    if (details?.releaseDate) console.log(`Release Date: ${details.releaseDate}`);
-    if (details?.releasePdfUrl) console.log(`Digital PDF: ${details.releasePdfUrl}`);
-    if (details?.remarks) console.log(`Remarks: ${details.remarks}`);
-    console.log("========================================================\n");
-    return { delivered: false, devMode: true };
-  }
-
-  const transporter = getSharedTransporter(host, port, user, pass);
-
   const statusTitle =
     status === "ready"
       ? "Your Document is Ready for Pickup"
@@ -125,8 +147,7 @@ export async function sendStatusNotificationEmail(
     ? `<div style="margin: 20px 0;"><a href="${details.releasePdfUrl}" target="_blank" rel="noopener noreferrer" style="background: #8a1e2b; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Download Official PDF</a></div>`
     : "";
 
-  await transporter.sendMail({
-    from,
+  return dispatchEmail({
     to: email,
     subject: `ARCH: ${statusTitle} (${referenceNumber})`,
     text: `Hello ${recipientName},\n\nYour request for ${documentName} (${referenceNumber}) is now ${status}.${details?.releaseDate ? `\nPickup Date: ${details.releaseDate}` : ""}${details?.releasePdfUrl ? `\nDownload URL: ${details.releasePdfUrl}` : ""}\n\nPlease check your student portal for more details.`,
@@ -146,7 +167,4 @@ export async function sendStatusNotificationEmail(
       </div>
     `,
   });
-
-  return { delivered: true, devMode: false };
 }
-
