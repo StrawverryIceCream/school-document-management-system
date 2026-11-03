@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { REVIEW_ACTIONS } from "@/lib/windows/review/constants";
+import { REVIEW_ACTIONS } from "@/lib/sectors/review/constants";
 import type { RequestStatus } from "@/types";
 
 const STAFF_NOTES_MAX_LENGTH = 1000;

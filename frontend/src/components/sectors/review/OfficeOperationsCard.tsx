@@ -3,7 +3,7 @@ import { Building2, Calendar, Check, Copy, UserCheck, UserX } from "lucide-react
 import { QRCodeSVG } from "qrcode.react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/windows/review/format";
+import { formatDate } from "@/lib/sectors/review/format";
 import { assignRequest, getOfficeStaff } from "@/api/requests";
 import { AuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";

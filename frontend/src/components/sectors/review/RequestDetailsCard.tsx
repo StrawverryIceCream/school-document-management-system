@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AttachmentLink } from "./AttachmentLink";
-import { displayValue, formatDate } from "@/lib/windows/review/format";
-import { formatPaymentMetaItems } from "@/lib/windows/review/preview";
+import { displayValue, formatDate } from "@/lib/sectors/review/format";
+import { formatPaymentMetaItems } from "@/lib/sectors/review/preview";
 import { FilePreviewDialog } from "@/components/shared/FilePreviewDialog";
 import { OfficialReceiptDialog } from "@/components/payments/OfficialReceiptDialog";
 import { hasOfficialReceipt } from "@/lib/payments/official-receipt";
 import { cn } from "@/lib/utils";
-import type { ReviewField } from "@/lib/windows/review/types";
+import type { ReviewField } from "@/lib/sectors/review/types";
 import type { RequestReviewDetails } from "@/api/requests";
 import type { RequestAttachment } from "@/types";
 

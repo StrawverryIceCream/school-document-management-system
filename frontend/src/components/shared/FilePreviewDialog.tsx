@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { resolvePreviewType } from "@/lib/windows/review/preview";
+import { resolvePreviewType } from "@/lib/sectors/review/preview";
 import { cn } from "@/lib/utils";
 
 export interface FilePreviewDialogProps {

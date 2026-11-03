@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import {
   REJECTION_REASON_PRESETS,
   CANCELLATION_REASON_PRESETS,
-} from "@/lib/windows/review/constants";
+} from "@/lib/sectors/review/constants";
 import type { RequestStatus } from "@/types";
 
 export function StatusChangeDialog({
