@@ -38,6 +38,7 @@ Thumbs.db
 .agents/
 .claude/
 .scratch/
+.worktrees/
 tasks/
 
 # Drizzle

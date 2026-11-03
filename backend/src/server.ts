@@ -17,7 +17,7 @@ import announcementsRouter from "./routes/announcements.routes.js";
 import requestAttachmentsRouter from "./routes/requestAttachments.routes.js";
 import logsRouter from "./routes/logs.routes.js";
 import officesRouter from "./routes/offices.routes.js";
-dotenv.config();
+dotenv.config({ override: true });
 
 const REQUIRED_ENV = ["DATABASE_URL", "SESSION_SECRET", "CLIENT_ORIGIN"];
 const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]?.trim());
