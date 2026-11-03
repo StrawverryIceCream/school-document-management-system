@@ -292,10 +292,15 @@ export async function updateUserById(
       updateData.officeId = null;
       updateData.department = null;
     } else if (targetRole === "admin") {
-      updateData.office = null;
-      updateData.officeId = null;
+      updateData.office = office !== undefined ? office : null;
+      updateData.officeId = officeId !== undefined ? officeId : null;
+      updateData.department = department !== undefined ? department : null;
       updateData.studentId = null;
-      updateData.department = null;
+      updateData.yearLevel = null;
+      updateData.section = null;
+      updateData.studentStatus = null;
+      updateData.courseId = null;
+      if (collegeId !== undefined) updateData.collegeId = collegeId;
     }
 
     await db.update(users).set(updateData).where(eq(users.id, id));

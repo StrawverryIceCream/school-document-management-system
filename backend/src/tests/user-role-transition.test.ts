@@ -79,10 +79,15 @@ export function sanitizeRoleTransition(
     updateData.department = null;
   } else if (targetRole === "admin") {
     // Admin cleans up incompatible non-admin credentials
-    updateData.office = null;
-    updateData.officeId = null;
+    updateData.office = patch.office !== undefined ? patch.office : null;
+    updateData.officeId = patch.officeId !== undefined ? patch.officeId : null;
+    updateData.department = patch.department !== undefined ? patch.department : null;
     updateData.studentId = null;
-    updateData.department = null;
+    updateData.yearLevel = null;
+    updateData.section = null;
+    updateData.studentStatus = null;
+    updateData.courseId = null;
+    if (patch.collegeId !== undefined) updateData.collegeId = patch.collegeId;
   }
 
   return updateData;
@@ -155,6 +160,18 @@ function runTests() {
   assert.strictEqual(studentAgain.role, "student");
   assert.strictEqual(studentAgain.studentId, "TUPM-22-9999");
   assert.strictEqual(studentAgain.department, null);
+
+  // Student -> Admin transition (must clear yearLevel, section, studentStatus to satisfy DB check constraints)
+  const adminUpdate = sanitizeRoleTransition(studentUser, {
+    role: "admin",
+  });
+
+  assert.strictEqual(adminUpdate.role, "admin");
+  assert.strictEqual(adminUpdate.yearLevel, null);
+  assert.strictEqual(adminUpdate.section, null);
+  assert.strictEqual(adminUpdate.studentStatus, null);
+  assert.strictEqual(adminUpdate.courseId, null);
+  assert.strictEqual(adminUpdate.studentId, null);
 
   console.log("All role transition sanitization tests passed!");
 }
