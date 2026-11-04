@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import AppLayout from "./components/layout/AppLayout";
 import RequireAuth from "./components/guards/RequireAuth";
 import RequireRole from "./components/guards/RequireRole";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 import { AuthProvider } from "./provider/AuthProvider";
 import { SystemSettingsProvider } from "./provider/SystemSettingsProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
@@ -47,8 +48,9 @@ export default function App() {
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Toaster />
         <BrowserRouter>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
+          <ErrorBoundary>
+            <Suspense fallback={<PageFallback />}>
+              <Routes>
               <Route
                 element={
                   <RequireAuth>
@@ -186,7 +188,8 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-        </BrowserRouter>
+        </ErrorBoundary>
+      </BrowserRouter>
       </ThemeProvider>
       </SystemSettingsProvider>
     </AuthProvider>

@@ -14,7 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
-import { Fragment } from "react/jsx-runtime";
+import { Fragment } from "react";
 
 function SiteHeader() {
   const crumbs = useBreadcrumbs();

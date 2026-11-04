@@ -20,7 +20,7 @@ export function needsAcademicTermVerification(
   if (user.studentStatus === "alumni") return false;
   // If verifiedAcademicTerm is not set or does not match active term, verification is required
   if (!user.verifiedAcademicTerm) return true;
-  return user.verifiedAcademicTerm.trim() !== activeTerm.trim();
+  return user.verifiedAcademicTerm.trim() !== (activeTerm || "").trim();
 }
 
 export function validateRequestedStanding(input: {

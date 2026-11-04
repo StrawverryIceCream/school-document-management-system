@@ -46,7 +46,7 @@ function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar size="lg">
-                <AvatarFallback className="siz">{getInitials(user.fullName)}</AvatarFallback>
+                <AvatarFallback className="siz">{getInitials(user?.fullName || "User")}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate text-base font-semibold">{user.fullName}</span>
