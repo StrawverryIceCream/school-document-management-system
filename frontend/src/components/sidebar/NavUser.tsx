@@ -1,4 +1,4 @@
-import { ArrowLeftRight, EllipsisVertical, LogOut, Settings } from "lucide-react";
+import { EllipsisVertical, LogOut, Settings } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -77,10 +77,6 @@ function NavUser() {
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <ArrowLeftRight />
-              Switch Account
-            </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
               onClick={handleLogout}
