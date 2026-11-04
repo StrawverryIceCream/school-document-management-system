@@ -5,6 +5,7 @@ import AppLayout from "./components/layout/AppLayout";
 import RequireAuth from "./components/guards/RequireAuth";
 import RequireRole from "./components/guards/RequireRole";
 import { AuthProvider } from "./provider/AuthProvider";
+import { SystemSettingsProvider } from "./provider/SystemSettingsProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { RequestWizardProvider } from "./provider/WizardRequestProvider";
 import { SectorsVisibilityProvider } from "./provider/SectorsVisibilityProvider";
@@ -41,7 +42,8 @@ function PageFallback() {
 export default function App() {
   return (
     <AuthProvider>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <SystemSettingsProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Toaster />
         <BrowserRouter>
           <Suspense fallback={<PageFallback />}>
@@ -79,7 +81,7 @@ export default function App() {
                 <Route
                   path="/accounts"
                   element={
-                    <RequireRole allowedRoles={ADMIN_ROLES}>
+                    <RequireRole allowedRoles={STAFF_ROLES}>
                       <Accounts />
                     </RequireRole>
                   }
@@ -164,6 +166,7 @@ export default function App() {
           </Suspense>
         </BrowserRouter>
       </ThemeProvider>
+      </SystemSettingsProvider>
     </AuthProvider>
   );
 }

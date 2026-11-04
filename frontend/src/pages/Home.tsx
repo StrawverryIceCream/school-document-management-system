@@ -2,6 +2,8 @@ import DashboardHero from "@/components/home/DashboardHero";
 import AvailableDocuments from "@/components/home/AvailableDocuments";
 import MyRequestCards from "@/components/requests/my/MyRequestCards";
 import RequestsSection from "@/components/requests/my/RequestSection";
+import AcademicTermUpdateBanner from "@/components/home/AcademicTermUpdateBanner";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchShortcut } from "@/hooks/useSearchShortcut";
 import { getGreeting } from "@/lib/home";
@@ -10,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const { user } = useAuth();
+  const { activeAcademicTerm } = useSystemSettings();
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,12 +34,13 @@ function Home() {
         greeting={getGreeting()}
         userName={user?.fullName ?? ""}
         portalLabel="Administrative Records and Coordination Hub"
-        academicYear="AY 2026–2027"
+        academicYear={activeAcademicTerm}
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
         searchInputRef={searchInputRef}
       />
+      <AcademicTermUpdateBanner />
       <AvailableDocuments
         exploreHref="/documents"
         onApply={(documentId) => navigate(`/new-request/${documentId}`)}

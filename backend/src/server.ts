@@ -17,6 +17,8 @@ import announcementsRouter from "./routes/announcements.routes.js";
 import requestAttachmentsRouter from "./routes/requestAttachments.routes.js";
 import logsRouter from "./routes/logs.routes.js";
 import officesRouter from "./routes/offices.routes.js";
+import settingsRouter from "./routes/settings.routes.js";
+import accountUpdatesRouter from "./routes/accountUpdates.routes.js";
 dotenv.config({ override: true });
 
 const REQUIRED_ENV = ["DATABASE_URL", "SESSION_SECRET", "CLIENT_ORIGIN"];
@@ -82,6 +84,8 @@ app.use("/api/notifications", notificationsRouter);
 app.use("/api/request-attachments", requestAttachmentsRouter);
 app.use("/api/logs", logsRouter);
 app.use("/api/offices", officesRouter);
+app.use("/api/settings", settingsRouter);
+app.use("/api/account-updates", accountUpdatesRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Not Found" });

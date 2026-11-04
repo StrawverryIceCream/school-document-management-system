@@ -111,6 +111,12 @@ export const appointmentStatusEnum = pgEnum("appointment_status", [
   "cancelled",
 ]);
 
+export const accountUpdateStatusEnum = pgEnum("account_update_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
 /* -------------------------------------------------------------------------- */
 /*  Offices & Organizational Hierarchy                                        */
 /* -------------------------------------------------------------------------- */
@@ -211,6 +217,7 @@ export const users = pgTable(
     // Which office a staff member works for (legacy enum and new hierarchical UUID FK)
     office: officeEnum("office"),
     officeId: uuid("office_id").references(() => offices.id),
+    verifiedAcademicTerm: text("verified_academic_term"),
     emailVerifiedAt: tz("email_verified_at"),
     lastLoginAt: tz("last_login_at"),
     ...timestamps,
@@ -731,6 +738,55 @@ export const auditLogs = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  System Settings & Account Term Updates                                    */
+/* -------------------------------------------------------------------------- */
+
+export const systemSettings = pgTable("system_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  ...timestamps,
+});
+
+export const accountUpdateRequests = pgTable(
+  "account_update_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    academicTerm: text("academic_term").notNull(),
+    previousYearLevel: integer("previous_year_level"),
+    previousSection: text("previous_section"),
+    previousStudentStatus: studentStatusEnum("previous_student_status"),
+    requestedYearLevel: integer("requested_year_level"),
+    requestedSection: text("requested_section"),
+    requestedStudentStatus: studentStatusEnum("requested_student_status").notNull(),
+    proofFileUrl: text("proof_file_url").notNull(),
+    proofFileName: text("proof_file_name").notNull(),
+    status: accountUpdateStatusEnum("status").notNull().default("pending"),
+    rejectionReason: text("rejection_reason"),
+    reviewedBy: uuid("reviewed_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: tz("reviewed_at"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("account_update_requests_one_pending_per_user")
+      .on(table.userId)
+      .where(sql`${table.status} = 'pending'`),
+    index("account_update_requests_status_created_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    index("account_update_requests_user_id_idx").on(table.userId),
+  ],
+);
+
+/* -------------------------------------------------------------------------- */
 /*  Relations                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -775,6 +831,12 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   appointments: many(appointments),
   staffWindows: many(staffWindows),
   passwordResetTokens: many(passwordResetTokens),
+  accountUpdateRequests: many(accountUpdateRequests, {
+    relationName: "account_update_user",
+  }),
+  reviewedAccountUpdates: many(accountUpdateRequests, {
+    relationName: "account_update_reviewer",
+  }),
 }));
 
 export const passwordResetTokensRelations = relations(
@@ -953,3 +1015,26 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const systemSettingsRelations = relations(systemSettings, ({ one }) => ({
+  updater: one(users, {
+    fields: [systemSettings.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const accountUpdateRequestsRelations = relations(
+  accountUpdateRequests,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [accountUpdateRequests.userId],
+      references: [users.id],
+      relationName: "account_update_user",
+    }),
+    reviewer: one(users, {
+      fields: [accountUpdateRequests.reviewedBy],
+      references: [users.id],
+      relationName: "account_update_reviewer",
+    }),
+  }),
+);

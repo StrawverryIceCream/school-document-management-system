@@ -6,6 +6,7 @@ import { db } from "../db/db.js";
 import { users, emailVerifications, courses } from "../db/schema.js";
 import { sendOtpEmail } from "../services/email.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
+import { getActiveAcademicTerm } from "./settings.controller.js";
 
 const BCRYPT_SALT_ROUNDS = 10;
 const FIELD_MAX_LENGTH = 100;
@@ -58,6 +59,7 @@ function toAuthUser(user: DbUser) {
     department: user.department,
     office: user.office,
     officeId: user.officeId,
+    verifiedAcademicTerm: user.verifiedAcademicTerm ?? null,
     contactNumber: user.contactNumber,
   };
 }
@@ -358,6 +360,7 @@ export const signup = async (
       });
     }
 
+    const activeAcademicTerm = role === "student" ? await getActiveAcademicTerm() : null;
     const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
     const [user] = await db
@@ -373,6 +376,7 @@ export const signup = async (
               courseId: finalCourseId,
               studentStatus: studentStatus ?? "regular",
               ...(!isAlumni && yearLevel ? { yearLevel } : {}),
+              verifiedAcademicTerm: activeAcademicTerm,
             }
           : {}),
         emailVerifiedAt: new Date(),

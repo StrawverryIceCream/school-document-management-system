@@ -109,9 +109,16 @@ function AppSidebar() {
   const permittedNavItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(user.role),
   );
-  const permittedNavConfigs = navConfig.filter(
-    (item) => !item.roles || item.roles.includes(user.role),
-  );
+  const isRegistrarStaff =
+    user.role === "staff" &&
+    (user.office === "registrar" || (user as any).officeId === "OUR");
+
+  const permittedNavConfigs = navConfig.filter((item) => {
+    if (item.url === "/accounts") {
+      return user.role === "admin" || isRegistrarStaff;
+    }
+    return !item.roles || item.roles.includes(user.role);
+  });
 
   return (
     <Sidebar collapsible="icon" variant="inset" className="transition-[width] ">
