@@ -51,11 +51,11 @@ export default function LandingHero() {
         src={HERO_BACKGROUND.src}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 -z-20 size-full object-cover"
+        className="absolute inset-0 -z-20 size-full object-cover object-[center_top] sm:object-center"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-linear-to-r rtl:bg-linear-to-l from-background/95 via-background/85 to-background/40"
+        className="absolute inset-0 -z-10 bg-linear-to-b from-background/90 via-background/60 to-background/90 sm:bg-linear-to-r sm:rtl:bg-linear-to-l sm:from-background/95 sm:via-background/85 sm:to-background/40"
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
@@ -81,13 +81,13 @@ export default function LandingHero() {
 
             <h1
               id={HERO_HEADING_ID}
-              className="text-4xl font-extrabold leading-tight tracking-tight text-foreground text-balance sm:text-5xl lg:text-6xl"
+              className="text-3xl font-extrabold leading-tight tracking-tight text-foreground text-balance sm:text-5xl lg:text-6xl"
             >
               {HERO_TITLE.lead}{" "}
               <span className={TONES.brand.value}>{HERO_TITLE.accent}</span>
             </h1>
 
-            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-xl">
               {HERO_DESCRIPTION}
             </p>
 

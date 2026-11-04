@@ -19,7 +19,12 @@ export function MyRequestProvider({ children }: { children: React.ReactNode }) {
   const [requests, setRequests] = useState<MyRequestWithDocumentName[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
   const [statusFilter, setStatusFilter] = useState<"all" | RequestStatus>(
     "all",
   );

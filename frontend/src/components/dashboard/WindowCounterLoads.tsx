@@ -95,8 +95,8 @@ export default function WindowCounterLoads() {
             asChild
             className="w-full justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold"
           >
-            <Link to="/requests">
-              <span>View All Department Queues</span>
+            <Link to="/all-request">
+              <span>View All Office Queues</span>
               <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
             </Link>
           </Button>

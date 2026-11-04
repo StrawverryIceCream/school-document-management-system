@@ -199,7 +199,7 @@ export default function OfficeRequestTable({
                     className="font-semibold text-foreground max-w-58 text-xs"
                   />
                 )}
-                <span className="text-[11px] text-muted-foreground truncate max-w-28">
+                <span className="text-[11px] text-muted-foreground truncate max-w-full">
                   {req.user?.studentId
                     ? req.user.studentId
                     : (req.user?.role ?? "User")}
@@ -217,11 +217,11 @@ export default function OfficeRequestTable({
           <div className="flex min-w-0 flex-col">
             <TruncatedText
               text={req.documentType?.name ?? req.documentTypeName}
-              className="font-medium text-foreground max-w-56 text-xs sm:text-sm"
+              className="font-medium text-foreground max-w-full text-xs sm:text-sm"
             />
             <TruncatedText
               text={req.purpose ?? "Document request"}
-              className="text-xs text-muted-foreground max-w-56"
+              className="text-xs text-muted-foreground max-w-full"
             />
           </div>
         ),
@@ -441,17 +441,17 @@ export default function OfficeRequestTable({
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit gap-2 px-2 text-base"
+          className="w-fit gap-2 px-2 text-xs sm:text-sm"
           onClick={() => navigate(`/sectors/${sectorId}/${divisionId}`)}
         >
-          <ArrowLeft className="size-5" aria-hidden="true" />
+          <ArrowLeft className="size-4 sm:size-5" aria-hidden="true" />
           Back to {office.code} Offices
         </Button>
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight break-words text-balance">
             {office.code} Requests Queue
           </h2>
-          <p className="text-base text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             {office.name} &bull; {office.description}
           </p>
         </div>

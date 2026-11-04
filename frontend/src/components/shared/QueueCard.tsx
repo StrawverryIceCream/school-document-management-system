@@ -53,7 +53,7 @@ export default function QueueCard({
     <Card className="h-full gap-0 overflow-hidden rounded-2xl py-0 shadow-sm">
       <div
         className={cn(
-          "relative flex h-72 shrink-0 flex-col justify-between gap-4 p-5",
+          "relative flex min-h-72 h-auto shrink-0 flex-col justify-between gap-4 p-5",
           BANNER_TONES[bannerTone],
         )}
       >
@@ -81,17 +81,17 @@ export default function QueueCard({
         </div>
 
         <div className="relative flex flex-col items-center gap-2 text-center">
-          <p className="rounded-lg bg-black/30 px-8 py-3 text-3xl font-bold uppercase tracking-widest">
+          <p className="rounded-lg bg-black/30 px-6 sm:px-8 py-2 sm:py-3 text-2xl sm:text-3xl font-bold uppercase tracking-widest">
             {code}
           </p>
           {subtext && (
-            <p className="text-base text-white/80">{subtext}</p>
+            <p className="text-xs sm:text-sm md:text-base text-white/80">{subtext}</p>
           )}
         </div>
 
         <h2
           title={title}
-          className="relative line-clamp-3 text-2xl font-semibold leading-tight"
+          className="relative line-clamp-3 sm:line-clamp-none text-base sm:text-xl lg:text-2xl font-semibold leading-snug break-words"
         >
           {title}
         </h2>
@@ -148,7 +148,7 @@ export default function QueueCard({
         <Button
           variant="default"
           size="lg"
-          className="mt-auto w-full text-base"
+          className="mt-auto w-full text-sm sm:text-base"
           onClick={onSelect}
         >
           {actionLabel}

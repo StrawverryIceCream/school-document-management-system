@@ -18,8 +18,8 @@ export default function InactiveOfficePlaceholder({
       <div className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
         <AlertCircle className="size-7" />
       </div>
-      <h3 className="text-xl font-bold tracking-tight text-foreground">{title}</h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">{description}</p>
+      <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground break-words">{title}</h3>
+      <p className="mt-2 max-w-md text-xs sm:text-sm text-muted-foreground leading-relaxed">{description}</p>
       <div className="mt-6 flex gap-3">
         <Button variant="outline" asChild>
           <Link to={fallbackUrl} className="flex items-center gap-2">

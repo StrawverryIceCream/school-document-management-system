@@ -218,7 +218,7 @@ export default function SectorRequestReview() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit self-start justify-start -ml-3 gap-2"
+          className="w-fit self-start justify-start -ml-3 gap-2 text-xs sm:text-sm"
           onClick={() => navigate(backUrl)}
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
@@ -240,7 +240,7 @@ export default function SectorRequestReview() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 items-start">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words leading-snug sm:leading-tight">
                 Request Review: {documentType?.name ?? request.documentTypeName}
               </h1>
               <Badge
@@ -251,7 +251,7 @@ export default function SectorRequestReview() {
                 {statusConfig.label}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-normal">
               Requester:{" "}
               <span className="font-semibold text-foreground">
                 {student?.fullName ?? "Unknown Requester"}

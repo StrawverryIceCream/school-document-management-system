@@ -10,7 +10,12 @@ export function RequestProvider({ children }: { children: React.ReactNode }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [officeFilter, setOfficeFilter] = useState("all");
   const [documentFilter, setDocumentFilter] = useState("all");
