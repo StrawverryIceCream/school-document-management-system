@@ -1,4 +1,6 @@
 import { GraduationCap } from "lucide-react";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
+import { SYSTEM_VERSION } from "@/lib/constants";
 import { Separator } from "@/components/ui/separator";
 import {
   FOOTER_BRAND,
@@ -11,6 +13,7 @@ import { TONES } from "@/lib/tones";
 // The `dark` class re-themes this footer with the .dark tokens from index.css,
 // so it stays dark in both light and dark mode without hardcoded colors.
 export default function LandingFooter() {
+  const { systemVersion } = useSystemSettings();
   return (
     <footer className="dark border-t border-border bg-background py-14 text-foreground">
       <div className="mx-auto max-w-7xl space-y-10 px-4 sm:px-8">
@@ -33,7 +36,7 @@ export default function LandingFooter() {
               {FOOTER_BRAND.description}
             </p>
             <p className="text-sm text-muted-foreground/80">
-              {FOOTER_BRAND.build}
+              {`Current Build: ${systemVersion || SYSTEM_VERSION} • Production Grade`}
             </p>
           </div>
 
