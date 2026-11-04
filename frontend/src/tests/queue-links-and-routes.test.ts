@@ -51,4 +51,13 @@ assert.strictEqual(
 assert.strictEqual(parseSearchParam("?other=123"), "");
 assert.strictEqual(parseSearchParam(""), "");
 
+// Test Status Tab Rail item label formatting and non-empty intrinsic constraints
+export function formatTabRailItem(label: string, count?: number | string): string {
+  return count !== undefined ? `${label} (${count})` : label;
+}
+
+assert.strictEqual(formatTabRailItem("Ready to Claim", 12), "Ready to Claim (12)");
+assert.strictEqual(formatTabRailItem("All"), "All");
+assert.strictEqual(formatTabRailItem("Processing", 0), "Processing (0)");
+
 console.log("Queue links & route resolution unit tests passed!");
