@@ -128,6 +128,20 @@ export function formatClaimPeriod(releaseDate: string | null): string | null {
   return `${formatShortDate(start)} – ${endLabel}`;
 }
 
+export function getCurrentStepInfo(
+  completedSteps: number,
+  stepLabels: readonly string[] = STEP_LABELS,
+  stepDates: string[] = [],
+): { label: string; date?: string; stepNumber: number; totalSteps: number } {
+  const totalSteps = stepLabels.length;
+  const currentIdx = Math.min(Math.max(0, completedSteps - 1), totalSteps - 1);
+  return {
+    label: stepLabels[currentIdx] ?? "Filed",
+    date: stepDates[currentIdx],
+    stepNumber: Math.min(Math.max(1, completedSteps), totalSteps),
+    totalSteps,
+  };
+}
 // Order matches STEP_LABELS
 export function getStepDates(request: TrackedRequest): string[] {
   const releasedLabel =

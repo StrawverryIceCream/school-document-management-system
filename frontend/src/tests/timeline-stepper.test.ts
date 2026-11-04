@@ -33,6 +33,21 @@ export function formatTimelineReference(referenceNumber?: string | null, id?: st
   return id ? `#${id.slice(0, 8)}` : "#UNKNOWN";
 }
 
+export function getCurrentStepInfo(
+  completedSteps: number,
+  stepLabels: readonly string[] = STEP_LABELS,
+  stepDates: string[] = [],
+): { label: string; date?: string; stepNumber: number; totalSteps: number } {
+  const totalSteps = stepLabels.length;
+  const currentIdx = Math.min(Math.max(0, completedSteps - 1), totalSteps - 1);
+  return {
+    label: stepLabels[currentIdx] ?? "Filed",
+    date: stepDates[currentIdx],
+    stepNumber: Math.min(Math.max(1, completedSteps), totalSteps),
+    totalSteps,
+  };
+}
+
 console.log("Running timeline stepper helper tests...");
 
 // Test 4 steps
@@ -63,5 +78,18 @@ assert.strictEqual(readySteps.some((s) => s.isCurrent), false);
 assert.strictEqual(formatTimelineReference("REQ-2026-000088", "12345678-abcd"), "REQ-2026-000088");
 assert.strictEqual(formatTimelineReference("", "12345678-abcd"), "#12345678");
 assert.strictEqual(formatTimelineReference(null, "abcdef01-2345"), "#abcdef01");
+
+// Test current step info for mobile view
+const stepDatesSample = ["Oct 20", "Oct 22", "—", "—"];
+const step1Info = getCurrentStepInfo(1, STEP_LABELS, stepDatesSample);
+assert.strictEqual(step1Info.label, "Filed");
+assert.strictEqual(step1Info.date, "Oct 20");
+assert.strictEqual(step1Info.stepNumber, 1);
+assert.strictEqual(step1Info.totalSteps, 4);
+
+const step2Info = getCurrentStepInfo(2, STEP_LABELS, stepDatesSample);
+assert.strictEqual(step2Info.label, "Assessed");
+assert.strictEqual(step2Info.date, "Oct 22");
+assert.strictEqual(step2Info.stepNumber, 2);
 
 console.log("Timeline stepper helper tests passed!");
