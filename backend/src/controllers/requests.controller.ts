@@ -19,6 +19,8 @@ import {
   createAndDispatchNotification,
   notifyOfficeStaff,
 } from "../services/notification.service.js";
+import { getActiveAcademicTerm } from "./settings.controller.js";
+import { needsAcademicTermVerification } from "../lib/term-standing.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -707,6 +709,17 @@ export async function getMyRequests(
   try {
     const userId = getSessionUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const requestingUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { role: true, studentStatus: true, verifiedAcademicTerm: true },
+    });
+    const activeAcademicTerm = await getActiveAcademicTerm();
+    if (needsAcademicTermVerification(requestingUser, activeAcademicTerm)) {
+      return res.status(403).json({
+        error: `Academic term verification required for ${activeAcademicTerm} before submitting new document requests.`,
+      });
+    }
 
     const { status, page, limit } = req.query;
     const { pageNum, limitNum, offset } = parsePagination(page, limit);

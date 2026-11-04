@@ -6,8 +6,10 @@ import { LOGIN_HEADER } from "@/lib/auth/login-header";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import ArchLogo from "@/components/shared/ArchLogo";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 
 export default function LoginHeader() {
+  const { activeAcademicTerm } = useSystemSettings();
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -28,7 +30,7 @@ export default function LoginHeader() {
               )}
               aria-hidden="true"
             />
-            {LOGIN_HEADER.termLabel}
+            {`Active Academic Term: ${activeAcademicTerm}`}
           </Badge>
           <a
             href={LOGIN_HEADER.helpdeskHref}

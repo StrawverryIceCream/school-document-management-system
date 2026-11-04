@@ -3,7 +3,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useAuth } from "@/hooks/useAuth";
-import { ACTIVE_ACADEMIC_TERM } from "@/lib/constants";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 
 export default function DashboardHeader() {
   const {
@@ -15,6 +15,7 @@ export default function DashboardHeader() {
     setSector,
   } = useDashboard();
   const { user } = useAuth();
+  const { activeAcademicTerm } = useSystemSettings();
 
   const title =
     user?.role === "staff"
@@ -28,7 +29,7 @@ export default function DashboardHeader() {
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            <span>Active Term {ACTIVE_ACADEMIC_TERM}</span>
+            <span>Active Term {activeAcademicTerm}</span>
           </div>
           <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
             <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />

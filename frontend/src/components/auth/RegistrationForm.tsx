@@ -22,12 +22,14 @@ import {
 } from "@/lib/auth/arch-registration";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
-import { ACTIVE_ACADEMIC_TERM, SYSTEM_NAME } from "@/lib/constants";
+import { SYSTEM_NAME } from "@/lib/constants";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 import type { UserRole } from "@/types";
 
 export default function RegistrationForm() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { activeAcademicTerm } = useSystemSettings();
 
   const [firstName, setFirstName] = useState("");
   const [middleInitial, setMiddleInitial] = useState("");
@@ -167,7 +169,7 @@ export default function RegistrationForm() {
             <span className="hidden sm:inline truncate">PostgreSQL SIS &amp; HRIS Direct Sync Active</span>
           </Badge>
           <span className="text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
-            {ACTIVE_ACADEMIC_TERM}
+            {activeAcademicTerm}
           </span>
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl break-words">

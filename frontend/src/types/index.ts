@@ -218,11 +218,34 @@ export interface User extends Timestamps {
   department: string | null;
   office: Office | null;
   officeId: UUID | null;
+  verifiedAcademicTerm: string | null;
   emailVerifiedAt: ISODateTimeString | null;
   lastLoginAt: ISODateTimeString | null;
 }
 
 export type AuthUser = Omit<User, "createdAt" | "updatedAt">;
+
+export type AccountUpdateStatus = "pending" | "approved" | "rejected";
+
+export interface AccountUpdateRequest extends Timestamps {
+  id: UUID;
+  userId: UUID;
+  academicTerm: string;
+  previousYearLevel: number | null;
+  previousSection: string | null;
+  previousStudentStatus: StudentStatus | null;
+  requestedYearLevel: number | null;
+  requestedSection: string | null;
+  requestedStudentStatus: StudentStatus;
+  proofFileUrl: string;
+  proofFileName: string;
+  status: AccountUpdateStatus;
+  rejectionReason: string | null;
+  reviewedBy: UUID | null;
+  reviewedAt: ISODateTimeString | null;
+  user?: UserWithOrg;
+  reviewer?: UserSummary | null;
+}
 
 /** User with college and course resolved, for profile and accounts pages. */
 export interface UserWithOrg extends User {

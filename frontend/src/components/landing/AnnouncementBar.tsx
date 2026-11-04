@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { Clock, Search } from "lucide-react";
 import { getAllAnnouncements } from "@/api/announcements";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 import { Badge } from "@/components/ui/badge";
 import type { Announcement } from "@/types";
 import {
   ANNOUNCEMENT_ARIA_LABEL,
   ANNOUNCEMENT_BADGE_LABEL,
-  ANNOUNCEMENT_MESSAGE,
   COUNTER_HOURS_LABEL,
   QUICK_TRACK_HREF,
   QUICK_TRACK_LABEL,
 } from "@/lib/landing/announcement-bar";
 
 export default function AnnouncementBar() {
+  const { activeAcademicTerm } = useSystemSettings();
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function AnnouncementBar() {
 
   const message = announcement
     ? `${announcement.title} — ${announcement.body}`
-    : ANNOUNCEMENT_MESSAGE;
+    : `Office of the University Registrar • ${activeAcademicTerm} • Active Academic Office System`;
 
   return (
     <aside
