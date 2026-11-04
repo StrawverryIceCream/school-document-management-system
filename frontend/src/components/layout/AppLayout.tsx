@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import SiteHeader from "@/components/sidebar/SiteHeader";
 import { CommandMenu } from "@/components/shared/CommandMenu";
+import SettingsDialog from "@/components/shared/SettingsDialog";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DocumentProvider } from "@/provider/DocumentProvider";
 import { MyRequestProvider } from "@/provider/MyRequestProvider";
@@ -33,6 +34,7 @@ function AppLayout() {
                 </main>
               </SidebarInset>
               <CommandMenu />
+              <SettingsDialog />
             </SidebarProvider>
           </ProfileProvider>
         </MyRequestProvider>

@@ -1,16 +1,23 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FileText,
+  Archive,
+  Bell,
+  Building2,
+  CheckCircle2,
+  ClipboardList,
+  FileInputIcon,
+  FolderCog,
   Home,
-  PlusCircle,
-  Users,
-  ScrollText,
-  FolderOpen,
-  Moon,
-  Sun,
-  Search,
+  LayoutDashboard,
   LogOut,
+  Logs,
+  Moon,
+  PlusCircle,
+  Search,
+  Settings,
+  Sun,
+  UserCog,
 } from "lucide-react";
 import {
   Dialog,
@@ -70,17 +77,19 @@ export function CommandMenu() {
     const list: CommandItem[] = [
       {
         id: "nav-home",
-        title: "Home & Dashboard",
+        title: "Home",
         category: "Navigation",
         icon: Home,
+        shortcut: "H",
         perform: () => navigate("/home"),
       },
       {
         id: "nav-my-requests",
         title: "My Requests",
         category: "Navigation",
-        icon: FileText,
-        perform: () => navigate("/requests/my"),
+        icon: FileInputIcon,
+        shortcut: "M",
+        perform: () => navigate("/my-request"),
       },
       {
         id: "nav-new-request",
@@ -88,52 +97,100 @@ export function CommandMenu() {
         category: "Navigation",
         icon: PlusCircle,
         shortcut: "N",
-        perform: () => navigate("/requests/new"),
+        perform: () => navigate("/new-request"),
       },
       {
-        id: "nav-documents",
-        title: "Document Types Catalog",
+        id: "nav-notifications",
+        title: "Notifications",
         category: "Navigation",
-        icon: FolderOpen,
-        perform: () => navigate("/documents"),
+        icon: Bell,
+        perform: () => navigate("/notifications"),
+      },
+      {
+        id: "nav-claim",
+        title: "Verify Claim Slip",
+        category: "Navigation",
+        icon: CheckCircle2,
+        perform: () => navigate("/requests/claim"),
       },
     ];
 
     if (user?.role === "admin" || user?.role === "staff") {
       list.push({
+        id: "nav-dashboard",
+        title: "Overview Dashboard",
+        category: "Navigation",
+        icon: LayoutDashboard,
+        shortcut: "D",
+        perform: () => navigate("/dashboard"),
+      });
+      list.push({
         id: "nav-assigned-requests",
         title: "Assigned Requests Workspace",
         category: "Navigation",
-        icon: FileText,
-        perform: () => navigate("/requests/assigned"),
+        icon: ClipboardList,
+        perform: () => navigate("/assigned-request"),
       });
       list.push({
         id: "nav-all-requests",
         title: "All Requests Registry",
         category: "Navigation",
-        icon: ScrollText,
-        perform: () => navigate("/requests/all"),
+        icon: Archive,
+        perform: () => navigate("/all-request"),
+      });
+      list.push({
+        id: "nav-sectors",
+        title: "Sector & Office Workspaces",
+        category: "Navigation",
+        icon: Building2,
+        perform: () => navigate("/sectors/ovpaa/colleges"),
+      });
+      list.push({
+        id: "nav-document-manager",
+        title: "Document Manager & Catalog",
+        category: "Navigation",
+        icon: FolderCog,
+        perform: () => navigate("/document-manager"),
+      });
+    }
+
+    const isRegistrarStaff =
+      user?.role === "staff" &&
+      (user?.office === "registrar" || (user as any)?.officeId === "OUR");
+
+    if (user?.role === "admin" || isRegistrarStaff) {
+      list.push({
+        id: "nav-accounts",
+        title: "Accounts Directory",
+        category: "Navigation",
+        icon: UserCog,
+        perform: () => navigate("/accounts"),
       });
     }
 
     if (user?.role === "admin") {
       list.push({
-        id: "nav-accounts",
-        title: "Accounts Directory",
-        category: "Navigation",
-        icon: Users,
-        perform: () => navigate("/accounts"),
-      });
-      list.push({
         id: "nav-logs",
-        title: "System Logs & Audit",
+        title: "System Logs & Audit Trail",
         category: "Navigation",
-        icon: ScrollText,
+        icon: Logs,
         perform: () => navigate("/logs"),
       });
     }
 
     // Actions
+    list.push({
+      id: "action-settings",
+      title:
+        user?.role === "admin"
+          ? "Configure System & Term Settings"
+          : "Account Settings & Profile",
+      category: "Actions",
+      icon: Settings,
+      shortcut: "S",
+      perform: () => window.dispatchEvent(new CustomEvent("open-settings")),
+    });
+
     list.push({
       id: "action-toggle-theme",
       title: theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
@@ -152,7 +209,7 @@ export function CommandMenu() {
     });
 
     return list;
-  }, [user?.role, theme, setTheme, navigate, logout]);
+  }, [user, theme, setTheme, navigate, logout]);
 
   const filteredItems = useMemo(() => {
     if (!query.trim()) return items;
@@ -257,7 +314,8 @@ export function CommandMenu() {
                       <Kbd
                         className={cn(
                           "h-4 min-w-4 px-1 text-[10px] font-mono",
-                          isSelected && "bg-primary-foreground/20 text-primary-foreground",
+                          isSelected &&
+                            "bg-primary-foreground/20 text-primary-foreground",
                         )}
                       >
                         {item.shortcut}

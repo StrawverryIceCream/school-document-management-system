@@ -7,7 +7,6 @@ import {
   Logs,
   Notebook,
   Search,
-  Settings,
   UserCog,
   type LucideIcon,
 } from "lucide-react";
@@ -35,6 +34,7 @@ type NavItem = {
   url: string;
   icon: LucideIcon;
   roles?: UserRole[];
+  onClick?: () => void;
 };
 
 const navMain: NavItem[] = [
@@ -89,14 +89,10 @@ const navConfig: NavItem[] = [
 
 const navSecondary: NavItem[] = [
   {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-  {
     title: "Search",
     url: "#",
     icon: Search,
+    onClick: () => window.dispatchEvent(new CustomEvent("open-command-menu")),
   },
 ];
 
