@@ -27,6 +27,7 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const SectorPage = lazy(() => import("./pages/SectorPage"));
 const SectorRequestReview = lazy(() => import("./pages/SectorRequestReview"));
 const ClaimVerification = lazy(() => import("./pages/ClaimVerification"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const STAFF_ROLES: UserRole[] = ["admin", "staff"];
 const ADMIN_ROLES: UserRole[] = ["admin"];
@@ -134,6 +135,26 @@ export default function App() {
                   element={<Navigate to="/sectors/ovpaf/admin-services/hrmo" replace />}
                 />
                 <Route
+                  path="/requests/my"
+                  element={<Navigate to="/my-request" replace />}
+                />
+                <Route
+                  path="/requests/new"
+                  element={<Navigate to="/new-request" replace />}
+                />
+                <Route
+                  path="/documents"
+                  element={<Navigate to="/document-manager" replace />}
+                />
+                <Route
+                  path="/requests/assigned"
+                  element={<Navigate to="/assigned-request" replace />}
+                />
+                <Route
+                  path="/requests/all"
+                  element={<Navigate to="/all-request" replace />}
+                />
+                <Route
                   path="/assigned-request"
                   element={
                     <RequireRole allowedRoles={STAFF_ROLES}>
@@ -162,6 +183,7 @@ export default function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/landing" element={<LandingPage />} />
               <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
