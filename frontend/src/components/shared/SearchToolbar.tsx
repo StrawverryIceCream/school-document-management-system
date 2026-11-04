@@ -94,23 +94,23 @@ export default function SearchToolbar({
         <Tabs
           value={activeTab}
           onValueChange={onTabChange}
-          className="max-w-full min-w-0 sm:shrink-0 overflow-x-auto overflow-y-hidden scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="w-full sm:w-auto min-w-0 max-w-full overflow-x-auto overflow-y-hidden scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           <TabsList
             aria-label={tabsAriaLabel}
-            className="group-data-horizontal/tabs:h-12 w-fit shrink-0"
+            className="group-data-horizontal/tabs:h-10 sm:group-data-horizontal/tabs:h-12 w-max inline-flex shrink-0 items-center justify-start rounded-lg bg-muted p-1"
           >
             {tabs.map(({ value: tabVal, label, count }) => (
               <TabsTrigger
                 key={tabVal}
                 value={tabVal}
-                className="gap-2 px-4 text-base shrink-0"
+                className="gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium shrink-0 flex-initial w-auto whitespace-nowrap"
               >
                 {label}
                 {count !== undefined && (
                   <Badge
                     variant="secondary"
-                    className="h-auto px-2 py-0.5 text-sm"
+                    className="h-auto px-1.5 sm:px-2 py-0.5 text-xs font-semibold"
                   >
                     {count}
                   </Badge>

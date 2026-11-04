@@ -74,6 +74,10 @@ _Avoid_: Enrollment slip, registration attachment, schedule screenshot
 The design and layout adaptation strategy that prioritizes actionable workflows, suppresses non-critical decorative cards on mobile viewports (<768px), and scales navigation chrome to maximize viewport usability.
 _Avoid_: Mobile stripping, selective hiding, responsive cutting
 
+**Status Tab Rail**:
+A touch-scrollable, single-row horizontal track of segmented status filter tabs with intrinsic widths (`shrink-0 w-auto`), enabling one-tap lifecycle filtering on mobile viewports (<768px) without text clipping, squishing, or label overlap.
+_Avoid_: Squished tabs, multi-line tab cluster, accordion filter
+
 ## Staff and Offices
 
 **Processing Office**:
