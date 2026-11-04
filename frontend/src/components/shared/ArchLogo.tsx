@@ -7,6 +7,7 @@ import {
 } from "@/lib/constants";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 
 export interface ArchLogoProps {
   size?: "sm" | "md" | "lg";
@@ -15,6 +16,7 @@ export interface ArchLogoProps {
   href?: string | null;
   className?: string;
   iconClassName?: string;
+  versionLabel?: string;
 }
 
 export function ArchLogo({
@@ -24,7 +26,10 @@ export function ArchLogo({
   href = "/",
   className,
   iconClassName,
+  versionLabel,
 }: ArchLogoProps) {
+  const { systemVersionLabel } = useSystemSettings();
+  const displayVersion = versionLabel || systemVersionLabel || SYSTEM_VERSION_LABEL;
   const sizeStyles = {
     sm: {
       container: "gap-2",
@@ -82,7 +87,7 @@ export function ArchLogo({
                 sizeStyles.badge,
               )}
             >
-              {SYSTEM_VERSION_LABEL}
+              {displayVersion}
             </Badge>
           )}
         </div>

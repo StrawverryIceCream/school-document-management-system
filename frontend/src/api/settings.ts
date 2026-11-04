@@ -1,5 +1,7 @@
 export interface SystemSettingsResponse {
   activeAcademicTerm: string;
+  systemVersion: string;
+  systemVersionLabel: string;
 }
 
 export async function getSystemSettings(): Promise<SystemSettingsResponse> {
@@ -11,13 +13,17 @@ export async function getSystemSettings(): Promise<SystemSettingsResponse> {
 }
 
 export async function updateSystemSettings(
-  activeAcademicTerm: string,
+  settings: Partial<{
+    activeAcademicTerm: string;
+    systemVersion: string;
+    systemVersionLabel: string;
+  }>,
 ): Promise<SystemSettingsResponse> {
   const res = await fetch("/api/settings", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ activeAcademicTerm }),
+    body: JSON.stringify(settings),
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);

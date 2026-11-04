@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Settings, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,19 +23,36 @@ export default function AcademicTermSettingsDialog({
   open,
   onOpenChange,
 }: AcademicTermSettingsDialogProps) {
-  const { activeAcademicTerm, updateTerm } = useSystemSettings();
+  const {
+    activeAcademicTerm,
+    systemVersion,
+    systemVersionLabel,
+    updateSettings,
+  } = useSystemSettings();
+
   const [termInput, setTermInput] = useState(activeAcademicTerm);
+  const [versionInput, setVersionInput] = useState(systemVersion);
+  const [versionLabelInput, setVersionLabelInput] = useState(systemVersionLabel);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    setTermInput(activeAcademicTerm);
+    setVersionInput(systemVersion);
+    setVersionLabelInput(systemVersionLabel);
+  }, [activeAcademicTerm, systemVersion, systemVersionLabel, open]);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const trimmed = termInput.trim();
-    if (!trimmed) {
+    const trimmedTerm = termInput.trim();
+    const trimmedVersion = versionInput.trim();
+    const trimmedVersionLabel = versionLabelInput.trim();
+
+    if (!trimmedTerm) {
       setErrorMsg("Active academic term cannot be empty.");
       return;
     }
-    if (trimmed.length > 50) {
+    if (trimmedTerm.length > 50) {
       setErrorMsg("Academic term must be 50 characters or fewer.");
       return;
     }
@@ -43,11 +60,15 @@ export default function AcademicTermSettingsDialog({
     setSubmitting(true);
     setErrorMsg(null);
     try {
-      await updateTerm(trimmed);
-      toast.success(`Active academic term updated to ${trimmed}`);
+      await updateSettings({
+        activeAcademicTerm: trimmedTerm,
+        systemVersion: trimmedVersion || undefined,
+        systemVersionLabel: trimmedVersionLabel || undefined,
+      });
+      toast.success("System settings updated successfully");
       onOpenChange(false);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to update academic term";
+      const msg = err instanceof Error ? err.message : "Failed to update system settings";
       setErrorMsg(msg);
       toast.error(msg);
     } finally {
@@ -61,14 +82,14 @@ export default function AcademicTermSettingsDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader className="gap-1.5">
             <div className="flex items-center gap-2">
-              <Calendar className="size-5 text-primary" />
+              <Settings className="size-5 text-primary" />
               <DialogTitle className="text-lg font-bold">
-                Configure Active Academic Term
+                Configure System &amp; Term Settings
               </DialogTitle>
             </div>
             <DialogDescription className="text-sm">
-              The active academic term anchors public notices, registration stamping,
-              and student document request verification gates across the institution.
+              Manage institution-wide configuration anchors including active academic term,
+              build version, and branding badges.
             </DialogDescription>
           </DialogHeader>
 
@@ -81,7 +102,7 @@ export default function AcademicTermSettingsDialog({
 
           <div className="space-y-4 py-4">
             <div className="space-y-1.5">
-              <Label htmlFor="academic-term-input">Academic Term</Label>
+              <Label htmlFor="academic-term-input">Active Academic Term</Label>
               <Input
                 id="academic-term-input"
                 placeholder="e.g. AY 2026–2027"
@@ -91,6 +112,32 @@ export default function AcademicTermSettingsDialog({
               <p className="text-xs text-muted-foreground">
                 Advancing the term prompts enrolled students to submit their Certificate of
                 Registration (COR) for verification prior to new document requests.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="system-version-input">System Version</Label>
+              <Input
+                id="system-version-input"
+                placeholder="e.g. v1.0.0"
+                value={versionInput}
+                onChange={(e) => setVersionInput(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Displayed in landing footer build badge and system metadata.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="system-version-label-input">System Version Badge Label</Label>
+              <Input
+                id="system-version-label-input"
+                placeholder="e.g. v1.0 System"
+                value={versionLabelInput}
+                onChange={(e) => setVersionLabelInput(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Displayed beside the ARCH logo across headers and navigation.
               </p>
             </div>
           </div>
@@ -105,7 +152,7 @@ export default function AcademicTermSettingsDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : "Save Active Term"}
+              {submitting ? "Saving..." : "Save Settings"}
             </Button>
           </DialogFooter>
         </form>
