@@ -3,8 +3,10 @@ import type { UserRole } from "@/types";
 // Avatar fallbacks, role badges, and TUP ID formatting for the profile UI.
 // Which fields each role shows lives in fields.ts.
 
-export function getInitials(name: string): string {
+export function getInitials(name?: string | null): string {
+  if (!name || typeof name !== "string") return "??";
   const parts = name.trim().split(/\s+/);
+  if (!parts[0]) return "??";
 
   if (parts.length === 1) {
     return parts[0].slice(0, 2).toUpperCase();
@@ -13,7 +15,7 @@ export function getInitials(name: string): string {
   const firstName = parts[0];
   const lastName = parts[parts.length - 1];
 
-  return (firstName[0] + lastName[0]).toUpperCase();
+  return ((firstName[0] || "") + (lastName[0] || "")).toUpperCase() || "??";
 }
 
 type RoleBadgeVariant = "default" | "secondary" | "outline" | "destructive";

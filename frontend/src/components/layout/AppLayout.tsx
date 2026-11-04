@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import SiteHeader from "@/components/sidebar/SiteHeader";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 import SettingsDialog from "@/components/shared/SettingsDialog";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -22,15 +23,17 @@ function AppLayout() {
                 <SiteHeader />
                 <main className="flex flex-1 flex-col overflow-hidden">
                   {/* Keeps the sidebar mounted while a lazy page chunk loads */}
-                  <Suspense
-                    fallback={
-                      <div className="p-6 text-sm text-muted-foreground sm:p-10">
-                        Loading...
-                      </div>
-                    }
-                  >
-                    <Outlet />
-                  </Suspense>
+                  <ErrorBoundary>
+                    <Suspense
+                      fallback={
+                        <div className="p-6 text-sm text-muted-foreground sm:p-10">
+                          Loading...
+                        </div>
+                      }
+                    >
+                      <Outlet />
+                    </Suspense>
+                  </ErrorBoundary>
                 </main>
               </SidebarInset>
               <CommandMenu />

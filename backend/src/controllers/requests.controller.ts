@@ -710,17 +710,6 @@ export async function getMyRequests(
     const userId = getSessionUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const requestingUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { role: true, studentStatus: true, verifiedAcademicTerm: true },
-    });
-    const activeAcademicTerm = await getActiveAcademicTerm();
-    if (needsAcademicTermVerification(requestingUser, activeAcademicTerm)) {
-      return res.status(403).json({
-        error: `Academic term verification required for ${activeAcademicTerm} before submitting new document requests.`,
-      });
-    }
-
     const { status, page, limit } = req.query;
     const { pageNum, limitNum, offset } = parsePagination(page, limit);
 
@@ -794,6 +783,17 @@ export async function createRequest(req: Request, res: Response) {
   try {
     const userId = getSessionUserId(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const requestingUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { role: true, studentStatus: true, verifiedAcademicTerm: true },
+    });
+    const activeAcademicTerm = await getActiveAcademicTerm();
+    if (needsAcademicTermVerification(requestingUser, activeAcademicTerm)) {
+      return res.status(403).json({
+        error: `Academic term verification required for ${activeAcademicTerm} before submitting new document requests.`,
+      });
+    }
 
     const { documentTypeId, purpose, formData } = (req.body ??
       {}) as CreateRequestBody;
