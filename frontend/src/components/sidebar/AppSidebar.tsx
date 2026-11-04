@@ -35,6 +35,7 @@ type NavItem = {
   url: string;
   icon: LucideIcon;
   roles?: UserRole[];
+  onClick?: () => void;
 };
 
 const navMain: NavItem[] = [
@@ -92,11 +93,13 @@ const navSecondary: NavItem[] = [
     title: "Settings",
     url: "#",
     icon: Settings,
+    onClick: () => window.dispatchEvent(new CustomEvent("open-settings")),
   },
   {
     title: "Search",
     url: "#",
     icon: Search,
+    onClick: () => window.dispatchEvent(new CustomEvent("open-command-menu")),
   },
 ];
 
