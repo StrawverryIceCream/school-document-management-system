@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "test": "tsc -b --noEmit && node src/tests/review-actions.test.ts && node src/tests/qr-parser.test.ts && node src/tests/credentials-limit.test.ts && node src/tests/proof-preview.test.ts && node src/tests/timeline-stepper.test.ts && npx tsx src/tests/csv-export.test.ts && npx tsx src/tests/official-receipt.test.ts && npx tsx src/tests/claim-handoff.test.ts",
+    "test": "tsc -b --noEmit && node src/tests/review-actions.test.ts && node src/tests/qr-parser.test.ts && node src/tests/credentials-limit.test.ts && node src/tests/proof-preview.test.ts && node src/tests/timeline-stepper.test.ts && node src/tests/queue-links-and-routes.test.ts && npx tsx src/tests/csv-export.test.ts && npx tsx src/tests/official-receipt.test.ts && npx tsx src/tests/claim-handoff.test.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },

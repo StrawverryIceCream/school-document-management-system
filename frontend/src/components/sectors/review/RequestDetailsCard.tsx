@@ -52,7 +52,7 @@ export function RequestDetailsCard({
             <FileCheck className="size-4" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-foreground">
+            <h2 className="text-sm sm:text-base font-bold text-foreground">
               Submitted Document Request Schema
             </h2>
             <span className="text-xs text-muted-foreground">
@@ -144,7 +144,7 @@ export function RequestDetailsCard({
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                 {field.label}
               </span>
-              <p className="text-sm font-medium text-foreground wrap-break-word">
+              <p className="text-xs sm:text-sm font-medium text-foreground break-words leading-relaxed">
                 {displayValue(field.value)}
               </p>
               {field.fileField &&
@@ -207,7 +207,10 @@ export function RequestDetailsCard({
                     <FileText className="size-5" />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-medium text-foreground truncate max-w-45">
+                    <span
+                      className="text-xs font-medium text-foreground truncate max-w-[200px] sm:max-w-xs"
+                      title={attachment.fileName || attachment.label || "Document Attachment"}
+                    >
                       {attachment.fileName || attachment.label || "Document Attachment"}
                     </span>
                     <span className="text-[11px] text-muted-foreground">

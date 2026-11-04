@@ -10,10 +10,10 @@ export default function SectorHeader({ sector }: { sector: SectorConfig }) {
           <Icon className="size-6" aria-hidden="true" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-balance break-words">
             {sector.name}
           </h1>
-          <p className="text-sm text-muted-foreground">{sector.description}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{sector.description}</p>
         </div>
       </div>
     </header>

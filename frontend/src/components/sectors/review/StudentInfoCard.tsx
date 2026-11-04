@@ -37,7 +37,7 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
             {initials || "?"}
           </div>
           <div>
-            <h2 className="text-base font-bold text-foreground">
+            <h2 className="text-sm sm:text-base font-bold text-foreground">
               Requester Profile & Academic Standing
             </h2>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -63,7 +63,10 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
           <span className="text-sm font-bold text-foreground mt-0.5">
             {student.studentId || "No ID Record"}
           </span>
-          <span className="text-xs text-muted-foreground mt-1 truncate">
+          <span
+            className="text-xs text-muted-foreground mt-1 break-words line-clamp-2 sm:line-clamp-none"
+            title={student.department || undefined}
+          >
             {student.department || "General Department"}
           </span>
         </div>
@@ -72,7 +75,10 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Academic Program
           </span>
-          <span className="text-sm font-bold text-foreground mt-0.5 truncate">
+          <span
+            className="text-xs sm:text-sm font-bold text-foreground mt-0.5 break-words line-clamp-2 sm:line-clamp-none leading-snug"
+            title={student.college?.name || undefined}
+          >
             {student.college?.name || "College Department"}
           </span>
           <span className="text-xs text-muted-foreground mt-1">
@@ -106,7 +112,9 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5">
             <Mail className="size-3.5 text-muted-foreground" />
-            <span className="truncate">{student.email}</span>
+            <span className="truncate break-all sm:break-normal" title={student.email}>
+              {student.email}
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Phone className="size-3.5 text-muted-foreground" />

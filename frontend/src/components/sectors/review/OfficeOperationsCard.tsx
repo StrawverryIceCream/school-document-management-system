@@ -94,7 +94,7 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
   return (
     <Card className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6 space-y-4">
       <div className="flex items-center justify-between pb-1">
-        <h2 className="text-base font-bold text-foreground">
+        <h2 className="text-sm sm:text-base font-bold text-foreground">
           Office Operations
         </h2>
         <Building2 className="size-4 text-muted-foreground" />
@@ -106,7 +106,7 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Processing Office
             </span>
-            <span className="text-xs font-bold text-foreground mt-0.5">
+            <span className="text-xs font-bold text-foreground mt-0.5 break-words leading-relaxed">
               {officeDisplayName}
             </span>
           </div>
@@ -133,6 +133,7 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
               Assigned Staff
             </span>
             <span
+              title={currentAssignee ? currentAssignee.fullName : undefined}
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold truncate max-w-[160px] ${
                 currentAssignee
                   ? "bg-primary/10 text-primary border border-primary/20"

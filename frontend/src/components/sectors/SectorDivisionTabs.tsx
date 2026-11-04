@@ -28,7 +28,7 @@ export default function SectorDivisionTabs({
             role="tab"
             aria-selected={isActive}
             className={cn(
-              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              "rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors",
               isActive
                 ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",

@@ -18,7 +18,11 @@ function Home() {
   function handleSearchSubmit() {
     const query = searchQuery.trim();
     if (!query) return;
-    console.log(`/requests?search=${encodeURIComponent(query)}`);
+    const target =
+      user?.role === "admin" || user?.role === "staff"
+        ? "/all-request"
+        : "/my-request";
+    navigate(`${target}?search=${encodeURIComponent(query)}`);
   }
 
   return (
