@@ -7,7 +7,6 @@ import {
   Logs,
   Notebook,
   Search,
-  Settings,
   UserCog,
   type LucideIcon,
 } from "lucide-react";
@@ -89,12 +88,6 @@ const navConfig: NavItem[] = [
 ];
 
 const navSecondary: NavItem[] = [
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-    onClick: () => window.dispatchEvent(new CustomEvent("open-settings")),
-  },
   {
     title: "Search",
     url: "#",
