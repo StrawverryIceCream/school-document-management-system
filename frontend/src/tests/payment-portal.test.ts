@@ -2,24 +2,32 @@ import assert from "node:assert";
 import test from "node:test";
 import {
   PAYMENT_PORTALS,
-  MARIBANK_PAYMENT_CONFIG,
   getInitialPortal,
   getPortalPaymentDetails,
   formatPhoneNumber,
 } from "../lib/payment-portal";
 
 test("payment-portal config and helpers", async (t) => {
-  await t.test("PAYMENT_PORTALS contains MariBank as first banking option", () => {
+  await t.test("PAYMENT_PORTALS contains exactly MariBank, GoTyme, and GCash", () => {
+    assert.strictEqual(PAYMENT_PORTALS.length, 3);
+    const ids = PAYMENT_PORTALS.map((p) => p.id);
+    assert.deepStrictEqual(ids, ["maribank", "gotyme", "gcash"]);
+
     const maribank = PAYMENT_PORTALS.find((p) => p.id === "maribank");
-    assert.ok(maribank, "MariBank portal must be configured");
-    assert.strictEqual(maribank.value, "bank_transfer");
-    assert.strictEqual(maribank.label, "MariBank");
+    assert.strictEqual(maribank?.value, "bank_transfer");
+
+    const gotyme = PAYMENT_PORTALS.find((p) => p.id === "gotyme");
+    assert.strictEqual(gotyme?.value, "bank_transfer");
+    assert.strictEqual(gotyme?.label, "GoTyme");
+
+    const gcash = PAYMENT_PORTALS.find((p) => p.id === "gcash");
+    assert.strictEqual(gcash?.value, "e_wallet");
   });
 
-  await t.test("getInitialPortal prioritizes MariBank for bank_transfer", () => {
+  await t.test("getInitialPortal routes to maribank or gcash", () => {
     assert.strictEqual(getInitialPortal("bank_transfer"), "maribank");
-    assert.strictEqual(getInitialPortal("card"), "card");
     assert.strictEqual(getInitialPortal("e_wallet"), "gcash");
+    assert.strictEqual(getInitialPortal("card"), "maribank");
   });
 
   await t.test("formatPhoneNumber formats 11-digit PH mobile numbers", () => {
@@ -27,36 +35,34 @@ test("payment-portal config and helpers", async (t) => {
       formatPhoneNumber("09773254633"),
       "+63 977 325 4633",
     );
-    assert.strictEqual(
-      formatPhoneNumber("09123456789"),
-      "+63 912 345 6789",
-    );
-    // fallback if non-matching
     assert.strictEqual(formatPhoneNumber("123"), "123");
   });
 
-  await t.test("MARIBANK_PAYMENT_CONFIG contains verified details and QR path", () => {
-    assert.strictEqual(MARIBANK_PAYMENT_CONFIG.accountNumber, "09773254633");
-    assert.strictEqual(
-      MARIBANK_PAYMENT_CONFIG.formattedNumber,
-      "+63 977 325 4633",
-    );
-    assert.strictEqual(
-      MARIBANK_PAYMENT_CONFIG.qrImagePath,
-      "/images/payment/qr.jpg",
-    );
-    assert.strictEqual(MARIBANK_PAYMENT_CONFIG.bankName, "MariBank");
-  });
-
-  await t.test("getPortalPaymentDetails returns MariBank details for maribank and QR Ph channels", () => {
+  await t.test("MariBank portal details include QR and no phone number", () => {
     const details = getPortalPaymentDetails("maribank");
     assert.ok(details);
-    assert.strictEqual(details.accountNumber, "09773254633");
-    assert.strictEqual(details.qrImagePath, "/images/payment/qr.jpg");
-    assert.strictEqual(details.isQrPhCompatible, true);
+    assert.strictEqual(details.bankName, "MariBank");
+    assert.strictEqual(details.qrImagePath, "/images/payment/maribank_qr.jpg");
+    assert.strictEqual(details.hasPhoneNumber, false);
+    assert.strictEqual(details.accountNumber, undefined);
+  });
 
-    const gcashDetails = getPortalPaymentDetails("gcash");
-    assert.ok(gcashDetails);
-    assert.strictEqual(gcashDetails.isQrPhCompatible, true);
+  await t.test("GoTyme portal details include QR and no phone number", () => {
+    const details = getPortalPaymentDetails("gotyme");
+    assert.ok(details);
+    assert.strictEqual(details.bankName, "GoTyme Bank");
+    assert.strictEqual(details.qrImagePath, "/images/payment/gotyme_qr.jfif");
+    assert.strictEqual(details.hasPhoneNumber, false);
+    assert.strictEqual(details.accountNumber, undefined);
+  });
+
+  await t.test("GCash portal details include QR and verified phone number", () => {
+    const details = getPortalPaymentDetails("gcash");
+    assert.ok(details);
+    assert.strictEqual(details.bankName, "GCash");
+    assert.strictEqual(details.qrImagePath, "/images/payment/gcash_qr.jfif");
+    assert.strictEqual(details.hasPhoneNumber, true);
+    assert.strictEqual(details.accountNumber, "09773254633");
+    assert.strictEqual(details.formattedNumber, "+63 977 325 4633");
   });
 });

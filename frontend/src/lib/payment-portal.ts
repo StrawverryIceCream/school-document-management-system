@@ -1,16 +1,11 @@
-import {
-  CreditCard,
-  Landmark,
-  Smartphone,
-  Wallet,
-} from "lucide-react";
+import { Landmark, Wallet } from "lucide-react";
 import type { ComponentType } from "react";
 import type { PaymentMethod } from "@/api/payments";
 
 export type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
 
 export interface PaymentPortalOption {
-  id: "maribank" | "gcash" | "maya" | "bank_transfer" | "card";
+  id: "maribank" | "gotyme" | "gcash";
   label: string;
   value: OnlinePaymentMethod;
   icon: ComponentType<{ className?: string }>;
@@ -28,37 +23,26 @@ export const PAYMENT_PORTALS: readonly PaymentPortalOption[] = [
     icon: Landmark,
   },
   {
-    id: "gcash",
-    label: "GCash",
-    value: "e_wallet",
-    icon: Wallet,
-  },
-  {
-    id: "maya",
-    label: "Maya",
-    value: "e_wallet",
-    icon: Smartphone,
-  },
-  {
-    id: "bank_transfer",
-    label: "Bank Transfer",
+    id: "gotyme",
+    label: "GoTyme",
     value: "bank_transfer",
     icon: Landmark,
   },
   {
-    id: "card",
-    label: "Card",
-    value: "card",
-    icon: CreditCard,
+    id: "gcash",
+    label: "GCash",
+    value: "e_wallet",
+    icon: Wallet,
   },
 ] as const;
 
 export interface PortalPaymentDetails {
   bankName: string;
   accountName: string;
-  accountNumber: string;
-  formattedNumber: string;
+  accountNumber?: string;
+  formattedNumber?: string;
   qrImagePath: string;
+  hasPhoneNumber: boolean;
   isQrPhCompatible: boolean;
   notes: string;
 }
@@ -66,12 +50,33 @@ export interface PortalPaymentDetails {
 export const MARIBANK_PAYMENT_CONFIG: PortalPaymentDetails = {
   bankName: "MariBank",
   accountName: "MariBank Account",
-  accountNumber: "09773254633",
-  formattedNumber: "+63 977 325 4633",
-  qrImagePath: "/images/payment/qr.jpg",
+  qrImagePath: "/images/payment/maribank_qr.jpg",
+  hasPhoneNumber: false,
   isQrPhCompatible: true,
   notes:
-    "Scan via MariBank, GCash, Maya, ShopeePay, or any bank app supporting QR Ph / InstaPay.",
+    "Scan via MariBank or any bank/e-wallet app supporting QR Ph / InstaPay.",
+};
+
+export const GOTYME_PAYMENT_CONFIG: PortalPaymentDetails = {
+  bankName: "GoTyme Bank",
+  accountName: "GoTyme Account",
+  qrImagePath: "/images/payment/gotyme_qr.jfif",
+  hasPhoneNumber: false,
+  isQrPhCompatible: true,
+  notes:
+    "Scan via GoTyme or any bank/e-wallet app supporting QR Ph / InstaPay.",
+};
+
+export const GCASH_PAYMENT_CONFIG: PortalPaymentDetails = {
+  bankName: "GCash",
+  accountName: "GCash Account",
+  accountNumber: "09773254633",
+  formattedNumber: "+63 977 325 4633",
+  qrImagePath: "/images/payment/gcash_qr.jfif",
+  hasPhoneNumber: true,
+  isQrPhCompatible: true,
+  notes:
+    "Scan QR code with GCash or transfer using the registered mobile number above.",
 };
 
 export function formatPhoneNumber(phone: string): string {
@@ -84,20 +89,15 @@ export function formatPhoneNumber(phone: string): string {
 
 export function getInitialPortal(method: OnlinePaymentMethod): PaymentPortal {
   if (method === "bank_transfer") return "maribank";
-  if (method === "card") return "card";
-  return "gcash";
+  if (method === "e_wallet") return "gcash";
+  return "maribank";
 }
 
 export function getPortalPaymentDetails(
   portalId: PaymentPortal,
 ): PortalPaymentDetails | null {
-  if (
-    portalId === "maribank" ||
-    portalId === "bank_transfer" ||
-    portalId === "gcash" ||
-    portalId === "maya"
-  ) {
-    return MARIBANK_PAYMENT_CONFIG;
-  }
+  if (portalId === "maribank") return MARIBANK_PAYMENT_CONFIG;
+  if (portalId === "gotyme") return GOTYME_PAYMENT_CONFIG;
+  if (portalId === "gcash") return GCASH_PAYMENT_CONFIG;
   return null;
 }
