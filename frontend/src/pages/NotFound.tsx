@@ -38,12 +38,13 @@ export default function NotFound() {
               onClick={() =>
                 window.dispatchEvent(new CustomEvent("open-command-menu"))
               }
-              className="hidden sm:flex items-center gap-2 rounded-xl border border-input bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-              title="Open quick jump"
+              className="inline-flex h-8 sm:h-9 items-center gap-2 rounded-lg border border-border/70 bg-muted/30 px-2 sm:px-3 text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              title="Open Quick Jump (⌘K / Ctrl+K)"
+              aria-label="Open Quick Jump menu"
             >
-              <Search className="size-3.5" />
-              <span>Quick Jump</span>
-              <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">
+              <Search className="size-3.5 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline font-medium">Quick Jump</span>
+              <kbd className="hidden md:inline-flex rounded border border-border/70 bg-muted px-1 font-mono text-[10px]">
                 {typeof navigator !== "undefined" &&
                 /Mac|iPod|iPhone|iPad/.test(navigator.platform)
                   ? "⌘K"

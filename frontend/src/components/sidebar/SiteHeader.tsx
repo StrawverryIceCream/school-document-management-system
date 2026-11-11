@@ -54,16 +54,17 @@ function SiteHeader() {
             })}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent("open-command-menu"))}
-            className="hidden sm:flex items-center gap-2 rounded-xl border border-input bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-            title="Open command menu"
+            className="inline-flex h-8 sm:h-9 items-center gap-2 rounded-lg border border-border/70 bg-muted/30 px-2 sm:px-3 text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            title="Open Quick Jump (⌘K / Ctrl+K)"
+            aria-label="Open Quick Jump menu"
           >
-            <Search className="size-3.5" />
-            <span className="hidden md:inline">Quick Jump</span>
-            <Kbd className="h-4.5 px-1 font-mono text-[10px]">
+            <Search className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="hidden sm:inline font-medium">Quick Jump</span>
+            <Kbd className="hidden md:inline-flex h-4.5 px-1 font-mono text-[10px]">
               {typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
                 ? "⌘K"
                 : "Ctrl+K"}

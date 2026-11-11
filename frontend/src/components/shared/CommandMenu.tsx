@@ -18,6 +18,7 @@ import {
   Settings,
   Sun,
   UserCog,
+  X,
 } from "lucide-react";
 import {
   Dialog,
@@ -250,99 +251,141 @@ export function CommandMenu() {
     }
   };
 
+  const categories = ["Navigation", "Actions"] as const;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden shadow-2xl rounded-2xl border bg-card">
+      <DialogContent
+        showCloseButton={false}
+        className="w-[calc(100vw-2rem)] sm:max-w-xl p-0 overflow-hidden shadow-2xl rounded-2xl border bg-card ring-1 ring-border/50 outline-none"
+      >
         <DialogHeader className="sr-only">
-          <DialogTitle>Command Menu</DialogTitle>
+          <DialogTitle>Quick Jump Command Menu</DialogTitle>
         </DialogHeader>
 
-        <div className="flex items-center border-b px-3.5 py-2.5 gap-2.5">
-          <Search className="size-4 text-muted-foreground shrink-0" />
+        {/* Search Input Bar */}
+        <div className="flex items-center border-b px-3.5 py-3 gap-3">
+          <Search className="size-4.5 text-muted-foreground shrink-0" aria-hidden="true" />
           <Input
             autoFocus
-            placeholder="Type a command or search page..."
+            placeholder="Type a command or jump to page..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="h-9 border-none shadow-none text-sm focus-visible:ring-0 px-0 placeholder:text-muted-foreground"
+            className="h-8 flex-1 border-none bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground"
           />
-          <Kbd className="h-5 px-1.5 font-mono text-[10px]">
-            {isMac ? "⌘K" : "Ctrl+K"}
-          </Kbd>
-        </div>
-
-        <div className="max-h-72 overflow-y-auto p-2 space-y-1">
-          {filteredItems.length === 0 ? (
-            <p className="p-4 text-center text-xs text-muted-foreground">
-              No matching commands or pages found.
-            </p>
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
           ) : (
-            filteredItems.map((item, index) => {
-              const isSelected = index === selectedIndex;
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleSelect(item)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors cursor-pointer",
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-medium"
-                      : "text-foreground hover:bg-muted/70",
-                  )}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className="size-4 shrink-0" />
-                    <span className="truncate">{item.title}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={cn(
-                        "text-[10px] tracking-wider uppercase font-semibold",
-                        isSelected
-                          ? "text-primary-foreground/75"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {item.category}
-                    </span>
-                    {item.shortcut && (
-                      <Kbd
-                        className={cn(
-                          "h-4 min-w-4 px-1 text-[10px] font-mono",
-                          isSelected &&
-                            "bg-primary-foreground/20 text-primary-foreground",
-                        )}
-                      >
-                        {item.shortcut}
-                      </Kbd>
-                    )}
-                  </div>
-                </button>
-              );
-            })
+            <Kbd className="h-5 px-1.5 font-mono text-[10px] shrink-0">
+              {isMac ? "⌘K" : "Ctrl+K"}
+            </Kbd>
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span>Navigate:</span>
+        {/* Results List Grouped with Spacing */}
+        <div className="max-h-[min(380px,55vh)] overflow-y-auto p-2">
+          {filteredItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Search className="size-8 text-muted-foreground/40 mb-2" aria-hidden="true" />
+              <p className="text-sm font-medium text-foreground">
+                No matching results found
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                No commands or pages matching &ldquo;{query}&rdquo;.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {categories.map((cat) => {
+                const groupItems = filteredItems.filter(
+                  (item) => item.category === cat,
+                );
+                if (groupItems.length === 0) return null;
+
+                return (
+                  <div key={cat} className="space-y-1">
+                    <div className="px-3 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                      {cat}
+                    </div>
+                    <div className="space-y-0.5">
+                      {groupItems.map((item) => {
+                        const globalIndex = filteredItems.indexOf(item);
+                        const isSelected = globalIndex === selectedIndex;
+                        const Icon = item.icon;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleSelect(item)}
+                            onMouseEnter={() => setSelectedIndex(globalIndex)}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors cursor-pointer",
+                              isSelected
+                                ? "bg-primary/10 text-primary font-medium shadow-2xs"
+                                : "text-foreground hover:bg-muted/60",
+                            )}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span
+                                className={cn(
+                                  "flex size-7 shrink-0 items-center justify-center rounded-md transition-colors",
+                                  isSelected
+                                    ? "bg-primary text-primary-foreground shadow-2xs"
+                                    : "bg-muted/70 text-muted-foreground",
+                                )}
+                              >
+                                <Icon className="size-3.5" aria-hidden="true" />
+                              </span>
+                              <span className="truncate">{item.title}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {item.shortcut && (
+                                <Kbd
+                                  className={cn(
+                                    "h-4.5 min-w-4.5 px-1 font-mono text-[10px]",
+                                    isSelected
+                                      ? "border-primary/20 bg-background text-primary"
+                                      : "bg-muted/50 text-muted-foreground",
+                                  )}
+                                >
+                                  {item.shortcut}
+                                </Kbd>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer Navigation Bar */}
+        <div className="flex flex-wrap items-center justify-between border-t bg-muted/30 px-3.5 py-2 text-[11px] text-muted-foreground gap-2">
+          <div className="flex items-center gap-1.5">
+            <span>Navigate</span>
             <Kbd className="h-4 px-1 text-[10px]">↑</Kbd>
             <Kbd className="h-4 px-1 text-[10px]">↓</Kbd>
+            <span className="mx-1 text-border">|</span>
+            <span>Select</span>
+            <Kbd className="h-4 px-1 text-[10px]">↵</Kbd>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <span>Select:</span>
-              <Kbd className="h-4 px-1 text-[10px]">↵</Kbd>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span>Close:</span>
-              <Kbd className="h-4 px-1 text-[10px]">esc</Kbd>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <span>Close</span>
+            <Kbd className="h-4 px-1 text-[10px]">Esc</Kbd>
           </div>
         </div>
       </DialogContent>
