@@ -10,6 +10,7 @@ import {
   Lock,
   Mail,
   RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -31,6 +32,7 @@ import {
 import {
   resetPasswordWithOtp,
   sendForgotPasswordOtp,
+  verifyForgotPasswordOtp,
 } from "@/api/auth";
 
 interface ForgotPasswordDialogProps {
@@ -40,13 +42,15 @@ interface ForgotPasswordDialogProps {
   onSuccess: (email: string) => void;
 }
 
+type RecoveryStep = "email" | "otp" | "password";
+
 export function ForgotPasswordDialog({
   open,
   onOpenChange,
   initialEmail = "",
   onSuccess,
 }: ForgotPasswordDialogProps) {
-  const [step, setStep] = useState<"email" | "reset">("email");
+  const [step, setStep] = useState<RecoveryStep>("email");
   const [email, setEmail] = useState(initialEmail);
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -98,7 +102,7 @@ export function ForgotPasswordDialog({
     try {
       await sendForgotPasswordOtp(emailCheck.normalized);
       setEmail(emailCheck.normalized);
-      setStep("reset");
+      setStep("otp");
       setCooldown(60);
       toast.success("Recovery code dispatched", {
         description: "Check your inbox for the 6-digit verification code.",
@@ -112,7 +116,7 @@ export function ForgotPasswordDialog({
     }
   }
 
-  async function handleResetPassword(e: React.FormEvent) {
+  async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -120,6 +124,26 @@ export function ForgotPasswordDialog({
       setError("Please enter a valid 6-digit verification code");
       return;
     }
+
+    setLoading(true);
+    try {
+      await verifyForgotPasswordOtp(email, otp);
+      setStep("password");
+      toast.success("Code verified", {
+        description: "Please enter your new password.",
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Invalid or expired recovery code",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
 
     const passwordCheck = validateRecoveryPasswordPair(
       newPassword,
@@ -152,17 +176,26 @@ export function ForgotPasswordDialog({
       <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md p-6 bg-card text-card-foreground rounded-2xl shadow-2xl">
         <DialogHeader className="gap-1.5 text-start">
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-1">
-            <KeyRound className="size-5" aria-hidden="true" />
+            {step === "password" ? (
+              <Lock className="size-5" aria-hidden="true" />
+            ) : step === "otp" ? (
+              <ShieldCheck className="size-5" aria-hidden="true" />
+            ) : (
+              <KeyRound className="size-5" aria-hidden="true" />
+            )}
           </div>
           <DialogTitle className="text-xl font-bold tracking-tight">
-            {step === "email"
-              ? "Recover Your Password"
-              : "Set New Password"}
+            {step === "email" && "Recover Your Password"}
+            {step === "otp" && "Verify Recovery Code"}
+            {step === "password" && "Set New Password"}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            {step === "email"
-              ? "Enter your registered institutional email to receive a 6-digit recovery code."
-              : `Enter the 6-digit code sent to ${email} and choose your new password.`}
+            {step === "email" &&
+              "Enter your registered institutional email to receive a 6-digit recovery code."}
+            {step === "otp" &&
+              `Enter the 6-digit code sent to ${email} to verify your identity.`}
+            {step === "password" &&
+              `Code verified. Create a strong password with at least 8 characters for ${email}.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,7 +209,7 @@ export function ForgotPasswordDialog({
           </div>
         )}
 
-        {step === "email" ? (
+        {step === "email" && (
           <form onSubmit={handleSendCode} className="space-y-4 pt-1">
             <div className="space-y-2">
               <Label
@@ -222,8 +255,10 @@ export function ForgotPasswordDialog({
               )}
             </Button>
           </form>
-        ) : (
-          <form onSubmit={handleResetPassword} className="space-y-4 pt-1">
+        )}
+
+        {step === "otp" && (
+          <form onSubmit={handleVerifyOtp} className="space-y-4 pt-1">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label
@@ -264,6 +299,43 @@ export function ForgotPasswordDialog({
               />
             </div>
 
+            <div className="flex items-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setStep("email");
+                  setError(null);
+                }}
+                className="h-10 gap-1.5 rounded-lg px-3 text-xs cursor-pointer"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden="true" />
+                Change Email
+              </Button>
+
+              <Button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="flex-1 h-10 gap-2 rounded-lg text-sm font-semibold cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify Code
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {step === "password" && (
+          <form onSubmit={handleResetPassword} className="space-y-4 pt-1">
             <div className="space-y-2">
               <Label
                 htmlFor="recovery-new-password"
@@ -285,6 +357,7 @@ export function ForgotPasswordDialog({
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
                   className="h-10 ps-10 pe-10 rounded-lg text-sm"
+                  autoFocus
                 />
                 <Button
                   type="button"
@@ -349,20 +422,19 @@ export function ForgotPasswordDialog({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setStep("email");
+                  setStep("otp");
                   setError(null);
                 }}
                 className="h-10 gap-1.5 rounded-lg px-3 text-xs cursor-pointer"
               >
                 <ArrowLeft className="size-3.5" aria-hidden="true" />
-                Change Email
+                Back
               </Button>
 
               <Button
                 type="submit"
                 disabled={
                   loading ||
-                  otp.length !== 6 ||
                   newPassword.length < 8 ||
                   !confirmPassword
                 }
@@ -389,4 +461,3 @@ export function ForgotPasswordDialog({
 }
 
 export default ForgotPasswordDialog;
-

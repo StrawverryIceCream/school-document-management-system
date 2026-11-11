@@ -122,6 +122,28 @@ export async function sendForgotPasswordOtp(
   return res.json();
 }
 
+export async function verifyForgotPasswordOtp(
+  email: string,
+  otp: string,
+): Promise<{ valid: boolean; message: string }> {
+  const res = await fetch("/api/auth/forgot-password/verify-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      otp: otp.trim(),
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      await getErrorMessage(res, "Invalid or expired recovery code"),
+    );
+  }
+  return res.json();
+}
+
 export async function resetPasswordWithOtp(
   email: string,
   otp: string,

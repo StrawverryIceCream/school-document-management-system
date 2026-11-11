@@ -627,6 +627,58 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
   }
 };
 
+export const verifyForgotPasswordOtp = async (req: Request, res: Response) => {
+  try {
+    const emailResult = validateRecoveryEmail(req.body?.email);
+    if (!emailResult.valid || !emailResult.normalized) {
+      return res
+        .status(400)
+        .json({ error: emailResult.error || "A valid email address is required" });
+    }
+
+    const { otp } = req.body ?? {};
+    if (!validateOtpCode(otp)) {
+      return res.status(400).json({ error: "Invalid or expired recovery code" });
+    }
+
+    const email = emailResult.normalized;
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
+      columns: { id: true },
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid or expired recovery code" });
+    }
+
+    const tokenRecord = await db.query.passwordResetTokens.findFirst({
+      where: and(
+        eq(passwordResetTokens.userId, user.id),
+        isNull(passwordResetTokens.usedAt),
+      ),
+      orderBy: (tokens, { desc: d }) => [d(tokens.createdAt)],
+    });
+
+    const now = new Date();
+    if (!tokenRecord || isTokenExpired(tokenRecord.expiresAt, now)) {
+      return res.status(400).json({ error: "Invalid or expired recovery code" });
+    }
+
+    const isValidOtp = await bcrypt.compare(otp, tokenRecord.tokenHash);
+    if (!isValidOtp) {
+      return res.status(400).json({ error: "Invalid or expired recovery code" });
+    }
+
+    return res.status(200).json({
+      valid: true,
+      message: "Recovery code verified successfully",
+    });
+  } catch (error) {
+    console.error("[verifyForgotPasswordOtp] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const resetPasswordWithOtp = async (req: Request, res: Response) => {
   try {
     const emailResult = validateRecoveryEmail(req.body?.email);

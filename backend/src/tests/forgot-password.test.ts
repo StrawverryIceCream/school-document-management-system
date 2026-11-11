@@ -6,6 +6,7 @@ import {
   validateOtpCode,
   validateRecoveryEmail,
   validateRecoveryPassword,
+  verifyForgotPasswordOtp,
 } from "../controllers/auth.controller.js";
 
 console.log("Running self-service password recovery unit tests...");
@@ -66,6 +67,9 @@ const testOtp = "849201";
 const hash = await bcrypt.hash(testOtp, 10);
 assert.strictEqual(await bcrypt.compare(testOtp, hash), true);
 assert.strictEqual(await bcrypt.compare("111111", hash), false);
+
+// 7. Verify endpoint handler export
+assert.strictEqual(typeof verifyForgotPasswordOtp, "function");
 
 console.log("Password recovery unit tests passed successfully!");
 
