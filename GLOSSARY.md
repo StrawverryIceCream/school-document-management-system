@@ -136,6 +136,14 @@ _Avoid_: Credential reset, role switching wipe
 An in-page modal or inspection overlay allowing office staff to examine payment receipts, bank deposit slips, and supporting requirements directly within the request review card without navigating away or opening external browser tabs.
 _Avoid_: External tab viewer, artifact link, popup window
 
+**Institutional Payment Portal**:
+The in-app settlement modal and options interface presenting verified payment channels, official QR codes (e.g. MariBank / QR Ph), and account details to requesters before receipt proof submission.
+_Avoid_: Payment gateway, checkout screen, billing window
+
+**Settlement QR Ph Code**:
+An official interoperable QR code image rendered in the settlement interface, scannable across digital banking apps and e-wallets to direct document assessment fee transfers to the institution's account.
+_Avoid_: Payment QR pic, transfer snapshot, cashier scan
+
 **Payment Proof**:
 A digital receipt, bank confirmation slip, or electronic transaction screenshot uploaded by a requester to substantiate settlement of document assessment fees.
 _Avoid_: Payment artifact, receipt file, transaction attachment

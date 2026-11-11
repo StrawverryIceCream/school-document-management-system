@@ -2,10 +2,11 @@ import { useState } from "react";
 import {
   AlertCircle,
   Banknote,
-  CreditCard,
+  Check,
+  Copy,
   Landmark,
+  QrCode,
   Smartphone,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PaymentMethod } from "@/api/payments";
@@ -13,29 +14,14 @@ import PaymentReceiptAttachment from "./PaymentReceiptAttachment";
 import { cn } from "@/lib/utils";
 import { TONES } from "@/lib/tones";
 import { validatePaymentProof } from "@/lib/requests";
-
-type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
-const DEFAULT_PAYMENT_METHOD: OnlinePaymentMethod = "bank_transfer";
-
-const PAYMENT_PORTALS = [
-  { id: "gcash", label: "GCash", value: "e_wallet", icon: Wallet },
-  { id: "maya", label: "Maya", value: "e_wallet", icon: Smartphone },
-  {
-    id: "bank_transfer",
-    label: "Bank Transfer",
-    value: "bank_transfer",
-    icon: Landmark,
-  },
-  { id: "card", label: "Card", value: "card", icon: CreditCard },
-] as const;
-
-type PaymentPortal = (typeof PAYMENT_PORTALS)[number]["id"];
-
-function getInitialPortal(method: OnlinePaymentMethod): PaymentPortal {
-  if (method === "bank_transfer") return "bank_transfer";
-  if (method === "card") return "card";
-  return "gcash";
-}
+import {
+  DEFAULT_PAYMENT_METHOD,
+  PAYMENT_PORTALS,
+  getInitialPortal,
+  getPortalPaymentDetails,
+  type OnlinePaymentMethod,
+  type PaymentPortal,
+} from "@/lib/payment-portal";
 
 interface OnlinePaymentProps {
   documentName: string;
@@ -62,6 +48,7 @@ function OnlinePayment({
   const [portal, setPortal] = useState<PaymentPortal>(
     getInitialPortal(initialMethod),
   );
+  const [copied, setCopied] = useState(false);
 
   function choosePortal(
     portalId: PaymentPortal,
@@ -70,6 +57,16 @@ function OnlinePayment({
     setPortal(portalId);
     setMethod(paymentMethod);
     onMethodChange(paymentMethod);
+  }
+
+  async function copyMobileNumber(num: string) {
+    try {
+      await navigator.clipboard.writeText(num);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: clipboard permission denied or unsupported
+    }
   }
 
   function handleReceiptChange(file: File | undefined) {
@@ -110,6 +107,8 @@ function OnlinePayment({
     }
   }
 
+  const paymentDetails = getPortalPaymentDetails(portal);
+
   return (
     <div className="min-w-0 space-y-4">
       <div className="min-w-0 space-y-4">
@@ -124,7 +123,7 @@ function OnlinePayment({
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Available Payment Methods
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
               {PAYMENT_PORTALS.map(({ id, label, value, icon: Icon }) => (
                 <button
                   key={id}
@@ -146,39 +145,105 @@ function OnlinePayment({
             </div>
           </div>
 
-          <div>
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-              <p className="text-sm font-semibold">
-                Registered E-Wallet Mobile Number
-              </p>
-              <p className={cn("text-sm font-medium", TONES.brand.value)}>
-                Transaction Fee: Check with provider
-              </p>
+          {paymentDetails ? (
+            <div className="rounded-xl border bg-card p-4 shadow-xs space-y-3 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <Landmark className="size-4 text-primary" aria-hidden="true" />
+                  <p className="text-sm font-bold tracking-tight text-foreground">
+                    {paymentDetails.bankName} Official Settlement Channel
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                  <QrCode className="size-3" aria-hidden="true" />
+                  QR Ph & InstaPay Verified
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex shrink-0 justify-center">
+                  <div className="group relative overflow-hidden rounded-lg border bg-white p-1.5 shadow-xs">
+                    <img
+                      src={paymentDetails.qrImagePath}
+                      alt="MariBank Official QR Ph Payment Code"
+                      className="size-36 object-contain rounded-sm"
+                      loading="eager"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[10px] font-medium text-white">
+                      Scan with any bank/e-wallet
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-2.5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Account / Mobile Number
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="font-mono text-lg font-bold tracking-tight text-foreground">
+                        {paymentDetails.formattedNumber}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          void copyMobileNumber(paymentDetails.accountNumber)
+                        }
+                        className="h-8 gap-1.5 px-2.5 text-xs font-medium"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="size-3.5 text-emerald-600" aria-hidden="true" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="size-3.5" aria-hidden="true" />
+                            Copy
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                    <p>
+                      <span className="font-medium text-foreground">Bank:</span>{" "}
+                      {paymentDetails.bankName}
+                    </p>
+                    <p>
+                      <span className="font-medium text-foreground">Payee:</span>{" "}
+                      {paymentDetails.accountName}
+                    </p>
+                  </div>
+
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {paymentDetails.notes}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
-              <span className="border-r pr-3 font-medium">
-                +63
-              </span>
-              <span className="flex-1">
-                No mobile number on file
-              </span>
+          ) : (
+            <div className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
+              <div className="flex items-start gap-2.5">
+                <Smartphone className="size-4 shrink-0 text-primary mt-0.5" aria-hidden="true" />
+                <p>
+                  Please use MariBank, GCash, or Maya above to view the QR code and mobile settlement details.
+                </p>
+              </div>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              The app does not store a registered wallet number. Check the
-              official portal directly before sending payment.
-            </p>
-          </div>
+          )}
         </section>
 
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-lg bg-muted/40 p-3">
           <AlertCircle
             className="mt-0.5 size-4 shrink-0 text-primary"
             aria-hidden="true"
           />
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Official payment instructions or a school QR code have not been
-            configured here. Transfers are not detected automatically; only
-            submit proof after paying through a verified university portal.
+          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+            Transfers are processed externally via QR Ph / InstaPay. After sending payment, capture a screenshot of your transfer confirmation or transaction receipt and upload it below for office verification.
           </p>
         </div>
 
