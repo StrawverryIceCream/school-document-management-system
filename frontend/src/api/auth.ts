@@ -1,7 +1,4 @@
-
 import type { AuthUser, UserRole } from "@/types";
-
-
 
 export interface SignupPayload {
   email: string;
@@ -41,7 +38,9 @@ export async function sendSignupOtp(
   });
 
   if (!res.ok) {
-    throw new Error(await getErrorMessage(res, "Failed to send verification code"));
+    throw new Error(
+      await getErrorMessage(res, "Failed to send verification code"),
+    );
   }
   return res.json();
 }
@@ -102,5 +101,45 @@ export async function signup(payload: SignupPayload): Promise<AuthUser> {
   });
 
   if (!res.ok) throw new Error(await getErrorMessage(res, "Signup failed"));
+  return res.json();
+}
+
+export async function sendForgotPasswordOtp(
+  email: string,
+): Promise<{ message: string }> {
+  const res = await fetch("/api/auth/forgot-password/send-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email: email.trim().toLowerCase() }),
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      await getErrorMessage(res, "Failed to send recovery code"),
+    );
+  }
+  return res.json();
+}
+
+export async function resetPasswordWithOtp(
+  email: string,
+  otp: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  const res = await fetch("/api/auth/forgot-password/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      otp: otp.trim(),
+      newPassword,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await getErrorMessage(res, "Failed to reset password"));
+  }
   return res.json();
 }

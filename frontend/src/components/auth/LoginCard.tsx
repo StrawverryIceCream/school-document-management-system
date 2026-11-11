@@ -27,6 +27,7 @@ import {
 } from "@/lib/auth/login-card";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
+import ForgotPasswordDialog from "./ForgotPasswordDialog";
 
 type LoginCardProps = {
   error: string | null;
@@ -49,6 +50,7 @@ export default function LoginCard({
 }: LoginCardProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   return (
     <Card className="relative gap-6 overflow-hidden rounded-2xl py-7 shadow-lg sm:py-9">
@@ -116,12 +118,21 @@ export default function LoginCard({
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor={PASSWORD_FIELD.id}
-              className="text-sm font-semibold uppercase tracking-wider"
-            >
-              {PASSWORD_FIELD.label}
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor={PASSWORD_FIELD.id}
+                className="text-sm font-semibold uppercase tracking-wider"
+              >
+                {PASSWORD_FIELD.label}
+              </Label>
+              <button
+                type="button"
+                onClick={() => setForgotOpen(true)}
+                className="text-xs font-medium text-primary hover:underline cursor-pointer"
+              >
+                Forgot password?
+              </button>
+            </div>
             <div className="relative">
               <Lock
                 className="pointer-events-none absolute start-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
@@ -238,6 +249,16 @@ export default function LoginCard({
           </Link>
         </div>
       </CardFooter>
+
+      <ForgotPasswordDialog
+        open={forgotOpen}
+        onOpenChange={setForgotOpen}
+        initialEmail={email}
+        onSuccess={(recoveredEmail) => {
+          setEmail(recoveredEmail);
+          setPassword("");
+        }}
+      />
     </Card>
   );
 }
