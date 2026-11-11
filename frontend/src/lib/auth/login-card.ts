@@ -22,12 +22,6 @@ export const PASSWORD_FIELD = {
   hideLabel: "Hide password",
 };
 
-export const REMEMBER_OPTION = {
-  id: "login-remember",
-  label: "Remember credentials",
-  hint: "Keep active for 24h",
-};
-
 export const SUBMIT_LABEL = "Sign In to Portal";
 export const LOADING_SUBMIT_LABEL = "Signing in...";
 export const SIGN_UP = {

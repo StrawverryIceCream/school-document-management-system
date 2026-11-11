@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import bcrypt from "bcrypt";
+import { users } from "../db/schema.js";
 import {
   calculateRecoveryCooldown,
   isTokenExpired,
@@ -70,6 +71,10 @@ assert.strictEqual(await bcrypt.compare("111111", hash), false);
 
 // 7. Verify endpoint handler export
 assert.strictEqual(typeof verifyForgotPasswordOtp, "function");
+
+// 8. Verify users table schema passwordHash column target
+assert.ok(users.passwordHash, "users table must define passwordHash column");
+assert.strictEqual("password" in users, false, "users table must not define raw password column");
 
 console.log("Password recovery unit tests passed successfully!");
 

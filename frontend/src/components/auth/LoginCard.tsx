@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -20,7 +20,6 @@ import {
   LOADING_SUBMIT_LABEL,
   LOGIN_CARD,
   PASSWORD_FIELD,
-  REMEMBER_OPTION,
   SIGN_UP,
   SUBMIT_LABEL,
   TRACK_SLIP,
@@ -49,7 +48,6 @@ export default function LoginCard({
   setPassword,
 }: LoginCardProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(true);
   const [forgotOpen, setForgotOpen] = useState(false);
 
   return (
@@ -171,25 +169,6 @@ export default function LoginCard({
                 )}
               </Button>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={REMEMBER_OPTION.id}
-                checked={remember}
-                onCheckedChange={(checked) => setRemember(checked === true)}
-              />
-              <Label
-                htmlFor={REMEMBER_OPTION.id}
-                className="cursor-pointer text-base font-medium"
-              >
-                {REMEMBER_OPTION.label}
-              </Label>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {REMEMBER_OPTION.hint}
-            </span>
           </div>
 
           <Button

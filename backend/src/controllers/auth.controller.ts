@@ -733,7 +733,7 @@ export const resetPasswordWithOtp = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
     await db
       .update(users)
-      .set({ password: hashedPassword })
+      .set({ passwordHash: hashedPassword })
       .where(eq(users.id, user.id));
 
     // Invalidate token to prevent replay
