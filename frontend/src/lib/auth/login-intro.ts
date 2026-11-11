@@ -46,8 +46,3 @@ export const INTRO_STATS: IntroStat[] = [
     tone: "brand",
   },
 ];
-
-export const INTRO_NOTICE = {
-  title: "Counter Window Schedule",
-  body: "Main Registrar Hall Windows 1 to 4 are open Mon–Fri, 8:00 AM – 5:00 PM for physically sealed document pickups.",
-};

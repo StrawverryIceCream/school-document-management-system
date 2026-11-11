@@ -23,13 +23,11 @@ import {
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import { SYSTEM_NAME } from "@/lib/constants";
-import { useSystemSettings } from "@/provider/SystemSettingsProvider";
 import type { UserRole } from "@/types";
 
 export default function RegistrationForm() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { activeAcademicTerm } = useSystemSettings();
 
   const [firstName, setFirstName] = useState("");
   const [middleInitial, setMiddleInitial] = useState("");
@@ -150,7 +148,7 @@ export default function RegistrationForm() {
   return (
     <Card className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl p-0 shadow-sm">
       <div className="border-b bg-muted/40 px-4 py-6 sm:px-8 sm:py-8">
-        <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 min-w-0">
+        <div className="mb-3 flex items-center justify-between gap-2.5 min-w-0">
           <Badge
             className={cn(
               BADGE_BASE,
@@ -165,12 +163,8 @@ export default function RegistrationForm() {
                 TONES[SYNC_BADGE_TONE].dot,
               )}
             />
-            <span className="sm:hidden truncate">SIS &amp; HRIS Direct Sync Active</span>
-            <span className="hidden sm:inline truncate">PostgreSQL SIS &amp; HRIS Direct Sync Active</span>
+            <span className="truncate">Institutional SIS &amp; HRIS Sync Active</span>
           </Badge>
-          <span className="text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
-            {activeAcademicTerm}
-          </span>
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl break-words">
           Create your {SYSTEM_NAME} Account
@@ -203,13 +197,10 @@ export default function RegistrationForm() {
           className="space-y-4 border-t pt-3"
           data-purpose="academic-verification-section"
         >
-          <div className="mb-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 min-w-0">
+          <div className="mb-3 flex items-baseline justify-between gap-2 min-w-0">
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Academic Verification Details
             </h2>
-            <span className="w-fit rounded border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs sm:text-sm font-medium text-primary shrink-0">
-              {role === "student" ? "Student SIS Check" : "Faculty HRIS Check"}
-            </span>
           </div>
 
           {role === "student" ? (
@@ -275,13 +266,13 @@ export default function RegistrationForm() {
           </Button>
           <div className="pt-2 text-center">
             <span className="text-sm text-muted-foreground">
-              Already registered with your institutional ID?{" "}
+              Already have an institutional account?{" "}
             </span>
             <Link
               className="text-sm font-semibold text-primary hover:underline"
               to="/login"
             >
-              Log in to your portal
+              Sign in
             </Link>
           </div>
         </div>

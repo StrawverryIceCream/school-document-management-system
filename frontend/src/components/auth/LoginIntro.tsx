@@ -1,15 +1,13 @@
-import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   INTRO_DESCRIPTION,
   INTRO_HEADING_ID,
-  INTRO_NOTICE,
   INTRO_PILL,
   INTRO_STATS,
   INTRO_TITLE,
 } from "@/lib/auth/login-intro";
-import { BADGE_BASE, ICON_BOX_BASE, TONES, VALUE_BASE } from "@/lib/tones";
+import { BADGE_BASE, TONES, VALUE_BASE } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 
 export default function LoginIntro() {
@@ -45,7 +43,7 @@ export default function LoginIntro() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-3">
+      <div className="hidden sm:grid sm:grid-cols-3 gap-3 pt-2">
         {INTRO_STATS.map(({ id, label, value, caption, tone }) => (
           <Card key={id} className="gap-0 rounded-xl py-3">
             <CardContent className="space-y-1 px-3">
@@ -68,22 +66,6 @@ export default function LoginIntro() {
           </Card>
         ))}
       </div>
-
-      <Card className="bg-muted/90 py-4">
-        <CardContent className="flex items-start gap-3 px-4">
-          <div
-            className={cn(ICON_BOX_BASE, "size-9 rounded-lg", TONES.amber.icon)}
-          >
-            <Info className="size-5" aria-hidden="true" />
-          </div>
-          <div className="space-y-1 text-sm text-muted-foreground">
-            <p className="text-base font-bold text-foreground">
-              {INTRO_NOTICE.title}
-            </p>
-            <p>{INTRO_NOTICE.body}</p>
-          </div>
-        </CardContent>
-      </Card>
     </section>
   );
 }

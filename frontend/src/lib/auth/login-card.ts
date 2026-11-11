@@ -1,8 +1,6 @@
 export const LOGIN_CARD = {
   title: "Welcome back to ARCH",
-  badge: "Secure Portal",
-  description:
-    "Sign in with your university account or institutional credentials to access document requests, clearance tracking, and records.",
+  description: "Enter your institutional credentials to access your account.",
   formAriaLabel: "Sign in",
 };
 
@@ -10,7 +8,7 @@ export const IDENTIFIER_FIELD = {
   id: "email",
   name: "email",
   label: "Institutional Email",
-  placeholder: "e.g. test@example.com",
+  placeholder: "name@university.edu.ph",
 };
 
 export const PASSWORD_FIELD = {

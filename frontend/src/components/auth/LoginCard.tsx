@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, Lock, UserRound } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +23,7 @@ import {
   SUBMIT_LABEL,
   TRACK_SLIP,
 } from "@/lib/auth/login-card";
-import { BADGE_BASE, TONES } from "@/lib/tones";
+import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
 
@@ -58,24 +57,13 @@ export default function LoginCard({
       />
 
       <CardHeader className="gap-2 px-5 sm:px-9">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-          <CardTitle
-            role="heading"
-            aria-level={2}
-            className="text-3xl font-bold tracking-tight"
-          >
-            {LOGIN_CARD.title}
-          </CardTitle>
-          <Badge
-            className={cn(
-              BADGE_BASE,
-              "shrink-0 border-transparent",
-              TONES.emerald.badge,
-            )}
-          >
-            {LOGIN_CARD.badge}
-          </Badge>
-        </div>
+        <CardTitle
+          role="heading"
+          aria-level={2}
+          className="text-3xl font-bold tracking-tight"
+        >
+          {LOGIN_CARD.title}
+        </CardTitle>
         <CardDescription className="text-base leading-normal">
           {LOGIN_CARD.description}
         </CardDescription>
@@ -90,7 +78,7 @@ export default function LoginCard({
           <div className="space-y-2">
             <Label
               htmlFor={IDENTIFIER_FIELD.id}
-              className="text-sm font-semibold uppercase tracking-wider"
+              className="text-sm font-semibold"
             >
               {IDENTIFIER_FIELD.label}
             </Label>
@@ -119,7 +107,7 @@ export default function LoginCard({
             <div className="flex items-center justify-between">
               <Label
                 htmlFor={PASSWORD_FIELD.id}
-                className="text-sm font-semibold uppercase tracking-wider"
+                className="text-sm font-semibold"
               >
                 {PASSWORD_FIELD.label}
               </Label>
