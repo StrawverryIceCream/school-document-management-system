@@ -130,6 +130,14 @@ _Avoid_: User disabling, account ban, soft delete
 The automatic cleanup and nullification of mutually exclusive role attributes (such as student program records vs. staff office assignments) during user role changes to maintain relational integrity.
 _Avoid_: Credential reset, role switching wipe
 
+**Self-Service Password Recovery**:
+The unauthenticated verification and password reset workflow allowing users to regain account access via a time-bounded 6-digit email OTP without administrative intervention.
+_Avoid_: Password reset link, admin unlock, credential recovery wizard
+
+**Password Reset OTP**:
+A cryptographically hashed, single-use 6-digit numerical token dispatched to a user's verified institutional email address with a 10-minute validity window and attempt throttling.
+_Avoid_: Reset code, unlock pin, magic token
+
 ## Request Review and Verification
 
 **In-Situ Proof Preview**:
