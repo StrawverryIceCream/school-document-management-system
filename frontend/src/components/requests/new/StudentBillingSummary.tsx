@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, UserRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { getRequesterProfileSummary } from "@/lib/profile";
 import { Card } from "@/components/ui/card";
 
 interface StudentBillingSummaryProps {
@@ -18,6 +19,12 @@ function StudentBillingSummary({
   processingDays,
 }: StudentBillingSummaryProps) {
   const { user } = useAuth();
+  const profileSummary = user ? getRequesterProfileSummary(user) : null;
+  const primaryId = profileSummary?.primaryIdentifier ?? {
+    label: "Account ID",
+    value: "Not provided",
+    hasValue: false,
+  };
 
   const turnaroundLabel =
     processingDays !== undefined
@@ -30,7 +37,7 @@ function StudentBillingSummary({
     <Card className="gap-3 rounded-xl border-0 p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Section B • Student Billing Data
+          Section B • Requester &amp; Billing Data
         </p>
         <BriefcaseBusiness
           className="size-3.5 text-muted-foreground"
@@ -49,11 +56,9 @@ function StudentBillingSummary({
         </div>
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Student ID No.
+            {primaryId.label}
           </p>
-          <p className="mt-1 text-sm font-semibold">
-            {user?.studentId ?? "Not provided"}
-          </p>
+          <p className="mt-1 text-sm font-semibold">{primaryId.value}</p>
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

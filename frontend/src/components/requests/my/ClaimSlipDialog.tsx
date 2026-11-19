@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { getRequesterProfileSummary } from "@/lib/profile";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 
 interface ClaimSlipDialogProps {
@@ -25,6 +26,7 @@ export function ClaimSlipDialog({
   onOpenChange,
 }: ClaimSlipDialogProps) {
   const { user } = useAuth();
+  const profileSummary = user ? getRequesterProfileSummary(user) : null;
 
   if (!request) return null;
 
@@ -98,17 +100,17 @@ export function ClaimSlipDialog({
                 <User className="size-4" /> Requester
               </span>
               <span className="font-medium">
-                {user?.fullName || "Student"}
+                {user?.fullName || profileSummary?.badgeLabel || "Requester"}
               </span>
             </div>
 
-            {user?.studentId && (
+            {profileSummary?.primaryIdentifier.hasValue && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground flex items-center gap-1.5">
-                  <Hash className="size-4" /> Student ID
+                  <Hash className="size-4" /> {profileSummary.primaryIdentifier.label}
                 </span>
-                <span className="font-mono text-xs font-medium">
-                  {user.studentId}
+                <span className="font-mono text-xs font-medium text-right max-w-[220px] truncate">
+                  {profileSummary.primaryIdentifier.value}
                 </span>
               </div>
             )}

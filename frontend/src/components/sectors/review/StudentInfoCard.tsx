@@ -1,30 +1,27 @@
-import { Check, Mail, Phone, ShieldCheck } from "lucide-react";
+import { Mail, Phone, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { BADGE_BASE, TONES } from "@/lib/tones";
+import { getInitials, getRequesterProfileSummary } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 import type { RequestReviewDetails } from "@/api/requests";
 
-type Student = NonNullable<RequestReviewDetails["user"]> & {
-  section?: string | null;
-  yearLevel?: number | null;
-  contactNumber?: string | null;
-};
+type Requester = NonNullable<RequestReviewDetails["user"]>;
 
 interface StudentInfoCardProps {
-  student: Student;
+  student: Requester;
   amountDue?: string | number;
 }
 
 export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
-  const initials = student.fullName
-    .split(/\s+/)
-    .map((part) => part.charAt(0))
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
+  const initials = getInitials(student.fullName);
+  const summary = getRequesterProfileSummary(student);
   const isCleared = Number(amountDue ?? 0) === 0;
+
+  // Use the two role-specific identity tiles (slots 1 and 2 from summary.tiles, after Full Name)
+  const identityTiles =
+    student.role === "student"
+      ? [summary.tiles[1], summary.tiles[2]]
+      : [summary.tiles[2], summary.tiles[1]];
 
   return (
     <Card className="rounded-2xl border bg-card p-4 sm:p-6 shadow-sm space-y-4">
@@ -34,62 +31,47 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
             className="size-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-base shrink-0"
             aria-label={`Avatar for ${student.fullName}`}
           >
-            {initials || "?"}
+            {initials}
           </div>
           <div>
             <h2 className="text-sm sm:text-base font-bold text-foreground">
-              Requester Profile & Academic Standing
+              Requester Profile — {student.fullName}
             </h2>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <ShieldCheck className="size-3 text-emerald-600 dark:text-emerald-400" />
-              Synchronized via University Student Information System (SIS)
+              {summary.subtitle}
             </p>
           </div>
         </div>
-        <Badge
-          variant="secondary"
-          className={cn(BADGE_BASE, "shrink-0 w-fit", TONES.emerald.badge)}
-        >
-          <Check className="size-3 mr-1" />
-          Active Student
+        <Badge variant={summary.badgeVariant} className="shrink-0 w-fit">
+          {summary.badgeLabel}
         </Badge>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-        <div className="bg-muted/40 p-3.5 rounded-xl border flex flex-col">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Student ID
-          </span>
-          <span className="text-sm font-bold text-foreground mt-0.5">
-            {student.studentId || "No ID Record"}
-          </span>
-          <span
-            className="text-xs text-muted-foreground mt-1 break-words line-clamp-2 sm:line-clamp-none"
-            title={student.department || undefined}
+        {identityTiles.map((tile) => (
+          <div
+            key={tile.label}
+            className="bg-muted/40 p-3.5 rounded-xl border flex flex-col"
           >
-            {student.department || "General Department"}
-          </span>
-        </div>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {tile.label}
+            </span>
+            <span
+              className="text-xs sm:text-sm font-bold text-foreground mt-0.5 break-words line-clamp-2 sm:line-clamp-none leading-snug"
+              title={tile.value}
+            >
+              {tile.value}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1 break-words line-clamp-2 sm:line-clamp-none">
+              {tile.detail}
+            </span>
+          </div>
+        ))}
 
         <div className="bg-muted/40 p-3.5 rounded-xl border flex flex-col">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Academic Program
-          </span>
-          <span
-            className="text-xs sm:text-sm font-bold text-foreground mt-0.5 break-words line-clamp-2 sm:line-clamp-none leading-snug"
-            title={student.college?.name || undefined}
-          >
-            {student.college?.name || "College Department"}
-          </span>
-          <span className="text-xs text-muted-foreground mt-1">
-            {student.section ? `Section ${student.section}` : "Regular Track"}
-            {student.yearLevel ? ` • Year ${student.yearLevel}` : ""}
-          </span>
-        </div>
-
-        <div className="bg-muted/40 p-3.5 rounded-xl border flex flex-col">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Tuition & Dues Status
+            Request Fee Status
           </span>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span
@@ -99,11 +81,15 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
               )}
             />
             <span className="text-sm font-bold text-foreground">
-              {isCleared ? "Fully Cleared (₱0.00)" : `₱${Number(amountDue).toFixed(2)}`}
+              {isCleared
+                ? "No Fee Required (₱0.00)"
+                : `₱${Number(amountDue).toFixed(2)}`}
             </span>
           </div>
           <span className="text-xs text-muted-foreground mt-1">
-            {isCleared ? "No outstanding holds" : "Payment verification required"}
+            {isCleared
+              ? "No settlement required"
+              : "Payment verification required"}
           </span>
         </div>
       </div>
@@ -112,23 +98,25 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5">
             <Mail className="size-3.5 text-muted-foreground" />
-            <span className="truncate break-all sm:break-normal" title={student.email}>
+            <span
+              className="truncate break-all sm:break-normal"
+              title={student.email}
+            >
               {student.email}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Phone className="size-3.5 text-muted-foreground" />
-            <span>{student.contactNumber || "+63 917 000 0000"}</span>
+            <span>{student.contactNumber?.trim() || "Not provided"}</span>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Badge variant="outline" className="text-xs font-medium">
-            Good Standing
-          </Badge>
-          <Badge variant="outline" className="text-xs font-medium">
-            Clearance Verified
-          </Badge>
-        </div>
+        {student.role === "student" && (
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <Badge variant="outline" className="text-xs font-medium">
+              {summary.tiles[3].value}
+            </Badge>
+          </div>
+        )}
       </div>
     </Card>
   );

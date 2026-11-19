@@ -2,6 +2,8 @@
 import { Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { getRoleIdRequirementLabel } from "@/lib/profile";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +22,16 @@ export default function DeliveryMethodCard({
   disabled,
   officeName,
 }: DeliveryMethodCardProps) {
+  const { user } = useAuth();
+  const idRequirementLabel = getRoleIdRequirementLabel(user?.role);
+
   const options = [
     {
       id: "pickup",
       title: `Campus Office Pickup (${officeName || "Registrar Main Hall"})`,
       badge: "Recommended",
       badgeTone: TONES.emerald.badge,
-      desc: "Direct handoff upon presentation of mobile QR voucher and University Student ID",
+      desc: `Direct handoff upon presentation of mobile QR voucher and ${idRequirementLabel}`,
       feeLabel: "Free of Charge",
       feeColor: "text-emerald-600 dark:text-emerald-400 font-bold",
     },
@@ -65,7 +70,8 @@ export default function DeliveryMethodCard({
               key={opt.id}
               className={cn(
                 "flex items-start gap-3.5 p-4 rounded-xl border bg-muted/20 hover:bg-muted/50 cursor-pointer transition-all",
-                isSelected && "border-primary/60 bg-primary/5 ring-1 ring-primary/20",
+                isSelected &&
+                  "border-primary/60 bg-primary/5 ring-1 ring-primary/20",
                 disabled && "pointer-events-none opacity-50",
               )}
             >
@@ -85,7 +91,10 @@ export default function DeliveryMethodCard({
                       {opt.title}
                     </span>
                     {opt.badge && (
-                      <Badge variant="secondary" className={cn(BADGE_BASE, opt.badgeTone)}>
+                      <Badge
+                        variant="secondary"
+                        className={cn(BADGE_BASE, opt.badgeTone)}
+                      >
                         {opt.badge}
                       </Badge>
                     )}
@@ -94,7 +103,12 @@ export default function DeliveryMethodCard({
                     {opt.desc}
                   </span>
                 </div>
-                <span className={cn("text-sm self-start sm:self-auto shrink-0", opt.feeColor)}>
+                <span
+                  className={cn(
+                    "text-sm self-start sm:self-auto shrink-0",
+                    opt.feeColor,
+                  )}
+                >
                   {opt.feeLabel}
                 </span>
               </div>

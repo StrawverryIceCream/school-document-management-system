@@ -34,6 +34,10 @@ _Avoid_: Agent, worker, clerk
 The academic standing of a student user (regular, irregular, graduating, alumni) determining record entitlement.
 _Avoid_: Enrollment type, student level, year tier
 
+**Requester Profile**:
+The role-specific institutional identity summary of a Requester (such as student program and standing, faculty department, or staff office assignment) presented during request filing and staff review.
+_Avoid_: Applicant profile, student profile, user card
+
 **Document Eligibility**:
 The role and student status criteria defining whether a document type is available for filing by a specific user.
 _Avoid_: Permission level, record accessibility
@@ -105,7 +109,7 @@ The role-based navigation model that restricts a staff user's sidebar sectors an
 _Avoid_: Siloed view, locked tab, filtered portal
 
 **Sector Request Review**:
-The institutional staff review workspace providing comprehensive multi-card inspection of document requests, applicant student standing, compliance prerequisites, payment verification, and status advancement within a processing office.
+The institutional staff review workspace providing comprehensive multi-card inspection of document requests, requester profile and standing, compliance prerequisites, payment verification, and status advancement within a processing office.
 _Avoid_: Window review, counter review, ticket details view
 
 **Assigned Requests Workspace**:

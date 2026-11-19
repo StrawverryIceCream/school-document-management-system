@@ -95,6 +95,13 @@ export const roleLabels: Record<UserRole, string> = {
   staff: "Staff",
 };
 
+export const studentStatusLabels: Record<StudentStatus, string> = {
+  regular: "Regular",
+  irregular: "Irregular",
+  graduating: "Graduating",
+  alumni: "Alumni",
+};
+
 export const officeLabels: Record<Office, string> = {
   registrar: "Registrar",
   hr: "Human Resources",
@@ -223,7 +230,17 @@ export interface User extends Timestamps {
   lastLoginAt: ISODateTimeString | null;
 }
 
-export type AuthUser = Omit<User, "createdAt" | "updatedAt">;
+export interface OrgSummary {
+  id: UUID;
+  code: string;
+  name: string;
+}
+
+export type AuthUser = Omit<User, "createdAt" | "updatedAt"> & {
+  college?: OrgSummary | null;
+  course?: OrgSummary | null;
+  officeRecord?: OrgSummary | null;
+};
 
 export type AccountUpdateStatus = "pending" | "approved" | "rejected";
 
@@ -262,11 +279,19 @@ export type UserSummary = Pick<
   course?: { id: string; code: string; name: string } | null;
 };
 
-/** Requester summary with the college identity returned by staff request APIs. */
+/** Requester summary with role and org identity returned by staff request APIs. */
 export interface RequesterSummary extends UserSummary {
   collegeId: UUID | null;
+  courseId?: UUID | null;
   college: Pick<College, "id" | "code" | "name"> | null;
+  course?: Pick<Course, "id" | "code" | "name"> | null;
+  officeId?: UUID | null;
+  officeRecord?: OrgSummary | null;
   department: string | null;
+  section?: string | null;
+  yearLevel?: number | null;
+  studentStatus?: StudentStatus | null;
+  contactNumber?: string | null;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -13,15 +13,34 @@ import {
 import { getTupIdLabel, NO_TUP_ID_LABEL } from "./profile";
 import {
   officeLabels,
+  studentStatusLabels,
   userRoles,
-  type AuthUser,
+  type Office,
+  type OrgSummary,
+  type StudentStatus,
   type UserRole,
-  type UserWithOrg,
 } from "@/types";
 
-// College and course names only exist when the API returns the user with its organization resolved
-export type ProfileUser = AuthUser &
-  Partial<Pick<UserWithOrg, "college" | "course">>;
+// Accepts AuthUser, UserWithOrg, or RequesterSummary so every profile surface shares one contract
+export type ProfileUser = {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  studentId?: string | null;
+  studentStatus?: StudentStatus | null;
+  contactNumber?: string | null;
+  collegeId?: string | null;
+  courseId?: string | null;
+  section?: string | null;
+  yearLevel?: number | null;
+  department?: string | null;
+  office?: Office | null;
+  officeId?: string | null;
+  college?: Pick<OrgSummary, "name"> | null;
+  course?: Pick<OrgSummary, "name"> | null;
+  officeRecord?: Pick<OrgSummary, "name"> | null;
+};
 
 type ProfileFieldConfig = {
   key: string;
@@ -74,12 +93,22 @@ export const PROFILE_FIELDS: readonly ProfileFieldConfig[] = [
     emptyLabel: NO_TUP_ID_LABEL,
   },
   {
+    key: "studentStatus",
+    label: "Student status",
+    icon: GraduationCap,
+    roles: ["student"],
+    getValue: (user) =>
+      user.studentStatus ? studentStatusLabels[user.studentStatus] : null,
+  },
+  {
     key: "yearLevel",
     label: "Year level",
     icon: Layers,
     roles: ["student"],
     getValue: (user) =>
-      user.yearLevel == null ? null : `Year ${user.yearLevel}`,
+      user.studentStatus === "alumni" || user.yearLevel == null
+        ? null
+        : `Year ${user.yearLevel}`,
   },
   {
     key: "section",
@@ -116,7 +145,9 @@ export const PROFILE_FIELDS: readonly ProfileFieldConfig[] = [
     label: "Office",
     icon: Briefcase,
     roles: ["staff"],
-    getValue: (user) => (user.office ? officeLabels[user.office] : null),
+    getValue: (user) =>
+      user.officeRecord?.name ??
+      (user.office ? officeLabels[user.office] : null),
   },
 ];
 

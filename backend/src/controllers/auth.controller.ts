@@ -41,8 +41,21 @@ interface SignupBody {
   otp: string;
 }
 
+type OrgSummary = { id: string; code: string; name: string };
+type AuthDbUser = DbUser & {
+  college?: OrgSummary | null;
+  course?: OrgSummary | null;
+  officeRecord?: OrgSummary | null;
+};
+
+const AUTH_USER_WITH = {
+  college: { columns: { id: true, code: true, name: true } },
+  course: { columns: { id: true, code: true, name: true } },
+  officeRecord: { columns: { id: true, code: true, name: true } },
+} as const;
+
 // One shape for signup, login, and me so they can't drift apart; never includes passwordHash
-function toAuthUser(user: DbUser) {
+function toAuthUser(user: AuthDbUser) {
   return {
     id: user.id,
     studentId: user.studentId,
@@ -50,8 +63,9 @@ function toAuthUser(user: DbUser) {
     fullName: user.fullName,
     role: user.role,
     studentStatus: user.studentStatus,
-    college: user.collegeId,
-    course: user.courseId,
+    college: user.college ?? null,
+    course: user.course ?? null,
+    officeRecord: user.officeRecord ?? null,
     collegeId: user.collegeId,
     courseId: user.courseId,
     yearLevel: user.yearLevel,
@@ -162,6 +176,7 @@ export const me = async (req: Request, res: Response) => {
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
+      with: AUTH_USER_WITH,
     });
 
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
@@ -397,6 +412,12 @@ export const signup = async (
       return res.status(500).json({ error: "Failed to create user" });
     }
 
+    const hydratedUser =
+      (await db.query.users.findFirst({
+        where: eq(users.id, user.id),
+        with: AUTH_USER_WITH,
+      })) ?? user;
+
     req.session.userId = user.id;
     req.session.role = user.role;
     req.session.officeId = user.officeId ?? null;
@@ -412,7 +433,7 @@ export const signup = async (
         ipAddress: req.ip,
         metadata: { role: user.role, email: user.email },
       });
-      return res.status(201).json(toAuthUser(user));
+      return res.status(201).json(toAuthUser(hydratedUser));
     });
   } catch (err) {
     // Safety net for a race between the duplicate checks and the insert
@@ -442,6 +463,7 @@ export const login = async (req: Request, res: Response) => {
 
     const user = await db.query.users.findFirst({
       where: eq(users.email, email),
+      with: AUTH_USER_WITH,
     });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 

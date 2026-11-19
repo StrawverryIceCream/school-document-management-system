@@ -345,6 +345,7 @@ export default function SectorRequestReview() {
           }}
           studentName={request.user?.fullName ?? ""}
           studentId={request.user?.studentId ?? ""}
+          requesterRole={request.user?.role}
           referenceNumber={request.referenceNumber}
           documentTitle={request.documentTypeName}
           updating={updating}

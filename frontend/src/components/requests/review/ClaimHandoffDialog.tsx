@@ -16,6 +16,8 @@ import {
   type PickupType,
   validateClaimHandoff,
 } from "@/lib/requests/claim-handoff";
+import { getRoleIdRequirementLabel, ROLE_META } from "@/lib/profile";
+import type { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
 
 export interface ClaimHandoffDialogProps {
@@ -23,6 +25,7 @@ export interface ClaimHandoffDialogProps {
   onOpenChange: (open: boolean) => void;
   studentName?: string;
   studentId?: string;
+  requesterRole?: UserRole;
   referenceNumber?: string;
   documentTitle?: string;
   updating: boolean;
@@ -34,11 +37,14 @@ export function ClaimHandoffDialog({
   onOpenChange,
   studentName = "",
   studentId = "",
+  requesterRole,
   referenceNumber = "",
   documentTitle = "",
   updating,
   onConfirm,
 }: ClaimHandoffDialogProps) {
+  const roleLabel = requesterRole ? ROLE_META[requesterRole].label : "Requester";
+  const idLabel = getRoleIdRequirementLabel(requesterRole);
   const [pickupType, setPickupType] = useState<PickupType>("self");
   const [claimantName, setClaimantName] = useState(studentName);
   const [notes, setNotes] = useState("");
@@ -49,7 +55,11 @@ export function ClaimHandoffDialog({
     setErrors({});
     if (type === "self") {
       setClaimantName(studentName);
-      setNotes(studentId ? `Student ID #${studentId} presented` : "Student ID verified");
+      setNotes(
+        requesterRole === "student" && studentId
+          ? `${idLabel} #${studentId} presented`
+          : `${idLabel} verified`,
+      );
     } else {
       setClaimantName("");
       setNotes("");
@@ -110,9 +120,9 @@ export function ClaimHandoffDialog({
             )}
             {studentName && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Registered Student:</span>
+                <span className="text-muted-foreground">Registered {roleLabel}:</span>
                 <span className="font-semibold text-foreground">
-                  {studentName} {studentId ? `(${studentId})` : ""}
+                  {studentName} {requesterRole === "student" && studentId ? `(${studentId})` : ""}
                 </span>
               </div>
             )}
@@ -137,7 +147,7 @@ export function ClaimHandoffDialog({
             >
               <User className="size-4 shrink-0" />
               <div>
-                <p className="text-xs font-semibold">Student (Self)</p>
+                <p className="text-xs font-semibold">{roleLabel} (Self)</p>
                 <p className="text-[10px] opacity-80">Claimed in person</p>
               </div>
             </button>
@@ -172,8 +182,8 @@ export function ClaimHandoffDialog({
               id="claimant-full-name"
               placeholder={
                 pickupType === "self"
-                  ? "Student full name"
-                  : "e.g., Maria Santos (Mother / Proxy)"
+                  ? `${roleLabel} full name`
+                  : "e.g., Maria Santos (Authorized Proxy)"
               }
               value={claimantName}
               onChange={(e) => {
@@ -200,8 +210,8 @@ export function ClaimHandoffDialog({
               id="claimant-notes"
               placeholder={
                 pickupType === "self"
-                  ? "e.g., Student ID #2023-01456 verified at counter"
-                  : "e.g., Authorization letter presented with Student ID & Representative National ID #1234-5678"
+                  ? `e.g., ${idLabel} verified at counter`
+                  : `e.g., Authorization letter presented with ${idLabel} & Representative National ID`
               }
               value={notes}
               onChange={(e) => {

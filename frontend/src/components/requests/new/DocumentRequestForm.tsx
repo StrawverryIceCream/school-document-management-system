@@ -19,6 +19,7 @@ import type { DocumentType, RequiredFieldValues } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
 import { formatPeso } from "@/lib/format";
+import { getInitialRequiredFieldValue } from "@/lib/profile";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import RequestWizardHeader from "./RequestWizardHeader";
@@ -44,29 +45,11 @@ export default function DocumentRequestForm({
     setCurrentStep("details");
   }, [setCurrentStep]);
 
-  // Initial values pre-populated with student profile if field keys match
+  // Initial values pre-populated from the requester's role-specific profile
   const [values, setValues] = useState<RequiredFieldValues>(() => {
     const initial: RequiredFieldValues = {};
     for (const field of document.requiredFields) {
-      const lowerKey = field.key.toLowerCase();
-      const lowerLabel = field.label.toLowerCase();
-
-      if (lowerKey === "student-name" || lowerLabel.includes("student name")) {
-        initial[field.key] = user?.fullName || "";
-      } else if (lowerKey === "student-id" || lowerLabel.includes("student id")) {
-        initial[field.key] = user?.studentId || "";
-      } else if (
-        lowerKey === "student-course-section" ||
-        lowerLabel.includes("course")
-      ) {
-        initial[field.key] = user?.department || "";
-      } else if (field.type === "number") {
-        initial[field.key] = 1;
-      } else if (field.type === "checkbox") {
-        initial[field.key] = false;
-      } else {
-        initial[field.key] = "";
-      }
+      initial[field.key] = getInitialRequiredFieldValue(user, field);
     }
     return initial;
   });

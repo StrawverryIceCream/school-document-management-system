@@ -812,6 +812,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.courseId],
     references: [courses.id],
   }),
+  officeRecord: one(offices, {
+    fields: [users.officeId],
+    references: [offices.id],
+  }),
   documentRequests: many(documentRequests, {
     relationName: "request_owner",
   }),

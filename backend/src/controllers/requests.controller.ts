@@ -46,16 +46,28 @@ const STATUS_TRANSITIONS: Record<RequestStatus, readonly RequestStatus[]> = {
   cancelled: [],
 };
 
-// Staff need student details to process a request; never expose passwordHash
+// Staff need requester details to process a request; never expose passwordHash
 const REQUESTER_COLUMNS = {
   id: true,
   studentId: true,
   fullName: true,
   email: true,
   role: true,
+  studentStatus: true,
+  yearLevel: true,
+  contactNumber: true,
   collegeId: true,
+  courseId: true,
   department: true,
   section: true,
+  office: true,
+  officeId: true,
+} as const;
+
+const REQUESTER_WITH = {
+  college: { columns: { id: true, code: true, name: true } },
+  course: { columns: { id: true, code: true, name: true } },
+  officeRecord: { columns: { id: true, code: true, name: true } },
 } as const;
 
 interface RequiredField {
@@ -399,9 +411,7 @@ export async function getAllRequests(
         with: {
           user: {
             columns: REQUESTER_COLUMNS,
-            with: {
-              college: { columns: { id: true, code: true, name: true } },
-            },
+            with: REQUESTER_WITH,
           },
           documentType: {
             with: {
@@ -463,9 +473,7 @@ export async function getRequestById(
       with: {
         user: {
           columns: REQUESTER_COLUMNS,
-          with: {
-            college: { columns: { id: true, code: true, name: true } },
-          },
+          with: REQUESTER_WITH,
         },
         assignee: {
           columns: {
