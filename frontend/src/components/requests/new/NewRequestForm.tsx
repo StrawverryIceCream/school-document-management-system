@@ -6,13 +6,15 @@ import { createRequest } from "@/api/requests";
 import { createPayment, uploadPaymentProof } from "@/api/payments";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import { useRequestWizard } from "@/hooks/useRequestWizard";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { Headset, ShieldCheck } from "lucide-react";
 import { formatPeso } from "@/lib/format";
+import { findActiveDuplicateRequest } from "@/lib/requests/duplicate-guard";
 import { TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import DocumentRequestForm from "./DocumentRequestForm";
+import DuplicateRequestDialog from "./DuplicateRequestDialog";
 import PaymentRequestSummary from "./PaymentRequestSummary";
 import RequestWizardHeader from "./RequestWizardHeader";
 import StudentBillingSummary from "./StudentBillingSummary";
@@ -29,9 +31,21 @@ type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
 
 function NewRequestForm() {
   const { id } = useParams<{ id?: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { document, documentLoading, documentError } = useDocument(id);
-  const { refreshMyRequests } = useMyRequest();
+  const { requests, refreshMyRequests } = useMyRequest();
   const { setCurrentStep } = useRequestWizard();
+  const [duplicateConfirmed, setDuplicateConfirmed] = useState(() =>
+    Boolean(
+      (location.state as { duplicateConfirmed?: boolean } | null)
+        ?.duplicateConfirmed,
+    ),
+  );
+  const activeDuplicate = useMemo(
+    () => findActiveDuplicateRequest(requests, document?.id ?? id),
+    [requests, document?.id, id],
+  );
   const [step, setStep] = useState<PaymentStep>("form");
   const [formData, setFormData] = useState<Record<
     string,
@@ -172,7 +186,21 @@ function NewRequestForm() {
     "University Office";
 
   if (step === "form") {
-    return <DocumentRequestForm document={document} onSubmit={handleSubmit} />;
+    return (
+      <>
+        <DocumentRequestForm document={document} onSubmit={handleSubmit} />
+        <DuplicateRequestDialog
+          open={!duplicateConfirmed && Boolean(activeDuplicate)}
+          onOpenChange={(open) => {
+            if (!open) setDuplicateConfirmed(true);
+          }}
+          documentName={document.name}
+          existingRequest={activeDuplicate}
+          onViewExisting={() => navigate("/my-request")}
+          onContinue={() => setDuplicateConfirmed(true)}
+        />
+      </>
+    );
   }
 
   return (

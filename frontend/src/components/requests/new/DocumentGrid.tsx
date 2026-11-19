@@ -1,17 +1,24 @@
 import { Banknote, Check, CircleCheck, Clock, Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useDocument } from "@/hooks/useDocument";
+import { useMyRequest } from "@/hooks/useMyRequest";
 import {
   getRequestFormPath,
   NO_DESCRIPTION_LABEL,
 } from "@/lib/documents";
 import { formatPeso } from "@/lib/format";
+import {
+  findActiveDuplicateRequest,
+  getActiveDocumentTypeIds,
+} from "@/lib/requests/duplicate-guard";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { CARD_HOVER_LIFT, cn } from "@/lib/utils";
+import type { DocumentType } from "@/types";
+import DuplicateRequestDialog from "./DuplicateRequestDialog";
 
 import { useAuth } from "@/hooks/useAuth";
 import { isDocumentEligible } from "@/lib/documents/eligibility";
@@ -21,8 +28,29 @@ const CHIP_CLASS_NAME = "rounded-lg px-3 py-1.5 font-medium";
 export default function DocumentGrid() {
   const { user } = useAuth();
   const { documents, loading, error, refreshDocument } = useDocument();
+  const { requests } = useMyRequest();
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [duplicateTarget, setDuplicateTarget] = useState<DocumentType | null>(
+    null,
+  );
+
+  const activeDocumentTypeIds = useMemo(
+    () => getActiveDocumentTypeIds(requests),
+    [requests],
+  );
+  const duplicateRequest = useMemo(
+    () => findActiveDuplicateRequest(requests, duplicateTarget?.id),
+    [requests, duplicateTarget],
+  );
+
+  function handleProceed(documentType: DocumentType) {
+    if (findActiveDuplicateRequest(requests, documentType.id)) {
+      setDuplicateTarget(documentType);
+      return;
+    }
+    navigate(getRequestFormPath(documentType.id));
+  }
 
   // Inactive or ineligible document types can't be requested
   const requestableDocuments = documents.filter(
@@ -57,9 +85,11 @@ export default function DocumentGrid() {
   }
 
   return (
+    <>
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {requestableDocuments.map((documentType) => {
         const isSelected = documentType.id === selectedId;
+        const hasActiveRequest = activeDocumentTypeIds.has(documentType.id);
         const fee = Number(documentType.fee);
         const isFree = !Number.isFinite(fee) || fee <= 0;
         const feeLabel = isFree ? "Free (No fee)" : formatPeso(fee);
@@ -107,13 +137,23 @@ export default function DocumentGrid() {
               >
                 {documentType.code}
               </Badge>
-              <Badge
-                variant="secondary"
-                className={cn(BADGE_BASE, TONES.sky.badge)}
-                title={officeName}
-              >
-                {officeCode}
-              </Badge>
+              <div className="flex items-center gap-1.5">
+                {hasActiveRequest && (
+                  <Badge
+                    variant="secondary"
+                    className={cn(BADGE_BASE, TONES.amber.badge)}
+                  >
+                    Active Request
+                  </Badge>
+                )}
+                <Badge
+                  variant="secondary"
+                  className={cn(BADGE_BASE, TONES.sky.badge)}
+                  title={officeName}
+                >
+                  {officeCode}
+                </Badge>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -174,7 +214,7 @@ export default function DocumentGrid() {
               aria-pressed={isSelected}
               onClick={() =>
                 isSelected
-                  ? navigate(getRequestFormPath(documentType.id))
+                  ? handleProceed(documentType)
                   : setSelectedId(documentType.id)
               }
             >
@@ -194,5 +234,26 @@ export default function DocumentGrid() {
         );
       })}
     </div>
+    <DuplicateRequestDialog
+      open={Boolean(duplicateTarget && duplicateRequest)}
+      onOpenChange={(open) => {
+        if (!open) setDuplicateTarget(null);
+      }}
+      documentName={duplicateTarget?.name ?? ""}
+      existingRequest={duplicateRequest}
+      onViewExisting={() => {
+        setDuplicateTarget(null);
+        navigate("/my-request");
+      }}
+      onContinue={() => {
+        if (!duplicateTarget) return;
+        const targetId = duplicateTarget.id;
+        setDuplicateTarget(null);
+        navigate(getRequestFormPath(targetId), {
+          state: { duplicateConfirmed: true },
+        });
+      }}
+    />
+    </>
   );
 }

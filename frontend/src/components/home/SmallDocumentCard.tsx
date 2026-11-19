@@ -12,10 +12,15 @@ import { ICON_BOX_BASE, TONES } from "@/lib/tones";
 
 type SmallDocumentCardProps = {
   document: DocumentTypeItem;
+  hasActiveRequest?: boolean;
   onApply: (documentId: string) => void;
 };
 
-function SmallDocumentCard({ document, onApply }: SmallDocumentCardProps) {
+function SmallDocumentCard({
+  document,
+  hasActiveRequest = false,
+  onApply,
+}: SmallDocumentCardProps) {
   const initializedDocument = initializeDocumentTypeItem(document);
   const {
     id,
@@ -40,12 +45,22 @@ function SmallDocumentCard({ document, onApply }: SmallDocumentCardProps) {
         <div className={cn(ICON_BOX_BASE, "size-14 ", TONES[tone].icon)}>
           <Icon className="size-6" aria-hidden="true" />
         </div>
-        <Badge
-          variant="outline"
-          className="rounded-full px-2.5 py-1 text-base font-semibold text-muted-foreground"
-        >
-          {formatPeso(price)}
-        </Badge>
+        <div className="flex flex-col items-end gap-1.5">
+          <Badge
+            variant="outline"
+            className="rounded-full px-2.5 py-1 text-base font-semibold text-muted-foreground"
+          >
+            {formatPeso(price)}
+          </Badge>
+          {hasActiveRequest && (
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300"
+            >
+              Active Request
+            </Badge>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

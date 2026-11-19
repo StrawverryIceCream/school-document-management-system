@@ -42,8 +42,12 @@ function Home() {
       />
       <AcademicTermUpdateBanner />
       <AvailableDocuments
-        exploreHref="/documents"
-        onApply={(documentId) => navigate(`/new-request/${documentId}`)}
+        exploreHref="/new-request"
+        onApply={(documentId, duplicateConfirmed) =>
+          navigate(`/new-request/${documentId}`, {
+            state: duplicateConfirmed ? { duplicateConfirmed: true } : undefined,
+          })
+        }
       />
 
       <MyRequestCards />

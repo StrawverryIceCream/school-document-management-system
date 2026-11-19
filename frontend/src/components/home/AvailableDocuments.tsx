@@ -1,20 +1,50 @@
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import PageHeader from "@/components/shared/PageHeader";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
+import DuplicateRequestDialog from "@/components/requests/new/DuplicateRequestDialog";
 import { useDocument } from "@/hooks/useDocument";
+import { useMyRequest } from "@/hooks/useMyRequest";
 import { initializeDocumentTypeItem } from "@/lib/documents";
+import {
+  findActiveDuplicateRequest,
+  getActiveDocumentTypeIds,
+} from "@/lib/requests/duplicate-guard";
 
 type DocumentTypesSectionProps = {
   exploreHref: string;
-  onApply: (documentId: string) => void;
+  onApply: (documentId: string, duplicateConfirmed?: boolean) => void;
 };
 
 function AvailableDocuments({
   exploreHref,
   onApply,
 }: DocumentTypesSectionProps) {
+  const navigate = useNavigate();
   const { documents, totalCount, loading, error } = useDocument();
+  const { requests } = useMyRequest();
+  const [duplicateTarget, setDuplicateTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const activeDocumentTypeIds = useMemo(
+    () => getActiveDocumentTypeIds(requests),
+    [requests],
+  );
+  const duplicateRequest = useMemo(
+    () => findActiveDuplicateRequest(requests, duplicateTarget?.id),
+    [requests, duplicateTarget],
+  );
+
+  function handleApply(documentId: string, documentName: string) {
+    if (findActiveDuplicateRequest(requests, documentId)) {
+      setDuplicateTarget({ id: documentId, name: documentName });
+      return;
+    }
+    onApply(documentId);
+  }
   const documentItems = documents.slice(0, 4).map((document) =>
     initializeDocumentTypeItem({
       id: String(document.id),
@@ -67,11 +97,31 @@ function AvailableDocuments({
             <SmallDocumentCard
               key={document.id}
               document={document}
-              onApply={onApply}
+              hasActiveRequest={activeDocumentTypeIds.has(document.id)}
+              onApply={(docId) => handleApply(docId, document.title)}
             />
           ))}
         </div>
       )}
+
+      <DuplicateRequestDialog
+        open={Boolean(duplicateTarget && duplicateRequest)}
+        onOpenChange={(open) => {
+          if (!open) setDuplicateTarget(null);
+        }}
+        documentName={duplicateTarget?.name ?? ""}
+        existingRequest={duplicateRequest}
+        onViewExisting={() => {
+          setDuplicateTarget(null);
+          navigate("/my-request");
+        }}
+        onContinue={() => {
+          if (!duplicateTarget) return;
+          const targetId = duplicateTarget.id;
+          setDuplicateTarget(null);
+          onApply(targetId, true);
+        }}
+      />
     </section>
   );
 }
