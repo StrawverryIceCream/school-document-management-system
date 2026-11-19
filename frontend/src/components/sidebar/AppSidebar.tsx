@@ -25,6 +25,11 @@ import NavUser from "./NavUser";
 import NavMain from "./NavMain";
 import NavSectors from "./NavSectors";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  canAccessAccounts,
+  getDefaultHomeRoute,
+  REQUESTER_ROLES,
+} from "@/lib/navigation/role-access";
 import type { UserRole } from "@/types";
 import { NavLink } from "react-router-dom";
 import NavConfig from "./NavConfig";
@@ -33,7 +38,7 @@ type NavItem = {
   title: string;
   url: string;
   icon: LucideIcon;
-  roles?: UserRole[];
+  roles?: readonly UserRole[];
   onClick?: () => void;
 };
 
@@ -42,6 +47,7 @@ const navMain: NavItem[] = [
     title: "My Request ",
     url: "/my-request",
     icon: FileInputIcon,
+    roles: REQUESTER_ROLES,
   },
 ];
 
@@ -102,16 +108,16 @@ function AppSidebar() {
     return null;
   }
 
+  const permittedNavMain = navMain.filter(
+    (item) => !item.roles || item.roles.includes(user.role),
+  );
   const permittedNavItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(user.role),
   );
-  const isRegistrarStaff =
-    user.role === "staff" &&
-    (user.office === "registrar" || (user as any).officeId === "OUR");
 
   const permittedNavConfigs = navConfig.filter((item) => {
     if (item.url === "/accounts") {
-      return user.role === "admin" || isRegistrarStaff;
+      return canAccessAccounts(user);
     }
     return !item.roles || item.roles.includes(user.role);
   });
@@ -121,7 +127,7 @@ function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <NavLink to="/home">
+            <NavLink to={getDefaultHomeRoute(user.role)}>
               <SidebarMenuButton
                 size="lg"
                 className="h-12 gap-3 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center! group-data-[collapsible=icon]:p-0! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -141,7 +147,7 @@ function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        {permittedNavMain.length > 0 && <NavMain items={permittedNavMain} />}
         {permittedNavItems.length > 0 && <NavItems items={permittedNavItems} />}
         {(user.role === "admin" || user.role === "staff") && <NavSectors />}
         {permittedNavConfigs.length > 0 && (

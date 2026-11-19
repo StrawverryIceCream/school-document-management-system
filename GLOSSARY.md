@@ -105,8 +105,12 @@ The aggregate volume of active in-flight document requests currently awaiting re
 _Avoid_: Window queue, counter traffic, ticket backlog
 
 **Scoped Workspace**:
-The role-based navigation model that restricts a staff user's sidebar sectors and divisions to their designated office and organizational unit.
+The role-based navigation model that restricts a staff user's sidebar sectors, divisions, Quick Jump targets, and route access to their designated office and organizational unit.
 _Avoid_: Siloed view, locked tab, filtered portal
+
+**Quick Jump**:
+The keyboard-accessible command palette (`Cmd+K` / `Ctrl+K`) that surfaces only the navigation destinations and actions permitted for the signed-in user's role and assigned office.
+_Avoid_: Global search bar, universal menu, shortcut modal
 
 **Sector Request Review**:
 The institutional staff review workspace providing comprehensive multi-card inspection of document requests, requester profile and standing, compliance prerequisites, payment verification, and status advancement within a processing office.

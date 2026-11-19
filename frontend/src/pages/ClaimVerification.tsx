@@ -60,8 +60,8 @@ export default function ClaimVerification() {
       return;
     }
 
-    // If a student scanned this or no target, nothing to asynchronously resolve
-    if (user.role === "student" || !queryTarget) {
+    // Requesters cannot resolve staff claim verification queries
+    if (user.role === "student" || user.role === "teacher" || !queryTarget) {
       return;
     }
 

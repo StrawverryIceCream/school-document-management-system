@@ -4,7 +4,6 @@ import {
   Archive,
   Bell,
   Building2,
-  CheckCircle2,
   ClipboardList,
   FileInputIcon,
   FolderCog,
@@ -29,6 +28,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  canAccessAccounts,
+  getStaffWorkspaceLink,
+  REQUESTER_ROLES,
+  STAFF_ROLES,
+} from "@/lib/navigation/role-access";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
@@ -75,77 +80,76 @@ export function CommandMenu() {
   }, []);
 
   const items: CommandItem[] = useMemo(() => {
-    const list: CommandItem[] = [
-      {
-        id: "nav-home",
-        title: "Home",
-        category: "Navigation",
-        icon: Home,
-        shortcut: "H",
-        perform: () => navigate("/home"),
-      },
-      {
-        id: "nav-my-requests",
-        title: "My Requests",
-        category: "Navigation",
-        icon: FileInputIcon,
-        shortcut: "M",
-        perform: () => navigate("/my-request"),
-      },
-      {
-        id: "nav-new-request",
-        title: "Request a Document",
-        category: "Navigation",
-        icon: PlusCircle,
-        shortcut: "N",
-        perform: () => navigate("/new-request"),
-      },
-      {
-        id: "nav-notifications",
-        title: "Notifications",
-        category: "Navigation",
-        icon: Bell,
-        perform: () => navigate("/notifications"),
-      },
-      {
-        id: "nav-claim",
-        title: "Verify Claim Slip",
-        category: "Navigation",
-        icon: CheckCircle2,
-        perform: () => navigate("/requests/claim"),
-      },
-    ];
+    if (!user) return [];
 
-    if (user?.role === "admin" || user?.role === "staff") {
-      list.push({
-        id: "nav-dashboard",
-        title: "Overview Dashboard",
-        category: "Navigation",
-        icon: LayoutDashboard,
-        shortcut: "D",
-        perform: () => navigate("/dashboard"),
-      });
-      list.push({
-        id: "nav-assigned-requests",
-        title: "Assigned Requests Workspace",
-        category: "Navigation",
-        icon: ClipboardList,
-        perform: () => navigate("/assigned-request"),
-      });
-      list.push({
-        id: "nav-all-requests",
-        title: "All Requests Registry",
-        category: "Navigation",
-        icon: Archive,
-        perform: () => navigate("/all-request"),
-      });
-      list.push({
-        id: "nav-sectors",
-        title: "Sector & Office Workspaces",
-        category: "Navigation",
-        icon: Building2,
-        perform: () => navigate("/sectors/ovpaa/colleges"),
-      });
+    const list: CommandItem[] = [];
+
+    if (REQUESTER_ROLES.includes(user.role)) {
+      list.push(
+        {
+          id: "nav-home",
+          title: "Home",
+          category: "Navigation",
+          icon: Home,
+          shortcut: "H",
+          perform: () => navigate("/home"),
+        },
+        {
+          id: "nav-my-requests",
+          title: "My Requests",
+          category: "Navigation",
+          icon: FileInputIcon,
+          shortcut: "M",
+          perform: () => navigate("/my-request"),
+        },
+        {
+          id: "nav-new-request",
+          title: "Request a Document",
+          category: "Navigation",
+          icon: PlusCircle,
+          shortcut: "N",
+          perform: () => navigate("/new-request"),
+        },
+      );
+    }
+
+    if (STAFF_ROLES.includes(user.role)) {
+      list.push(
+        {
+          id: "nav-dashboard",
+          title: "Overview Dashboard",
+          category: "Navigation",
+          icon: LayoutDashboard,
+          shortcut: "D",
+          perform: () => navigate("/dashboard"),
+        },
+        {
+          id: "nav-assigned-requests",
+          title: "Assigned Requests Workspace",
+          category: "Navigation",
+          icon: ClipboardList,
+          perform: () => navigate("/assigned-request"),
+        },
+        {
+          id: "nav-all-requests",
+          title: "All Requests Registry",
+          category: "Navigation",
+          icon: Archive,
+          perform: () => navigate("/all-request"),
+        },
+      );
+
+      const workspaceLink = getStaffWorkspaceLink(user);
+      if (workspaceLink) {
+        list.push({
+          id: "nav-sectors",
+          title: workspaceLink.title,
+          category: "Navigation",
+          icon: Building2,
+          perform: () => navigate(workspaceLink.url),
+        });
+      }
+
       list.push({
         id: "nav-document-manager",
         title: "Document Manager & Catalog",
@@ -155,11 +159,7 @@ export function CommandMenu() {
       });
     }
 
-    const isRegistrarStaff =
-      user?.role === "staff" &&
-      (user?.office === "registrar" || (user as any)?.officeId === "OUR");
-
-    if (user?.role === "admin" || isRegistrarStaff) {
+    if (canAccessAccounts(user)) {
       list.push({
         id: "nav-accounts",
         title: "Accounts Directory",
@@ -169,7 +169,7 @@ export function CommandMenu() {
       });
     }
 
-    if (user?.role === "admin") {
+    if (user.role === "admin") {
       list.push({
         id: "nav-logs",
         title: "System Logs & Audit Trail",
@@ -178,6 +178,14 @@ export function CommandMenu() {
         perform: () => navigate("/logs"),
       });
     }
+
+    list.push({
+      id: "nav-notifications",
+      title: "Notifications",
+      category: "Navigation",
+      icon: Bell,
+      perform: () => navigate("/notifications"),
+    });
 
     // Actions
     list.push({

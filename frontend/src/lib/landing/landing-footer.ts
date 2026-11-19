@@ -38,7 +38,6 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Transcript of Records (TOR)", href: "#services" },
       { label: "Certificate of Registration (COR)", href: "#services" },
       { label: "True Copy of Grades (TCG)", href: "#services" },
-      { label: "Verify Claim Slip", href: "/requests/claim" },
       { label: "Access Student Portal", href: "/login" },
     ],
   },
@@ -72,5 +71,4 @@ export const LEGAL_LINKS: FooterLink[] = [
   { label: "Terms of Service", href: "#services" },
   { label: "Registrar Guidelines", href: "#offices" },
   { label: "Track Document", href: "#track" },
-  { label: "Verify QR Code", href: "/requests/claim" },
 ];

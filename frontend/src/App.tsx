@@ -10,7 +10,12 @@ import { SystemSettingsProvider } from "./provider/SystemSettingsProvider";
 import { ThemeProvider } from "./provider/ThemeProvider";
 import { RequestWizardProvider } from "./provider/WizardRequestProvider";
 import { SectorsVisibilityProvider } from "./provider/SectorsVisibilityProvider";
-import type { UserRole } from "./types";
+import {
+  ADMIN_ROLES,
+  canAccessAccounts,
+  REQUESTER_ROLES,
+  STAFF_ROLES,
+} from "./lib/navigation/role-access";
 
 const Home = lazy(() => import("./pages/Home"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -29,9 +34,6 @@ const SectorPage = lazy(() => import("./pages/SectorPage"));
 const SectorRequestReview = lazy(() => import("./pages/SectorRequestReview"));
 const ClaimVerification = lazy(() => import("./pages/ClaimVerification"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-const STAFF_ROLES: UserRole[] = ["admin", "staff"];
-const ADMIN_ROLES: UserRole[] = ["admin"];
 
 function PageFallback() {
   return (
@@ -65,14 +67,30 @@ export default function App() {
                 <Route
                   path="/new-request/:id?"
                   element={
-                    <RequestWizardProvider>
-                      <NewRequest />
-                    </RequestWizardProvider>
+                    <RequireRole allowedRoles={REQUESTER_ROLES}>
+                      <RequestWizardProvider>
+                        <NewRequest />
+                      </RequestWizardProvider>
+                    </RequireRole>
                   }
                 />
-                <Route path="/my-request" element={<MyRequest />} />
+                <Route
+                  path="/my-request"
+                  element={
+                    <RequireRole allowedRoles={REQUESTER_ROLES}>
+                      <MyRequest />
+                    </RequireRole>
+                  }
+                />
                 <Route path="/notifications" element={<Notifications />} />
-                <Route path="/requests/claim" element={<ClaimVerification />} />
+                <Route
+                  path="/requests/claim"
+                  element={
+                    <RequireRole allowedRoles={STAFF_ROLES}>
+                      <ClaimVerification />
+                    </RequireRole>
+                  }
+                />
                 <Route
                   path="/dashboard"
                   element={
@@ -84,7 +102,10 @@ export default function App() {
                 <Route
                   path="/accounts"
                   element={
-                    <RequireRole allowedRoles={STAFF_ROLES}>
+                    <RequireRole
+                      allowedRoles={STAFF_ROLES}
+                      checkAccess={canAccessAccounts}
+                    >
                       <Accounts />
                     </RequireRole>
                   }

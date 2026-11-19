@@ -1,17 +1,36 @@
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import type { UserRole } from "@/types";
+import { getDefaultHomeRoute } from "@/lib/navigation/role-access";
+import type { AuthUser, UserRole } from "@/types";
 
 interface RequireRoleProps {
-  allowedRoles: UserRole[];
+  allowedRoles: readonly UserRole[];
+  checkAccess?: (user: AuthUser) => boolean;
   children: React.ReactNode;
 }
 
 export default function RequireRole({
   allowedRoles,
+  checkAccess,
   children,
 }: RequireRoleProps) {
   const { user, loading } = useAuth();
+
+  const isDenied =
+    !loading &&
+    Boolean(user) &&
+    (!allowedRoles.includes(user!.role) ||
+      (checkAccess !== undefined && !checkAccess(user!)));
+
+  useEffect(() => {
+    if (isDenied) {
+      toast.error("You don't have access to that page.", {
+        id: "route-access-denied",
+      });
+    }
+  }, [isDenied]);
 
   if (loading) {
     return (
@@ -25,8 +44,8 @@ export default function RequireRole({
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/home" replace />;
+  if (isDenied) {
+    return <Navigate to={getDefaultHomeRoute(user.role)} replace />;
   }
 
   return <>{children}</>;

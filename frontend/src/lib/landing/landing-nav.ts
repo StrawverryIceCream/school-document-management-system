@@ -22,7 +22,6 @@ export const NAV_LINKS: NavLink[] = [
   { label: "College Offices", href: "#offices" },
   { label: "Credentials Catalog", href: "#services" },
   { label: "Track Request", href: "#track" },
-  { label: "Verify Claim Slip", href: "/requests/claim" },
 ];
 
 export const CHECK_STATUS_ACTION: NavLink = {

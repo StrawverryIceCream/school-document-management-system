@@ -8,18 +8,24 @@ import AccountUpdatesTab from "@/components/accounts/AccountUpdatesTab";
 import { UsersProvider } from "@/provider/UsersProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  canAccessAccounts,
+  getDefaultHomeRoute,
+} from "@/lib/navigation/role-access";
 
 export default function Accounts() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("users");
 
   const isAdmin = user?.role === "admin";
-  const isRegistrarStaff =
-    user?.role === "staff" &&
-    (user.office === "registrar" || (user as any).officeId === "OUR");
 
-  if (!isAdmin && !isRegistrarStaff) {
-    return <Navigate to="/home" replace />;
+  if (!user || !canAccessAccounts(user)) {
+    return (
+      <Navigate
+        to={user ? getDefaultHomeRoute(user.role) : "/login"}
+        replace
+      />
+    );
   }
 
   return (
