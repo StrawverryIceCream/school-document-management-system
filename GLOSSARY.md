@@ -139,7 +139,7 @@ The active or suspended operational state of a user account governing authentica
 _Avoid_: User disabling, account ban, soft delete
 
 **Role Transition Sanitization**:
-The automatic cleanup and nullification of mutually exclusive role attributes (such as student program records vs. staff office assignments) during user role changes to maintain relational integrity.
+The automatic cleanup of mutually exclusive role attributes during user role changes, paired with requiring mandatory placement attributes for the target role (Assigned Office for Office Staff, Degree Program for Students), to preserve relational integrity.
 _Avoid_: Credential reset, role switching wipe
 
 **Self-Service Password Recovery**:

@@ -21,8 +21,9 @@ import { ALL_OFFICES } from "@/lib/sectors/sectors-config";
 import { getOffices, type OfficeRecord } from "@/api/offices";
 import { updateUserById, type UpdateUserBody } from "@/api/users";
 import { useUsers } from "@/hooks/useUsers";
-import type { User } from "@/types";
+import type { StudentStatus, User } from "@/types";
 import { Loader2 } from "lucide-react";
+import StudentPlacementFields from "@/components/shared/StudentPlacementFields";
 
 interface EditUserDialogProps {
   user: User;
@@ -30,15 +31,26 @@ interface EditUserDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditUserDialog({
+function EditUserForm({
   user,
-  open,
   onOpenChange,
-}: EditUserDialogProps) {
+}: {
+  user: User;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { refreshAccounts } = useUsers();
   const [fullName, setFullName] = useState(user.fullName);
   const [email, setEmail] = useState(user.email);
   const [studentId, setStudentId] = useState(user.studentId || "");
+  const [collegeId, setCollegeId] = useState(user.collegeId || "");
+  const [courseId, setCourseId] = useState(user.courseId || "");
+  const [studentStatus, setStudentStatus] = useState<StudentStatus | "">(
+    (user.studentStatus as StudentStatus) || "",
+  );
+  const [yearLevel, setYearLevel] = useState(
+    user.yearLevel ? String(user.yearLevel) : "",
+  );
+  const [section, setSection] = useState(user.section || "");
   const [department, setDepartment] = useState(user.department || "");
   const [officeId, setOfficeId] = useState(user.officeId || "");
   const [dbOffices, setDbOffices] = useState<OfficeRecord[]>([]);
@@ -53,19 +65,6 @@ export default function EditUserDialog({
       .catch((err) => console.error("Could not fetch offices:", err));
   }, []);
 
-  // Sync state if user changes or dialog opens
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      setFullName(user.fullName);
-      setEmail(user.email);
-      setStudentId(user.studentId || "");
-      setDepartment(user.department || "");
-      setOfficeId(user.officeId || "");
-      setError(null);
-    }
-    onOpenChange(isOpen);
-  };
-
   const officeOptions =
     dbOffices.length > 0
       ? dbOffices.map((o) => ({ id: o.id, code: o.code, name: o.name }))
@@ -75,6 +74,12 @@ export default function EditUserDialog({
     e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
       setError("Full name and email are required");
+      return;
+    }
+
+    const isAlumni = studentStatus === "alumni";
+    if (user.role === "student" && !courseId) {
+      setError("Please select a degree program (course)");
       return;
     }
 
@@ -88,7 +93,19 @@ export default function EditUserDialog({
       };
 
       if (user.role === "student") {
-        payload.studentId = studentId.trim() || null;
+        const cleanId = studentId.trim().toUpperCase();
+        payload.studentId = !cleanId || cleanId === "TUPM-" ? null : cleanId;
+        payload.collegeId = collegeId || null;
+        payload.courseId = courseId;
+        if (studentStatus) {
+          payload.studentStatus = studentStatus;
+        }
+        payload.yearLevel = isAlumni
+          ? null
+          : yearLevel
+            ? Number(yearLevel)
+            : null;
+        payload.section = isAlumni ? null : section.trim() || null;
       } else if (user.role === "teacher") {
         payload.department = department.trim() || null;
       } else if (user.role === "staff") {
@@ -107,122 +124,146 @@ export default function EditUserDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <form onSubmit={handleSave} className="space-y-4">
-          <DialogHeader>
-            <DialogTitle>Edit User Details</DialogTitle>
-            <DialogDescription>
-              Update account information for {user.fullName}.
-            </DialogDescription>
-          </DialogHeader>
+    <form onSubmit={handleSave} className="space-y-4">
+      <DialogHeader>
+        <DialogTitle>Edit User Details</DialogTitle>
+        <DialogDescription>
+          Update account information for {user.fullName}.
+        </DialogDescription>
+      </DialogHeader>
 
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">
-              {error}
-            </div>
-          )}
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">
+          {error}
+        </div>
+      )}
 
-          <div className="space-y-3 py-1">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-fullName" className="text-xs font-medium">
-                Full Name
-              </Label>
-              <Input
-                id="edit-fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter full name"
-                required
-                className="h-9 text-sm"
-              />
-            </div>
+      <div className="space-y-3 py-1">
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-fullName" className="text-xs font-medium">
+            Full Name
+          </Label>
+          <Input
+            id="edit-fullName"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Enter full name"
+            required
+            className="h-9 text-sm"
+          />
+        </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-email" className="text-xs font-medium">
-                Email Address
-              </Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email address"
-                required
-                className="h-9 text-sm"
-              />
-            </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-email" className="text-xs font-medium">
+            Email Address
+          </Label>
+          <Input
+            id="edit-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter email address"
+            required
+            className="h-9 text-sm"
+          />
+        </div>
 
-            {user.role === "student" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-studentId" className="text-xs font-medium">
-                  Student ID
-                </Label>
-                <Input
-                  id="edit-studentId"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  placeholder="e.g. TUPM-21-0001"
-                  className="h-9 text-sm"
-                />
-              </div>
-            )}
+        {user.role === "student" && (
+          <StudentPlacementFields
+            idPrefix={`edit-user-${user.id}`}
+            showStandingFields
+            collegeId={collegeId}
+            setCollegeId={setCollegeId}
+            courseId={courseId}
+            setCourseId={setCourseId}
+            studentId={studentId}
+            setStudentId={setStudentId}
+            studentStatus={studentStatus}
+            setStudentStatus={setStudentStatus}
+            yearLevel={yearLevel}
+            setYearLevel={setYearLevel}
+            section={section}
+            setSection={setSection}
+          />
+        )}
 
-            {user.role === "teacher" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-department" className="text-xs font-medium">
-                  Department
-                </Label>
-                <Input
-                  id="edit-department"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. Mathematics Department"
-                  className="h-9 text-sm"
-                />
-              </div>
-            )}
-
-            {user.role === "staff" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-office" className="text-xs font-medium">
-                  Assigned Office
-                </Label>
-                <Select
-                  value={officeId}
-                  onValueChange={(val) => setOfficeId(val)}
-                >
-                  <SelectTrigger id="edit-office" className="w-full h-9 text-sm">
-                    <SelectValue placeholder="Select assigned office" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {officeOptions.map((off) => (
-                      <SelectItem key={off.id} value={off.id}>
-                        {off.code} — {off.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+        {user.role === "teacher" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-department" className="text-xs font-medium">
+              Department
+            </Label>
+            <Input
+              id="edit-department"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g. Mathematics Department"
+              className="h-9 text-sm"
+            />
           </div>
+        )}
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              disabled={saving}
+        {user.role === "staff" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-office" className="text-xs font-medium">
+              Assigned Office
+            </Label>
+            <Select
+              value={officeId}
+              onValueChange={(val) => setOfficeId(val)}
             >
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" disabled={saving}>
-              {saving && <Loader2 className="mr-2 size-3.5 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </form>
+              <SelectTrigger id="edit-office" className="w-full h-9 text-sm">
+                <SelectValue placeholder="Select assigned office" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {officeOptions.map((off) => (
+                  <SelectItem key={off.id} value={off.id}>
+                    {off.code} — {off.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      <DialogFooter className="gap-2 sm:gap-0 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenChange(false)}
+          disabled={saving}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          size="sm"
+          disabled={saving || (user.role === "student" && !courseId)}
+        >
+          {saving && <Loader2 className="mr-2 size-3.5 animate-spin" />}
+          Save Changes
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+export default function EditUserDialog({
+  user,
+  open,
+  onOpenChange,
+}: EditUserDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        {open && (
+          <EditUserForm
+            key={`${user.id}-${user.role}-${user.courseId ?? ""}-${user.section ?? ""}`}
+            user={user}
+            onOpenChange={onOpenChange}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

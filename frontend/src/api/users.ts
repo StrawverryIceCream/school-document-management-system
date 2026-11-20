@@ -40,6 +40,16 @@ export interface PaginatedUsersResponse {
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    if (text) {
+      try {
+        const parsed = JSON.parse(text) as { error?: unknown };
+        if (typeof parsed?.error === "string") {
+          throw new Error(parsed.error);
+        }
+      } catch (e) {
+        if (e instanceof Error && !(e instanceof SyntaxError)) throw e;
+      }
+    }
     throw new Error(`${url} responded ${res.status}${text ? `: ${text}` : ""}`);
   }
   return res.json();

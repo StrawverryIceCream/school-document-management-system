@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { submitAccountUpdate } from "@/api/accountUpdates";
+import { getCurrentUser } from "@/api/auth";
+import StudentPlacementFields from "@/components/shared/StudentPlacementFields";
 import { useAuth } from "@/hooks/useAuth";
 import type { StudentStatus } from "@/types";
 
@@ -28,16 +30,20 @@ interface AcademicTermUpdateDialogProps {
   onOpenChange: (open: boolean) => void;
   activeAcademicTerm: string;
   onSuccess: () => void;
+  allowCourseEdit?: boolean;
 }
 
-export default function AcademicTermUpdateDialog({
-  open,
-  onOpenChange,
+function AcademicTermUpdateForm({
   activeAcademicTerm,
+  onOpenChange,
   onSuccess,
-}: AcademicTermUpdateDialogProps) {
-  const { user } = useAuth();
+  allowCourseEdit = false,
+}: Omit<AcademicTermUpdateDialogProps, "open">) {
+  const { user, setUser } = useAuth();
+  const needsCoursePlacement = allowCourseEdit || !user?.courseId;
 
+  const [collegeId, setCollegeId] = useState<string>(user?.collegeId || "");
+  const [courseId, setCourseId] = useState<string>(user?.courseId || "");
   const [studentStatus, setStudentStatus] = useState<StudentStatus>(
     (user?.studentStatus as StudentStatus) || "regular",
   );
@@ -79,6 +85,11 @@ export default function AcademicTermUpdateDialog({
       return;
     }
 
+    if (needsCoursePlacement && !courseId) {
+      setErrorMsg("Please select your college and degree program.");
+      return;
+    }
+
     if (!isAlumni && (!yearLevel || parseInt(yearLevel, 10) < 1 || parseInt(yearLevel, 10) > 6)) {
       setErrorMsg("Please select a valid year level (1–6).");
       return;
@@ -87,6 +98,10 @@ export default function AcademicTermUpdateDialog({
     setSubmitting(true);
     try {
       const formData = new FormData();
+      if (needsCoursePlacement && courseId) {
+        if (collegeId) formData.append("collegeId", collegeId);
+        formData.append("courseId", courseId);
+      }
       formData.append("requestedStudentStatus", studentStatus);
       if (!isAlumni) {
         formData.append("requestedYearLevel", yearLevel);
@@ -97,6 +112,7 @@ export default function AcademicTermUpdateDialog({
       formData.append("proofFile", proofFile);
 
       await submitAccountUpdate(formData);
+      await getCurrentUser().then(setUser).catch(() => {});
       toast.success("Verification request submitted successfully.");
       onSuccess();
       onOpenChange(false);
@@ -110,119 +126,148 @@ export default function AcademicTermUpdateDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader className="gap-1.5">
-            <DialogTitle className="text-lg font-bold">
-              Verify Academic Term Standing
-            </DialogTitle>
-            <DialogDescription className="text-sm">
-              Confirm your enrollment standing for{" "}
-              <strong className="text-foreground">{activeAcademicTerm}</strong>.
-              Your update will be reviewed by the Registrar.
-            </DialogDescription>
-          </DialogHeader>
+    <form onSubmit={handleSubmit}>
+      <DialogHeader className="gap-1.5">
+        <DialogTitle className="text-lg font-bold">
+          Verify Academic Term Standing
+        </DialogTitle>
+        <DialogDescription className="text-sm">
+          Confirm your enrollment standing for{" "}
+          <strong className="text-foreground">{activeAcademicTerm}</strong>.
+          Your update will be reviewed by an Administrator.
+        </DialogDescription>
+      </DialogHeader>
 
-          {errorMsg && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
-              <AlertCircle className="size-4 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
+      {errorMsg && (
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
 
-          <div className="space-y-4 py-4">
+      <div className="space-y-4 py-4">
+        {needsCoursePlacement && (
+          <StudentPlacementFields
+            idPrefix="term-update"
+            collegeId={collegeId}
+            setCollegeId={setCollegeId}
+            courseId={courseId}
+            setCourseId={setCourseId}
+          />
+        )}
+
+        <div className="space-y-1.5">
+          <Label htmlFor="student-status">Student Status</Label>
+          <Select
+            value={studentStatus}
+            onValueChange={(val) => setStudentStatus(val as StudentStatus)}
+          >
+            <SelectTrigger id="student-status">
+              <SelectValue placeholder="Select student status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="regular">Regular</SelectItem>
+              <SelectItem value="irregular">Irregular</SelectItem>
+              <SelectItem value="graduating">Graduating</SelectItem>
+              <SelectItem value="alumni">Alumni / Graduated</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {!isAlumni && (
+          <>
             <div className="space-y-1.5">
-              <Label htmlFor="student-status">Student Status</Label>
-              <Select
-                value={studentStatus}
-                onValueChange={(val) => setStudentStatus(val as StudentStatus)}
-              >
-                <SelectTrigger id="student-status">
-                  <SelectValue placeholder="Select student status" />
+              <Label htmlFor="year-level">Year Level</Label>
+              <Select value={yearLevel} onValueChange={setYearLevel}>
+                <SelectTrigger id="year-level">
+                  <SelectValue placeholder="Select year level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="regular">Regular</SelectItem>
-                  <SelectItem value="irregular">Irregular</SelectItem>
-                  <SelectItem value="graduating">Graduating</SelectItem>
-                  <SelectItem value="alumni">Alumni / Graduated</SelectItem>
+                  <SelectItem value="1">1st Year</SelectItem>
+                  <SelectItem value="2">2nd Year</SelectItem>
+                  <SelectItem value="3">3rd Year</SelectItem>
+                  <SelectItem value="4">4th Year</SelectItem>
+                  <SelectItem value="5">5th Year</SelectItem>
+                  <SelectItem value="6">6th Year</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {!isAlumni && (
-              <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="year-level">Year Level</Label>
-                  <Select value={yearLevel} onValueChange={setYearLevel}>
-                    <SelectTrigger id="year-level">
-                      <SelectValue placeholder="Select year level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1st Year</SelectItem>
-                      <SelectItem value="2">2nd Year</SelectItem>
-                      <SelectItem value="3">3rd Year</SelectItem>
-                      <SelectItem value="4">4th Year</SelectItem>
-                      <SelectItem value="5">5th Year</SelectItem>
-                      <SelectItem value="6">6th Year</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="section">Section</Label>
-                  <Input
-                    id="section"
-                    placeholder="e.g. BSCS-3A"
-                    value={section}
-                    onChange={(e) => setSection(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-
             <div className="space-y-1.5">
-              <Label htmlFor="proof-file">
-                {isAlumni
-                  ? "Graduation Proof (Diploma / Transcript / Alumni ID)"
-                  : "Certificate of Registration (COR) Proof"}
-              </Label>
-              <div className="mt-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-4 text-center hover:bg-muted/30 transition-colors">
-                <UploadCloud className="size-8 text-muted-foreground mb-2" />
-                <label
-                  htmlFor="proof-file"
-                  className="cursor-pointer text-xs font-medium text-primary hover:underline"
-                >
-                  {proofFile ? proofFile.name : "Click to upload proof image"}
-                </label>
-                <span className="text-[11px] text-muted-foreground mt-1">
-                  JPG, PNG, or WebP up to 5MB
-                </span>
-                <input
-                  id="proof-file"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
+              <Label htmlFor="section">Section</Label>
+              <Input
+                id="section"
+                placeholder="e.g. BSCS-3A"
+                value={section}
+                onChange={(e) => setSection(e.target.value)}
+              />
             </div>
-          </div>
+          </>
+        )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
+        <div className="space-y-1.5">
+          <Label htmlFor="proof-file">
+            {isAlumni
+              ? "Graduation Proof (Diploma / Transcript / Alumni ID)"
+              : "Certificate of Registration (COR) Proof"}
+          </Label>
+          <div className="mt-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-4 text-center hover:bg-muted/30 transition-colors">
+            <UploadCloud className="size-8 text-muted-foreground mb-2" />
+            <label
+              htmlFor="proof-file"
+              className="cursor-pointer text-xs font-medium text-primary hover:underline"
             >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Verification"}
-            </Button>
-          </DialogFooter>
-        </form>
+              {proofFile ? proofFile.name : "Click to upload proof image"}
+            </label>
+            <span className="text-[11px] text-muted-foreground mt-1">
+              JPG, PNG, or WebP up to 5MB
+            </span>
+            <input
+              id="proof-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+        </div>
+      </div>
+
+      <DialogFooter className="gap-2 sm:gap-0">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={submitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Submitting..." : "Submit Verification"}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+export default function AcademicTermUpdateDialog({
+  open,
+  onOpenChange,
+  activeAcademicTerm,
+  onSuccess,
+  allowCourseEdit = false,
+}: AcademicTermUpdateDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        {open && (
+          <AcademicTermUpdateForm
+            activeAcademicTerm={activeAcademicTerm}
+            onOpenChange={onOpenChange}
+            onSuccess={onSuccess}
+            allowCourseEdit={allowCourseEdit}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

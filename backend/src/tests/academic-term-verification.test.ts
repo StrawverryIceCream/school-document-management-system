@@ -3,6 +3,7 @@ import {
   DEFAULT_ACADEMIC_TERM,
   buildApprovedStandingPatch,
   canUserReviewAccountUpdates,
+  extractCourseCodeFromSection,
   isActiveAdminRecipient,
   needsAcademicTermVerification,
   validateRequestedStanding,
@@ -230,5 +231,15 @@ assert.deepStrictEqual(
   ["admin-1", "admin-2"],
   "Only active admins should be retained as notification recipients",
 );
+
+// 11. Course code inference from student section for missing courseId backfill
+assert.strictEqual(extractCourseCodeFromSection("BSCS-3B"), "BSCS");
+assert.strictEqual(extractCourseCodeFromSection("  bsit-1a  "), "BSIT");
+assert.strictEqual(extractCourseCodeFromSection("BSEE 2C"), "BSEE");
+assert.strictEqual(extractCourseCodeFromSection("BSCE3A"), "BSCE");
+assert.strictEqual(extractCourseCodeFromSection("3B"), null);
+assert.strictEqual(extractCourseCodeFromSection(""), null);
+assert.strictEqual(extractCourseCodeFromSection(null), null);
+assert.strictEqual(extractCourseCodeFromSection(undefined), null);
 
 console.log("Academic term verification domain tests passed successfully!");

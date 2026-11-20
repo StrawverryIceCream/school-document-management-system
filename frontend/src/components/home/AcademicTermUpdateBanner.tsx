@@ -162,6 +162,7 @@ export default function AcademicTermUpdateBanner({
           onOpenChange={setDialogOpen}
           activeAcademicTerm={activeAcademicTerm}
           onSuccess={handleSuccess}
+          allowCourseEdit
         />
       </>
     );
@@ -206,6 +207,7 @@ export default function AcademicTermUpdateBanner({
         onOpenChange={setDialogOpen}
         activeAcademicTerm={activeAcademicTerm}
         onSuccess={handleSuccess}
+        allowCourseEdit={!user?.courseId}
       />
     </>
   );

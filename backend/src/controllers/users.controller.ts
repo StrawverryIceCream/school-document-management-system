@@ -1,8 +1,21 @@
 import { type Request, type Response } from "express";
 import { db } from "../db/db.js";
-import { users, offices } from "../db/schema.js";
-import { eq, and, ilike, or, count, inArray } from "drizzle-orm";
+import { users, offices, courses } from "../db/schema.js";
+import { eq, and, ilike, or, count, inArray, sql } from "drizzle-orm";
 import { recordAuditLog } from "../services/audit.service.js";
+import {
+  RoleTransitionValidationError,
+  sanitizeRoleTransition,
+  type RoleTransitionUpdateData,
+} from "../lib/role-transition.js";
+import { extractCourseCodeFromSection } from "../lib/term-standing.js";
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
 
 interface UpdateUserBody {
   fullName?: string;
@@ -170,14 +183,20 @@ export async function updateUserById(
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (email) {
+    const normalizedEmail =
+      typeof email === "string" ? email.trim().toLowerCase() : undefined;
+
+    if (email !== undefined) {
+      if (!normalizedEmail) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
+      if (!emailRegex.test(normalizedEmail)) {
         return res.status(400).json({ error: "Invalid email format" });
       }
 
       const emailExists = await db.query.users.findFirst({
-        where: eq(users.email, email),
+        where: sql`lower(trim(${users.email})) = ${normalizedEmail}`,
       });
 
       if (emailExists && emailExists.id !== id) {
@@ -185,9 +204,14 @@ export async function updateUserById(
       }
     }
 
-    if (studentId) {
+    const normalizedStudentId =
+      typeof studentId === "string"
+        ? studentId.trim().toUpperCase() || null
+        : studentId;
+
+    if (normalizedStudentId) {
       const studentIdExists = await db.query.users.findFirst({
-        where: eq(users.studentId, studentId),
+        where: eq(users.studentId, normalizedStudentId),
       });
 
       if (studentIdExists && studentIdExists.id !== id) {
@@ -203,15 +227,32 @@ export async function updateUserById(
     }
 
     const targetRole = role ?? existingUser.role;
-    const updateData: any = {};
+    let resolvedOfficeId = officeId;
+    let resolvedOffice = office;
+    let resolvedCourseId =
+      typeof courseId === "string" ? courseId.trim() || null : courseId;
+    let resolvedCollegeId =
+      typeof collegeId === "string" ? collegeId.trim() || null : collegeId;
 
-    if (fullName !== undefined) updateData.fullName = fullName;
-    if (email !== undefined) updateData.email = email;
-    if (role !== undefined) updateData.role = role;
-    if (isActive !== undefined) updateData.isActive = isActive;
+    if (
+      resolvedCollegeId &&
+      !UUID_REGEX.test(resolvedCollegeId)
+    ) {
+      return res.status(400).json({ error: "Invalid college id" });
+    }
+
+    if (
+      targetRole === "admin" &&
+      typeof resolvedOfficeId === "string" &&
+      resolvedOfficeId &&
+      !UUID_REGEX.test(resolvedOfficeId)
+    ) {
+      return res.status(400).json({ error: "Invalid office id" });
+    }
 
     if (targetRole === "staff") {
-      const rawOfficeId = officeId !== undefined ? officeId : existingUser.officeId;
+      const rawOfficeId =
+        officeId !== undefined ? officeId : existingUser.officeId;
       const rawOffice = office !== undefined ? office : existingUser.office;
 
       if (!rawOfficeId && !rawOffice) {
@@ -220,87 +261,128 @@ export async function updateUserById(
           .json({ error: "Staff role requires an assigned office" });
       }
 
-      let resolvedOffice = null;
+      let foundOffice = null;
       if (rawOfficeId) {
-        const isUuid =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-            rawOfficeId,
-          );
-        if (isUuid) {
-          resolvedOffice = await db.query.offices.findFirst({
+        if (UUID_REGEX.test(rawOfficeId)) {
+          foundOffice = await db.query.offices.findFirst({
             where: eq(offices.id, rawOfficeId),
           });
         } else {
-          resolvedOffice = await db.query.offices.findFirst({
+          foundOffice = await db.query.offices.findFirst({
             where: or(
-              ilike(offices.code, rawOfficeId),
-              ilike(offices.name, `%${rawOfficeId}%`),
+              ilike(offices.code, escapeLikePattern(rawOfficeId)),
+              ilike(offices.name, `%${escapeLikePattern(rawOfficeId)}%`),
             ),
           });
         }
       }
 
-      if (!resolvedOffice && rawOffice) {
+      if (!foundOffice && rawOffice) {
         const legacyCode = rawOffice === "registrar" ? "OUR" : "HRMO";
-        resolvedOffice = await db.query.offices.findFirst({
+        foundOffice = await db.query.offices.findFirst({
           where: eq(offices.code, legacyCode),
         });
       }
 
-      if (!resolvedOffice) {
+      if (!foundOffice) {
         return res.status(400).json({
           error: `Assigned office "${rawOfficeId || rawOffice}" could not be found.`,
         });
       }
 
-      updateData.officeId = resolvedOffice.id;
-      updateData.office =
-        resolvedOffice.code === "OUR"
+      resolvedOfficeId = foundOffice.id;
+      resolvedOffice =
+        foundOffice.code === "OUR"
           ? "registrar"
-          : resolvedOffice.code === "HRMO"
+          : foundOffice.code === "HRMO"
             ? "hr"
             : null;
-
-      // Clear student and teacher credentials
-      updateData.studentId = null;
-      updateData.collegeId = null;
-      updateData.courseId = null;
-      updateData.section = null;
-      updateData.yearLevel = null;
-      updateData.studentStatus = null;
-      updateData.department = null;
-    } else if (targetRole === "teacher") {
-      updateData.department = department !== undefined ? department : existingUser.department;
-      // Clear staff and student credentials
-      updateData.office = null;
-      updateData.officeId = null;
-      updateData.studentId = null;
-      updateData.collegeId = null;
-      updateData.courseId = null;
-      updateData.section = null;
-      updateData.yearLevel = null;
-      updateData.studentStatus = null;
     } else if (targetRole === "student") {
-      if (studentId !== undefined) updateData.studentId = studentId;
-      if (collegeId !== undefined) updateData.collegeId = collegeId;
-      if (courseId !== undefined) updateData.courseId = courseId;
-      if (section !== undefined) updateData.section = section;
-      if (yearLevel !== undefined) updateData.yearLevel = yearLevel;
-      if (studentStatus !== undefined) updateData.studentStatus = studentStatus;
-      // Clear staff and teacher credentials
-      updateData.office = null;
-      updateData.officeId = null;
-      updateData.department = null;
-    } else if (targetRole === "admin") {
-      updateData.office = office !== undefined ? office : null;
-      updateData.officeId = officeId !== undefined ? officeId : null;
-      updateData.department = department !== undefined ? department : null;
-      updateData.studentId = null;
-      updateData.yearLevel = null;
-      updateData.section = null;
-      updateData.studentStatus = null;
-      updateData.courseId = null;
-      if (collegeId !== undefined) updateData.collegeId = collegeId;
+      const explicitCourseProvided =
+        typeof resolvedCourseId === "string" && resolvedCourseId.length > 0;
+      const rawCourseRef = explicitCourseProvided
+        ? resolvedCourseId
+        : resolvedCourseId === null
+          ? null
+          : existingUser.courseId ||
+            extractCourseCodeFromSection(
+              section !== undefined ? section : existingUser.section,
+            );
+
+      if (rawCourseRef) {
+        const escapedCourseRef = escapeLikePattern(rawCourseRef);
+        const preferredCollegeId = resolvedCollegeId ?? existingUser.collegeId;
+        const foundCourse = UUID_REGEX.test(rawCourseRef)
+          ? await db.query.courses.findFirst({
+              where: eq(courses.id, rawCourseRef),
+              columns: { id: true, collegeId: true },
+            })
+          : (preferredCollegeId
+              ? await db.query.courses.findFirst({
+                  where: and(
+                    eq(courses.isActive, true),
+                    eq(courses.collegeId, preferredCollegeId),
+                    ilike(courses.code, escapedCourseRef),
+                  ),
+                  columns: { id: true, collegeId: true },
+                })
+              : null) ??
+            (await db.query.courses.findFirst({
+              where: and(
+                eq(courses.isActive, true),
+                ilike(courses.code, escapedCourseRef),
+              ),
+              columns: { id: true, collegeId: true },
+            }));
+
+        if (explicitCourseProvided && !foundCourse) {
+          return res.status(400).json({
+            error: `Assigned degree program "${rawCourseRef}" could not be found.`,
+          });
+        }
+
+        if (foundCourse) {
+          resolvedCourseId = foundCourse.id;
+          resolvedCollegeId = foundCourse.collegeId;
+        }
+      }
+    }
+
+    let updateData: RoleTransitionUpdateData;
+    try {
+      updateData = sanitizeRoleTransition(existingUser, {
+        ...(fullName !== undefined ? { fullName: fullName.trim() } : {}),
+        ...(normalizedEmail !== undefined ? { email: normalizedEmail } : {}),
+        ...(role !== undefined ? { role } : {}),
+        ...(isActive !== undefined ? { isActive } : {}),
+        ...(normalizedStudentId !== undefined
+          ? { studentId: normalizedStudentId }
+          : {}),
+        ...(resolvedCollegeId !== undefined
+          ? { collegeId: resolvedCollegeId }
+          : {}),
+        ...(resolvedCourseId !== undefined
+          ? { courseId: resolvedCourseId }
+          : {}),
+        ...(section !== undefined ? { section } : {}),
+        ...(yearLevel !== undefined
+          ? {
+              yearLevel:
+                yearLevel === null ? null : Number(yearLevel),
+            }
+          : {}),
+        ...(studentStatus !== undefined ? { studentStatus } : {}),
+        ...(department !== undefined ? { department } : {}),
+        ...(resolvedOffice !== undefined ? { office: resolvedOffice } : {}),
+        ...(resolvedOfficeId !== undefined
+          ? { officeId: resolvedOfficeId }
+          : {}),
+      });
+    } catch (validationErr) {
+      if (validationErr instanceof RoleTransitionValidationError) {
+        return res.status(400).json({ error: validationErr.message });
+      }
+      throw validationErr;
     }
 
     await db.update(users).set(updateData).where(eq(users.id, id));

@@ -74,6 +74,15 @@ export function validateRequestedStanding(input: {
   return { valid: true };
 }
 
+export function extractCourseCodeFromSection(
+  section?: string | null,
+): string | null {
+  const trimmed = section?.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/^([A-Za-z]{2,15})(?:[-\s_]+[A-Za-z0-9]|\d)/);
+  return match?.[1] ? match[1].toUpperCase() : null;
+}
+
 export function canUserReviewAccountUpdates(
   user: { role?: string | null } | null | undefined,
 ): boolean {

@@ -3,6 +3,7 @@ import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
   accountUpdateRequests,
+  courses,
   users,
 } from "../db/schema.js";
 import { getActiveAcademicTerm } from "./settings.controller.js";
@@ -15,6 +16,7 @@ import {
 import {
   buildApprovedStandingPatch,
   canUserReviewAccountUpdates,
+  extractCourseCodeFromSection,
   validateRequestedStanding,
 } from "../lib/term-standing.js";
 
@@ -23,6 +25,50 @@ const UUID_REGEX =
 
 function isUuid(val: unknown): val is string {
   return typeof val === "string" && UUID_REGEX.test(val);
+}
+
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
+async function resolveCourseForStudent(
+  courseRef?: unknown,
+  section?: string | null,
+  preferredCollegeId?: string | null,
+) {
+  if (typeof courseRef === "string" && courseRef.trim()) {
+    const trimmed = courseRef.trim();
+    return db.query.courses.findFirst({
+      where: isUuid(trimmed)
+        ? eq(courses.id, trimmed)
+        : and(
+            eq(courses.isActive, true),
+            ilike(courses.code, escapeLikePattern(trimmed)),
+          ),
+      columns: { id: true, code: true, collegeId: true },
+    });
+  }
+
+  const inferredCode = extractCourseCodeFromSection(section);
+  if (!inferredCode) return null;
+
+  const escaped = escapeLikePattern(inferredCode);
+  if (preferredCollegeId) {
+    const collegeMatch = await db.query.courses.findFirst({
+      where: and(
+        eq(courses.isActive, true),
+        eq(courses.collegeId, preferredCollegeId),
+        ilike(courses.code, escaped),
+      ),
+      columns: { id: true, code: true, collegeId: true },
+    });
+    if (collegeMatch) return collegeMatch;
+  }
+
+  return db.query.courses.findFirst({
+    where: and(eq(courses.isActive, true), ilike(courses.code, escaped)),
+    columns: { id: true, code: true, collegeId: true },
+  });
 }
 
 function parsePagination(page?: unknown, limit?: unknown) {
@@ -59,7 +105,7 @@ export async function createAccountUpdate(req: Request, res: Response) {
       });
     }
 
-    const { requestedStudentStatus, requestedSection } = req.body;
+    const { requestedStudentStatus, requestedSection, courseId } = req.body;
     const rawYear = req.body.requestedYearLevel;
     const requestedYearLevel =
       rawYear !== undefined && rawYear !== null && rawYear !== ""
@@ -81,7 +127,7 @@ export async function createAccountUpdate(req: Request, res: Response) {
       });
     }
 
-    // Check for existing pending request
+    // Check for existing pending request BEFORE resolving or uploading files
     const existingPending = await db.query.accountUpdateRequests.findFirst({
       where: and(
         eq(accountUpdateRequests.userId, user.id),
@@ -96,8 +142,40 @@ export async function createAccountUpdate(req: Request, res: Response) {
     }
 
     const activeAcademicTerm = await getActiveAcademicTerm();
-    const proofFileUrl = await uploadCorProof(req.file.buffer, user.id);
     const isAlumni = requestedStudentStatus === "alumni";
+    const trimmedSection =
+      !isAlumni && typeof requestedSection === "string"
+        ? requestedSection.trim() || null
+        : null;
+
+    const hasExplicitCourse =
+      typeof courseId === "string" && courseId.trim().length > 0;
+    const canModifyCourse =
+      !user.courseId ||
+      (hasExplicitCourse && user.verifiedAcademicTerm !== activeAcademicTerm);
+
+    const resolvedCourse = canModifyCourse
+      ? await resolveCourseForStudent(
+          hasExplicitCourse ? courseId : null,
+          trimmedSection,
+          user.collegeId,
+        )
+      : null;
+
+    if (hasExplicitCourse && canModifyCourse && !resolvedCourse) {
+      return res.status(400).json({
+        error: "Selected degree program could not be found.",
+      });
+    }
+
+    if (!user.courseId && !resolvedCourse && trimmedSection) {
+      return res.status(400).json({
+        error:
+          "Degree program (course) is required when a section is specified. Please select your college and degree program.",
+      });
+    }
+
+    const proofFileUrl = await uploadCorProof(req.file.buffer, user.id);
 
     const [created] = await db
       .insert(accountUpdateRequests)
@@ -122,6 +200,17 @@ export async function createAccountUpdate(req: Request, res: Response) {
 
     if (!created) {
       return res.status(500).json({ error: "Failed to submit verification request" });
+    }
+
+    if (resolvedCourse && canModifyCourse) {
+      await db
+        .update(users)
+        .set({
+          courseId: resolvedCourse.id,
+          collegeId: resolvedCourse.collegeId,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, user.id));
     }
 
     void notifyAdmins({
@@ -317,24 +406,63 @@ export async function reviewAccountUpdate(req: Request, res: Response) {
       });
     }
 
+    let approvedPatch: ReturnType<typeof buildApprovedStandingPatch> | null = null;
+    let backfilledPlacement: { courseId: string; collegeId: string } | null = null;
+
+    if (decision === "approved") {
+      const targetStudent = await db.query.users.findFirst({
+        where: eq(users.id, targetRequest.userId),
+        columns: { id: true, role: true, courseId: true, collegeId: true },
+      });
+      if (!targetStudent) {
+        return res.status(404).json({ error: "Student account not found" });
+      }
+      if (targetStudent.role !== "student") {
+        return res.status(400).json({
+          error:
+            "Account is no longer a student and cannot receive student standing updates.",
+        });
+      }
+
+      approvedPatch = buildApprovedStandingPatch({
+        academicTerm: targetRequest.academicTerm,
+        requestedStudentStatus: targetRequest.requestedStudentStatus,
+        requestedYearLevel: targetRequest.requestedYearLevel,
+        requestedSection: targetRequest.requestedSection,
+      });
+
+      if (!targetStudent.courseId) {
+        const matchedCourse = await resolveCourseForStudent(
+          null,
+          approvedPatch.section,
+          targetStudent.collegeId,
+        );
+        if (matchedCourse) {
+          backfilledPlacement = {
+            courseId: matchedCourse.id,
+            collegeId: matchedCourse.collegeId,
+          };
+        } else if (approvedPatch.section) {
+          return res.status(400).json({
+            error:
+              "Student account has no assigned degree program (course). Please assign their course in Edit User Details before approving.",
+          });
+        }
+      }
+    }
+
     let updatedRecord;
 
     await db.transaction(async (tx) => {
-      if (decision === "approved") {
-        const patch = buildApprovedStandingPatch({
-          academicTerm: targetRequest.academicTerm,
-          requestedStudentStatus: targetRequest.requestedStudentStatus,
-          requestedYearLevel: targetRequest.requestedYearLevel,
-          requestedSection: targetRequest.requestedSection,
-        });
-
+      if (decision === "approved" && approvedPatch) {
         await tx
           .update(users)
           .set({
-            studentStatus: patch.studentStatus as any,
-            yearLevel: patch.yearLevel,
-            section: patch.section,
-            verifiedAcademicTerm: patch.verifiedAcademicTerm,
+            studentStatus: approvedPatch.studentStatus as any,
+            yearLevel: approvedPatch.yearLevel,
+            section: approvedPatch.section,
+            verifiedAcademicTerm: approvedPatch.verifiedAcademicTerm,
+            ...(backfilledPlacement ?? {}),
             updatedAt: new Date(),
           })
           .where(eq(users.id, targetRequest.userId));
