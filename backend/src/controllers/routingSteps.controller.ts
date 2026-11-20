@@ -7,6 +7,7 @@ import {
   users,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
+import { isSelfRequestAction } from "../lib/request-guards.js";
 
 const STEP_STATUSES = routingStepStatusEnum.enumValues;
 type RoutingStepStatus = (typeof STEP_STATUSES)[number];
@@ -64,6 +65,11 @@ export async function updateRoutingStepStatus(
     const currentStep = await db.query.requestRoutingSteps.findFirst({
       where: (table, { and, eq }) =>
         and(eq(table.id, stepId), eq(table.requestId, requestId)),
+      with: {
+        request: {
+          columns: { userId: true },
+        },
+      },
     });
 
     if (!currentStep) {
@@ -83,13 +89,11 @@ export async function updateRoutingStepStatus(
     if (!caller) {
       return res.status(401).json({ error: "Invalid session" });
     }
-    
-    const request = await db.query.documentRequests.findFirst({
-      where: (table, { eq }) => eq(table.id, requestId),
-      columns: { userId: true },
-    });
 
-    if (request?.userId === callerId) {
+    if (
+      currentStep.request &&
+      isSelfRequestAction(currentStep.request.userId, callerId)
+    ) {
       void recordAuditLog({
         actorId: callerId,
         action: "routing_step.self_processing_blocked",

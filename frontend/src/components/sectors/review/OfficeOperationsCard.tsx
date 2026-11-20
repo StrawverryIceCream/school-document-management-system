@@ -87,6 +87,13 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
     request.window?.office ||
     "Designated Office";
 
+  const isOwnRequest = Boolean(
+    authContext?.user && authContext.user.id === request.userId,
+  );
+  const assignableStaff = staffMembers.filter(
+    (staff) => staff.id !== request.userId,
+  );
+
   if (request.status === "cancelled") {
     return null;
   }
@@ -144,52 +151,58 @@ export function OfficeOperationsCard({ request }: OfficeOperationsCardProps) {
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            {authContext?.user && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-[11px] gap-1 cursor-pointer"
-                disabled={isAssigning || currentAssignee?.id === authContext.user.id}
-                onClick={() => handleAssign(authContext.user!.id)}
-              >
-                <UserCheck className="size-3" />
-                Assign to me
-              </Button>
-            )}
+          {isOwnRequest ? (
+            <p className="pt-1 text-[11px] text-muted-foreground">
+              You cannot assign or change custody on your own request. Another staff member or admin must handle it.
+            </p>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {authContext?.user && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] gap-1 cursor-pointer"
+                  disabled={isAssigning || currentAssignee?.id === authContext.user.id}
+                  onClick={() => handleAssign(authContext.user!.id)}
+                >
+                  <UserCheck className="size-3" />
+                  Assign to me
+                </Button>
+              )}
 
-            {staffMembers.length > 0 && (
-              <select
-                aria-label="Delegate request to office colleague"
-                className="h-7 rounded-md border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-1 focus:ring-ring"
-                value={currentAssignee?.id ?? ""}
-                disabled={isAssigning}
-                onChange={(e) => handleAssign(e.target.value || null)}
-              >
-                <option value="">-- Delegate to colleague --</option>
-                {staffMembers.map((staff) => (
-                  <option key={staff.id} value={staff.id}>
-                    {staff.fullName} ({staff.role})
-                  </option>
-                ))}
-              </select>
-            )}
+              {assignableStaff.length > 0 && (
+                <select
+                  aria-label="Delegate request to office colleague"
+                  className="h-7 rounded-md border border-input bg-background px-2 text-[11px] focus:outline-none focus:ring-1 focus:ring-ring"
+                  value={currentAssignee?.id ?? ""}
+                  disabled={isAssigning}
+                  onChange={(e) => handleAssign(e.target.value || null)}
+                >
+                  <option value="">-- Delegate to colleague --</option>
+                  {assignableStaff.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.fullName} ({staff.role})
+                    </option>
+                  ))}
+                </select>
+              )}
 
-            {currentAssignee && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 text-[11px] text-destructive hover:text-destructive gap-1 px-2 cursor-pointer"
-                disabled={isAssigning}
-                onClick={() => handleAssign(null)}
-              >
-                <UserX className="size-3" />
-                Unassign
-              </Button>
-            )}
-          </div>
+              {currentAssignee && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-[11px] text-destructive hover:text-destructive gap-1 px-2 cursor-pointer"
+                  disabled={isAssigning}
+                  onClick={() => handleAssign(null)}
+                >
+                  <UserX className="size-3" />
+                  Unassign
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

@@ -94,7 +94,8 @@ async function handleResponse<T>(res: Response, url: string): Promise<T> {
     const text = await res.text().catch(() => "");
     let message = "";
     try {
-      message = JSON.parse(text)?.error ?? "";
+      const parsed = JSON.parse(text);
+      message = typeof parsed?.error === "string" ? parsed.error : "";
     } catch {
       // response wasn't JSON, fall back below
     }
@@ -300,14 +301,5 @@ export async function resubmitMyRequest(
     body: formData,
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(
-      typeof body?.error === "string" && body.error
-        ? body.error
-        : `Resubmission failed (${res.status})`,
-    );
-  }
-
-  return res.json();
+  return handleResponse<DocumentRequestRow>(res, url);
 }

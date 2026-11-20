@@ -4,9 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import PageHeader from "@/components/shared/PageHeader";
 import SmallDocumentCard from "@/components/home/SmallDocumentCard";
 import DuplicateRequestDialog from "@/components/requests/new/DuplicateRequestDialog";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import { initializeDocumentTypeItem } from "@/lib/documents";
+import { isDocumentEligible } from "@/lib/documents/eligibility";
 import {
   findActiveDuplicateRequest,
   getActiveDocumentTypeIds,
@@ -22,13 +24,18 @@ function AvailableDocuments({
   onApply,
 }: DocumentTypesSectionProps) {
   const navigate = useNavigate();
-  const { documents, totalCount, loading, error } = useDocument();
+  const { user } = useAuth();
+  const { documents, loading, error } = useDocument();
   const { requests } = useMyRequest();
   const [duplicateTarget, setDuplicateTarget] = useState<{
     id: string;
     name: string;
   } | null>(null);
 
+  const eligibleDocuments = useMemo(
+    () => documents.filter((doc) => isDocumentEligible(doc, user)),
+    [documents, user],
+  );
   const activeDocumentTypeIds = useMemo(
     () => getActiveDocumentTypeIds(requests),
     [requests],
@@ -45,7 +52,7 @@ function AvailableDocuments({
     }
     onApply(documentId);
   }
-  const documentItems = documents.slice(0, 4).map((document) =>
+  const documentItems = eligibleDocuments.slice(0, 4).map((document) =>
     initializeDocumentTypeItem({
       id: String(document.id),
       title: document.name,
@@ -68,7 +75,7 @@ function AvailableDocuments({
           to={exploreHref}
           className="flex shrink-0 items-center gap-2 text-base font-semibold text-primary hover:underline"
         >
-          Explore all {totalCount} credentials
+          Explore all {eligibleDocuments.length} credentials
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </PageHeader>
@@ -87,7 +94,7 @@ function AvailableDocuments({
         >
           Loading available documents...
         </p>
-      ) : documents.length === 0 ? (
+      ) : eligibleDocuments.length === 0 ? (
         <p className="rounded-2xl bg-muted p-6 text-sm text-muted-foreground">
           No documents are available to request right now.
         </p>

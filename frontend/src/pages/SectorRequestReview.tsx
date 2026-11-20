@@ -15,6 +15,7 @@ import { StudentInfoCard } from "@/components/sectors/review/StudentInfoCard";
 import { OfficeOperationsCard } from "@/components/sectors/review/OfficeOperationsCard";
 import { WorkflowPipelineCard } from "@/components/sectors/review/WorkflowPipelineCard";
 import { getOffice } from "@/lib/sectors/sectors-config";
+import { useAuth } from "@/hooks/useAuth";
 import { updateRequestStatus } from "@/api/requests";
 import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/requests";
 import { REVIEW_ACTIONS } from "@/lib/sectors/review/constants";
@@ -26,6 +27,7 @@ import type { MissedRequirement, RequestStatus } from "@/types";
 export default function SectorRequestReview() {
   const { sectorId, divisionId, officeId, requestId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const office =
     sectorId && divisionId && officeId
@@ -136,6 +138,7 @@ export default function SectorRequestReview() {
   }
 
   const student = request.user;
+  const isOwnRequest = Boolean(user && request.userId === user.id);
   const documentType = request.documentType;
   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
   const configuredFields = documentType?.requiredFields ?? [];
@@ -331,6 +334,7 @@ export default function SectorRequestReview() {
           <RegistrarReviewCard
             actions={actions}
             statusLabel={statusConfig.label}
+            isOwnRequest={isOwnRequest}
             releaseDate={releaseDate}
             onReleaseDateChange={setReleaseDate}
             releasePdfUrl={releasePdfUrl}
