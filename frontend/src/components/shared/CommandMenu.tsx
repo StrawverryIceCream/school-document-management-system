@@ -200,22 +200,19 @@ export function CommandMenu() {
       perform: () => window.dispatchEvent(new CustomEvent("open-settings")),
     });
 
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
     list.push({
       id: "action-toggle-theme",
-      title: theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
+      title: isDark ? "Switch to Light Mode" : "Switch to Dark Mode",
       category: "Actions",
-      icon: theme === "dark" ? Sun : Moon,
+      icon: isDark ? Sun : Moon,
       shortcut: "T",
-      perform: () => {
-        const nextTheme = theme === "dark" ? "light" : "dark";
-        setTheme(nextTheme);
-
-        // Apply immediately in the Quick Jump action so a Vercel deployment
-        // with stale theme-provider state still updates the visible interface.
-        localStorage.setItem("vite-ui-theme", nextTheme);
-        document.documentElement.classList.remove("light", "dark");
-        document.documentElement.classList.add(nextTheme);
-      },
+      perform: () => setTheme(isDark ? "light" : "dark"),
     });
 
     list.push({
