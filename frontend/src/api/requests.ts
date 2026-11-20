@@ -92,7 +92,16 @@ export interface PublicRequestStatus {
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`${url} responded ${res.status}${text ? `: ${text}` : ""}`);
+    let message = "";
+    try {
+      const parsed = JSON.parse(text);
+      message = typeof parsed?.error === "string" ? parsed.error : "";
+    } catch {
+      // response wasn't JSON, fall back below
+    }
+    throw new Error(
+      message || `${url} responded ${res.status}${text ? `: ${text}` : ""}`,
+    );
   }
   return res.json();
 }
@@ -292,14 +301,5 @@ export async function resubmitMyRequest(
     body: formData,
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(
-      typeof body?.error === "string" && body.error
-        ? body.error
-        : `Resubmission failed (${res.status})`,
-    );
-  }
-
-  return res.json();
+  return handleResponse<DocumentRequestRow>(res, url);
 }

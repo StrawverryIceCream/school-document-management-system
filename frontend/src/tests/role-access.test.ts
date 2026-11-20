@@ -4,7 +4,11 @@ import {
   getDefaultHomeRoute,
   getStaffWorkspaceLink,
   isRegistrarStaff,
+  REQUESTER_ROLES,
 } from "../lib/navigation/role-access";
+
+// 0. Requester role allowlist includes institutional staff & admins
+assert.deepEqual([...REQUESTER_ROLES], ["student", "teacher", "admin", "staff"]);
 
 // 1. Default home routes per role
 assert.equal(getDefaultHomeRoute("student"), "/home");

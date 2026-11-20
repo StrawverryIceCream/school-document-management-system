@@ -28,6 +28,11 @@ import {
 } from "../lib/resubmission.js";
 import { getActiveAcademicTerm } from "./settings.controller.js";
 import { needsAcademicTermVerification } from "../lib/term-standing.js";
+import {
+  isSelfRequestAction,
+  isUserEligibleForDocument,
+  validateRequestAssignmentActors,
+} from "../lib/request-guards.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -520,9 +525,14 @@ export async function getRequestById(
       return res.status(404).json({ error: "Request not found" });
     }
 
+    const viewerId = getSessionUserId(req);
+    const isOwnRequest = Boolean(
+      viewerId && isSelfRequestAction(request.userId, viewerId),
+    );
+
     return res.json({
       ...request,
-      availableTransitions: STATUS_TRANSITIONS[request.status],
+      availableTransitions: isOwnRequest ? [] : STATUS_TRANSITIONS[request.status],
     });
   } catch (err) {
     console.error("[getRequestById] error:", err);
@@ -599,6 +609,21 @@ export async function updateRequestStatus(
 
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
+    }
+    
+    if (isSelfRequestAction(request.userId, staffId)) {
+      void recordAuditLog({
+        actorId: staffId,
+        action: "request.self_processing_blocked",
+        entityType: "request",
+        entityId: id,
+        ipAddress: req.ip,
+        metadata: { attemptedStatus: status, fromStatus: request.status },
+      });
+      return res.status(403).json({
+        error:
+          "You can't process your own request. Another staff member or admin must handle it.",
+      });
     }
 
     if (!STATUS_TRANSITIONS[request.status].includes(status)) {
@@ -920,10 +945,9 @@ export async function createRequest(req: Request, res: Response) {
       return res.status(404).json({ error: "Document type not found" });
     }
 
-    if (!documentType.isActive) {
-      return res
-        .status(400)
-        .json({ error: "This document type is not available for requests" });
+    const eligibility = isUserEligibleForDocument(documentType, requestingUser);
+    if (!eligibility.eligible) {
+      return res.status(eligibility.status).json({ error: eligibility.error });
     }
 
     const fields = Array.isArray(documentType.requiredFields)
@@ -1350,6 +1374,27 @@ export async function assignRequest(
 
     if (!actor || (actor.role !== "admin" && actor.role !== "staff")) {
       return res.status(403).json({ error: "Forbidden: only staff and admins can assign requests" });
+    }
+
+    const assignmentGuard = validateRequestAssignmentActors(
+      request.userId,
+      actorId,
+      targetUserId,
+    );
+    if (!assignmentGuard.allowed) {
+      if (assignmentGuard.auditAction) {
+        void recordAuditLog({
+          actorId,
+          action: assignmentGuard.auditAction,
+          entityType: "request",
+          entityId: id,
+          ipAddress: req.ip,
+          metadata: { targetUserId: targetUserId ?? null },
+        });
+      }
+      return res
+        .status(assignmentGuard.status)
+        .json({ error: assignmentGuard.error });
     }
 
     let targetUser: {

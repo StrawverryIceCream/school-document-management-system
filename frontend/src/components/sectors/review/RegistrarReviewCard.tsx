@@ -17,6 +17,7 @@ const STAFF_NOTES_MAX_LENGTH = 1000;
 export function RegistrarReviewCard({
   actions,
   statusLabel,
+  isOwnRequest = false,
   releaseDate,
   onReleaseDateChange,
   releasePdfUrl = "",
@@ -30,6 +31,7 @@ export function RegistrarReviewCard({
 }: {
   actions: typeof REVIEW_ACTIONS;
   statusLabel: string;
+  isOwnRequest?: boolean;
   releaseDate: string;
   onReleaseDateChange: (value: string) => void;
   releasePdfUrl?: string;
@@ -175,8 +177,9 @@ export function RegistrarReviewCard({
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No status changes are available for a {statusLabel.toLowerCase()}{" "}
-            request.
+            {isOwnRequest
+              ? "You cannot process your own request. Another authorized staff member or admin must review it."
+              : `No status changes are available for a ${statusLabel.toLowerCase()} request.`}
           </p>
         )}
 
