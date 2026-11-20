@@ -13,6 +13,10 @@ import {
   STUDENT_STATUS_OPTIONS,
   type StudentStatus,
 } from "@/lib/auth/arch-registration";
+import {
+  formatStudentId,
+  STUDENT_ID_PREFIX,
+} from "@/lib/auth/format-student-id";
 import { getAllColleges } from "@/api/colleges";
 import { getAllCourses } from "@/api/courses";
 import type { College, Course } from "@/types";
@@ -94,10 +98,10 @@ function StudentFields({
     };
   }, []);
 
-  // Filter courses by selected college if one is picked
+  // Filter courses by selected college; empty until a college is chosen
   const filteredCourses = collegeId
     ? courses.filter((c) => c.collegeId === collegeId)
-    : courses;
+    : [];
 
   function handleCollegeChange(newCollegeId: string) {
     setCollegeId(newCollegeId);
@@ -106,14 +110,6 @@ function StudentFields({
     );
     if (!courseStillValid) {
       setCourseId("");
-    }
-  }
-
-  function handleCourseChange(newCourseId: string) {
-    setCourseId(newCourseId);
-    const selectedCourse = courses.find((c) => c.id === newCourseId);
-    if (selectedCourse && selectedCourse.collegeId !== collegeId) {
-      setCollegeId(selectedCourse.collegeId);
     }
   }
 
@@ -133,12 +129,15 @@ function StudentFields({
           <Input
             className="uppercase font-mono"
             id="student-id"
-            onChange={(e) => setStudentId(e.target.value)}
-            placeholder="TUPM-24-6969"
+            onChange={(e) => setStudentId(formatStudentId(e.target.value))}
+            onFocus={() => {
+              if (!studentId) setStudentId(STUDENT_ID_PREFIX);
+            }}
+            placeholder="TUPM-24-1234"
             value={studentId}
           />
           <p className="mt-1 text-xs text-muted-foreground">
-            Found on your university RFID or registration card
+            Format: TUPM-XX-XXXX or TUPM-XX-XXXXX (from your university RFID)
           </p>
         </div>
         <div>
@@ -204,10 +203,8 @@ function StudentFields({
             Degree Program
           </Label>
           <Select
-            disabled={
-              loading || (filteredCourses.length === 0 && Boolean(collegeId))
-            }
-            onValueChange={handleCourseChange}
+            disabled={loading || !collegeId || filteredCourses.length === 0}
+            onValueChange={setCourseId}
             value={courseId}
           >
             <SelectTrigger id="course-program">
@@ -215,9 +212,11 @@ function StudentFields({
                 placeholder={
                   loading
                     ? "Loading programs..."
-                    : filteredCourses.length === 0
-                      ? "No programs found for college"
-                      : "Select degree program..."
+                    : !collegeId
+                      ? "Select a college first..."
+                      : filteredCourses.length === 0
+                        ? "No programs found for college"
+                        : "Select degree program..."
                 }
               />
             </SelectTrigger>
