@@ -239,14 +239,14 @@ export function CommandMenu() {
     );
   }, [items, query]);
 
-  // Reset selected index when query changes
-  useEffect(() => {
+  const updateQuery = (nextQuery: string) => {
+    setQuery(nextQuery);
     setSelectedIndex(0);
-  }, [query]);
+  };
 
   const handleSelect = (item: CommandItem) => {
     setOpen(false);
-    setQuery("");
+    updateQuery("");
     item.perform();
   };
 
@@ -287,14 +287,14 @@ export function CommandMenu() {
             autoFocus
             placeholder="Type a command or jump to page..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             className="h-8 flex-1 border-none bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground"
           />
           {query ? (
             <button
               type="button"
-              onClick={() => setQuery("")}
+              onClick={() => updateQuery("")}
               className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
               aria-label="Clear search"
             >
