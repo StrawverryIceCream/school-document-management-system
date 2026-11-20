@@ -3,6 +3,7 @@ import {
   DEFAULT_ACADEMIC_TERM,
   buildApprovedStandingPatch,
   canUserReviewAccountUpdates,
+  isActiveAdminRecipient,
   needsAcademicTermVerification,
   validateRequestedStanding,
 } from "../lib/term-standing.js";
@@ -158,6 +159,76 @@ assert.strictEqual(
   canUserReviewAccountUpdates(undefined),
   false,
   "Undefined user must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: null }),
+  false,
+  "Null role must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: "" }),
+  false,
+  "Empty role must not be permitted to review account updates",
+);
+
+// 10. Admin notification recipient filter selects active admins only
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "admin", isActive: true }),
+  true,
+  "Active admin must be selected as notification recipient",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "admin", isActive: false }),
+  false,
+  "Inactive admin must not receive admin notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "admin", isActive: null }),
+  false,
+  "Admin with null isActive must not receive admin notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "admin" }),
+  false,
+  "Admin missing isActive must not receive admin notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "staff", isActive: true }),
+  false,
+  "Active staff must not receive admin-only notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "student", isActive: true }),
+  false,
+  "Active student must not receive admin-only notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient({ role: "teacher", isActive: true }),
+  false,
+  "Active teacher must not receive admin-only notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient(null),
+  false,
+  "Null user must not receive admin notifications",
+);
+assert.strictEqual(
+  isActiveAdminRecipient(undefined),
+  false,
+  "Undefined user must not receive admin notifications",
+);
+
+const mixedCandidates = [
+  { id: "admin-1", role: "admin", isActive: true },
+  { id: "admin-inactive", role: "admin", isActive: false },
+  { id: "registrar-staff", role: "staff", isActive: true },
+  { id: "student-1", role: "student", isActive: true },
+  { id: "admin-2", role: "admin", isActive: true },
+];
+assert.deepStrictEqual(
+  mixedCandidates.filter(isActiveAdminRecipient).map((u) => u.id),
+  ["admin-1", "admin-2"],
+  "Only active admins should be retained as notification recipients",
 );
 
 console.log("Academic term verification domain tests passed successfully!");

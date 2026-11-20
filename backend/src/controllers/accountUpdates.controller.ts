@@ -10,7 +10,7 @@ import { uploadCorProof } from "../services/storage.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import {
   createAndDispatchNotification,
-  notifyOfficeStaff,
+  notifyAdmins,
 } from "../services/notification.service.js";
 import {
   buildApprovedStandingPatch,
@@ -91,7 +91,7 @@ export async function createAccountUpdate(req: Request, res: Response) {
     if (existingPending) {
       return res.status(400).json({
         error:
-          "You already have a pending verification request. Please wait for registrar review.",
+          "You already have a pending verification request. Please wait for administrator review.",
       });
     }
 
@@ -124,11 +124,13 @@ export async function createAccountUpdate(req: Request, res: Response) {
       return res.status(500).json({ error: "Failed to submit verification request" });
     }
 
-    void notifyOfficeStaff({
-      officeCode: "registrar",
+    void notifyAdmins({
+      senderId: user.id,
       title: "New Academic Term Verification",
       message: `${user.fullName} submitted an academic term verification request for ${activeAcademicTerm}.`,
       type: "system",
+    }).catch((err) => {
+      console.error("[createAccountUpdate] notifyAdmins error:", err);
     });
 
     void recordAuditLog({
@@ -226,6 +228,7 @@ export async function listAccountUpdates(req: Request, res: Response) {
         where: whereClause,
         with: {
           user: {
+            columns: { passwordHash: false },
             with: {
               college: true,
               course: true,

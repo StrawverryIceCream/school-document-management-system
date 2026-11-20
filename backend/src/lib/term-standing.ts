@@ -79,3 +79,9 @@ export function canUserReviewAccountUpdates(
 ): boolean {
   return user?.role === "admin";
 }
+
+export function isActiveAdminRecipient(
+  user: { role?: string | null; isActive?: boolean | null } | null | undefined,
+): boolean {
+  return user?.role === "admin" && user?.isActive === true;
+}
