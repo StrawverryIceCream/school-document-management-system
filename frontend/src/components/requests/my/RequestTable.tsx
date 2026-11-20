@@ -4,6 +4,7 @@ import RequestActionButton from "./RequestActionButton";
 import RequestStatusBadge from "./RequestStatusBadge";
 import RequestTimelineDialog from "./RequestTimelineDialog";
 import { ClaimSlipDialog } from "./ClaimSlipDialog";
+import ResubmitRequestDialog from "./ResubmitRequestDialog";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import {
@@ -28,10 +29,13 @@ export default function RequestsTable({
   page,
   onPageChange,
 }: RequestsTableProps) {
-  const { filteredRequests, loading, error } = useMyRequest();
+  const { filteredRequests, loading, error, refreshMyRequests } =
+    useMyRequest();
   const [selectedTimelineRequest, setSelectedTimelineRequest] =
     useState<MyRequestWithDocumentName | null>(null);
   const [selectedClaimSlipRequest, setSelectedClaimSlipRequest] =
+    useState<MyRequestWithDocumentName | null>(null);
+  const [selectedResubmitRequest, setSelectedResubmitRequest] =
     useState<MyRequestWithDocumentName | null>(null);
 
   const columns: DataTableColumn<MyRequestWithDocumentName>[] = useMemo(
@@ -134,11 +138,21 @@ export default function RequestsTable({
           setSelectedTimelineRequest(null);
           setSelectedClaimSlipRequest(req);
         }}
+        onResubmit={(req) => {
+          setSelectedTimelineRequest(null);
+          setSelectedResubmitRequest(req);
+        }}
       />
       <ClaimSlipDialog
         request={selectedClaimSlipRequest}
         open={selectedClaimSlipRequest !== null}
         onOpenChange={(open) => !open && setSelectedClaimSlipRequest(null)}
+      />
+      <ResubmitRequestDialog
+        request={selectedResubmitRequest}
+        open={selectedResubmitRequest !== null}
+        onOpenChange={(open) => !open && setSelectedResubmitRequest(null)}
+        onSuccess={refreshMyRequests}
       />
     </>
   );

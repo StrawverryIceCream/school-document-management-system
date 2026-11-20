@@ -7,11 +7,21 @@ export interface DuplicateCandidate {
   status: RequestStatus;
   createdAt: string;
   documentName?: string;
+  resubmissionAllowed?: boolean;
 }
 
 const OPEN_STATUS_SET = new Set<RequestStatus>(openRequestStatuses);
 
-/** Returns the most recent in-flight request for the given document type, or null if none. */
+function isActiveForDuplicateGuard(
+  req: Pick<DuplicateCandidate, "status" | "resubmissionAllowed">,
+): boolean {
+  return (
+    OPEN_STATUS_SET.has(req.status) ||
+    (req.status === "rejected" && Boolean(req.resubmissionAllowed))
+  );
+}
+
+/** Returns the most recent active or resubmittable request for the given document type, or null if none. */
 export function findActiveDuplicateRequest<T extends DuplicateCandidate>(
   requests: readonly T[],
   documentTypeId: string | undefined | null,
@@ -23,7 +33,7 @@ export function findActiveDuplicateRequest<T extends DuplicateCandidate>(
 
   for (const req of requests) {
     if (req.documentTypeId !== documentTypeId) continue;
-    if (!OPEN_STATUS_SET.has(req.status)) continue;
+    if (!isActiveForDuplicateGuard(req)) continue;
 
     const ms = Date.parse(req.createdAt);
     const comparable = Number.isNaN(ms) ? 0 : ms;
@@ -36,13 +46,16 @@ export function findActiveDuplicateRequest<T extends DuplicateCandidate>(
   return latest;
 }
 
-/** Returns all documentTypeIds that currently have at least one active in-flight request. */
+/** Returns all documentTypeIds that currently have at least one active or resubmittable request. */
 export function getActiveDocumentTypeIds(
-  requests: readonly Pick<DuplicateCandidate, "documentTypeId" | "status">[],
+  requests: readonly Pick<
+    DuplicateCandidate,
+    "documentTypeId" | "status" | "resubmissionAllowed"
+  >[],
 ): Set<string> {
   const activeIds = new Set<string>();
   for (const req of requests) {
-    if (OPEN_STATUS_SET.has(req.status)) {
+    if (isActiveForDuplicateGuard(req)) {
       activeIds.add(req.documentTypeId);
     }
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Clock, QrCode, Receipt } from "lucide-react";
+import { Check, Clock, QrCode, Receipt, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ interface RequestTimelineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenClaimSlip?: (request: MyRequestWithDocumentName) => void;
+  onResubmit?: (request: MyRequestWithDocumentName) => void;
 }
 
 export function RequestTimelineDialog({
@@ -35,6 +36,7 @@ export function RequestTimelineDialog({
   open,
   onOpenChange,
   onOpenClaimSlip,
+  onResubmit,
 }: RequestTimelineDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
   if (!request) return null;
@@ -147,6 +149,32 @@ export function RequestTimelineDialog({
             </div>
           )}
 
+          {request.status === "rejected" && (
+            <div className="sm:col-span-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 space-y-2">
+              <div className="space-y-1">
+                <span className="font-semibold uppercase tracking-wider text-destructive block">
+                  Rejection Reason
+                </span>
+                <p className="text-sm text-foreground break-words">
+                  {request.remarks || "No reason provided."}
+                </p>
+              </div>
+              {request.resubmissionAllowed &&
+                (request.missedRequirements?.length ?? 0) > 0 && (
+                  <div className="border-t border-destructive/20 pt-2 space-y-1">
+                    <span className="font-semibold uppercase tracking-wider text-muted-foreground block">
+                      Missed Requirements
+                    </span>
+                    <ul className="list-disc list-inside text-xs text-foreground space-y-0.5">
+                      {request.missedRequirements!.map((item) => (
+                        <li key={item.key}>{item.label}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+            </div>
+          )}
+
           {claimPeriod && (
             <div className="sm:col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-1">
               <span className="text-emerald-700 dark:text-emerald-300 font-semibold">Available for Counter Claiming</span>
@@ -159,6 +187,19 @@ export function RequestTimelineDialog({
 
         <DialogFooter className="sm:justify-between items-center gap-2 pt-2">
           <div className="flex flex-wrap items-center gap-2">
+            {request.status === "rejected" &&
+              request.resubmissionAllowed &&
+              onResubmit && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => onResubmit(request)}
+                  className="gap-1.5 font-semibold cursor-pointer"
+                >
+                  <RotateCcw className="size-4" aria-hidden="true" />
+                  Fix &amp; Resubmit
+                </Button>
+              )}
             {config.canClaim && onOpenClaimSlip ? (
               <Button
                 type="button"

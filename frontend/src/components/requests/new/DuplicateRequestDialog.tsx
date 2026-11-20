@@ -44,6 +44,9 @@ export default function DuplicateRequestDialog({
 }: DuplicateRequestDialogProps) {
   if (!existingRequest) return null;
 
+  const isResubmittable =
+    existingRequest.status === "rejected" &&
+    Boolean(existingRequest.resubmissionAllowed);
   const statusLabel =
     requestStatusLabels[existingRequest.status] ?? existingRequest.status;
 
@@ -56,14 +59,32 @@ export default function DuplicateRequestDialog({
               <AlertTriangle className="size-5" aria-hidden="true" />
             </span>
             <AlertDialogTitle className="text-left text-base font-bold">
-              Active Request Already Exists
+              {isResubmittable
+                ? "Resubmittable Request Exists"
+                : "Active Request Already Exists"}
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-left text-sm leading-relaxed">
-            You already have an active request for{" "}
-            <span className="font-semibold text-foreground">{documentName}</span>
-            . Submitting another request will create a separate copy and fee
-            assessment.
+            {isResubmittable ? (
+              <>
+                You have a rejected request for{" "}
+                <span className="font-semibold text-foreground">
+                  {documentName}
+                </span>{" "}
+                that allows resubmission with missed requirements. Open My
+                Requests to fix and resubmit it instead of creating a separate
+                request and fee assessment.
+              </>
+            ) : (
+              <>
+                You already have an active request for{" "}
+                <span className="font-semibold text-foreground">
+                  {documentName}
+                </span>
+                . Submitting another request will create a separate copy and fee
+                assessment.
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -105,7 +126,7 @@ export default function DuplicateRequestDialog({
             Continue Anyway
           </AlertDialogCancel>
           <AlertDialogAction onClick={onViewExisting}>
-            View Existing Request
+            {isResubmittable ? "Go to My Requests" : "View Existing Request"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
