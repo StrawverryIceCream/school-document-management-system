@@ -1,8 +1,9 @@
 import assert from "node:assert";
 import {
   DEFAULT_ACADEMIC_TERM,
-  needsAcademicTermVerification,
   buildApprovedStandingPatch,
+  canUserReviewAccountUpdates,
+  needsAcademicTermVerification,
   validateRequestedStanding,
 } from "../lib/term-standing.js";
 
@@ -125,6 +126,38 @@ assert.strictEqual(
 assert.strictEqual(
   validateRequestedStanding({ requestedStudentStatus: "alumni" }).valid,
   true,
+);
+
+// 9. Account update review permissions are restricted exclusively to admins
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: "admin" }),
+  true,
+  "Admin should be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: "staff" }),
+  false,
+  "Staff must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: "student" }),
+  false,
+  "Student must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates({ role: "teacher" }),
+  false,
+  "Teacher must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates(null),
+  false,
+  "Null user must not be permitted to review account updates",
+);
+assert.strictEqual(
+  canUserReviewAccountUpdates(undefined),
+  false,
+  "Undefined user must not be permitted to review account updates",
 );
 
 console.log("Academic term verification domain tests passed successfully!");

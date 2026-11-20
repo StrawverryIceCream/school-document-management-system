@@ -3,7 +3,6 @@ import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
   accountUpdateRequests,
-  offices,
   users,
 } from "../db/schema.js";
 import { getActiveAcademicTerm } from "./settings.controller.js";
@@ -15,6 +14,7 @@ import {
 } from "../services/notification.service.js";
 import {
   buildApprovedStandingPatch,
+  canUserReviewAccountUpdates,
   validateRequestedStanding,
 } from "../lib/term-standing.js";
 
@@ -35,27 +35,9 @@ function parsePagination(page?: unknown, limit?: unknown) {
 export async function canReviewAccountUpdates(userId: string): Promise<boolean> {
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { id: true, role: true, office: true, officeId: true },
+    columns: { id: true, role: true },
   });
-  if (!user) return false;
-  if (user.role === "admin") return true;
-  if (user.role === "staff") {
-    if (user.office === "registrar") return true;
-    if (user.officeId) {
-      const office = await db.query.offices.findFirst({
-        where: eq(offices.id, user.officeId),
-        columns: { code: true, name: true },
-      });
-      if (
-        office?.code === "OUR" ||
-        office?.code?.toLowerCase() === "registrar" ||
-        office?.name?.toLowerCase().includes("registrar")
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return canUserReviewAccountUpdates(user);
 }
 
 export async function createAccountUpdate(req: Request, res: Response) {

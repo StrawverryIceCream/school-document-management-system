@@ -73,3 +73,9 @@ export function validateRequestedStanding(input: {
   }
   return { valid: true };
 }
+
+export function canUserReviewAccountUpdates(
+  user: { role?: string | null } | null | undefined,
+): boolean {
+  return user?.role === "admin";
+}
