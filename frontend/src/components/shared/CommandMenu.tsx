@@ -34,7 +34,7 @@ import {
   REQUESTER_ROLES,
   STAFF_ROLES,
 } from "@/lib/navigation/role-access";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 interface CommandItem {
@@ -206,16 +206,7 @@ export function CommandMenu() {
       category: "Actions",
       icon: theme === "dark" ? Sun : Moon,
       shortcut: "T",
-      perform: () => {
-        const nextTheme = theme === "dark" ? "light" : "dark";
-        setTheme(nextTheme);
-
-        // Apply immediately in the Quick Jump action so a Vercel deployment
-        // with stale theme-provider state still updates the visible interface.
-        localStorage.setItem("vite-ui-theme", nextTheme);
-        document.documentElement.classList.remove("light", "dark");
-        document.documentElement.classList.add(nextTheme);
-      },
+      perform: () => setTheme(theme === "dark" ? "light" : "dark"),
     });
 
     list.push({
