@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useSystemSettings } from "@/provider/SystemSettingsProvider";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/hooks/useTheme";
 import { getInitials, ROLE_META } from "@/lib/profile";
 import ProfileFields from "@/components/profile/ProfileFields";
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
+  AlertCircle,
   CalendarDays,
   CircleCheck,
   Clock,
   Download,
   QrCode,
+  RotateCcw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyRequest } from "@/hooks/useMyRequest";
 import { ClaimSlipDialog } from "./ClaimSlipDialog";
+import ResubmitRequestDialog from "./ResubmitRequestDialog";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import {
   formatClaimPeriod,
@@ -27,8 +30,11 @@ import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 
 export default function MyRequestList() {
-  const { filteredRequests, loading, error } = useMyRequest();
+  const { filteredRequests, loading, error, refreshMyRequests } =
+    useMyRequest();
   const [selectedClaimSlipRequest, setSelectedClaimSlipRequest] =
+    useState<MyRequestWithDocumentName | null>(null);
+  const [resubmitRequest, setResubmitRequest] =
     useState<MyRequestWithDocumentName | null>(null);
 
   if (loading) {
@@ -120,6 +126,38 @@ export default function MyRequestList() {
                       </span>
                     </p>
                   )}
+                  {request.status === "rejected" &&
+                    (request.remarks || request.resubmissionAllowed) && (
+                      <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-sm space-y-2">
+                        <div className="flex items-start gap-2 text-destructive">
+                          <AlertCircle
+                            className="size-4 shrink-0 mt-0.5"
+                            aria-hidden="true"
+                          />
+                          <div className="space-y-1 min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-wider">
+                              Rejection Reason
+                            </p>
+                            <p className="text-sm text-foreground break-words">
+                              {request.remarks || "No reason provided."}
+                            </p>
+                          </div>
+                        </div>
+                        {request.resubmissionAllowed &&
+                          (request.missedRequirements?.length ?? 0) > 0 && (
+                            <div className="border-t border-destructive/20 pt-2 pl-6 space-y-1">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Missed Requirements to Resubmit
+                              </p>
+                              <ul className="list-disc list-inside text-xs text-foreground space-y-0.5">
+                                {request.missedRequirements!.map((item) => (
+                                  <li key={item.key}>{item.label}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                      </div>
+                    )}
                 </div>
 
                 <div className="flex shrink-0 flex-col items-start sm:items-end gap-1 rounded-xl bg-muted/60 sm:bg-muted px-4 py-3 sm:px-6 sm:py-4">
@@ -214,6 +252,18 @@ export default function MyRequestList() {
                   )}
                 </span>
 
+                {request.status === "rejected" &&
+                  request.resubmissionAllowed && (
+                    <Button
+                      size="sm"
+                      className="text-xs sm:text-sm h-9 sm:h-10 justify-center gap-1.5"
+                      onClick={() => setResubmitRequest(request)}
+                    >
+                      <RotateCcw className="size-4 shrink-0" aria-hidden="true" />
+                      Fix &amp; Resubmit
+                    </Button>
+                  )}
+
                 {config.canClaim && (
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     {request.releasePdfUrl ? (
@@ -254,6 +304,12 @@ export default function MyRequestList() {
         request={selectedClaimSlipRequest}
         open={selectedClaimSlipRequest !== null}
         onOpenChange={(open) => !open && setSelectedClaimSlipRequest(null)}
+      />
+      <ResubmitRequestDialog
+        request={resubmitRequest}
+        open={resubmitRequest !== null}
+        onOpenChange={(open) => !open && setResubmitRequest(null)}
+        onSuccess={refreshMyRequests}
       />
     </ul>
   );

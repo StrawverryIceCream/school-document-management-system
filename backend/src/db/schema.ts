@@ -39,6 +39,13 @@ export type RequiredField = {
   options?: string[];
 };
 
+export type MissedRequirement = {
+  key: string;
+  label: string;
+  type: "file" | "text" | "textarea";
+  required: boolean;
+};
+
 /* -------------------------------------------------------------------------- */
 /*  Sequences (human-readable numbers)                                        */
 /* -------------------------------------------------------------------------- */
@@ -454,6 +461,13 @@ export const documentRequests = pgTable(
     // internalNotes: staff only. remarks: visible to the requester.
     internalNotes: text("internal_notes"),
     remarks: text("remarks"),
+    // Resubmission (set when staff allows requester to fix missed requirements)
+    resubmissionAllowed: boolean("resubmission_allowed").notNull().default(false),
+    missedRequirements: jsonb("missed_requirements")
+      .$type<MissedRequirement[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    resubmittedAt: tz("resubmitted_at"),
     ...timestamps,
   },
   (table) => [

@@ -53,3 +53,26 @@ export function uploadCorProof(
     stream.end(buffer);
   });
 }
+
+export function uploadRequestAttachment(
+  buffer: Buffer,
+  requestId: string,
+  key: string,
+): Promise<string> {
+  const safeKey = key.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) || "file";
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "student-document-management-system/request-attachments",
+        public_id: `req-${requestId}-${safeKey}-${Date.now()}`,
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (error || !result)
+          return reject(error ?? new Error("Upload failed"));
+        resolve(result.secure_url);
+      },
+    );
+    stream.end(buffer);
+  });
+}

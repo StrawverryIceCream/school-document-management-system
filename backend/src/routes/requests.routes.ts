@@ -3,6 +3,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireRoles } from "../middleware/requireRoles.js";
 import validateId from "../middleware/validateId.js";
+import { handleMultipleAttachments } from "../middleware/upload.js";
 import {
   cancelMyRequest,
   createRequest,
@@ -10,6 +11,7 @@ import {
   getMyRequestById,
   getMyRequests,
   getRequestById,
+  resubmitMyRequest,
   updateRequestStatus,
   assignRequest,
   getPublicRequestStatus,
@@ -30,6 +32,12 @@ router.use(requireAuth);
 router.get("/me", getMyRequests);
 router.get("/me/:id", validateId, getMyRequestById);
 router.patch("/me/:id/cancel", validateId, cancelMyRequest);
+router.post(
+  "/me/:id/resubmit",
+  validateId,
+  handleMultipleAttachments("files", 10),
+  resubmitMyRequest,
+);
 router.post("/", createRequest);
 
 router.get("/", requireRoles("admin", "staff"), getAllRequests);

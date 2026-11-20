@@ -21,7 +21,7 @@ import { REVIEW_ACTIONS } from "@/lib/sectors/review/constants";
 import { fetchReviewData } from "@/lib/sectors/review/fetch-review-data";
 import { formatDate } from "@/lib/sectors/review/format";
 import type { ReviewData, ReviewField } from "@/lib/sectors/review/types";
-import type { RequestStatus } from "@/types";
+import type { MissedRequirement, RequestStatus } from "@/types";
 
 export default function SectorRequestReview() {
   const { sectorId, divisionId, officeId, requestId } = useParams();
@@ -140,9 +140,11 @@ export default function SectorRequestReview() {
   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
   const configuredFields = documentType?.requiredFields ?? [];
   const formData = request.formData ?? {};
-  const configuredKeys = new Set(configuredFields.map((f) => f.key));
+  const configuredKeysAndLabels = new Set(
+    configuredFields.flatMap((f) => [f.key, f.label]),
+  );
   const extraFields = Object.entries(formData).filter(
-    ([k]) => !configuredKeys.has(k),
+    ([k]) => !configuredKeysAndLabels.has(k),
   );
   const paymentRequired = Number(request.amountDue) > 0;
   const processingRequiresPayment =
@@ -162,6 +164,8 @@ export default function SectorRequestReview() {
   async function confirmStatusChange(details?: {
     reason?: string;
     claimedBy?: string;
+    resubmissionAllowed?: boolean;
+    missedRequirements?: MissedRequirement[];
   }) {
     if (!requestId || !pendingAction) return;
     setUpdating(true);
@@ -174,9 +178,14 @@ export default function SectorRequestReview() {
           pendingAction === "ready" && releasePdfUrl.trim()
             ? releasePdfUrl.trim()
             : undefined,
-        staffNotes: details?.reason || staffNotes.trim() || null,
+        staffNotes:
+          pendingAction === "rejected"
+            ? staffNotes.trim() || null
+            : details?.reason || staffNotes.trim() || null,
         claimedBy: details?.claimedBy || undefined,
         remarks: details?.reason || undefined,
+        resubmissionAllowed: details?.resubmissionAllowed,
+        missedRequirements: details?.missedRequirements,
       });
       setPendingAction(null);
       toast.success(
@@ -201,7 +210,7 @@ export default function SectorRequestReview() {
     ...configuredFields.map((field) => ({
       key: field.key,
       label: field.label,
-      value: formData[field.key],
+      value: formData[field.label] ?? formData[field.key],
       fileField: field.type === "file",
     })),
     ...extraFields.map(([key, value]) => ({
@@ -250,6 +259,14 @@ export default function SectorRequestReview() {
                 <statusConfig.icon className="size-3.5" aria-hidden="true" />
                 {statusConfig.label}
               </Badge>
+              {request.resubmittedAt && (
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
+                >
+                  Resubmitted &middot; {formatDate(request.resubmittedAt)}
+                </Badge>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground leading-normal">
               Requester:{" "}

@@ -322,6 +322,13 @@ export interface RequiredFieldDefinition {
   options?: string[];
 }
 
+export interface MissedRequirement {
+  key: string;
+  label: string;
+  type: "file" | "text" | "textarea";
+  required: boolean;
+}
+
 export type RequiredFieldValues = Record<string, string | number | boolean>;
 
 export interface DocumentType extends Timestamps {
@@ -409,6 +416,10 @@ export interface DocumentRequest extends Timestamps {
   internalNotes: string | null;
   /** Visible to the requester. */
   remarks: string | null;
+
+  resubmissionAllowed?: boolean;
+  missedRequirements?: MissedRequirement[];
+  resubmittedAt?: ISODateTimeString | null;
 
   /** Frontend-only. Not a column in the schema. */
   tags?: string[];

@@ -8,10 +8,12 @@ import {
   notifications,
   offices,
   officeSectorEnum,
+  requestAttachments,
   requestRoutingSteps,
   requestStatusEnum,
   requestStatusHistory,
   users,
+  type MissedRequirement,
 } from "../db/schema.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { sendStatusNotificationEmail } from "../services/email.service.js";
@@ -19,6 +21,11 @@ import {
   createAndDispatchNotification,
   notifyOfficeStaff,
 } from "../services/notification.service.js";
+import { uploadRequestAttachment } from "../services/storage.service.js";
+import {
+  sanitizeMissedRequirements,
+  validateResubmissionPayload,
+} from "../lib/resubmission.js";
 import { getActiveAcademicTerm } from "./settings.controller.js";
 import { needsAcademicTermVerification } from "../lib/term-standing.js";
 
@@ -103,6 +110,8 @@ interface UpdateStatusBody {
   releasePdfUrl?: unknown;
   claimedBy?: unknown;
   remarks?: unknown;
+  resubmissionAllowed?: unknown;
+  missedRequirements?: unknown;
 }
 
 function getSessionUserId(req: Pick<Request, "session">): string | undefined {
@@ -181,6 +190,11 @@ function buildStatusNotification(
   status: RequestStatus,
   documentName: string,
   releaseDate: string | null,
+  extra?: {
+    remarks?: string | null;
+    resubmissionAllowed?: boolean;
+    missedRequirements?: MissedRequirement[];
+  },
 ): { title: string; message: string } | null {
   switch (status) {
     case "processing":
@@ -200,11 +214,23 @@ function buildStatusNotification(
         title: "Request claimed",
         message: `Your ${documentName} has been marked as claimed.`,
       };
-    case "rejected":
+    case "rejected": {
+      const parts = [`Your request for ${documentName} was rejected.`];
+      if (extra?.remarks) {
+        parts.push(`Reason: ${extra.remarks}`);
+      }
+      if (extra?.resubmissionAllowed && extra.missedRequirements?.length) {
+        parts.push(
+          `Missed requirements: ${extra.missedRequirements
+            .map((item) => item.label)
+            .join(", ")}. Open My Requests to fix and resubmit.`,
+        );
+      }
       return {
         title: "Request rejected",
-        message: `Your request for ${documentName} was rejected. Check your portal for staff remarks.`,
+        message: parts.join(" "),
       };
+    }
     case "cancelled":
       return {
         title: "Request cancelled",
@@ -513,8 +539,16 @@ export async function updateRequestStatus(
     if (!staffId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
-    const { status, releaseDate, staffNotes, releasePdfUrl, claimedBy, remarks } = (req.body ??
-      {}) as UpdateStatusBody;
+    const {
+      status,
+      releaseDate,
+      staffNotes,
+      releasePdfUrl,
+      claimedBy,
+      remarks,
+      resubmissionAllowed,
+      missedRequirements,
+    } = (req.body ?? {}) as UpdateStatusBody;
 
     if (!isRequestStatus(status)) {
       return res
@@ -539,6 +573,17 @@ export async function updateRequestStatus(
       ) {
         return res.status(400).json({
           error: `staffNotes must be at most ${STAFF_NOTES_MAX_LENGTH} characters`,
+        });
+      }
+    }
+
+    if (remarks !== undefined && remarks !== null) {
+      if (
+        typeof remarks !== "string" ||
+        remarks.trim().length > STAFF_NOTES_MAX_LENGTH
+      ) {
+        return res.status(400).json({
+          error: `remarks must be at most ${STAFF_NOTES_MAX_LENGTH} characters`,
         });
       }
     }
@@ -635,6 +680,33 @@ export async function updateRequestStatus(
       updates.remarks = staffNotes.trim();
     }
 
+    if (status === "rejected") {
+      const effectiveRemarks =
+        (typeof updates.remarks === "string" ? updates.remarks.trim() : "") ||
+        "";
+      if (!effectiveRemarks) {
+        return res.status(400).json({
+          error: "A rejection reason is required",
+        });
+      }
+      updates.remarks = effectiveRemarks;
+
+      if (resubmissionAllowed === true) {
+        const parsed = sanitizeMissedRequirements(missedRequirements);
+        if (!parsed.valid) {
+          return res.status(400).json({ error: parsed.error });
+        }
+        updates.resubmissionAllowed = true;
+        updates.missedRequirements = parsed.items;
+      } else {
+        updates.resubmissionAllowed = false;
+        updates.missedRequirements = [];
+      }
+    } else {
+      updates.resubmissionAllowed = false;
+      updates.missedRequirements = [];
+    }
+
     // Notification and status change succeed or fail together
     const updated = await db.transaction(async (tx) => {
       // Matching on the old status stops two staff members racing each other
@@ -655,6 +727,11 @@ export async function updateRequestStatus(
         status,
         request.documentType.name,
         effectiveReleaseDate,
+        {
+          remarks: updates.remarks ?? null,
+          resubmissionAllowed: Boolean(updates.resubmissionAllowed),
+          missedRequirements: updates.missedRequirements ?? [],
+        },
       );
 
       if (notification) {
@@ -671,7 +748,9 @@ export async function updateRequestStatus(
         fromStatus: request.status,
         toStatus: status,
         changedBy: staffId,
-        note: typeof staffNotes === "string" ? staffNotes.trim() : null,
+        note:
+          updates.remarks ??
+          (typeof staffNotes === "string" ? staffNotes.trim() : null),
       });
 
       return row;
@@ -693,6 +772,7 @@ export async function updateRequestStatus(
         fromStatus: request.status,
         toStatus: status,
         documentTypeName: request.documentType?.name,
+        resubmissionAllowed: Boolean(updates.resubmissionAllowed),
       },
     });
 
@@ -705,11 +785,15 @@ export async function updateRequestStatus(
         status,
         {
           releaseDate: effectiveReleaseDate,
-          remarks: typeof staffNotes === "string" ? staffNotes.trim() : null,
+          remarks:
+            updates.remarks ??
+            (typeof staffNotes === "string" ? staffNotes.trim() : null),
           releasePdfUrl:
             typeof releasePdfUrl === "string"
               ? releasePdfUrl.trim() || null
               : request.releasePdfUrl ?? null,
+          resubmissionAllowed: Boolean(updates.resubmissionAllowed),
+          missedRequirements: updates.missedRequirements ?? [],
         },
       ).catch((err) => {
         console.error("[sendStatusNotificationEmail] error:", err);
@@ -983,6 +1067,250 @@ export async function cancelMyRequest(
     return res.json(updated);
   } catch (err) {
     console.error("[cancelMyRequest] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function resubmitMyRequest(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const userId = getSessionUserId(req);
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+
+    const request = await db.query.documentRequests.findFirst({
+      where: and(
+        eq(documentRequests.id, id),
+        eq(documentRequests.userId, userId),
+      ),
+      with: {
+        documentType: {
+          columns: { name: true, office: true, officeId: true },
+        },
+      },
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    if (request.status !== "rejected" || !request.resubmissionAllowed) {
+      return res.status(409).json({
+        error: "This request cannot be resubmitted",
+      });
+    }
+
+    let textResponses: Record<string, string> = {};
+    const rawResponses = req.body?.responses;
+    if (typeof rawResponses === "string" && rawResponses.trim()) {
+      try {
+        const parsed = JSON.parse(rawResponses);
+        if (!isPlainObject(parsed)) {
+          return res.status(400).json({ error: "responses must be a JSON object" });
+        }
+        for (const [k, v] of Object.entries(parsed)) {
+          textResponses[k] = typeof v === "string" ? v : String(v ?? "");
+        }
+      } catch {
+        return res.status(400).json({ error: "Invalid responses JSON" });
+      }
+    } else if (isPlainObject(rawResponses)) {
+      for (const [k, v] of Object.entries(rawResponses)) {
+        textResponses[k] = typeof v === "string" ? v : String(v ?? "");
+      }
+    }
+
+    let fileKeys: string[] = [];
+    const rawFileKeys = req.body?.fileKeys;
+    if (typeof rawFileKeys === "string" && rawFileKeys.trim()) {
+      try {
+        const parsed = JSON.parse(rawFileKeys);
+        if (
+          !Array.isArray(parsed) ||
+          !parsed.every((item) => typeof item === "string")
+        ) {
+          return res
+            .status(400)
+            .json({ error: "fileKeys must be a JSON string array" });
+        }
+        fileKeys = parsed;
+      } catch {
+        return res.status(400).json({ error: "Invalid fileKeys JSON" });
+      }
+    } else if (Array.isArray(rawFileKeys)) {
+      if (!rawFileKeys.every((item) => typeof item === "string")) {
+        return res.status(400).json({ error: "fileKeys must be strings" });
+      }
+      fileKeys = rawFileKeys;
+    }
+
+    const uploadedFiles = Array.isArray(req.files)
+      ? (req.files as Express.Multer.File[])
+      : [];
+
+    if (fileKeys.length !== uploadedFiles.length) {
+      return res.status(400).json({
+        error: "Uploaded files do not match provided fileKeys",
+      });
+    }
+
+    const missedReqs = request.missedRequirements ?? [];
+    const fileReqByKey = new Map(
+      missedReqs.filter((item) => item.type === "file").map((item) => [item.key, item]),
+    );
+    const uploadedFileMap = new Map<string, Express.Multer.File>();
+
+    for (let i = 0; i < fileKeys.length; i++) {
+      const key = fileKeys[i];
+      const file = uploadedFiles[i];
+      if (!key || !file || !fileReqByKey.has(key) || uploadedFileMap.has(key)) {
+        return res
+          .status(400)
+          .json({ error: `Invalid file key: ${key ?? ""}` });
+      }
+      uploadedFileMap.set(key, file);
+    }
+
+    const validation = validateResubmissionPayload(
+      missedReqs,
+      textResponses,
+      new Set(uploadedFileMap.keys()),
+    );
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    // Upload files only after all required missed items pass validation
+    const uploadedAttachments: Array<{
+      requirement: MissedRequirement;
+      file: Express.Multer.File;
+      fileUrl: string;
+    }> = [];
+
+    for (const [key, file] of uploadedFileMap.entries()) {
+      const requirement = fileReqByKey.get(key)!;
+      const fileUrl = await uploadRequestAttachment(file.buffer, id, key);
+      uploadedAttachments.push({ requirement, file, fileUrl });
+    }
+
+    const mergedFormData: Record<string, unknown> = {
+      ...(request.formData ?? {}),
+    };
+    const suppliedLabels: string[] = [];
+
+    for (const requirement of missedReqs) {
+      if (requirement.type === "file") {
+        const uploaded = uploadedFileMap.get(requirement.key);
+        if (uploaded) {
+          mergedFormData[requirement.label] = uploaded.originalname;
+          suppliedLabels.push(requirement.label);
+        }
+      } else {
+        const answer = textResponses[requirement.key]?.trim();
+        if (answer) {
+          mergedFormData[requirement.label] = answer;
+          suppliedLabels.push(requirement.label);
+        }
+      }
+    }
+
+    const updated = await db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(documentRequests)
+        .set({
+          status: "pending",
+          resubmissionAllowed: false,
+          missedRequirements: [],
+          resubmittedAt: new Date(),
+          formData: mergedFormData,
+        })
+        .where(
+          and(
+            eq(documentRequests.id, id),
+            eq(documentRequests.userId, userId),
+            eq(documentRequests.status, "rejected"),
+            eq(documentRequests.resubmissionAllowed, true),
+          ),
+        )
+        .returning();
+
+      if (!row) return null;
+
+      if (uploadedAttachments.length > 0) {
+        await tx.insert(requestAttachments).values(
+          uploadedAttachments.map(({ requirement, file, fileUrl }) => ({
+            requestId: id,
+            uploadedBy: userId,
+            label: requirement.label,
+            fileName: file.originalname,
+            fileUrl,
+            mimeType: file.mimetype,
+            sizeBytes: file.size,
+          })),
+        );
+      }
+
+      await tx.insert(requestStatusHistory).values({
+        requestId: id,
+        fromStatus: "rejected",
+        toStatus: "pending",
+        changedBy: userId,
+        note:
+          suppliedLabels.length > 0
+            ? `Requester resubmitted missed requirements: ${suppliedLabels.join(", ")}`
+            : "Requester resubmitted request",
+      });
+
+      return row;
+    });
+
+    if (!updated) {
+      return res.status(409).json({
+        error: "This request was already resubmitted or updated",
+      });
+    }
+
+    void recordAuditLog({
+      actorId: userId,
+      action: "Resubmitted rejected request",
+      entityType: "request",
+      entityId: id,
+      ipAddress: req.ip,
+      metadata: { suppliedLabels },
+    });
+
+    const staffMessage = `${request.referenceNumber} (${request.documentType.name}) was resubmitted with missed requirements.`;
+    try {
+      if (request.assignedTo) {
+        await db.insert(notifications).values({
+          userId: request.assignedTo,
+          senderId: userId,
+          requestId: id,
+          type: "status_update",
+          title: "Rejected request resubmitted",
+          message: staffMessage,
+        });
+      } else {
+        await notifyOfficeStaff({
+          officeId: request.documentType.officeId,
+          officeCode: request.documentType.office,
+          senderId: userId,
+          requestId: id,
+          type: "status_update",
+          title: "Rejected request resubmitted",
+          message: staffMessage,
+        });
+      }
+    } catch (err) {
+      console.error("[resubmitMyRequest] staff notification error:", err);
+    }
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("[resubmitMyRequest] error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

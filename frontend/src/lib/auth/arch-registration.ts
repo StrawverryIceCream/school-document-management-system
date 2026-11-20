@@ -8,6 +8,12 @@ export const STUDENT_ID_PREFIX = "TUPM-";
 
 export const MIN_PASSWORD_LENGTH = 8;
 
+export const CONTACT_NUMBER_LENGTH = 11;
+
+export function sanitizeContactNumber(value: string): string {
+  return value.replace(/\D/g, "").slice(0, CONTACT_NUMBER_LENGTH);
+}
+
 type RoleOption = {
   role: Extract<UserRole, "student" | "teacher">;
   label: string;

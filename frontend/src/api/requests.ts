@@ -1,5 +1,9 @@
 // api/requests.ts
-import type { DocumentRequestWithRelations, RequestStatus } from "@/types";
+import type {
+  DocumentRequestWithRelations,
+  MissedRequirement,
+  RequestStatus,
+} from "@/types";
 
 export type FormDataValue = string | number | boolean;
 
@@ -68,6 +72,8 @@ export interface UpdateRequestStatusPayload {
   staffNotes?: string | null;
   claimedBy?: string | null;
   remarks?: string | null;
+  resubmissionAllowed?: boolean;
+  missedRequirements?: MissedRequirement[];
 }
 
 export interface PublicRequestStatus {
@@ -268,4 +274,40 @@ export async function cancelMyRequest(id: string): Promise<DocumentRequestRow> {
   });
 
   return handleResponse<DocumentRequestRow>(res, url);
+}
+
+export async function resubmitMyRequest(
+  id: string,
+  payload: {
+    responses: Record<string, string>;
+    files: Array<{ key: string; file: File }>;
+  },
+): Promise<DocumentRequestRow> {
+  const url = `/api/requests/me/${id}/resubmit`;
+  const formData = new FormData();
+  formData.append("responses", JSON.stringify(payload.responses));
+  formData.append(
+    "fileKeys",
+    JSON.stringify(payload.files.map((item) => item.key)),
+  );
+  for (const item of payload.files) {
+    formData.append("files", item.file);
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(
+      typeof body?.error === "string" && body.error
+        ? body.error
+        : `Resubmission failed (${res.status})`,
+    );
+  }
+
+  return res.json();
 }

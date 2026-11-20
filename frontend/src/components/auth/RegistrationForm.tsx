@@ -13,6 +13,7 @@ import ComplianceNotice from "@/components/auth/ComplianceNotice";
 import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  CONTACT_NUMBER_LENGTH,
   DEPARTMENT_OPTIONS,
   MIN_PASSWORD_LENGTH,
   STUDENT_ID_PREFIX,
@@ -20,6 +21,7 @@ import {
   type FacultyRank,
   type StudentStatus,
 } from "@/lib/auth/arch-registration";
+import { isValidStudentId } from "@/lib/auth/format-student-id";
 import { BADGE_BASE, TONES } from "@/lib/tones";
 import { cn } from "@/lib/utils";
 import { SYSTEM_NAME } from "@/lib/constants";
@@ -83,8 +85,18 @@ export default function RegistrationForm() {
       );
       return;
     }
-    if (role === "student" && studentId === STUDENT_ID_PREFIX) {
-      setError("Please enter your complete Student ID number as shown on your university RFID.");
+    if (role === "student" && !isValidStudentId(studentId)) {
+      setError(
+        "Student ID must follow the format TUPM-XX-XXXX or TUPM-XX-XXXXX.",
+      );
+      return;
+    }
+    if (
+      role === "student" &&
+      contactNumber &&
+      contactNumber.length !== CONTACT_NUMBER_LENGTH
+    ) {
+      setError(`Contact number must be exactly ${CONTACT_NUMBER_LENGTH} digits.`);
       return;
     }
     if (role === "student" && (!collegeId || !courseId)) {
@@ -126,12 +138,11 @@ export default function RegistrationForm() {
         courseId: role === "student" ? courseId : undefined,
         yearLevel: role === "student" ? yearLevel : undefined,
         section: role === "student" ? (section.trim() || undefined) : undefined,
-        contactNumber: contactNumber.trim() || undefined,
+        contactNumber:
+          role === "student" ? contactNumber.trim() || undefined : undefined,
         department: role === "teacher" ? (selectedDepartment?.label ?? "") : undefined,
         studentId:
-          role === "student" && studentId !== STUDENT_ID_PREFIX
-            ? studentId
-            : undefined,
+          role === "student" ? studentId.trim().toUpperCase() : undefined,
         otp,
       });
       await login(cleanEmail, password);

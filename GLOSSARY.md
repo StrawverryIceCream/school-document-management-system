@@ -47,8 +47,12 @@ A one-click filter preset that scopes the global request view to an institutiona
 _Avoid_: Quick link, bookmark tab
 
 **Request Rejection**:
-An institutional compliance determination made by office staff denying the fulfillment of a document request due to unfulfilled prerequisites, academic ineligibility, or invalid documentation. Remarks are communicated to the requester.
+An institutional compliance determination made by office staff denying fulfillment of a document request due to unfulfilled prerequisites, academic ineligibility, or invalid documentation; may be final or resubmittable with Missed Requirements across multiple rounds. Remarks are communicated to the requester.
 _Avoid_: Cancel, decline, drop
+
+**Missed Requirements**:
+Structured items (file upload, short text, or detailed text) configured by office staff during a resubmittable Request Rejection that the requester must supply to reopen the request in-place.
+_Avoid_: Missing requirements, revision checklist, fix list
 
 **Request Cancellation**:
 The administrative termination or voluntary requester withdrawal of an in-flight or ready document request, stopping fulfillment without academic non-compliance fault.

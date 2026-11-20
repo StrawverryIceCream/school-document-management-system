@@ -11,6 +11,7 @@ import { getActiveAcademicTerm } from "./settings.controller.js";
 const BCRYPT_SALT_ROUNDS = 10;
 const FIELD_MAX_LENGTH = 100;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STUDENT_ID_REGEX = /^TUPM-\d{2}-\d{4,5}$/;
 const PG_UNIQUE_VIOLATION = "23505";
 
 type DbUser = typeof users.$inferSelect;
@@ -202,7 +203,8 @@ export const signup = async (
     const password = typeof body.password === "string" ? body.password : "";
     const role = body.role;
     const fullName = cleanText(body.fullName);
-    const studentId = cleanText(body.studentId);
+    const rawStudentId = cleanText(body.studentId);
+    const studentId = rawStudentId ? rawStudentId.toUpperCase() : null;
     const rawStudentStatus = cleanText(body.studentStatus);
     const validStudentStatuses = ["regular", "irregular", "graduating", "alumni"] as const;
     const studentStatus = validStudentStatuses.includes(rawStudentStatus as any)
@@ -250,6 +252,11 @@ export const signup = async (
     }
 
     if (role === "student") {
+      if (studentId && !STUDENT_ID_REGEX.test(studentId)) {
+        return res.status(400).json({
+          error: "Student ID must follow the format TUPM-XX-XXXX or TUPM-XX-XXXXX",
+        });
+      }
       if (!effectiveCourseId) {
         return res
           .status(400)
@@ -284,6 +291,12 @@ export const signup = async (
     if (tooLong) {
       return res.status(400).json({
         error: `Fields must be at most ${FIELD_MAX_LENGTH} characters`,
+      });
+    }
+
+    if (contactNumber && !/^\d{11}$/.test(contactNumber)) {
+      return res.status(400).json({
+        error: "Contact number must be exactly 11 digits",
       });
     }
 
