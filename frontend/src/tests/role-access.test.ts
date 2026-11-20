@@ -16,7 +16,7 @@ assert.equal(getDefaultHomeRoute("teacher"), "/home");
 assert.equal(getDefaultHomeRoute("staff"), "/dashboard");
 assert.equal(getDefaultHomeRoute("admin"), "/dashboard");
 
-// 2. Accounts access (admin + Registrar/OUR staff only)
+// 2. Accounts access (admin only)
 assert.equal(
   canAccessAccounts({ role: "admin", office: null, officeRecord: null }),
   true,
@@ -27,10 +27,22 @@ assert.equal(
     office: null,
     officeRecord: { id: "uuid-1", code: "OUR", name: "Office of the University Registrar" },
   }),
-  true,
+  false,
+);
+assert.equal(
+  canAccessAccounts({ role: "staff", office: "registrar", officeRecord: null }),
+  false,
 );
 assert.equal(
   isRegistrarStaff({ role: "staff", office: "registrar", officeRecord: null }),
+  true,
+);
+assert.equal(
+  isRegistrarStaff({
+    role: "staff",
+    office: null,
+    officeRecord: { id: "uuid-1", code: "OUR", name: "Office of the University Registrar" },
+  }),
   true,
 );
 assert.equal(

@@ -18,7 +18,7 @@ export function isRegistrarStaff(user: Pick<AuthUser, "role" | "office" | "offic
 }
 
 export function canAccessAccounts(user: Pick<AuthUser, "role" | "office" | "officeRecord">): boolean {
-  return user.role === "admin" || isRegistrarStaff(user);
+  return user.role === "admin";
 }
 
 export interface WorkspaceJumpLink {

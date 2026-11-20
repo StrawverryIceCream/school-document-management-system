@@ -103,7 +103,7 @@ export default function App() {
                   path="/accounts"
                   element={
                     <RequireRole
-                      allowedRoles={STAFF_ROLES}
+                      allowedRoles={ADMIN_ROLES}
                       checkAccess={canAccessAccounts}
                     >
                       <Accounts />
