@@ -2,6 +2,7 @@ export interface SystemSettingsResponse {
   activeAcademicTerm: string;
   systemVersion: string;
   systemVersionLabel: string;
+  loginTwoFactorEnabled: boolean;
 }
 
 export async function getSystemSettings(): Promise<SystemSettingsResponse> {
@@ -17,6 +18,7 @@ export async function updateSystemSettings(
     activeAcademicTerm: string;
     systemVersion: string;
     systemVersionLabel: string;
+    loginTwoFactorEnabled: boolean;
   }>,
 ): Promise<SystemSettingsResponse> {
   const res = await fetch("/api/settings", {

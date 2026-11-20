@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import {
   getCurrentUser,
+  isTwoFactorChallenge,
   login as apiLogin,
   logout as apiLogout,
 } from "@/api/auth";
@@ -19,10 +20,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(email: string, password: string) {
-    // The login response is already the full auth user, so no second /me request
-    const userData = await apiLogin(email, password);
-    setUser(userData);
+  async function login(email: string, password: string, otp?: string) {
+    // The login response is already the full auth user or a 2FA challenge
+    const result = await apiLogin(email, password, otp ? { otp } : undefined);
+    if (isTwoFactorChallenge(result)) {
+      return result;
+    }
+    setUser(result);
   }
 
   async function logout() {

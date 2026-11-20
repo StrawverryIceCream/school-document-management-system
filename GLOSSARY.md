@@ -150,6 +150,14 @@ _Avoid_: Password reset link, admin unlock, credential recovery wizard
 A cryptographically hashed, single-use 6-digit numerical token dispatched to a user's verified institutional email address with a 10-minute validity window and attempt throttling.
 _Avoid_: Reset code, unlock pin, magic token
 
+**Login Two-Factor Authentication (2FA)**:
+An administrator-controlled institutional login security policy requiring every password sign-in to complete an email verification code challenge before access is granted.
+_Avoid_: MFA toggle, global lock, SMS auth
+
+**Login Verification OTP**:
+A single-use, cryptographically hashed numerical code sent to a user's registered email address during password login when **Login Two-Factor Authentication (2FA)** is enabled, subject to expiry and attempt limits.
+_Avoid_: Login pin, session code, magic link
+
 ## Request Review and Verification
 
 **In-Situ Proof Preview**:

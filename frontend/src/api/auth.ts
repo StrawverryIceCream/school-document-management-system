@@ -45,15 +45,40 @@ export async function sendSignupOtp(
   return res.json();
 }
 
+export interface TwoFactorChallengeResponse {
+  requiresTwoFactor: true;
+  email: string;
+  message?: string;
+}
+
+export type LoginResponse = AuthUser | TwoFactorChallengeResponse;
+
+export function isTwoFactorChallenge(
+  data: unknown,
+): data is TwoFactorChallengeResponse {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    (data as { requiresTwoFactor?: unknown }).requiresTwoFactor === true
+  );
+}
+
 export async function login(
   email: string,
   password: string,
-): Promise<AuthUser> {
+  options?: { otp?: string; resend?: boolean },
+): Promise<LoginResponse> {
+  const trimmedOtp = options?.otp?.trim();
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      password,
+      ...(trimmedOtp ? { otp: trimmedOtp } : {}),
+      ...(options?.resend ? { resend: true } : {}),
+    }),
   });
 
   if (!res.ok) throw new Error(await getErrorMessage(res, "Login failed"));

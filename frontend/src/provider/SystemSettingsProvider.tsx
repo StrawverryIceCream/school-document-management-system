@@ -14,6 +14,7 @@ export function SystemSettingsProvider({ children }: { children: ReactNode }) {
   const [systemVersion, setSystemVersion] = useState<string>(SYSTEM_VERSION);
   const [systemVersionLabel, setSystemVersionLabel] =
     useState<string>(SYSTEM_VERSION_LABEL);
+  const [loginTwoFactorEnabled, setLoginTwoFactorEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function fetchSettings() {
@@ -28,6 +29,9 @@ export function SystemSettingsProvider({ children }: { children: ReactNode }) {
       if (data.systemVersionLabel) {
         setSystemVersionLabel(data.systemVersionLabel);
       }
+      if (typeof data.loginTwoFactorEnabled === "boolean") {
+        setLoginTwoFactorEnabled(data.loginTwoFactorEnabled);
+      }
     } catch (err) {
       console.warn("Failed to fetch system settings, using defaults:", err);
     } finally {
@@ -40,10 +44,11 @@ export function SystemSettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function updateTerm(term: string) {
-    const data = await apiUpdateSettings({ activeAcademicTerm: term });
-    setActiveAcademicTerm(data.activeAcademicTerm);
-    if (data.systemVersion) setSystemVersion(data.systemVersion);
-    if (data.systemVersionLabel) setSystemVersionLabel(data.systemVersionLabel);
+    await updateSettings({ activeAcademicTerm: term });
+  }
+
+  async function updateTwoFactor(enabled: boolean) {
+    await updateSettings({ loginTwoFactorEnabled: enabled });
   }
 
   async function updateSettings(
@@ -51,12 +56,16 @@ export function SystemSettingsProvider({ children }: { children: ReactNode }) {
       activeAcademicTerm: string;
       systemVersion: string;
       systemVersionLabel: string;
+      loginTwoFactorEnabled: boolean;
     }>,
   ) {
     const data = await apiUpdateSettings(settings);
     if (data.activeAcademicTerm) setActiveAcademicTerm(data.activeAcademicTerm);
     if (data.systemVersion) setSystemVersion(data.systemVersion);
     if (data.systemVersionLabel) setSystemVersionLabel(data.systemVersionLabel);
+    if (typeof data.loginTwoFactorEnabled === "boolean") {
+      setLoginTwoFactorEnabled(data.loginTwoFactorEnabled);
+    }
   }
 
   return (
@@ -65,8 +74,10 @@ export function SystemSettingsProvider({ children }: { children: ReactNode }) {
         activeAcademicTerm,
         systemVersion,
         systemVersionLabel,
+        loginTwoFactorEnabled,
         loading,
         updateTerm,
+        updateTwoFactor,
         updateSettings,
         refreshSettings: fetchSettings,
       }}
@@ -80,8 +91,10 @@ const FALLBACK_SETTINGS: SystemSettingsContextType = {
   activeAcademicTerm: DEFAULT_ACADEMIC_TERM,
   systemVersion: SYSTEM_VERSION,
   systemVersionLabel: SYSTEM_VERSION_LABEL,
+  loginTwoFactorEnabled: false,
   loading: false,
   updateTerm: async () => {},
+  updateTwoFactor: async () => {},
   updateSettings: async () => {},
   refreshSettings: async () => {},
 };

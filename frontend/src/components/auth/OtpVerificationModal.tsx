@@ -19,6 +19,9 @@ interface OtpVerificationModalProps {
   onVerify: (otp: string) => Promise<void>;
   onResend: () => Promise<void>;
   loading: boolean;
+  title?: string;
+  description?: string;
+  submitLabel?: string;
 }
 
 export default function OtpVerificationModal({
@@ -28,6 +31,9 @@ export default function OtpVerificationModal({
   onVerify,
   onResend,
   loading,
+  title = "Verify Your Email",
+  description = "Please enter it below to complete your registration.",
+  submitLabel = "Verify & Create Account",
 }: OtpVerificationModalProps) {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +69,8 @@ export default function OtpVerificationModal({
 
     try {
       await onVerify(trimmed);
+      setOtp("");
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     }
@@ -89,11 +97,11 @@ export default function OtpVerificationModal({
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:mx-0">
             <MailCheck className="size-6" />
           </div>
-          <DialogTitle className="text-xl font-bold">Verify Your Email</DialogTitle>
+          <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             We sent a 6-digit verification code to{" "}
-            <span className="font-semibold text-foreground">{email}</span>. Please enter
-            it below to complete your registration.
+            <span className="font-semibold text-foreground">{email}</span>.{" "}
+            {description}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,7 +184,7 @@ export default function OtpVerificationModal({
                   Verifying...
                 </>
               ) : (
-                "Verify & Create Account"
+                submitLabel
               )}
             </Button>
           </DialogFooter>

@@ -88,6 +88,29 @@ export async function sendOtpEmail(
   });
 }
 
+export async function sendLoginOtpEmail(
+  email: string,
+  otp: string,
+): Promise<SendOtpResult> {
+  return dispatchEmail({
+    to: email,
+    subject: `Your ARCH Sign-In Verification Code: ${otp}`,
+    text: `Your ARCH sign-in verification code is ${otp}. It expires in 10 minutes. If you did not try to sign in, please reset your password immediately.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <h2 style="color: #0f172a; margin-top: 0;">ARCH Two-Factor Verification</h2>
+        <p style="color: #475569; font-size: 15px;">Enter this 6-digit verification code to complete your sign-in:</p>
+        <div style="text-align: center; margin: 28px 0;">
+          <span style="font-size: 32px; font-weight: 700; letter-spacing: 6px; padding: 12px 24px; background: #f1f5f9; border-radius: 6px; color: #0f172a; display: inline-block;">
+            ${otp}
+          </span>
+        </div>
+        <p style="color: #64748b; font-size: 13px;">This code expires in 10 minutes. If you did not attempt to sign in, consider changing your password.</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPasswordResetOtpEmail(
   email: string,
   otp: string,

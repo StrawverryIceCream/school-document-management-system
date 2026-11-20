@@ -1,7 +1,9 @@
+import { isTwoFactorChallenge, login as apiLogin } from "@/api/auth";
 import LoginCard from "@/components/auth/LoginCard";
 import LoginFooter from "@/components/auth/LoginFooter";
 import LoginHeader from "@/components/auth/LoginHeader";
 import LoginIntro from "@/components/auth/LoginIntro";
+import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,21 +15,49 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [twoFactorEmail, setTwoFactorEmail] = useState("");
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (isTwoFactorChallenge(result)) {
+        setTwoFactorEmail(result.email);
+        setShowOtpModal(true);
+        return;
+      }
       navigate("/home");
-    } catch {
+    } catch (err) {
       setError(
-        "Invalid credentials. Please verify your email and password, or contact the university registrar if you need assistance.",
+        err instanceof Error && err.message !== "Invalid credentials"
+          ? err.message
+          : "Invalid credentials. Please verify your email and password, or contact the university registrar if you need assistance.",
       );
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleVerifyOtp(otp: string) {
+    setVerifyingOtp(true);
+    try {
+      const result = await login(twoFactorEmail || email, password, otp);
+      if (!isTwoFactorChallenge(result)) {
+        setShowOtpModal(false);
+        setTwoFactorEmail("");
+        navigate("/home");
+      }
+    } finally {
+      setVerifyingOtp(false);
+    }
+  }
+
+  async function handleResendOtp() {
+    await apiLogin(twoFactorEmail || email, password, { resend: true });
   }
 
   return (
@@ -52,6 +82,22 @@ function Login() {
         </div>
       </main>
       <LoginFooter />
+
+      <OtpVerificationModal
+        key={`${showOtpModal}-${twoFactorEmail}`}
+        open={showOtpModal}
+        email={twoFactorEmail}
+        onClose={() => {
+          setShowOtpModal(false);
+          setTwoFactorEmail("");
+        }}
+        onVerify={handleVerifyOtp}
+        onResend={handleResendOtp}
+        loading={verifyingOtp}
+        title="Two-Factor Authentication"
+        description="Please enter it below to complete your sign-in."
+        submitLabel="Verify & Sign In"
+      />
     </div>
   );
 }

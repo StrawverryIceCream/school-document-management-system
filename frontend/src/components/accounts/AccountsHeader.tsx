@@ -1,7 +1,11 @@
-import { Calendar, Download } from "lucide-react";
+import { Calendar, Download, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import PageHeader from "@/components/shared/PageHeader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useUsers } from "@/hooks/useUsers";
 import { useAuth } from "@/hooks/useAuth";
 import { useSystemSettings } from "@/provider/SystemSettingsProvider";
@@ -18,12 +22,38 @@ import {
 export default function AccountsHeader() {
   const { exportAccounts } = useUsers();
   const { user } = useAuth();
-  const { activeAcademicTerm } = useSystemSettings();
+  const {
+    activeAcademicTerm,
+    loginTwoFactorEnabled,
+    loading: settingsLoading,
+    updateTwoFactor,
+  } = useSystemSettings();
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [termDialogOpen, setTermDialogOpen] = useState(false);
+  const [togglingTwoFactor, setTogglingTwoFactor] = useState(false);
 
   const isAdmin = user?.role === "admin";
+
+  async function handleToggleTwoFactor(checked: boolean) {
+    setTogglingTwoFactor(true);
+    try {
+      await updateTwoFactor(checked);
+      toast.success(
+        checked
+          ? "Login two-factor authentication enabled."
+          : "Login two-factor authentication disabled.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed to update two-factor authentication setting",
+      );
+    } finally {
+      setTogglingTwoFactor(false);
+    }
+  }
 
   return (
     <>
@@ -33,6 +63,31 @@ export default function AccountsHeader() {
         description={ACCOUNTS_DESCRIPTION}
       >
         <div className="flex flex-wrap items-center gap-2">
+          {isAdmin && (
+            <div className="flex h-11 items-center gap-2.5 rounded-md border bg-background px-3.5">
+              <ShieldCheck className="size-4 text-primary shrink-0" />
+              <Label
+                htmlFor="login-2fa-toggle"
+                className="cursor-pointer text-sm font-medium whitespace-nowrap"
+              >
+                Login 2FA
+              </Label>
+              <Badge
+                variant={loginTwoFactorEnabled ? "default" : "secondary"}
+                className="text-[11px] font-semibold"
+              >
+                {loginTwoFactorEnabled ? "ON" : "OFF"}
+              </Badge>
+              <Switch
+                id="login-2fa-toggle"
+                aria-label="Toggle login two-factor authentication"
+                checked={loginTwoFactorEnabled}
+                disabled={togglingTwoFactor || settingsLoading}
+                onCheckedChange={handleToggleTwoFactor}
+              />
+            </div>
+          )}
+
           {isAdmin && (
             <Button
               variant="outline"

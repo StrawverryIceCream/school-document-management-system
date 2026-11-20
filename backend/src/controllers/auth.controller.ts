@@ -1,12 +1,12 @@
 import crypto from "crypto";
 import { type Request, type Response } from "express";
 import bcrypt from "bcrypt";
-import { eq, desc, or, and, isNull } from "drizzle-orm";
+import { eq, desc, or, and, isNull, lt, sql } from "drizzle-orm";
 import { db } from "../db/db.js";
 import { users, emailVerifications, courses, passwordResetTokens } from "../db/schema.js";
-import { sendOtpEmail, sendPasswordResetOtpEmail } from "../services/email.service.js";
+import { sendOtpEmail, sendPasswordResetOtpEmail, sendLoginOtpEmail } from "../services/email.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
-import { getActiveAcademicTerm } from "./settings.controller.js";
+import { getActiveAcademicTerm, isLoginTwoFactorEnabled } from "./settings.controller.js";
 
 const BCRYPT_SALT_ROUNDS = 10;
 const FIELD_MAX_LENGTH = 100;
@@ -93,6 +93,144 @@ function hasPgErrorCode(err: unknown, code: string): boolean {
   const { code: errCode, cause } = err as { code?: unknown; cause?: unknown };
   if (errCode === code) return true;
   return hasPgErrorCode(cause, code);
+}
+
+export type LoginOtpState = "bypass" | "challenge" | "verify";
+export type LoginChallengeAction = "send" | "reuse" | "rate_limit";
+
+export function normalizeLoginEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+export function evaluateLoginOtpState(options: {
+  twoFactorEnabled: boolean;
+  otp?: unknown;
+  resend?: unknown;
+}): LoginOtpState {
+  if (!options.twoFactorEnabled) return "bypass";
+  if (options.resend === true) return "challenge";
+  const otp = typeof options.otp === "string" ? options.otp.trim() : "";
+  return otp ? "verify" : "challenge";
+}
+
+export function decideLoginChallengeAction(options: {
+  cooldownActive: boolean;
+  isResend: boolean;
+  hasRecent: boolean;
+  expired: boolean;
+  attempts: number;
+}): LoginChallengeAction {
+  if (!options.cooldownActive) return "send";
+  if (options.isResend || (options.hasRecent && options.attempts >= 5)) {
+    return "rate_limit";
+  }
+  if (options.hasRecent && !options.expired) {
+    return "reuse";
+  }
+  return "send";
+}
+
+export interface EmailVerificationRecordLike {
+  otpHash: string;
+  expiresAt: Date | string;
+  attempts: number;
+}
+
+export type LoginOtpVerificationResult =
+  | { ok: true }
+  | {
+      ok: false;
+      status: 400;
+      error: string;
+      shouldDelete?: boolean;
+      nextAttempts?: number;
+    };
+
+export async function checkLoginOtpVerification(input: {
+  verification: EmailVerificationRecordLike | null | undefined;
+  otp: string;
+  now?: Date;
+}): Promise<LoginOtpVerificationResult> {
+  const { verification, otp, now = new Date() } = input;
+  if (!verification) {
+    return {
+      ok: false,
+      status: 400,
+      error: "No active verification code found. Please request a new code.",
+    };
+  }
+  if (new Date(verification.expiresAt) <= now) {
+    return {
+      ok: false,
+      status: 400,
+      error: "Verification code has expired. Please request a new code.",
+      shouldDelete: true,
+    };
+  }
+  if (verification.attempts >= 5) {
+    return {
+      ok: false,
+      status: 400,
+      error: "Too many failed attempts. Please request a new verification code.",
+      shouldDelete: true,
+    };
+  }
+  const isOtpValid = await bcrypt.compare(otp, verification.otpHash);
+  if (!isOtpValid) {
+    const nextAttempts = verification.attempts + 1;
+    const remaining = 5 - nextAttempts;
+    return {
+      ok: false,
+      status: 400,
+      error:
+        remaining > 0
+          ? `Invalid verification code. ${remaining} attempt(s) remaining.`
+          : "Invalid verification code. Maximum attempts reached. Please request a new code.",
+      nextAttempts,
+    };
+  }
+  return { ok: true };
+}
+
+async function verifyStoredEmailOtp(
+  normalizedEmail: string,
+  otp: string,
+): Promise<
+  | { ok: true; verificationId: string }
+  | { ok: false; status: 400; error: string }
+> {
+  const verification = await db.query.emailVerifications.findFirst({
+    where: eq(emailVerifications.email, normalizedEmail),
+    orderBy: (verifications, { desc: d }) => [d(verifications.createdAt)],
+  });
+
+  const otpCheck = await checkLoginOtpVerification({ verification, otp });
+  if (!otpCheck.ok || !verification) {
+    if (!otpCheck.ok && otpCheck.shouldDelete && verification) {
+      await db
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.id, verification.id));
+    } else if (!otpCheck.ok && otpCheck.nextAttempts !== undefined && verification) {
+      await db
+        .update(emailVerifications)
+        .set({ attempts: sql`${emailVerifications.attempts} + 1` })
+        .where(
+          and(
+            eq(emailVerifications.id, verification.id),
+            lt(emailVerifications.attempts, 5),
+          ),
+        );
+    }
+    return !otpCheck.ok
+      ? { ok: false, status: otpCheck.status, error: otpCheck.error }
+      : {
+          ok: false,
+          status: 400,
+          error: "No active verification code found. Please request a new code.",
+        };
+  }
+
+  return { ok: true, verificationId: verification.id };
 }
 
 export const sendSignupOtp = async (req: Request, res: Response) => {
@@ -343,49 +481,9 @@ export const signup = async (
     }
 
     // Verify OTP against email_verifications
-    const verification = await db.query.emailVerifications.findFirst({
-      where: eq(emailVerifications.email, normalizedEmail),
-      orderBy: (verifications, { desc: d }) => [d(verifications.createdAt)],
-    });
-
-    if (!verification) {
-      return res.status(400).json({
-        error: "No active verification code found. Please request a new code.",
-      });
-    }
-
-    if (verification.expiresAt < new Date()) {
-      await db
-        .delete(emailVerifications)
-        .where(eq(emailVerifications.id, verification.id));
-      return res.status(400).json({
-        error: "Verification code has expired. Please request a new code.",
-      });
-    }
-
-    if (verification.attempts >= 5) {
-      await db
-        .delete(emailVerifications)
-        .where(eq(emailVerifications.id, verification.id));
-      return res.status(400).json({
-        error: "Too many failed attempts. Please request a new verification code.",
-      });
-    }
-
-    const isOtpValid = await bcrypt.compare(otp, verification.otpHash);
-    if (!isOtpValid) {
-      await db
-        .update(emailVerifications)
-        .set({ attempts: verification.attempts + 1 })
-        .where(eq(emailVerifications.id, verification.id));
-
-      const remaining = 5 - (verification.attempts + 1);
-      return res.status(400).json({
-        error:
-          remaining > 0
-            ? `Invalid verification code. ${remaining} attempt(s) remaining.`
-            : "Invalid verification code. Maximum attempts reached. Please request a new code.",
-      });
+    const otpResult = await verifyStoredEmailOtp(normalizedEmail, otp);
+    if (!otpResult.ok) {
+      return res.status(otpResult.status).json({ error: otpResult.error });
     }
 
     const activeAcademicTerm = role === "student" ? await getActiveAcademicTerm() : null;
@@ -418,7 +516,7 @@ export const signup = async (
     // Invalidate consumed OTP
     await db
       .delete(emailVerifications)
-      .where(eq(emailVerifications.id, verification.id));
+      .where(eq(emailVerifications.id, otpResult.verificationId));
 
 
     if (!user) {
@@ -463,19 +561,16 @@ export const signup = async (
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body ?? {};
+    const { email, password, otp, resend } = req.body ?? {};
 
-    if (
-      typeof email !== "string" ||
-      typeof password !== "string" ||
-      !email ||
-      !password
-    ) {
+    const normalizedInputEmail =
+      typeof email === "string" ? normalizeLoginEmail(email) : "";
+    if (!normalizedInputEmail || typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
     const user = await db.query.users.findFirst({
-      where: eq(users.email, email),
+      where: sql`lower(trim(${users.email})) = ${normalizedInputEmail}`,
       with: AUTH_USER_WITH,
     });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
@@ -488,6 +583,99 @@ export const login = async (req: Request, res: Response) => {
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    const twoFactorEnabled = await isLoginTwoFactorEnabled();
+    const otpState = evaluateLoginOtpState({ twoFactorEnabled, otp, resend });
+    const normalizedEmail = normalizeLoginEmail(user.email);
+
+    if (otpState === "challenge") {
+      const now = new Date();
+      const recent = await db.query.emailVerifications.findFirst({
+        where: eq(emailVerifications.email, normalizedEmail),
+        orderBy: (verifications, { desc: d }) => [d(verifications.createdAt)],
+      });
+
+      const cooldown = recent
+        ? calculateRecoveryCooldown(recent.createdAt, now)
+        : { active: false, waitSeconds: 0 };
+
+      const challengeAction = decideLoginChallengeAction({
+        cooldownActive: cooldown.active,
+        isResend: resend === true,
+        hasRecent: Boolean(recent),
+        expired: recent ? isTokenExpired(recent.expiresAt, now) : true,
+        attempts: recent?.attempts ?? 0,
+      });
+
+      if (challengeAction === "rate_limit") {
+        return res.status(429).json({
+          error: `Please wait ${cooldown.waitSeconds} seconds before requesting a new code`,
+        });
+      }
+
+      if (challengeAction === "reuse") {
+        return res.json({
+          requiresTwoFactor: true,
+          email: user.email,
+          message: "Verification code sent to your email",
+        });
+      }
+
+      const code = crypto.randomInt(100000, 1000000).toString();
+      const otpHash = await bcrypt.hash(code, BCRYPT_SALT_ROUNDS);
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      try {
+        await sendLoginOtpEmail(user.email, code);
+      } catch (sendErr) {
+        console.error("[login] Failed to deliver 2FA email:", sendErr);
+        return res.status(502).json({
+          error:
+            "Failed to deliver two-factor verification email. Please try again later.",
+        });
+      }
+
+      await db
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.email, normalizedEmail));
+
+      await db.insert(emailVerifications).values({
+        email: normalizedEmail,
+        otpHash,
+        expiresAt,
+      });
+
+      return res.json({
+        requiresTwoFactor: true,
+        email: user.email,
+        message: "Verification code sent to your email",
+      });
+    }
+
+    if (otpState === "verify") {
+      const cleanOtp = typeof otp === "string" ? otp.trim() : "";
+      if (!validateOtpCode(cleanOtp)) {
+        return res
+          .status(400)
+          .json({ error: "A valid 6-digit verification code is required" });
+      }
+
+      const otpResult = await verifyStoredEmailOtp(normalizedEmail, cleanOtp);
+      if (!otpResult.ok) {
+        return res.status(otpResult.status).json({ error: otpResult.error });
+      }
+
+      // Single-use claim so concurrent login requests cannot consume the same OTP twice
+      const [consumed] = await db
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.id, otpResult.verificationId))
+        .returning({ id: emailVerifications.id });
+      if (!consumed) {
+        return res.status(400).json({
+          error: "No active verification code found. Please request a new code.",
+        });
+      }
+    }
 
     req.session.userId = user.id;
     req.session.role = user.role;
@@ -503,7 +691,11 @@ export const login = async (req: Request, res: Response) => {
           entityType: "account",
           entityId: user.id,
           ipAddress: req.ip,
-          metadata: { role: user.role, email: user.email },
+          metadata: {
+            role: user.role,
+            email: user.email,
+            ...(twoFactorEnabled ? { twoFactorVerified: true } : {}),
+          },
         });
       }
       return res.json(toAuthUser(user));

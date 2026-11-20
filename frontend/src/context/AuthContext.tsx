@@ -1,11 +1,16 @@
+import type { TwoFactorChallengeResponse } from "@/api/auth";
 import type { AuthUser } from "@/types";
 import { createContext } from "react";
 
 interface AuthContextType {
   user: AuthUser | null;
-   setUser: (user: AuthUser | null) => void;
+  setUser: (user: AuthUser | null) => void;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    otp?: string,
+  ) => Promise<TwoFactorChallengeResponse | void>;
   logout: () => Promise<void>;
 }
 

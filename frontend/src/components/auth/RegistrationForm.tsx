@@ -29,7 +29,7 @@ import type { UserRole } from "@/types";
 
 export default function RegistrationForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setUser } = useAuth();
 
   const [firstName, setFirstName] = useState("");
   const [middleInitial, setMiddleInitial] = useState("");
@@ -128,7 +128,7 @@ export default function RegistrationForm() {
 
       const cleanEmail = email.trim().toLowerCase();
 
-      await signup({
+      const createdUser = await signup({
         email: cleanEmail,
         password,
         fullName,
@@ -145,7 +145,7 @@ export default function RegistrationForm() {
           role === "student" ? studentId.trim().toUpperCase() : undefined,
         otp,
       });
-      await login(cleanEmail, password);
+      setUser(createdUser);
       navigate("/home");
     } finally {
       setVerifyingOtp(false);

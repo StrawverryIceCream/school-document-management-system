@@ -8,6 +8,23 @@ import { recordAuditLog } from "../services/audit.service.js";
 export const DEFAULT_SYSTEM_VERSION = "v1.0.0";
 export const DEFAULT_SYSTEM_VERSION_LABEL = "v1.0 System";
 
+export function parseBooleanSetting(raw: unknown, fallback = false): boolean {
+  if (typeof raw === "boolean") return raw;
+  if (typeof raw !== "string") return fallback;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "true" || normalized === "1") return true;
+  if (normalized === "false" || normalized === "0") return false;
+  return fallback;
+}
+
+export async function isLoginTwoFactorEnabled(): Promise<boolean> {
+  const setting = await db.query.systemSettings.findFirst({
+    where: eq(systemSettings.key, "loginTwoFactorEnabled"),
+    columns: { value: true },
+  });
+  return parseBooleanSetting(setting?.value, false);
+}
+
 export async function getActiveAcademicTerm(): Promise<string> {
   try {
     const setting = await db.query.systemSettings.findFirst({
@@ -43,11 +60,13 @@ export async function getSettings(_req: Request, res: Response) {
     const activeAcademicTerm = map.activeAcademicTerm || DEFAULT_ACADEMIC_TERM;
     const systemVersion = map.systemVersion || DEFAULT_SYSTEM_VERSION;
     const systemVersionLabel = map.systemVersionLabel || DEFAULT_SYSTEM_VERSION_LABEL;
+    const loginTwoFactorEnabled = parseBooleanSetting(map.loginTwoFactorEnabled, false);
 
     return res.json({
       activeAcademicTerm,
       systemVersion,
       systemVersionLabel,
+      loginTwoFactorEnabled,
     });
   } catch (error) {
     console.error("[getSettings] error:", error);
@@ -57,7 +76,12 @@ export async function getSettings(_req: Request, res: Response) {
 
 export async function updateSettings(req: Request, res: Response) {
   try {
-    const { activeAcademicTerm, systemVersion, systemVersionLabel } = req.body ?? {};
+    const {
+      activeAcademicTerm,
+      systemVersion,
+      systemVersionLabel,
+      loginTwoFactorEnabled,
+    } = req.body ?? {};
     const updates: Record<string, string> = {};
 
     if (activeAcademicTerm !== undefined) {
@@ -96,6 +120,24 @@ export async function updateSettings(req: Request, res: Response) {
       updates.systemVersionLabel = systemVersionLabel.trim();
     }
 
+    if (loginTwoFactorEnabled !== undefined) {
+      if (typeof loginTwoFactorEnabled === "boolean") {
+        updates.loginTwoFactorEnabled = loginTwoFactorEnabled ? "true" : "false";
+      } else if (typeof loginTwoFactorEnabled === "string") {
+        const normalized = loginTwoFactorEnabled.trim().toLowerCase();
+        if (normalized !== "true" && normalized !== "false") {
+          return res.status(400).json({
+            error: "Login two-factor authentication must be a boolean.",
+          });
+        }
+        updates.loginTwoFactorEnabled = normalized;
+      } else {
+        return res.status(400).json({
+          error: "Login two-factor authentication must be a boolean.",
+        });
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: "No valid settings provided to update." });
     }
@@ -122,7 +164,8 @@ export async function updateSettings(req: Request, res: Response) {
         actorId: req.session.userId,
         action: `settings.updated.${key}`,
         entityType: "account",
-        entityId: key,
+        entityId: null,
+        ipAddress: req.ip,
         metadata: { key, value },
       });
     }
@@ -132,6 +175,10 @@ export async function updateSettings(req: Request, res: Response) {
       activeAcademicTerm: currentMap.activeAcademicTerm || DEFAULT_ACADEMIC_TERM,
       systemVersion: currentMap.systemVersion || DEFAULT_SYSTEM_VERSION,
       systemVersionLabel: currentMap.systemVersionLabel || DEFAULT_SYSTEM_VERSION_LABEL,
+      loginTwoFactorEnabled: parseBooleanSetting(
+        currentMap.loginTwoFactorEnabled,
+        false,
+      ),
     });
   } catch (error) {
     console.error("[updateSettings] error:", error);
