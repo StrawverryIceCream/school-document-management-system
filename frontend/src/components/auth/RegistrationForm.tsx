@@ -65,7 +65,7 @@ export default function RegistrationForm() {
   const selectedDepartment = DEPARTMENT_OPTIONS.find(
     (d) => d.value === departmentValue,
   );
-  
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -88,7 +88,11 @@ export default function RegistrationForm() {
       setError("Please enter your complete Student ID number as shown on your university RFID.");
       return;
     }
-    if (contactNumber && contactNumber.length !== CONTACT_NUMBER_LENGTH) {
+    if (
+      role === "student" &&
+      contactNumber &&
+      contactNumber.length !== CONTACT_NUMBER_LENGTH
+    ) {
       setError(`Contact number must be exactly ${CONTACT_NUMBER_LENGTH} digits.`);
       return;
     }
@@ -131,7 +135,8 @@ export default function RegistrationForm() {
         courseId: role === "student" ? courseId : undefined,
         yearLevel: role === "student" ? yearLevel : undefined,
         section: role === "student" ? (section.trim() || undefined) : undefined,
-        contactNumber: contactNumber.trim() || undefined,
+        contactNumber:
+          role === "student" ? contactNumber.trim() || undefined : undefined,
         department: role === "teacher" ? (selectedDepartment?.label ?? "") : undefined,
         studentId:
           role === "student" && studentId !== STUDENT_ID_PREFIX
