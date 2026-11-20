@@ -287,6 +287,12 @@ export const signup = async (
       });
     }
 
+    if (contactNumber && !/^\d{11}$/.test(contactNumber)) {
+      return res.status(400).json({
+        error: "Contact number must be exactly 11 digits",
+      });
+    }
+
 
     const existing = await db.query.users.findFirst({
       where: eq(users.email, normalizedEmail),

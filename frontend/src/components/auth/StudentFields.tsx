@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  sanitizeContactNumber,
   STUDENT_STATUS_OPTIONS,
   type StudentStatus,
 } from "@/lib/auth/arch-registration";
@@ -151,9 +152,12 @@ function StudentFields({
             </span>
           </Label>
           <Input
+            autoComplete="tel"
             id="contact-number"
-            onChange={(e) => setContactNumber(e.target.value)}
-            placeholder="0912 345 6789"
+            inputMode="numeric"
+            onChange={(e) => setContactNumber(sanitizeContactNumber(e.target.value))}
+            pattern="[0-9]*"
+            placeholder="09123456789"
             value={contactNumber}
           />
           <p className="mt-1 text-xs text-muted-foreground">

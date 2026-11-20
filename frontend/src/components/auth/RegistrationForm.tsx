@@ -13,6 +13,7 @@ import ComplianceNotice from "@/components/auth/ComplianceNotice";
 import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  CONTACT_NUMBER_LENGTH,
   DEPARTMENT_OPTIONS,
   MIN_PASSWORD_LENGTH,
   STUDENT_ID_PREFIX,
@@ -87,6 +88,14 @@ export default function RegistrationForm() {
       setError("Please enter your complete Student ID number as shown on your university RFID.");
       return;
     }
+    if (
+      role === "student" &&
+      contactNumber &&
+      contactNumber.length !== CONTACT_NUMBER_LENGTH
+    ) {
+      setError(`Contact number must be exactly ${CONTACT_NUMBER_LENGTH} digits.`);
+      return;
+    }
     if (role === "student" && (!collegeId || !courseId)) {
       setError("Please select both your college and your degree program.");
       return;
@@ -126,7 +135,8 @@ export default function RegistrationForm() {
         courseId: role === "student" ? courseId : undefined,
         yearLevel: role === "student" ? yearLevel : undefined,
         section: role === "student" ? (section.trim() || undefined) : undefined,
-        contactNumber: contactNumber.trim() || undefined,
+        contactNumber:
+          role === "student" ? contactNumber.trim() || undefined : undefined,
         department: role === "teacher" ? (selectedDepartment?.label ?? "") : undefined,
         studentId:
           role === "student" && studentId !== STUDENT_ID_PREFIX
