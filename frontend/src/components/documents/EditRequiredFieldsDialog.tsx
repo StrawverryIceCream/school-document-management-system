@@ -28,7 +28,7 @@ const STUDENT_INFO_FIELDS = [
 ];
 
 interface EditRequiredFieldsDialogProps {
-  documentId: number;
+  documentId: string;
   initialFields: RequiredFieldDefinition[];
   onSaveSuccess: () => void;
   onCancel: () => void;
@@ -92,14 +92,16 @@ function EditRequiredFieldsDialog({
   async function handleSave() {
     setSaving(true);
     try {
-      await updateDocument(String(documentId), {
+      await updateDocument(documentId, {
         requiredFields: fields,
       });
       toast.success("Required fields updated successfully");
       onSaveSuccess();
     } catch (err) {
       console.error("Failed to update required fields:", err);
-      toast.error("Failed to update required fields");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update required fields",
+      );
     } finally {
       setSaving(false);
     }

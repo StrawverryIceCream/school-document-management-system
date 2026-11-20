@@ -19,16 +19,22 @@ import type { DocumentType } from "@/types";
 export default function DocumentTable() {
   const { user } = useAuth();
   const { documents, loading, error, search, isActive } = useDocument();
-  const [editingDocument, setEditingDocument] = useState<number | null>(null);
+  const [editingDocument, setEditingDocument] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [prevFilters, setPrevFilters] = useState({ search, isActive });
   const pageSize = 10;
+
+  if (prevFilters.search !== search || prevFilters.isActive !== isActive) {
+    setPrevFilters({ search, isActive });
+    setPage(1);
+  }
 
   const scopedDocuments = useMemo(
     () => filterDocumentsForManager(documents, user),
     [documents, user],
   );
 
-  function setEdit(isEditing: boolean, documentId: number) {
+  function setEdit(isEditing: boolean, documentId: string) {
     setEditingDocument(isEditing ? documentId : null);
   }
 
@@ -216,7 +222,7 @@ export default function DocumentTable() {
       : "No documents found.";
 
   const customRow = (doc: DocumentType) => {
-    if (editingDocument?.toString() === doc.id?.toString()) {
+    if (editingDocument === doc.id) {
       return (
         <TableRow
           key={doc.id}

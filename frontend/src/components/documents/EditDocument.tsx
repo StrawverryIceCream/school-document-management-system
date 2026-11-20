@@ -23,7 +23,7 @@ function EditDocument({
   setEdit,
 }: {
   document: DocumentType;
-  setEdit: (isEditing: boolean, documentId: number) => void;
+  setEdit: (isEditing: boolean, documentId: string) => void;
 }) {
   const { user } = useAuth();
   const { refreshDocument } = useDocument();
@@ -32,22 +32,30 @@ function EditDocument({
 
   async function handleToggleActive() {
     try {
-      await updateDocument(String(document.id), {
+      await updateDocument(document.id, {
         isActive: !document.isActive,
       });
-      refreshDocument();
+      await refreshDocument();
     } catch (err) {
-      console.log("Failed to toggle document status:", err);
+      console.error("Failed to toggle document status:", err);
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed to update document status",
+      );
     }
   }
 
   async function handleDeleteDocument() {
     try {
-      await deleteDocumentById(String(document.id));
-      refreshDocument();
+      await deleteDocumentById(document.id);
+      await refreshDocument();
       toast.success("Successfully Deleted");
     } catch (err) {
-      console.log("Failed to delete document:", err);
+      console.error("Failed to delete document:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete document",
+      );
     }
   }
 
@@ -65,7 +73,7 @@ function EditDocument({
       <DropdownMenuContent align="end" className="w-32">
         <DropdownMenuItem
           onClick={() => {
-            setEdit(true, Number(document.id));
+            setEdit(true, document.id);
           }}
         >
           Edit
@@ -89,7 +97,7 @@ function EditDocument({
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DocumentDialogHeader type="Edit" />
           <EditRequiredFieldsDialog
-            documentId={Number(document.id)}
+            documentId={document.id}
             initialFields={document.requiredFields}
             onSaveSuccess={() => {
               setEditFieldsOpen(false);

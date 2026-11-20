@@ -1,11 +1,14 @@
-import type { DocumentType } from "@/types";
+import { useState } from "react";
+import { toast } from "sonner";
+import { updateDocument } from "@/api/documents";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import { updateDocument } from "@/api/documents";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
+import { resolveDocumentOfficeCode } from "@/lib/documents";
+import type { DocumentType } from "@/types";
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 
 function EditDocumentRow({
@@ -13,9 +16,11 @@ function EditDocumentRow({
   setEdit,
 }: {
   document: DocumentType;
-  setEdit: (isEditing: boolean, documentId: number) => void;
+  setEdit: (isEditing: boolean, documentId: string) => void;
 }) {
+  const { user } = useAuth();
   const { refreshDocument } = useDocument();
+  const isAdmin = user?.role === "admin";
   const [code, setCode] = useState(document.code);
   const [name, setName] = useState(document.name);
   const [description, setDescription] = useState(document.description || "");
@@ -24,30 +29,35 @@ function EditDocumentRow({
     document.processingDays ?? 3,
   );
   const [maxCopies, setMaxCopies] = useState(document.maxCopies ?? 1);
+  const [saving, setSaving] = useState(false);
 
   const officeName =
     document.officeRecord?.name ??
     document.officeRecord?.code ??
     document.office ??
     "Registrar";
-  const officeCode =
-    document.officeRecord?.code ??
-    (document.code.includes("-") ? document.code.split("-")[0] : "OUR");
+  const officeCode = resolveDocumentOfficeCode(document) ?? "OUR";
 
   async function handleSubmit() {
+    setSaving(true);
     try {
-      setEdit(false, Number(document.id));
-      await updateDocument(String(document.id), {
-        code,
+      await updateDocument(document.id, {
+        ...(isAdmin ? { code } : {}),
         name,
         description,
         fee,
         processingDays,
         maxCopies,
       });
-      refreshDocument();
+      setEdit(false, document.id);
+      await refreshDocument();
     } catch (err) {
-      console.log("Failed to update document:", err);
+      console.error("Failed to update document:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update document",
+      );
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -58,15 +68,16 @@ function EditDocumentRow({
     setFee(document.fee);
     setProcessingDays(document.processingDays ?? 3);
     setMaxCopies(document.maxCopies ?? 1);
-    setEdit(false, Number(document.id));
+    setEdit(false, document.id);
   }
 
   return (
     <>
       <TableCell>
         <Input
-          value={code}
+          value={isAdmin ? code : document.code}
           onChange={(e) => setCode(e.target.value)}
+          disabled={!isAdmin}
           placeholder="Code"
           className="h-8 text-xs font-mono"
         />
@@ -149,14 +160,16 @@ function EditDocumentRow({
             size="sm"
             className="h-8 px-2.5 text-xs"
             onClick={handleSubmit}
+            disabled={saving}
           >
-            Save
+            {saving ? "Saving..." : "Save"}
           </Button>
           <Button
             size="sm"
             variant="outline"
             className="h-8 px-2.5 text-xs"
             onClick={handleCancel}
+            disabled={saving}
           >
             Cancel
           </Button>
