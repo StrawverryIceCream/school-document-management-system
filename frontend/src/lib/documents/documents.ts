@@ -88,3 +88,74 @@ export const SEARCH_PLACEHOLDER =
 export const PROCESSING_WINDOW_LABEL = "Registrar Processing Window";
 
 export const PROCESSING_WINDOW_HOURS = "Mon–Fri, 8:00 AM – 5:00 PM";
+
+export interface DocumentOfficeTarget {
+  code: string;
+  office?: "registrar" | "hr" | null;
+  officeId?: string | null;
+  officeRecord?: { id?: string | null; code?: string | null } | null;
+}
+
+export interface StaffOfficeViewer {
+  role: "student" | "teacher" | "admin" | "staff";
+  office?: "registrar" | "hr" | null;
+  officeId?: string | null;
+  officeRecord?: { id?: string | null; code?: string | null } | null;
+}
+
+function legacyOfficeToCode(office?: "registrar" | "hr" | null): string | null {
+  if (office === "hr") return "HRMO";
+  if (office === "registrar") return "OUR";
+  return null;
+}
+
+export function resolveDocumentOfficeCode(doc: DocumentOfficeTarget): string | null {
+  const recordCode = doc.officeRecord?.code?.trim().toUpperCase();
+  if (recordCode) return recordCode;
+
+  const trimmedCode = doc.code?.trim() ?? "";
+  const dashIdx = trimmedCode.indexOf("-");
+  if (dashIdx > 0) {
+    return trimmedCode.slice(0, dashIdx).toUpperCase();
+  }
+
+  return legacyOfficeToCode(doc.office);
+}
+
+export function resolveStaffOfficeCode(
+  user: Pick<StaffOfficeViewer, "office" | "officeRecord"> | null | undefined,
+): string | null {
+  if (!user) return null;
+  const recordCode = user.officeRecord?.code?.trim().toUpperCase();
+  if (recordCode) return recordCode;
+  return legacyOfficeToCode(user.office);
+}
+
+export function isDocumentInStaffOffice(
+  doc: DocumentOfficeTarget,
+  user: StaffOfficeViewer | null | undefined,
+): boolean {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  if (user.role !== "staff") return false;
+
+  const docOfficeId = (doc.officeId ?? doc.officeRecord?.id)?.trim() || null;
+  const userOfficeId = (user.officeId ?? user.officeRecord?.id)?.trim() || null;
+  if (docOfficeId && userOfficeId) {
+    return docOfficeId === userOfficeId;
+  }
+
+  const docCode = resolveDocumentOfficeCode(doc);
+  const userCode = resolveStaffOfficeCode(user);
+  return Boolean(docCode && userCode && docCode === userCode);
+}
+
+export function filterDocumentsForManager<T extends DocumentOfficeTarget>(
+  documents: T[],
+  user: StaffOfficeViewer | null | undefined,
+): T[] {
+  if (!user) return [];
+  if (user.role === "admin") return documents;
+  if (user.role !== "staff") return [];
+  return documents.filter((doc) => isDocumentInStaffOffice(doc, user));
+}

@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import StatCard from "@/components/shared/StatCard";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
+import { filterDocumentsForManager } from "@/lib/documents";
 import type { Tone } from "@/lib/tones";
 import { CheckCircle2, FileText, Slash, type LucideIcon } from "lucide-react";
 
@@ -12,13 +15,20 @@ type DocumentSummaryItem = {
 };
 
 export default function DocumentCards() {
+  const { user } = useAuth();
   const { documents, loading, error } = useDocument();
+
+  const scopedDocuments = useMemo(
+    () => filterDocumentsForManager(documents, user),
+    [documents, user],
+  );
 
   if (error) return null;
 
-  const totalDocuments = documents.length;
-  const activeDocuments = documents.filter((doc) => doc.isActive).length;
-  const inactiveDocuments = documents.filter((doc) => !doc.isActive).length;
+  const totalDocuments = scopedDocuments.length;
+  const activeDocuments = scopedDocuments.filter((doc) => doc.isActive).length;
+  const inactiveDocuments = scopedDocuments.filter((doc) => !doc.isActive).length;
+  const isStaff = user?.role === "staff";
 
   const summaryCards: DocumentSummaryItem[] = [
     {
@@ -26,7 +36,9 @@ export default function DocumentCards() {
       value: totalDocuments,
       icon: FileText,
       tone: "brand",
-      caption: "Configured document catalog",
+      caption: isStaff
+        ? "Assigned to your processing office"
+        : "Configured document catalog",
     },
     {
       label: "Active Documents",

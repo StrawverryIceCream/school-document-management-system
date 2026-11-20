@@ -10,6 +10,7 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { DocumentType } from "@/types";
 import { deleteDocumentById, updateDocument } from "@/api/documents";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
 import DocumentDeleteAlert from "./DocumentDeleteAlert";
 import EditRequiredFieldsDialog from "./EditRequiredFieldsDialog";
@@ -24,8 +25,10 @@ function EditDocument({
   document: DocumentType;
   setEdit: (isEditing: boolean, documentId: number) => void;
 }) {
+  const { user } = useAuth();
   const { refreshDocument } = useDocument();
   const [editFieldsOpen, setEditFieldsOpen] = useState(false);
+  const isAdmin = user?.role === "admin";
 
   async function handleToggleActive() {
     try {
@@ -77,7 +80,7 @@ function EditDocument({
         >
           {document.isActive ? "Disable" : "Enable"}
         </DropdownMenuItem>
-        {!document.isActive && (
+        {isAdmin && !document.isActive && (
           <DocumentDeleteAlert handleDeleteDocument={handleDeleteDocument} />
         )}
       </DropdownMenuContent>

@@ -1,7 +1,13 @@
+import { useMemo } from "react";
 import SearchToolbar, {
   type SearchToolbarTab,
 } from "@/components/shared/SearchToolbar";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
+import {
+  filterDocumentsForManager,
+  resolveDocumentOfficeCode,
+} from "@/lib/documents";
 import { exportToCsv, type ExportColumn } from "@/lib/export/csv-export";
 import type { DocumentType } from "@/types";
 
@@ -17,7 +23,7 @@ const documentExportColumns: ExportColumn<DocumentType>[] = [
   {
     header: "Office",
     key: "officeRecord",
-    formatter: (_, doc) => doc.officeRecord?.code || doc.office || "—",
+    formatter: (_, doc) => resolveDocumentOfficeCode(doc) || doc.office || "—",
   },
   {
     header: "Sector",
@@ -41,7 +47,13 @@ const documentExportColumns: ExportColumn<DocumentType>[] = [
 ];
 
 function DocumentSearchToolbar() {
+  const { user } = useAuth();
   const { setIsActive, setSearch, search, isActive, documents } = useDocument();
+
+  const scopedDocuments = useMemo(
+    () => filterDocumentsForManager(documents, user),
+    [documents, user],
+  );
 
   const activeTab =
     isActive === undefined ? "all" : isActive ? "active" : "inactive";
@@ -54,7 +66,7 @@ function DocumentSearchToolbar() {
 
   const handleExport = () => {
     const filename = `document-types-${new Date().toISOString().slice(0, 10)}`;
-    exportToCsv(filename, documents, documentExportColumns);
+    exportToCsv(filename, scopedDocuments, documentExportColumns);
   };
 
   return (

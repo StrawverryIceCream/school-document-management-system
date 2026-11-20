@@ -7,15 +7,26 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import DocumentRequiredFieldDialog from "./DocumentRequiredFieldDialog";
 import EditDocumentRow from "./EditDocumentRow";
 import EditDocument from "./EditDocument";
+import { useAuth } from "@/hooks/useAuth";
 import { useDocument } from "@/hooks/useDocument";
+import {
+  filterDocumentsForManager,
+  resolveDocumentOfficeCode,
+} from "@/lib/documents";
 import { cn } from "@/lib/utils";
 import type { DocumentType } from "@/types";
 
 export default function DocumentTable() {
-  const { documents, loading, error } = useDocument();
+  const { user } = useAuth();
+  const { documents, loading, error, search, isActive } = useDocument();
   const [editingDocument, setEditingDocument] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  const scopedDocuments = useMemo(
+    () => filterDocumentsForManager(documents, user),
+    [documents, user],
+  );
 
   function setEdit(isEditing: boolean, documentId: number) {
     setEditingDocument(isEditing ? documentId : null);
@@ -73,9 +84,7 @@ export default function DocumentTable() {
             doc.officeRecord?.code ??
             doc.office ??
             "Registrar";
-          const officeCode =
-            doc.officeRecord?.code ??
-            (doc.code.includes("-") ? doc.code.split("-")[0] : "OUR");
+          const officeCode = resolveDocumentOfficeCode(doc) ?? "OUR";
           return (
             <div className="flex items-center gap-1.5" title={officeName}>
               <Badge
@@ -193,12 +202,18 @@ export default function DocumentTable() {
     [],
   );
 
-  const totalPages = Math.max(1, Math.ceil(documents.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pagedData = documents.slice(
+  const totalPages = Math.max(1, Math.ceil(scopedDocuments.length / pageSize));
+  const currentPage = Math.max(1, Math.min(page, totalPages));
+  const pagedData = scopedDocuments.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
+  const hasFilters = Boolean(search.trim()) || isActive !== undefined;
+  const emptyMessage = hasFilters
+    ? "No documents match your current filters."
+    : user?.role === "staff"
+      ? "No document types are assigned to your office."
+      : "No documents found.";
 
   const customRow = (doc: DocumentType) => {
     if (editingDocument?.toString() === doc.id?.toString()) {
@@ -224,7 +239,7 @@ export default function DocumentTable() {
       keyExtractor={(doc) => doc.id}
       loading={loading}
       error={error}
-      emptyMessage="No documents match your current filters."
+      emptyMessage={emptyMessage}
       rowClassName={(doc) =>
         !doc.isActive ? "text-muted-foreground" : "align-middle"
       }
@@ -232,7 +247,7 @@ export default function DocumentTable() {
       pagination={{
         page: currentPage,
         totalPages,
-        totalItems: documents.length,
+        totalItems: scopedDocuments.length,
         itemsPerPage: pageSize,
         itemLabel: "documents",
         onPageChange: setPage,
