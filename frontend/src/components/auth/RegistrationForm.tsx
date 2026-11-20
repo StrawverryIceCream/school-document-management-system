@@ -13,6 +13,7 @@ import ComplianceNotice from "@/components/auth/ComplianceNotice";
 import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  CONTACT_NUMBER_LENGTH,
   DEPARTMENT_OPTIONS,
   MIN_PASSWORD_LENGTH,
   STUDENT_ID_PREFIX,
@@ -64,7 +65,7 @@ export default function RegistrationForm() {
   const selectedDepartment = DEPARTMENT_OPTIONS.find(
     (d) => d.value === departmentValue,
   );
-
+  
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -85,6 +86,10 @@ export default function RegistrationForm() {
     }
     if (role === "student" && studentId === STUDENT_ID_PREFIX) {
       setError("Please enter your complete Student ID number as shown on your university RFID.");
+      return;
+    }
+    if (contactNumber && contactNumber.length !== CONTACT_NUMBER_LENGTH) {
+      setError(`Contact number must be exactly ${CONTACT_NUMBER_LENGTH} digits.`);
       return;
     }
     if (role === "student" && (!collegeId || !courseId)) {

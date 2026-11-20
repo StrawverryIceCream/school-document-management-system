@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  CONTACT_NUMBER_LENGTH,
   STUDENT_STATUS_OPTIONS,
   type StudentStatus,
 } from "@/lib/auth/arch-registration";
@@ -151,8 +152,14 @@ function StudentFields({
             </span>
           </Label>
           <Input
+            autoComplete="tel"
             id="contact-number"
-            onChange={(e) => setContactNumber(e.target.value)}
+            inputMode="numeric"
+            maxLength={CONTACT_NUMBER_LENGTH}
+            onChange={(e) => setContactNumber(
+                e.target.value.replace(/\D/g, "").slice(0, CONTACT_NUMBER_LENGTH),
+              )}
+            pattern="[0-9]*"
             placeholder="0912 345 6789"
             value={contactNumber}
           />

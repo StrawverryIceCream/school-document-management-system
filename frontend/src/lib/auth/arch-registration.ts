@@ -8,6 +8,8 @@ export const STUDENT_ID_PREFIX = "TUPM-";
 
 export const MIN_PASSWORD_LENGTH = 8;
 
+export const CONTACT_NUMBER_LENGTH = 11;
+
 type RoleOption = {
   role: Extract<UserRole, "student" | "teacher">;
   label: string;
