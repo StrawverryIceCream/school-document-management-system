@@ -8,6 +8,7 @@ import {
   notifications,
   offices,
   officeSectorEnum,
+  payments,
   requestAttachments,
   requestRoutingSteps,
   requestStatusEnum,
@@ -21,7 +22,10 @@ import {
   createAndDispatchNotification,
   notifyOfficeStaff,
 } from "../services/notification.service.js";
-import { uploadRequestAttachment } from "../services/storage.service.js";
+import {
+  uploadRefundQrCode,
+  uploadRequestAttachment,
+} from "../services/storage.service.js";
 import {
   sanitizeMissedRequirements,
   validateResubmissionPayload,
@@ -33,6 +37,11 @@ import {
   isUserEligibleForDocument,
   validateRequestAssignmentActors,
 } from "../lib/request-guards.js";
+import {
+  canRequesterCancelRequest,
+  shouldTriggerRefundOnTermination,
+  validateRefundPayoutPreference,
+} from "../lib/refunds.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -199,6 +208,7 @@ function buildStatusNotification(
     remarks?: string | null;
     resubmissionAllowed?: boolean;
     missedRequirements?: MissedRequirement[];
+    refundEligible?: boolean;
   },
 ): { title: string; message: string } | null {
   switch (status) {
@@ -230,17 +240,28 @@ function buildStatusNotification(
             .map((item) => item.label)
             .join(", ")}. Open My Requests to fix and resubmit.`,
         );
+      } else if (extra?.refundEligible) {
+        parts.push(
+          "You are eligible for a fee refund. Open My Requests to submit your refund payout details or QR code.",
+        );
       }
       return {
         title: "Request rejected",
         message: parts.join(" "),
       };
     }
-    case "cancelled":
+    case "cancelled": {
+      const parts = [`Your request for ${documentName} was cancelled.`];
+      if (extra?.refundEligible) {
+        parts.push(
+          "You are eligible for a fee refund. Open My Requests to submit your refund payout details or QR code.",
+        );
+      }
       return {
         title: "Request cancelled",
-        message: `Your request for ${documentName} was cancelled.`,
+        message: parts.join(" "),
       };
+    }
     default:
       return null;
   }
@@ -273,57 +294,76 @@ export async function getAllRequests(
     }
 
     const conditions = [];
+    const paidRequestIdsSubquery = db
+      .select({ requestId: payments.requestId })
+      .from(payments);
 
     if (officeId && isUuid(officeId)) {
-      conditions.push(
-        or(
-          // 1. Direct document type assignment
-          inArray(
-            documentRequests.documentTypeId,
-            db
-              .select({ id: documentTypes.id })
-              .from(documentTypes)
-              .where(eq(documentTypes.officeId, officeId)),
-          ),
-          // 2. Active routing step assigned to this office
-          inArray(
-            documentRequests.id,
-            db
-              .select({ requestId: requestRoutingSteps.requestId })
-              .from(requestRoutingSteps)
-              .where(
-                and(
-                  eq(requestRoutingSteps.officeId, officeId),
-                  eq(requestRoutingSteps.status, "pending"),
-                ),
-              ),
-          ),
+      const targetOffice = await db.query.offices.findFirst({
+        where: eq(offices.id, officeId),
+        columns: { code: true },
+      });
+      const isCashierOffice =
+        targetOffice?.code?.toUpperCase() === "CO" ||
+        targetOffice?.code?.toUpperCase() === "CASHIER";
+
+      const officeOr = [
+        // 1. Direct document type assignment
+        inArray(
+          documentRequests.documentTypeId,
+          db
+            .select({ id: documentTypes.id })
+            .from(documentTypes)
+            .where(eq(documentTypes.officeId, officeId)),
         ),
-      );
+        // 2. Active routing step assigned to this office
+        inArray(
+          documentRequests.id,
+          db
+            .select({ requestId: requestRoutingSteps.requestId })
+            .from(requestRoutingSteps)
+            .where(
+              and(
+                eq(requestRoutingSteps.officeId, officeId),
+                eq(requestRoutingSteps.status, "pending"),
+              ),
+            ),
+        ),
+      ];
+
+      if (isCashierOffice) {
+        officeOr.push(inArray(documentRequests.id, paidRequestIdsSubquery));
+      }
+
+      conditions.push(or(...officeOr));
     } else if (typeof officeCode === "string" && officeCode.trim()) {
       const code = officeCode.trim().toUpperCase();
-      conditions.push(
-        or(
-          ilike(documentRequests.documentTypeCode, `${code}-%`),
-          // Academic colleges
-          inArray(
-            documentRequests.userId,
-            db
-              .select({ id: users.id })
-              .from(users)
-              .innerJoin(colleges, eq(users.collegeId, colleges.id))
-              .where(ilike(colleges.code, code)),
-          ),
-          // Faculty/staff department match
-          inArray(
-            documentRequests.userId,
-            db
-              .select({ id: users.id })
-              .from(users)
-              .where(ilike(users.department, `%${code}%`)),
-          ),
+      const officeCodeOr = [
+        ilike(documentRequests.documentTypeCode, `${code}-%`),
+        // Academic colleges
+        inArray(
+          documentRequests.userId,
+          db
+            .select({ id: users.id })
+            .from(users)
+            .innerJoin(colleges, eq(users.collegeId, colleges.id))
+            .where(ilike(colleges.code, code)),
         ),
-      );
+        // Faculty/staff department match
+        inArray(
+          documentRequests.userId,
+          db
+            .select({ id: users.id })
+            .from(users)
+            .where(ilike(users.department, `%${code}%`)),
+        ),
+      ];
+
+      if (code === "CO" || code === "CASHIER") {
+        officeCodeOr.push(inArray(documentRequests.id, paidRequestIdsSubquery));
+      }
+
+      conditions.push(or(...officeCodeOr));
     }
 
     if (typeof sector === "string" && sector.trim()) {
@@ -331,20 +371,27 @@ export async function getAllRequests(
       if (
         (officeSectorEnum.enumValues as readonly string[]).includes(normSector)
       ) {
-        conditions.push(
-          inArray(
-            documentRequests.documentTypeId,
-            db
-              .select({ id: documentTypes.id })
-              .from(documentTypes)
-              .innerJoin(offices, eq(documentTypes.officeId, offices.id))
-              .where(
-                eq(
-                  offices.sector,
-                  normSector as (typeof officeSectorEnum.enumValues)[number],
-                ),
+        const sectorDocFilter = inArray(
+          documentRequests.documentTypeId,
+          db
+            .select({ id: documentTypes.id })
+            .from(documentTypes)
+            .innerJoin(offices, eq(documentTypes.officeId, offices.id))
+            .where(
+              eq(
+                offices.sector,
+                normSector as (typeof officeSectorEnum.enumValues)[number],
               ),
-          ),
+            ),
+        );
+
+        conditions.push(
+          normSector === "OVPAF"
+            ? or(
+                sectorDocFilter,
+                inArray(documentRequests.id, paidRequestIdsSubquery),
+              )
+            : sectorDocFilter,
         );
       }
     }
@@ -517,7 +564,16 @@ export async function getRequestById(
           },
         },
         documentType: true,
-        payments: true,
+        payments: {
+          with: {
+            reviewer: {
+              columns: { id: true, fullName: true, email: true, role: true },
+            },
+            refundReviewer: {
+              columns: { id: true, fullName: true, email: true, role: true },
+            },
+          },
+        },
       },
     });
 
@@ -602,7 +658,7 @@ export async function updateRequestStatus(
       where: eq(documentRequests.id, id),
       with: {
         documentType: { columns: { name: true, fee: true } },
-        payments: { columns: { id: true } },
+        payments: { columns: { id: true, status: true, refundStatus: true } },
         user: { columns: { email: true, fullName: true } },
       },
     });
@@ -717,6 +773,18 @@ export async function updateRequestStatus(
       updates.missedRequirements = [];
     }
 
+    const activePayment = request.payments.find(
+      (p) => p.status === "pending" || p.status === "verified",
+    );
+    const refundEligible =
+      shouldTriggerRefundOnTermination({
+        toStatus: status,
+        resubmissionAllowed: Boolean(updates.resubmissionAllowed),
+        activePaymentExists: Boolean(activePayment),
+      }) &&
+      Boolean(activePayment) &&
+      !activePayment?.refundStatus;
+
     // Notification and status change succeed or fail together
     const updated = await db.transaction(async (tx) => {
       // Matching on the old status stops two staff members racing each other
@@ -741,6 +809,7 @@ export async function updateRequestStatus(
           remarks: updates.remarks ?? null,
           resubmissionAllowed: Boolean(updates.resubmissionAllowed),
           missedRequirements: updates.missedRequirements ?? [],
+          refundEligible,
         },
       );
 
@@ -841,7 +910,19 @@ export async function getMyRequests(
     const [data, totalResult] = await Promise.all([
       db.query.documentRequests.findMany({
         where: whereClause,
-        with: { documentType: true },
+        with: {
+          documentType: true,
+          payments: {
+            with: {
+              reviewer: {
+                columns: { id: true, fullName: true, email: true, role: true },
+              },
+              refundReviewer: {
+                columns: { id: true, fullName: true, email: true, role: true },
+              },
+            },
+          },
+        },
         orderBy: [desc(documentRequests.createdAt)],
         limit: limitNum,
         offset,
@@ -1028,41 +1109,150 @@ export async function cancelMyRequest(
         eq(documentRequests.id, id),
         eq(documentRequests.userId, userId),
       ),
-      columns: { id: true, status: true },
-      with: { payments: { columns: { id: true } } },
+      columns: { id: true, status: true, referenceNumber: true },
+      with: {
+        documentType: { columns: { name: true, office: true, officeId: true } },
+        payments: {
+          columns: { id: true, status: true, refundStatus: true, amount: true },
+        },
+      },
     });
 
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
     }
 
-    if (request.status !== "pending") {
-      return res
-        .status(409)
-        .json({ error: "Only pending requests can be cancelled" });
-    }
-    if (request.payments.length > 0) {
+    if (!canRequesterCancelRequest(request.status)) {
       return res.status(409).json({
-        error: "Paid requests can't be cancelled here, contact the registrar",
+        error: "Only pending or awaiting-payment requests can be cancelled",
       });
     }
-    // Re-checking pending in the WHERE closes the gap if staff picked it up meanwhile
-    const [updated] = await db
-      .update(documentRequests)
-      .set({ status: "cancelled" })
-      .where(
-        and(
-          eq(documentRequests.id, id),
-          eq(documentRequests.userId, userId),
-          eq(documentRequests.status, "pending"),
-        ),
-      )
-      .returning();
 
-    if (!updated) {
+    const body = (req.body ?? {}) as {
+      reason?: unknown;
+      refundMethod?: unknown;
+      refundAccountName?: unknown;
+      refundAccountNumber?: unknown;
+    };
+
+    if (body.reason !== undefined && body.reason !== null) {
+      if (
+        typeof body.reason !== "string" ||
+        body.reason.trim().length > STAFF_NOTES_MAX_LENGTH
+      ) {
+        return res.status(400).json({
+          error: `reason must be at most ${STAFF_NOTES_MAX_LENGTH} characters`,
+        });
+      }
+    }
+
+    const activePayment = request.payments.find(
+      (p) => p.status === "pending" || p.status === "verified",
+    );
+
+    const payoutValidation = validateRefundPayoutPreference({
+      hasActivePayment: Boolean(activePayment),
+      refundMethod: body.refundMethod,
+      refundAccountName: body.refundAccountName,
+      refundAccountNumber: body.refundAccountNumber,
+      hasRefundQr: Boolean(req.file),
+    });
+
+    if (!payoutValidation.valid) {
+      return res.status(400).json({ error: payoutValidation.error });
+    }
+
+    let uploadedRefundQrUrl: string | null = null;
+    if (
+      activePayment &&
+      payoutValidation.details &&
+      payoutValidation.details.refundMethod !== "cash" &&
+      req.file
+    ) {
+      uploadedRefundQrUrl = await uploadRefundQrCode(
+        req.file.buffer,
+        activePayment.id,
+      );
+    }
+
+    const cancellationReason =
+      typeof body.reason === "string" && body.reason.trim()
+        ? body.reason.trim()
+        : "Cancelled by requester";
+
+    // Re-checking pre-production statuses in WHERE closes the race if staff picked it up meanwhile
+    const result = await db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(documentRequests)
+        .set({
+          status: "cancelled",
+          cancelledAt: new Date(),
+          cancellationReason,
+          resubmissionAllowed: false,
+          missedRequirements: [],
+        })
+        .where(
+          and(
+            eq(documentRequests.id, id),
+            eq(documentRequests.userId, userId),
+            inArray(documentRequests.status, ["pending", "awaiting_payment"]),
+          ),
+        )
+        .returning();
+
+      if (!row) return null;
+
+      await tx.insert(requestStatusHistory).values({
+        requestId: id,
+        fromStatus: request.status,
+        toStatus: "cancelled",
+        changedBy: userId,
+        note: cancellationReason,
+      });
+
+      let updatedPayment = null;
+      if (activePayment && payoutValidation.details && !activePayment.refundStatus) {
+        const [paymentRow] = await tx
+          .update(payments)
+          .set({
+            refundStatus: "pending",
+            refundMethod: payoutValidation.details.refundMethod,
+            refundAccountName: payoutValidation.details.refundAccountName,
+            refundAccountNumber: payoutValidation.details.refundAccountNumber,
+            refundQrUrl: uploadedRefundQrUrl,
+            refundRequestedAt: new Date(),
+          })
+          .where(eq(payments.id, activePayment.id))
+          .returning();
+        updatedPayment = paymentRow ?? null;
+      }
+
+      return { row, updatedPayment };
+    });
+
+    if (!result) {
       return res
         .status(409)
         .json({ error: "Request is already being processed" });
+    }
+
+    if (result.updatedPayment) {
+      try {
+        const cashierOffice = await db.query.offices.findFirst({
+          where: eq(offices.code, "CO"),
+          columns: { id: true },
+        });
+        await notifyOfficeStaff({
+          officeId: cashierOffice?.id ?? null,
+          senderId: userId,
+          requestId: id,
+          type: "payment",
+          title: "Refund request submitted",
+          message: `Request ${request.referenceNumber} (${request.documentType?.name ?? "Document"}) was cancelled by the requester and queued a fee refund of ₱${Number(result.updatedPayment.amount).toFixed(2)}.`,
+        });
+      } catch (notifyErr) {
+        console.error("[cancelMyRequest] cashier notification error:", notifyErr);
+      }
     }
 
     void recordAuditLog({
@@ -1071,9 +1261,17 @@ export async function cancelMyRequest(
       entityType: "request",
       entityId: id,
       ipAddress: req.ip,
+      metadata: {
+        cancellationReason,
+        refundQueued: Boolean(result.updatedPayment),
+        refundMethod: payoutValidation.details?.refundMethod ?? null,
+      },
     });
 
-    return res.json(updated);
+    return res.json({
+      ...result.row,
+      ...(result.updatedPayment ? { payments: [result.updatedPayment] } : {}),
+    });
   } catch (err) {
     console.error("[cancelMyRequest] error:", err);
     return res.status(500).json({ error: "Internal server error" });

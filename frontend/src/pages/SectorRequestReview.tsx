@@ -17,7 +17,11 @@ import { WorkflowPipelineCard } from "@/components/sectors/review/WorkflowPipeli
 import { getOffice } from "@/lib/sectors/sectors-config";
 import { useAuth } from "@/hooks/useAuth";
 import { updateRequestStatus } from "@/api/requests";
-import { REQUEST_STATUS_CONFIG, statusStyles } from "@/lib/requests";
+import {
+  canUserManageRefunds,
+  REQUEST_STATUS_CONFIG,
+  statusStyles,
+} from "@/lib/requests";
 import { REVIEW_ACTIONS } from "@/lib/sectors/review/constants";
 import { fetchReviewData } from "@/lib/sectors/review/fetch-review-data";
 import { formatDate } from "@/lib/sectors/review/format";
@@ -139,6 +143,7 @@ export default function SectorRequestReview() {
 
   const student = request.user;
   const isOwnRequest = Boolean(user && request.userId === user.id);
+  const canManageRefunds = Boolean(canUserManageRefunds(user) && !isOwnRequest);
   const documentType = request.documentType;
   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
   const configuredFields = documentType?.requiredFields ?? [];
@@ -163,6 +168,15 @@ export default function SectorRequestReview() {
   );
   const statusLabel = (status: RequestStatus) =>
     REQUEST_STATUS_CONFIG[status].label;
+
+  async function refreshReviewData() {
+    if (!requestId) return;
+    const data = await fetchReviewData(requestId);
+    setReviewData({ id: requestId, loading: false, error: null, data });
+    setReleaseDate(data.request.releaseDate ?? "");
+    setReleasePdfUrl(data.request.releasePdfUrl ?? "");
+    setStaffNotes(data.request.internalNotes ?? "");
+  }
 
   async function confirmStatusChange(details?: {
     reason?: string;
@@ -195,11 +209,7 @@ export default function SectorRequestReview() {
         `Request marked ${statusLabel(pendingAction).toLowerCase()}.`,
       );
 
-      const data = await fetchReviewData(requestId);
-      setReviewData({ id: requestId, loading: false, error: null, data });
-      setReleaseDate(data.request.releaseDate ?? "");
-      setReleasePdfUrl(data.request.releasePdfUrl ?? "");
-      setStaffNotes(data.request.internalNotes ?? "");
+      await refreshReviewData();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Could not update status.",
@@ -317,13 +327,21 @@ export default function SectorRequestReview() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          <StudentInfoCard student={student} amountDue={request.amountDue} />
+          <StudentInfoCard
+            student={student}
+            amountDue={request.amountDue}
+            hasRefundedPayment={Boolean(
+              request.payments?.some((p) => p.refundStatus === "refunded"),
+            )}
+          />
           <RequestDetailsCard
             request={request}
             paymentStatus={paymentStatus}
             fields={fields}
             attachments={reviewData.data?.attachments ?? []}
             attachmentsError={reviewData.data?.attachmentsError ?? null}
+            canManageRefunds={canManageRefunds}
+            onPaymentUpdated={refreshReviewData}
           />
           <ComplianceChecklistCard
             request={request}

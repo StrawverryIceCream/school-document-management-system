@@ -4,6 +4,7 @@ import RequestActionButton from "./RequestActionButton";
 import RequestStatusBadge from "./RequestStatusBadge";
 import RequestTimelineDialog from "./RequestTimelineDialog";
 import { ClaimSlipDialog } from "./ClaimSlipDialog";
+import CancelRequestDialog from "./CancelRequestDialog";
 import ResubmitRequestDialog from "./ResubmitRequestDialog";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import { useMyRequest } from "@/hooks/useMyRequest";
@@ -37,6 +38,10 @@ export default function RequestsTable({
     useState<MyRequestWithDocumentName | null>(null);
   const [selectedResubmitRequest, setSelectedResubmitRequest] =
     useState<MyRequestWithDocumentName | null>(null);
+  const [refundDialogTarget, setRefundDialogTarget] = useState<{
+    request: MyRequestWithDocumentName;
+    mode: "cancel" | "claim_refund";
+  } | null>(null);
 
   const columns: DataTableColumn<MyRequestWithDocumentName>[] = useMemo(
     () => [
@@ -142,6 +147,14 @@ export default function RequestsTable({
           setSelectedTimelineRequest(null);
           setSelectedResubmitRequest(req);
         }}
+        onCancelRequest={(req) => {
+          setSelectedTimelineRequest(null);
+          setRefundDialogTarget({ request: req, mode: "cancel" });
+        }}
+        onClaimRefund={(req) => {
+          setSelectedTimelineRequest(null);
+          setRefundDialogTarget({ request: req, mode: "claim_refund" });
+        }}
       />
       <ClaimSlipDialog
         request={selectedClaimSlipRequest}
@@ -152,6 +165,13 @@ export default function RequestsTable({
         request={selectedResubmitRequest}
         open={selectedResubmitRequest !== null}
         onOpenChange={(open) => !open && setSelectedResubmitRequest(null)}
+        onSuccess={refreshMyRequests}
+      />
+      <CancelRequestDialog
+        request={refundDialogTarget?.request ?? null}
+        mode={refundDialogTarget?.mode ?? "cancel"}
+        open={refundDialogTarget !== null}
+        onOpenChange={(open) => !open && setRefundDialogTarget(null)}
         onSuccess={refreshMyRequests}
       />
     </>

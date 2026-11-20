@@ -14,6 +14,8 @@ export interface DashboardStats {
   slaWarning: number;
   totalRevenue: number;
   settledTransactions: number;
+  refundedAmount?: number;
+  refundedTransactions?: number;
   efficiencyRate: number;
   avgTurnaroundDays: number;
 }
@@ -44,6 +46,9 @@ export interface RequestRow {
   sector?: string | null;
   documentTypeCode?: string;
   paymentMethod?: "cash" | "online";
+  paymentStatus?: string;
+  refundStatus?: string | null;
+  paidAmount?: number;
   feeRequired?: boolean;
   assignedTo?: string | null;
   assignee?: {

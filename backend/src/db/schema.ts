@@ -609,6 +609,19 @@ export const payments = pgTable(
     reviewedBy: uuid("reviewed_by_id").references(() => users.id),
     reviewedAt: tz("reviewed_at"),
     receiptNumber: text("receipt_number").unique(),
+    refundStatus: text("refund_status").$type<"pending" | "refunded" | "rejected">(),
+    refundMethod: text("refund_method").$type<"e_wallet" | "bank_transfer" | "cash">(),
+    refundAccountName: text("refund_account_name"),
+    refundAccountNumber: text("refund_account_number"),
+    refundQrUrl: text("refund_qr_url"),
+    refundProofUrl: text("refund_proof_url"),
+    refundRequestedAt: tz("refund_requested_at"),
+    refundPayoutReference: text("refund_payout_reference"),
+    refundRejectionReason: text("refund_rejection_reason"),
+    refundReviewedBy: uuid("refund_reviewed_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    refundReviewedAt: tz("refund_reviewed_at"),
     ...timestamps,
   },
   (table) => [
@@ -840,6 +853,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     relationName: "request_releaser",
   }),
   reviewedPayments: many(payments, { relationName: "payment_reviewer" }),
+  reviewedRefunds: many(payments, { relationName: "refund_reviewer" }),
   receivedNotifications: many(notifications, {
     relationName: "notification_recipient",
   }),
@@ -985,6 +999,11 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.reviewedBy],
     references: [users.id],
     relationName: "payment_reviewer",
+  }),
+  refundReviewer: one(users, {
+    fields: [payments.refundReviewedBy],
+    references: [users.id],
+    relationName: "refund_reviewer",
   }),
 }));
 

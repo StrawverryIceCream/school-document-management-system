@@ -3,7 +3,10 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireRoles } from "../middleware/requireRoles.js";
 import validateId from "../middleware/validateId.js";
-import { handleMultipleAttachments } from "../middleware/upload.js";
+import {
+  handleMultipleAttachments,
+  handleUpload,
+} from "../middleware/upload.js";
 import {
   cancelMyRequest,
   createRequest,
@@ -31,7 +34,7 @@ router.use(requireAuth);
 // "/me" routes must come before "/:id" or "me" is treated as an id
 router.get("/me", getMyRequests);
 router.get("/me/:id", validateId, getMyRequestById);
-router.patch("/me/:id/cancel", validateId, cancelMyRequest);
+router.patch("/me/:id/cancel", validateId, handleUpload("refundQr"), cancelMyRequest);
 router.post(
   "/me/:id/resubmit",
   validateId,

@@ -45,6 +45,8 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "processing", label: "Processing" },
   { value: "ready", label: "Ready" },
   { value: "claimed", label: "Claimed" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "rejected", label: "Rejected" },
 ];
 
 const tabs: SearchToolbarTab[] = STATUS_FILTERS.map((s) => ({

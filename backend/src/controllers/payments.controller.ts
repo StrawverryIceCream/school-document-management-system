@@ -1,17 +1,30 @@
 // controllers/payments.controller.ts
 import { randomBytes } from "node:crypto";
 import type { Request, Response } from "express";
-import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, isNull, or } from "drizzle-orm";
 import { db } from "../db/db.js";
 import {
   documentRequests,
   documentTypes,
   notifications,
+  offices,
   payments,
   users,
 } from "../db/schema.js";
-import { uploadPaymentProof } from "../services/storage.service.js";
+import {
+  uploadPaymentProof,
+  uploadRefundProof,
+  uploadRefundQrCode,
+} from "../services/storage.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
+import { notifyOfficeStaff } from "../services/notification.service.js";
+import { isSelfRequestAction } from "../lib/request-guards.js";
+import {
+  canRequesterClaimOrUpdateRefund,
+  canUserManageRefunds,
+  validateRefundPayoutPreference,
+  validateRefundReviewDecision,
+} from "../lib/refunds.js";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -479,5 +492,483 @@ export async function uploadPaymentProofHandler(
   } catch (err) {
     console.error("[uploadPaymentProof] error:", err);
     return res.status(500).json({ error: "Failed to upload payment proof" });
+  }
+}
+
+const MAX_REJECTION_REASON_LENGTH = 1000;
+
+async function loadAuthorizedPaymentForReview(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  const callerId = getSessionUserId(req);
+  if (!callerId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+
+  const { id: paymentId } = req.params;
+  if (!isUuid(paymentId)) {
+    res.status(400).json({ error: "Invalid payment id" });
+    return null;
+  }
+
+  const caller = await db.query.users.findFirst({
+    where: eq(users.id, callerId),
+    columns: { id: true, role: true },
+    with: {
+      officeRecord: { columns: { id: true, code: true, name: true } },
+    },
+  });
+
+  if (!canUserManageRefunds(caller)) {
+    res.status(403).json({
+      error: "Only Cashier's Office staff or admins can manage payments and refunds",
+    });
+    return null;
+  }
+
+  const payment = await db.query.payments.findFirst({
+    where: eq(payments.id, paymentId),
+    with: {
+      request: {
+        with: {
+          documentType: { columns: { name: true } },
+        },
+      },
+    },
+  });
+
+  if (!payment || !payment.request) {
+    res.status(404).json({ error: "Payment not found" });
+    return null;
+  }
+
+  if (isSelfRequestAction(payment.request.userId, callerId)) {
+    res.status(403).json({
+      error: "You can't review a payment or refund for your own request",
+    });
+    return null;
+  }
+
+  return { callerId, payment };
+}
+
+export async function reviewPaymentHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const context = await loadAuthorizedPaymentForReview(req, res);
+    if (!context) return;
+
+    const { callerId, payment } = context;
+
+    if (payment.status !== "pending") {
+      return res
+        .status(409)
+        .json({ error: "Only pending payments can be reviewed" });
+    }
+
+    const body = (req.body ?? {}) as {
+      decision?: unknown;
+      rejectionReason?: unknown;
+    };
+
+    if (body.decision !== "verified" && body.decision !== "rejected") {
+      return res.status(400).json({
+        error: "decision must be either 'verified' or 'rejected'",
+      });
+    }
+
+    let cleanReason: string | null = null;
+    if (body.decision === "rejected") {
+      cleanReason =
+        typeof body.rejectionReason === "string"
+          ? body.rejectionReason.trim()
+          : "";
+      if (!cleanReason) {
+        return res
+          .status(400)
+          .json({ error: "rejectionReason is required when rejecting payment" });
+      }
+      if (cleanReason.length > MAX_REJECTION_REASON_LENGTH) {
+        return res.status(400).json({
+          error: `rejectionReason must be at most ${MAX_REJECTION_REASON_LENGTH} characters`,
+        });
+      }
+    }
+
+    const now = new Date();
+    const docName =
+      payment.request.documentType?.name ||
+      payment.request.documentTypeName ||
+      "Document";
+
+    const updated = await db.transaction(async (tx) => {
+      const updateSet: Partial<typeof payments.$inferInsert> =
+        body.decision === "verified"
+          ? {
+              status: "verified",
+              reviewedBy: callerId,
+              reviewedAt: now,
+              receiptNumber: payment.receiptNumber ?? buildReceiptNumber(),
+              rejectionReason: null,
+            }
+          : {
+              status: "rejected",
+              reviewedBy: callerId,
+              reviewedAt: now,
+              rejectionReason: cleanReason,
+              ...(payment.refundStatus === "pending"
+                ? {
+                    refundStatus: "rejected" as const,
+                    refundRejectionReason: cleanReason,
+                    refundReviewedBy: callerId,
+                    refundReviewedAt: now,
+                  }
+                : {}),
+            };
+
+      const [row] = await tx
+        .update(payments)
+        .set(updateSet)
+        .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
+        .returning();
+
+      if (!row) return null;
+
+      await tx.insert(notifications).values({
+        userId: payment.request.userId,
+        senderId: callerId,
+        requestId: payment.requestId,
+        type: "payment",
+        title:
+          body.decision === "verified"
+            ? "Payment verified"
+            : "Payment proof rejected",
+        message:
+          body.decision === "verified"
+            ? `Your payment of ₱${Number(payment.amount).toFixed(2)} for ${docName} (${payment.request.referenceNumber}) was verified. Official receipt: ${row.receiptNumber}.`
+            : `Your payment proof for ${docName} (${payment.request.referenceNumber}) was rejected. Reason: ${cleanReason}`,
+      });
+
+      return row;
+    });
+
+    if (!updated) {
+      return res.status(409).json({
+        error: "Payment was already reviewed by someone else",
+      });
+    }
+
+    void recordAuditLog({
+      actorId: callerId,
+      action:
+        body.decision === "verified"
+          ? "payment.verified"
+          : "payment.rejected",
+      entityType: "payment",
+      entityId: payment.id,
+      ipAddress: req.ip,
+      metadata: {
+        requestId: payment.requestId,
+        receiptNumber: updated.receiptNumber,
+        rejectionReason: cleanReason,
+      },
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("[reviewPaymentHandler] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function reviewRefundHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const context = await loadAuthorizedPaymentForReview(req, res);
+    if (!context) return;
+
+    const { callerId, payment } = context;
+
+    const body = (req.body ?? {}) as {
+      decision?: unknown;
+      payoutReference?: unknown;
+      rejectionReason?: unknown;
+    };
+
+    const validation = validateRefundReviewDecision({
+      currentPaymentStatus: payment.status,
+      currentRefundStatus: payment.refundStatus ?? null,
+      decision: body.decision,
+      payoutReference: body.payoutReference,
+      rejectionReason: body.rejectionReason,
+    });
+
+    if (!validation.valid) {
+      const statusCode =
+        payment.refundStatus !== "pending" || payment.status === "rejected"
+          ? 409
+          : 400;
+      return res.status(statusCode).json({ error: validation.error });
+    }
+
+    const now = new Date();
+    const docName =
+      payment.request.documentType?.name ||
+      payment.request.documentTypeName ||
+      "Document";
+
+    let uploadedRefundProofUrl: string | null = null;
+    if (validation.decision === "refunded" && req.file) {
+      uploadedRefundProofUrl = await uploadRefundProof(
+        req.file.buffer,
+        payment.id,
+      );
+    }
+
+    const updated = await db.transaction(async (tx) => {
+      const updateSet: Partial<typeof payments.$inferInsert> =
+        validation.decision === "refunded"
+          ? {
+              refundStatus: "refunded",
+              refundPayoutReference: validation.payoutReference,
+              ...(uploadedRefundProofUrl
+                ? { refundProofUrl: uploadedRefundProofUrl }
+                : {}),
+              refundRejectionReason: null,
+              refundReviewedBy: callerId,
+              refundReviewedAt: now,
+              ...(payment.status === "pending"
+                ? {
+                    status: "verified" as const,
+                    reviewedBy: callerId,
+                    reviewedAt: now,
+                    receiptNumber:
+                      payment.receiptNumber ?? buildReceiptNumber(),
+                  }
+                : {}),
+            }
+          : {
+              refundStatus: "rejected",
+              refundRejectionReason: validation.rejectionReason,
+              refundReviewedBy: callerId,
+              refundReviewedAt: now,
+              ...(payment.status === "pending"
+                ? {
+                    status: "rejected" as const,
+                    rejectionReason: validation.rejectionReason,
+                    reviewedBy: callerId,
+                    reviewedAt: now,
+                  }
+                : {}),
+            };
+
+      const [row] = await tx
+        .update(payments)
+        .set(updateSet)
+        .where(
+          and(
+            eq(payments.id, payment.id),
+            eq(payments.refundStatus, "pending"),
+          ),
+        )
+        .returning();
+
+      if (!row) return null;
+
+      await tx.insert(notifications).values({
+        userId: payment.request.userId,
+        senderId: callerId,
+        requestId: payment.requestId,
+        type: "payment",
+        title:
+          validation.decision === "refunded"
+            ? "Refund disbursed"
+            : "Refund request denied",
+        message:
+          validation.decision === "refunded"
+            ? `Your fee refund of ₱${Number(payment.amount).toFixed(2)} for ${docName} (${payment.request.referenceNumber}) has been disbursed. Reference: ${validation.payoutReference}.`
+            : `Your refund request for ${docName} (${payment.request.referenceNumber}) was denied. Reason: ${validation.rejectionReason}`,
+      });
+
+      return row;
+    });
+
+    if (!updated) {
+      return res.status(409).json({
+        error: "Refund was already reviewed by someone else",
+      });
+    }
+
+    void recordAuditLog({
+      actorId: callerId,
+      action:
+        validation.decision === "refunded"
+          ? "payment.refund_disbursed"
+          : "payment.refund_rejected",
+      entityType: "payment",
+      entityId: payment.id,
+      ipAddress: req.ip,
+      metadata: {
+        requestId: payment.requestId,
+        payoutReference: validation.payoutReference,
+        rejectionReason: validation.rejectionReason,
+      },
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("[reviewRefundHandler] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function claimRefundHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const userId = getSessionUserId(req);
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id: paymentId } = req.params;
+    if (!isUuid(paymentId)) {
+      return res.status(400).json({ error: "Invalid payment id" });
+    }
+
+    const payment = await db.query.payments.findFirst({
+      where: eq(payments.id, paymentId),
+      with: {
+        request: {
+          with: {
+            documentType: { columns: { name: true } },
+          },
+        },
+      },
+    });
+
+    if (!payment || !payment.request || payment.request.userId !== userId) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    if (
+      !canRequesterClaimOrUpdateRefund({
+        requestStatus: payment.request.status,
+        resubmissionAllowed: Boolean(payment.request.resubmissionAllowed),
+        paymentStatus: payment.status,
+        refundStatus: payment.refundStatus,
+      })
+    ) {
+      return res.status(409).json({
+        error: "This payment is not eligible for a refund claim",
+      });
+    }
+
+    const body = (req.body ?? {}) as {
+      refundMethod?: unknown;
+      refundAccountName?: unknown;
+      refundAccountNumber?: unknown;
+    };
+
+    const existingQrAllowed =
+      body.refundMethod !== "cash" && Boolean(payment.refundQrUrl);
+
+    const payoutValidation = validateRefundPayoutPreference({
+      hasActivePayment: true,
+      refundMethod: body.refundMethod,
+      refundAccountName: body.refundAccountName,
+      refundAccountNumber: body.refundAccountNumber,
+      hasRefundQr: Boolean(req.file || existingQrAllowed),
+    });
+
+    if (!payoutValidation.valid || !payoutValidation.details) {
+      return res.status(400).json({
+        error: !payoutValidation.valid
+          ? payoutValidation.error
+          : "Invalid refund payout details",
+      });
+    }
+
+    let nextRefundQrUrl: string | null = null;
+    if (payoutValidation.details.refundMethod !== "cash") {
+      if (req.file) {
+        nextRefundQrUrl = await uploadRefundQrCode(req.file.buffer, payment.id);
+      } else {
+        nextRefundQrUrl = payment.refundQrUrl ?? null;
+      }
+    }
+
+    const [updated] = await db
+      .update(payments)
+      .set({
+        refundStatus: "pending",
+        refundMethod: payoutValidation.details.refundMethod,
+        refundAccountName: payoutValidation.details.refundAccountName,
+        refundAccountNumber: payoutValidation.details.refundAccountNumber,
+        refundQrUrl: nextRefundQrUrl,
+        refundRequestedAt: payment.refundRequestedAt ?? new Date(),
+      })
+      .where(
+        and(
+          eq(payments.id, payment.id),
+          or(isNull(payments.refundStatus), eq(payments.refundStatus, "pending")),
+        ),
+      )
+      .returning();
+
+    if (!updated) {
+      return res.status(409).json({
+        error: "Refund has already been finalized by the Cashier's Office",
+      });
+    }
+
+    const docName =
+      payment.request.documentType?.name ||
+      payment.request.documentTypeName ||
+      "Document";
+
+    try {
+      const cashierOffice = await db.query.offices.findFirst({
+        where: eq(offices.code, "CO"),
+        columns: { id: true },
+      });
+      await notifyOfficeStaff({
+        officeId: cashierOffice?.id ?? null,
+        senderId: userId,
+        requestId: payment.requestId,
+        type: "payment",
+        title: payment.refundStatus
+          ? "Refund payout details updated"
+          : "Refund claim submitted",
+        message: `Requester submitted refund details for ${payment.request.referenceNumber} (${docName}, ₱${Number(payment.amount).toFixed(2)}).`,
+      });
+    } catch (notifyErr) {
+      console.error("[claimRefundHandler] cashier notification error:", notifyErr);
+    }
+
+    void recordAuditLog({
+      actorId: userId,
+      action: payment.refundStatus
+        ? "payment.refund_updated"
+        : "payment.refund_claimed",
+      entityType: "payment",
+      entityId: payment.id,
+      ipAddress: req.ip,
+      metadata: {
+        requestId: payment.requestId,
+        refundMethod: payoutValidation.details.refundMethod,
+        hasRefundQr: Boolean(nextRefundQrUrl),
+      },
+    });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("[claimRefundHandler] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -10,9 +10,14 @@ type Requester = NonNullable<RequestReviewDetails["user"]>;
 interface StudentInfoCardProps {
   student: Requester;
   amountDue?: string | number;
+  hasRefundedPayment?: boolean;
 }
 
-export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
+export function StudentInfoCard({
+  student,
+  amountDue,
+  hasRefundedPayment = false,
+}: StudentInfoCardProps) {
   const initials = getInitials(student.fullName);
   const summary = getRequesterProfileSummary(student);
   const isCleared = Number(amountDue ?? 0) === 0;
@@ -81,15 +86,19 @@ export function StudentInfoCard({ student, amountDue }: StudentInfoCardProps) {
               )}
             />
             <span className="text-sm font-bold text-foreground">
-              {isCleared
-                ? "No Fee Required (₱0.00)"
-                : `₱${Number(amountDue).toFixed(2)}`}
+              {hasRefundedPayment
+                ? "Refunded (₱0.00 net)"
+                : isCleared
+                  ? "No Fee Required (₱0.00)"
+                  : `₱${Number(amountDue).toFixed(2)}`}
             </span>
           </div>
           <span className="text-xs text-muted-foreground mt-1">
-            {isCleared
-              ? "No settlement required"
-              : "Payment verification required"}
+            {hasRefundedPayment
+              ? "Assessment fee refunded to requester"
+              : isCleared
+                ? "No settlement required"
+                : "Payment verification required"}
           </span>
         </div>
       </div>

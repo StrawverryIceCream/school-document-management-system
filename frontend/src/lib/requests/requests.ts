@@ -134,12 +134,20 @@ export function normalizeRequestRow(
     raw.payments?.find((p) => p.status === "verified") ??
     raw.payments?.find((p) => p.status === "pending") ??
     raw.payments?.[0];
+  const isRefundedOrRejectedPayment =
+    validPayment?.refundStatus === "refunded" ||
+    validPayment?.status === "rejected";
+  const isTerminatedRequest =
+    raw.status === "cancelled" || raw.status === "rejected";
   const paymentMethod =
-    validPayment?.method === "cash"
-      ? "cash"
-      : validPayment?.method
-        ? "online"
-        : undefined;
+    !isRefundedOrRejectedPayment && !isTerminatedRequest && validPayment?.method
+      ? validPayment.method === "cash"
+        ? "cash"
+        : "online"
+      : undefined;
+  const paidAmount = validPayment
+    ? Number(validPayment.amount) || Number(raw.amountDue) || 0
+    : Number(raw.amountDue) || 0;
 
   const rawForm =
     raw.formData && typeof raw.formData === "object"
@@ -199,6 +207,9 @@ export function normalizeRequestRow(
     amountDue: raw.amountDue ?? String(raw.documentType?.fee ?? "0"),
     processingDays: raw.documentType?.processingDays ?? raw.turnaroundDays ?? 3,
     paymentMethod,
+    paymentStatus: validPayment?.status,
+    refundStatus: validPayment?.refundStatus ?? null,
+    paidAmount,
     college,
     collegeName,
     course,

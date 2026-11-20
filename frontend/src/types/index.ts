@@ -48,6 +48,12 @@ export type RequestStatus = (typeof requestStatuses)[number];
 export const paymentStatuses = ["pending", "verified", "rejected"] as const;
 export type PaymentStatus = (typeof paymentStatuses)[number];
 
+export const refundStatuses = ["pending", "refunded", "rejected"] as const;
+export type RefundStatus = (typeof refundStatuses)[number];
+
+export const refundMethods = ["e_wallet", "bank_transfer", "cash"] as const;
+export type RefundMethod = (typeof refundMethods)[number];
+
 export const paymentMethods = [
   "bank_transfer",
   "e_wallet",
@@ -466,6 +472,18 @@ export interface Payment extends Timestamps {
   reviewedAt: ISODateTimeString | null;
   receiptNumber: string | null;
   reviewer?: UserSummary | null;
+  refundStatus?: RefundStatus | null;
+  refundMethod?: RefundMethod | null;
+  refundAccountName?: string | null;
+  refundAccountNumber?: string | null;
+  refundQrUrl?: string | null;
+  refundProofUrl?: string | null;
+  refundRequestedAt?: ISODateTimeString | null;
+  refundPayoutReference?: string | null;
+  refundRejectionReason?: string | null;
+  refundReviewedBy?: UUID | null;
+  refundReviewedAt?: ISODateTimeString | null;
+  refundReviewer?: UserSummary | null;
 }
 
 /**

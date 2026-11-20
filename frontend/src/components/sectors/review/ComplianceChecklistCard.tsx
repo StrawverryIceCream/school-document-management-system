@@ -12,9 +12,13 @@ export function ComplianceChecklistCard({
   request,
   paymentStatus,
 }: ComplianceChecklistCardProps) {
+  const hasRefundedPayment = Boolean(
+    request.payments?.some((p) => p.refundStatus === "refunded"),
+  );
   const isPaid =
     Number(request.amountDue) === 0 ||
-    request.payments?.some((p) => p.status === "verified");
+    (!hasRefundedPayment &&
+      Boolean(request.payments?.some((p) => p.status === "verified")));
 
   const checklist = [
     {
@@ -29,9 +33,11 @@ export function ComplianceChecklistCard({
     },
     {
       title: `Cashier Assessment: ₱${Number(request.amountDue).toFixed(2)} Fee`,
-      description: isPaid
-        ? `Settlement recorded (${paymentStatus || "Cleared"}).`
-        : "Pending payment confirmation.",
+      description: hasRefundedPayment
+        ? "Fee refunded (₱0.00 net)."
+        : isPaid
+          ? `Settlement recorded (${paymentStatus || "Cleared"}).`
+          : "Pending payment confirmation.",
       passed: isPaid,
     },
     {

@@ -17,6 +17,8 @@ export interface OfficialReceiptData {
   verifiedAt: string;
   submittedAt: string;
   status: string;
+  isRefunded: boolean;
+  refundPayoutReference: string | null;
 }
 
 export function formatPaymentMethodLabel(method: string): string {
@@ -104,5 +106,7 @@ export function extractOfficialReceiptData(
     verifiedAt: verifiedPayment.reviewedAt || verifiedPayment.submittedAt,
     submittedAt: verifiedPayment.submittedAt,
     status: verifiedPayment.status,
+    isRefunded: verifiedPayment.refundStatus === "refunded",
+    refundPayoutReference: verifiedPayment.refundPayoutReference ?? null,
   };
 }

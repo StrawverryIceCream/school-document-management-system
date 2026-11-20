@@ -12,16 +12,20 @@ const cloudinaryConfig = {
 
 cloudinary.config(cloudinaryConfig);
 
-export function uploadPaymentProof(
+function uploadBufferToCloudinary(
   buffer: Buffer,
-  paymentId: string,
+  options: {
+    folder: string;
+    publicId: string;
+    resourceType: "image" | "auto";
+  },
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "student-document-management-system/payment-proofs",
-        public_id: `payment-${paymentId}-${Date.now()}`,
-        resource_type: "image",
+        folder: options.folder,
+        public_id: options.publicId,
+        resource_type: options.resourceType,
       },
       (error, result) => {
         if (error || !result)
@@ -30,6 +34,39 @@ export function uploadPaymentProof(
       },
     );
     stream.end(buffer);
+  });
+}
+
+export function uploadPaymentProof(
+  buffer: Buffer,
+  paymentId: string,
+): Promise<string> {
+  return uploadBufferToCloudinary(buffer, {
+    folder: "student-document-management-system/payment-proofs",
+    publicId: `payment-${paymentId}-${Date.now()}`,
+    resourceType: "image",
+  });
+}
+
+export function uploadRefundQrCode(
+  buffer: Buffer,
+  paymentId: string,
+): Promise<string> {
+  return uploadBufferToCloudinary(buffer, {
+    folder: "student-document-management-system/refund-qr-codes",
+    publicId: `refund-qr-${paymentId}-${Date.now()}`,
+    resourceType: "image",
+  });
+}
+
+export function uploadRefundProof(
+  buffer: Buffer,
+  paymentId: string,
+): Promise<string> {
+  return uploadBufferToCloudinary(buffer, {
+    folder: "student-document-management-system/refund-proofs",
+    publicId: `refund-proof-${paymentId}-${Date.now()}`,
+    resourceType: "image",
   });
 }
 

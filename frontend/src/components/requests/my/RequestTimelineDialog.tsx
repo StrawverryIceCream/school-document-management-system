@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, Clock, QrCode, Receipt, RotateCcw } from "lucide-react";
+import { Check, Clock, Eye, QrCode, Receipt, RotateCcw, Wallet, XCircle } from "lucide-react";
+import { FilePreviewDialog } from "@/components/shared/FilePreviewDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { hasOfficialReceipt } from "@/lib/payments/official-receipt";
 import type { MyRequestWithDocumentName } from "@/context/MyRequestContext";
 import {
   formatClaimPeriod,
+  formatRefundMethodLabel,
   formatRequestCardData,
   getStepDates,
   STATUS_CONFIGS,
@@ -29,6 +31,8 @@ interface RequestTimelineDialogProps {
   onOpenChange: (open: boolean) => void;
   onOpenClaimSlip?: (request: MyRequestWithDocumentName) => void;
   onResubmit?: (request: MyRequestWithDocumentName) => void;
+  onCancelRequest?: (request: MyRequestWithDocumentName) => void;
+  onClaimRefund?: (request: MyRequestWithDocumentName) => void;
 }
 
 export function RequestTimelineDialog({
@@ -37,8 +41,16 @@ export function RequestTimelineDialog({
   onOpenChange,
   onOpenClaimSlip,
   onResubmit,
+  onCancelRequest,
+  onClaimRefund,
 }: RequestTimelineDialogProps) {
   const [showReceipt, setShowReceipt] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<{
+    title: string;
+    subtitle?: string;
+    fileUrl: string | null;
+    fileName?: string;
+  } | null>(null);
   if (!request) return null;
 
   const config = STATUS_CONFIGS[request.status];
@@ -175,6 +187,116 @@ export function RequestTimelineDialog({
             </div>
           )}
 
+          {request.status === "cancelled" && request.cancellationReason && (
+            <div className="sm:col-span-2 rounded-xl border bg-muted/30 p-3 space-y-1">
+              <span className="font-semibold uppercase tracking-wider text-muted-foreground block">
+                Cancellation Reason
+              </span>
+              <p className="text-sm text-foreground break-words">
+                {request.cancellationReason}
+              </p>
+            </div>
+          )}
+
+          {cardData.canClaimRefund && cardData.activePayment && (
+            <div className="sm:col-span-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-1">
+              <span className="font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                Fee Refund Eligible to Claim
+              </span>
+              <p className="text-xs text-muted-foreground">
+                Submit your preferred payout channel or receiving QR code so Cashier&apos;s Office (CO) can process your reimbursement.
+              </p>
+            </div>
+          )}
+
+          {cardData.refundStatus && cardData.activePayment && (
+            <div
+              className={cn(
+                "sm:col-span-2 rounded-xl border p-3 space-y-1.5",
+                cardData.refundStatus === "refunded"
+                  ? "border-emerald-500/30 bg-emerald-500/10"
+                  : cardData.refundStatus === "rejected"
+                    ? "border-destructive/30 bg-destructive/10"
+                    : "border-amber-500/30 bg-amber-500/10",
+              )}
+            >
+              <span className="font-semibold uppercase tracking-wider text-foreground block">
+                {cardData.refundStatus === "refunded"
+                  ? "Fee Refund Disbursed"
+                  : cardData.refundStatus === "rejected"
+                    ? "Fee Refund Denied"
+                    : cardData.activePayment.status === "pending"
+                      ? "Awaiting Cashier Payment Verification & Refund"
+                      : "Fee Refund Pending Payout"}
+              </span>
+              <p className="text-xs text-muted-foreground">
+                Channel:{" "}
+                <span className="font-medium text-foreground">
+                  {formatRefundMethodLabel(
+                    cardData.activePayment.refundMethod || "cash",
+                  )}
+                </span>
+                {cardData.activePayment.refundAccountName &&
+                cardData.activePayment.refundAccountNumber
+                  ? ` (${cardData.activePayment.refundAccountName} · ${cardData.activePayment.refundAccountNumber})`
+                  : ""}
+              </p>
+              {cardData.activePayment.refundPayoutReference && (
+                <p className="font-mono text-xs font-semibold text-foreground">
+                  Disbursement Ref: {cardData.activePayment.refundPayoutReference}
+                </p>
+              )}
+              {cardData.activePayment.refundRejectionReason && (
+                <p className="text-xs text-destructive">
+                  Reason: {cardData.activePayment.refundRejectionReason}
+                </p>
+              )}
+              {(cardData.activePayment.refundQrUrl ||
+                cardData.activePayment.refundProofUrl) && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {cardData.activePayment.refundQrUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1 px-2 text-xs cursor-pointer"
+                      onClick={() =>
+                        setPreviewTarget({
+                          title: "Receiving Refund QR Code",
+                          subtitle: cardData.referenceNumber,
+                          fileUrl: cardData.activePayment!.refundQrUrl!,
+                          fileName: `refund-qr-${cardData.referenceNumber}`,
+                        })
+                      }
+                    >
+                      <Eye className="size-3" aria-hidden="true" />
+                      Preview My QR
+                    </Button>
+                  )}
+                  {cardData.activePayment.refundProofUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1 px-2 text-xs cursor-pointer"
+                      onClick={() =>
+                        setPreviewTarget({
+                          title: "Cashier Refund Disbursement Receipt",
+                          subtitle: cardData.referenceNumber,
+                          fileUrl: cardData.activePayment!.refundProofUrl!,
+                          fileName: `refund-receipt-${cardData.referenceNumber}`,
+                        })
+                      }
+                    >
+                      <Eye className="size-3" aria-hidden="true" />
+                      Preview Refund Receipt
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {claimPeriod && (
             <div className="sm:col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-1">
               <span className="text-emerald-700 dark:text-emerald-300 font-semibold">Available for Counter Claiming</span>
@@ -187,6 +309,33 @@ export function RequestTimelineDialog({
 
         <DialogFooter className="sm:justify-between items-center gap-2 pt-2">
           <div className="flex flex-wrap items-center gap-2">
+            {cardData.canCancel && onCancelRequest && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onCancelRequest(request)}
+                className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive font-semibold cursor-pointer"
+              >
+                <XCircle className="size-4" aria-hidden="true" />
+                Cancel Request
+              </Button>
+            )}
+            {(cardData.canClaimRefund || cardData.canUpdateRefund) &&
+              onClaimRefund && (
+                <Button
+                  type="button"
+                  variant={cardData.canClaimRefund ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onClaimRefund(request)}
+                  className="gap-1.5 font-semibold cursor-pointer"
+                >
+                  <Wallet className="size-4" aria-hidden="true" />
+                  {cardData.canClaimRefund
+                    ? "Claim Refund / Reimbursement"
+                    : "Update Refund / QR"}
+                </Button>
+              )}
             {request.status === "rejected" &&
               request.resubmissionAllowed &&
               onResubmit && (
@@ -241,6 +390,14 @@ export function RequestTimelineDialog({
         request={request}
         open={showReceipt}
         onOpenChange={setShowReceipt}
+      />
+      <FilePreviewDialog
+        open={previewTarget !== null}
+        onOpenChange={(open) => !open && setPreviewTarget(null)}
+        title={previewTarget?.title ?? "Preview"}
+        subtitle={previewTarget?.subtitle}
+        fileUrl={previewTarget?.fileUrl ?? null}
+        fileName={previewTarget?.fileName}
       />
     </Dialog>
   );

@@ -180,4 +180,24 @@ _Avoid_: Pickup finish, handover close, physical dispatch
 The client-side generation and download of an RFC 4180-compliant CSV spreadsheet reflecting the active search, filter criteria, and column formatting of an operational table view.
 _Avoid_: Dump file, raw data export, sheet rip
 
+**Fee Refund**:
+The manual return of settled document assessment fees by the Cashier's Office after a paid document request ends in Request Cancellation or final Request Rejection prior to fulfillment.
+_Avoid_: Chargeback, auto-reversal, fee credit
+
+**Verify-Then-Refund Gate**:
+The financial safeguard requiring Cashier's Office staff to confirm that an unverified Payment Proof actually settled in the institution's account before approving and disbursing a Fee Refund.
+_Avoid_: Blind voiding, instant refund, unverified payout
+
+**Refund Disbursement Proof**:
+The transaction reference number or counter release log recorded by the Cashier's Office when completing a Fee Refund via e-wallet, bank transfer, or cash counter pickup, marking any issued Official Receipt (OR) Slip as refunded.
+_Avoid_: Payout receipt, refund attachment, reversal slip
+
+**Refund Claim**:
+The requester-initiated submission of payout channel details and an optional Receiving Refund QR Code to claim a Fee Refund after a paid document request is cancelled or permanently rejected.
+_Avoid_: Reimbursement ticket, payout form, chargeback claim
+
+**Receiving Refund QR Code**:
+A personal e-wallet or bank QR code image uploaded by a requester during Request Cancellation or Refund Claim so Cashier's Office staff can scan and transfer a Fee Refund directly.
+_Avoid_: Student payment QR, personal scan pic
+
 

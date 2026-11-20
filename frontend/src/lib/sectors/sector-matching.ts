@@ -6,6 +6,18 @@ export function matchesOffice(
   request: DocumentRequestWithRelations,
   office: OfficeConfig,
 ): boolean {
+  // Cashier's Office (CO) owns payment verification and fee refunds across all sectors
+  if (
+    office.code.toUpperCase() === "CO" &&
+    Boolean(
+      request.payments?.some(
+        (p) => p.refundStatus != null || p.status === "pending",
+      ),
+    )
+  ) {
+    return true;
+  }
+
   // 1. Match by explicit office record code or id
   const docOfficeCode =
     request.documentType?.officeRecord?.code?.toUpperCase() ??

@@ -38,7 +38,16 @@ export const requestExportColumns: ExportColumn<DocumentRequestWithRelations>[] 
   { header: "Document Code", key: "documentTypeCode" },
   { header: "Copies", key: "copies" },
   { header: "Purpose", key: "purpose", formatter: (val) => val || "—" },
-  { header: "Amount Due (PHP)", key: "amountDue" },
+  {
+    header: "Amount Due (PHP)",
+    key: "amountDue",
+    formatter: (val, req) => {
+      if (req.payments?.some((p) => p.refundStatus === "refunded")) {
+        return "0.00 (Refunded)";
+      }
+      return val ? Number(val).toFixed(2) : "0.00";
+    },
+  },
   { header: "Status", key: "status" },
   {
     header: "Assignee",
@@ -95,6 +104,7 @@ export interface RequestRowExportable {
   claimedAt?: string | null;
   purpose?: string | null;
   amountDue?: string;
+  refundStatus?: string | null;
   officeCode?: string | null;
   collegeName?: string | null;
   assignee?: { fullName?: string } | null;
@@ -112,7 +122,10 @@ export const requestRowExportColumns: ExportColumn<RequestRowExportable>[] = [
   {
     header: "Amount Due (PHP)",
     key: "amountDue",
-    formatter: (val) => (val ? Number(val).toFixed(2) : "0.00"),
+    formatter: (val, req) => {
+      if (req.refundStatus === "refunded") return "0.00 (Refunded)";
+      return val ? Number(val).toFixed(2) : "0.00";
+    },
   },
   { header: "Status", key: "status" },
   {

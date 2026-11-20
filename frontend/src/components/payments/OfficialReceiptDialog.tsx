@@ -55,9 +55,14 @@ export function OfficialReceiptDialog({
             </span>
             <Badge
               variant="outline"
-              className="border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-semibold"
+              className={
+                data.isRefunded
+                  ? "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400 gap-1 text-[11px] font-semibold"
+                  : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-semibold"
+              }
             >
-              <CheckCircle2 className="size-3" /> Settled & Verified
+              <CheckCircle2 className="size-3" />{" "}
+              {data.isRefunded ? "Refunded & Voided" : "Settled & Verified"}
             </Badge>
           </div>
           <DialogTitle className="text-lg font-bold tracking-tight text-foreground">
@@ -117,6 +122,16 @@ export function OfficialReceiptDialog({
                 </span>
                 <p className="font-mono text-xs font-semibold text-foreground truncate">
                   {data.transactionReference}
+                </p>
+              </div>
+            )}
+            {data.isRefunded && data.refundPayoutReference && (
+              <div className="col-span-2 space-y-1 rounded-md border border-rose-500/30 bg-rose-500/10 p-2.5">
+                <span className="text-rose-700 dark:text-rose-300 font-semibold">
+                  Refund Disbursement Reference (Receipt Voided)
+                </span>
+                <p className="font-mono text-xs font-bold text-foreground truncate">
+                  {data.refundPayoutReference}
                 </p>
               </div>
             )}

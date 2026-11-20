@@ -1,6 +1,6 @@
 // api/payments.ts
 import type { DocumentRequestRow } from "@/api/requests";
-import type { DocumentType, Payment, User } from "@/types";
+import type { DocumentType, Payment, RefundMethod, User } from "@/types";
 
 export type PaymentMethod = "cash" | "card" | "e_wallet" | "bank_transfer";
 
@@ -157,5 +157,92 @@ export async function getPaymentById(id: string): Promise<PaymentWithDetails> {
 
   const res = await fetch(url, { credentials: "include" });
   return handleResponse<PaymentWithDetails>(res, url);
+}
+
+export type ReviewPaymentPayload =
+  | { decision: "verified" }
+  | { decision: "rejected"; rejectionReason: string };
+
+export async function reviewPayment(
+  paymentId: string,
+  payload: ReviewPaymentPayload,
+): Promise<Payment> {
+  const url = `/api/payments/${paymentId}/review`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<Payment>(res, url);
+}
+
+export type ReviewRefundPayload =
+  | {
+      decision: "refunded";
+      payoutReference: string;
+      refundProofFile?: File | null;
+    }
+  | { decision: "rejected"; rejectionReason: string };
+
+export async function reviewPaymentRefund(
+  paymentId: string,
+  payload: ReviewRefundPayload,
+): Promise<Payment> {
+  const url = `/api/payments/${paymentId}/refund`;
+
+  if (payload.decision === "refunded" && payload.refundProofFile) {
+    const formData = new FormData();
+    formData.append("decision", payload.decision);
+    formData.append("payoutReference", payload.payoutReference);
+    formData.append("refundProof", payload.refundProofFile);
+
+    const res = await fetch(url, {
+      method: "PATCH",
+      credentials: "include",
+      body: formData,
+    });
+    return handleResponse<Payment>(res, url);
+  }
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<Payment>(res, url);
+}
+
+export interface ClaimRefundPayload {
+  refundMethod: RefundMethod;
+  refundAccountName?: string;
+  refundAccountNumber?: string;
+  refundQrFile?: File | null;
+}
+
+export async function claimPaymentRefund(
+  paymentId: string,
+  payload: ClaimRefundPayload,
+): Promise<Payment> {
+  const url = `/api/payments/${paymentId}/claim-refund`;
+  const formData = new FormData();
+  formData.append("refundMethod", payload.refundMethod);
+  if (payload.refundAccountName) {
+    formData.append("refundAccountName", payload.refundAccountName);
+  }
+  if (payload.refundAccountNumber) {
+    formData.append("refundAccountNumber", payload.refundAccountNumber);
+  }
+  if (payload.refundQrFile) {
+    formData.append("refundQr", payload.refundQrFile);
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  return handleResponse<Payment>(res, url);
 }
 

@@ -2,6 +2,7 @@
 import type {
   DocumentRequestWithRelations,
   MissedRequirement,
+  RefundMethod,
   RequestStatus,
 } from "@/types";
 
@@ -266,12 +267,45 @@ export async function createRequest(
   return handleResponse<DocumentRequestRow>(res, url);
 }
 
-export async function cancelMyRequest(id: string): Promise<DocumentRequestRow> {
+export interface CancelMyRequestPayload {
+  reason?: string;
+  refundMethod?: RefundMethod;
+  refundAccountName?: string;
+  refundAccountNumber?: string;
+  refundQrFile?: File | null;
+}
+
+export async function cancelMyRequest(
+  id: string,
+  payload?: CancelMyRequestPayload,
+): Promise<DocumentRequestRow> {
   const url = `/api/requests/me/${id}/cancel`;
+
+  if (payload?.refundQrFile) {
+    const formData = new FormData();
+    if (payload.reason) formData.append("reason", payload.reason);
+    if (payload.refundMethod) formData.append("refundMethod", payload.refundMethod);
+    if (payload.refundAccountName) {
+      formData.append("refundAccountName", payload.refundAccountName);
+    }
+    if (payload.refundAccountNumber) {
+      formData.append("refundAccountNumber", payload.refundAccountNumber);
+    }
+    formData.append("refundQr", payload.refundQrFile);
+
+    const res = await fetch(url, {
+      method: "PATCH",
+      credentials: "include",
+      body: formData,
+    });
+    return handleResponse<DocumentRequestRow>(res, url);
+  }
 
   const res = await fetch(url, {
     method: "PATCH",
     credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload ?? {}),
   });
 
   return handleResponse<DocumentRequestRow>(res, url);

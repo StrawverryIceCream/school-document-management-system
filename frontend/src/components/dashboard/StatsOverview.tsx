@@ -111,7 +111,10 @@ export default function StatsOverview() {
         tone: "emerald" as const,
         className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
       },
-      caption: `${stats?.settledTransactions ?? 0} verified payments`,
+      caption:
+        (stats?.refundedTransactions ?? 0) > 0
+          ? `${stats?.settledTransactions ?? 0} settled · ₱${(stats?.refundedAmount ?? 0).toLocaleString()} refunded (${stats?.refundedTransactions})`
+          : `${stats?.settledTransactions ?? 0} verified payments`,
     },
   ];
 

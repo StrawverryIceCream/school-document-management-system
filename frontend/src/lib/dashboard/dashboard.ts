@@ -12,6 +12,25 @@ export function getDateKey(value: string | Date) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
+function getNetRevenueAmount(req: RequestRow): {
+  netRevenue: number;
+  refundedAmount: number;
+} {
+  const fee = req.paidAmount ?? (Number(req.amountDue) || 0);
+  if (fee <= 0) return { netRevenue: 0, refundedAmount: 0 };
+
+  if (req.refundStatus === "refunded") {
+    return { netRevenue: 0, refundedAmount: fee };
+  }
+
+  const isExcluded =
+    req.status === "cancelled" ||
+    (req.status as string) === "rejected" ||
+    req.paymentStatus === "rejected";
+
+  return { netRevenue: isExcluded ? 0 : fee, refundedAmount: 0 };
+}
+
 // Computed from whatever request rows we already have, calculating operational
 // throughput, SLA delays, and fee totals.
 export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
@@ -27,6 +46,8 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
     slaWarning: 0,
     totalRevenue: 0,
     settledTransactions: 0,
+    refundedAmount: 0,
+    refundedTransactions: 0,
     efficiencyRate: 96.4,
     avgTurnaroundDays: 1.6,
   };
@@ -34,6 +55,8 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
   const now = Date.now();
   let totalRevenue = 0;
   let settledTransactions = 0;
+  let refundedAmount = 0;
+  let refundedTransactions = 0;
   let totalTurnaroundDays = 0;
   let completedCount = 0;
   let awaitingPaymentCount = 0;
@@ -46,11 +69,14 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
       awaitingPaymentCount += 1;
     }
 
-    // Revenue calculation from fee / amountDue
-    const fee = Number(req.amountDue) || 0;
-    if (fee > 0 && req.status !== "cancelled" && (req.status as string) !== "rejected") {
-      totalRevenue += fee;
+    const { netRevenue, refundedAmount: rowRefunded } = getNetRevenueAmount(req);
+    if (netRevenue > 0) {
+      totalRevenue += netRevenue;
       settledTransactions += 1;
+    }
+    if (rowRefunded > 0) {
+      refundedAmount += rowRefunded;
+      refundedTransactions += 1;
     }
 
     // SLA Warning: if active (pending/processing) and elapsed > processingDays
@@ -78,6 +104,8 @@ export function buildStatsFromRequests(requests: RequestRow[]): DashboardStats {
   stats.readyForRelease = stats.ready;
   stats.totalRevenue = totalRevenue;
   stats.settledTransactions = settledTransactions;
+  stats.refundedAmount = refundedAmount;
+  stats.refundedTransactions = refundedTransactions;
 
   const resolved = stats.claimed + stats.cancelled;
   stats.efficiencyRate = resolved > 0 ? Math.round((stats.claimed / resolved) * 1000) / 10 : 96.4;
@@ -133,13 +161,9 @@ export function buildSectorWorkloadData(requests: RequestRow[]) {
       group.active += 1;
     }
 
-    const fee = Number(req.amountDue) || 0;
-    if (
-      fee > 0 &&
-      req.status !== "cancelled" &&
-      (req.status as string) !== "rejected"
-    ) {
-      group.revenue += fee;
+    const { netRevenue } = getNetRevenueAmount(req);
+    if (netRevenue > 0) {
+      group.revenue += netRevenue;
     }
   }
 
