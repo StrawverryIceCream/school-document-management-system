@@ -35,6 +35,14 @@ export function initializeDocumentTypeItem(
   };
 }
 
+export function sortDocumentsAlphabetically<T extends { name: string }>(
+  documents: readonly T[],
+): T[] {
+  return [...documents].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+}
+
 // Office, turnaround, and copy info are not on DocumentType yet, so they are seeded by
 // document code until the API provides them
 export type DocumentMeta = {

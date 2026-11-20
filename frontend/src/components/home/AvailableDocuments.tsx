@@ -6,7 +6,10 @@ import SmallDocumentCard from "@/components/home/SmallDocumentCard";
 import DuplicateRequestDialog from "@/components/requests/new/DuplicateRequestDialog";
 import { useDocument } from "@/hooks/useDocument";
 import { useMyRequest } from "@/hooks/useMyRequest";
-import { initializeDocumentTypeItem } from "@/lib/documents";
+import {
+  initializeDocumentTypeItem,
+  sortDocumentsAlphabetically,
+} from "@/lib/documents";
 import {
   findActiveDuplicateRequest,
   getActiveDocumentTypeIds,
@@ -45,18 +48,20 @@ function AvailableDocuments({
     }
     onApply(documentId);
   }
-  const documentItems = documents.slice(0, 4).map((document) =>
-    initializeDocumentTypeItem({
-      id: String(document.id),
-      title: document.name,
-      description: document.description ?? "",
-      price: Number(document.fee),
-      turnaround:
-        document.processingDays && document.processingDays > 0
-          ? `${document.processingDays} days`
-          : "Same-day",
-    }),
-  );
+  const documentItems = sortDocumentsAlphabetically(documents)
+    .slice(0, 4)
+    .map((document) =>
+      initializeDocumentTypeItem({
+        id: String(document.id),
+        title: document.name,
+        description: document.description ?? "",
+        price: Number(document.fee),
+        turnaround:
+          document.processingDays && document.processingDays > 0
+            ? `${document.processingDays} days`
+            : "Same-day",
+      }),
+    );
 
   return (
     <section className="flex flex-col gap-4">

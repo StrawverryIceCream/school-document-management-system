@@ -9,6 +9,7 @@ import { useMyRequest } from "@/hooks/useMyRequest";
 import {
   getRequestFormPath,
   NO_DESCRIPTION_LABEL,
+  sortDocumentsAlphabetically,
 } from "@/lib/documents";
 import { formatPeso } from "@/lib/format";
 import {
@@ -53,8 +54,10 @@ export default function DocumentGrid() {
   }
 
   // Inactive or ineligible document types can't be requested
-  const requestableDocuments = documents.filter(
-    (documentType) => isDocumentEligible(documentType, user),
+  const requestableDocuments = sortDocumentsAlphabetically(
+    documents.filter((documentType) =>
+      isDocumentEligible(documentType, user),
+    ),
   );
 
   if (loading) {

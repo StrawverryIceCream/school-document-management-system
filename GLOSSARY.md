@@ -84,6 +84,10 @@ _Avoid_: Squished tabs, multi-line tab cluster, accordion filter
 
 ## Staff and Offices
 
+**Requestable Document Type**:
+An active institutional document with an issuing office and allowed requester categories, available to eligible users through the shared document catalog.
+_Avoid_: Static document list, role-unchecked service
+
 **Processing Office**:
 The academic or administrative organizational unit (e.g. Office of the University Registrar, HRMO, College Dean's Office) responsible for reviewing, endorsing, and releasing a requested document.
 _Avoid_: Service window, counter window, releasing window
