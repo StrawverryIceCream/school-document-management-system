@@ -83,6 +83,26 @@ export async function updateRoutingStepStatus(
     if (!caller) {
       return res.status(401).json({ error: "Invalid session" });
     }
+    
+    const request = await db.query.documentRequests.findFirst({
+      where: (table, { eq }) => eq(table.id, requestId),
+      columns: { userId: true },
+    });
+
+    if (request?.userId === callerId) {
+      void recordAuditLog({
+        actorId: callerId,
+        action: "routing_step.self_processing_blocked",
+        entityType: "routing_step",
+        entityId: stepId,
+        metadata: { requestId, attemptedStatus: status },
+        ipAddress: req.ip ?? null,
+      });
+      return res.status(403).json({
+        error:
+          "You can't act on routing steps of your own request. Another authorized user must handle it.",
+      });
+    }
 
     if (caller.role !== "admin" && caller.officeId !== currentStep.officeId) {
       return res.status(403).json({

@@ -86,7 +86,15 @@ export interface PublicRequestStatus {
 async function handleResponse<T>(res: Response, url: string): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`${url} responded ${res.status}${text ? `: ${text}` : ""}`);
+    let message = "";
+    try {
+      message = JSON.parse(text)?.error ?? "";
+    } catch {
+      // response wasn't JSON, fall back below
+    }
+    throw new Error(
+      message || `${url} responded ${res.status}${text ? `: ${text}` : ""}`,
+    );
   }
   return res.json();
 }

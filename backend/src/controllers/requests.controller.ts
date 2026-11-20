@@ -555,6 +555,21 @@ export async function updateRequestStatus(
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
     }
+    
+    if (request.userId === staffId) {
+      void recordAuditLog({
+        actorId: staffId,
+        action: "request.self_processing_blocked",
+        entityType: "request",
+        entityId: id,
+        ipAddress: req.ip,
+        metadata: { attemptedStatus: status, fromStatus: request.status },
+      });
+      return res.status(403).json({
+        error:
+          "You can't process your own request. Another staff member or admin must handle it.",
+      });
+    }
 
     if (!STATUS_TRANSITIONS[request.status].includes(status)) {
       return res.status(409).json({
@@ -1013,6 +1028,12 @@ export async function assignRequest(
 
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
+    }
+
+    if (targetUserId && targetUserId === request.userId) {
+      return res.status(400).json({
+        error: "A request can't be assigned to the person who made it",
+      });
     }
 
     const actor = await db.query.users.findFirst({

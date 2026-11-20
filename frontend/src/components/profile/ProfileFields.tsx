@@ -1,6 +1,10 @@
 import { useOrgNames } from "@/hooks/useOrgNames";
-import { getProfileFields, type ProfileUser } from "@/lib/profile";
 import { cn } from "@/lib/utils";
+import {
+  getProfileFields,
+  getRoleIdRequirementLabel,
+  type ProfileUser,
+} from "@/lib/profile";
 
 const FULL_WIDTH_KEYS = ["college", "course", "department"];
 
@@ -47,6 +51,17 @@ export default function ProfileFields({
           </div>
         ))}
       </dl>
+      <p
+        role="note"
+        className="mt-5 rounded-lg border-l-4 border-primary bg-muted/50 p-3 text-sm text-muted-foreground"
+      >
+        <span className="block font-medium text-foreground">
+          School guidance
+        </span>
+        These details are verified from your school record and appear on the documents
+        you request. If anything is incorrect or incomplete, visit the Registrar&apos;s
+        Office and bring your {getRoleIdRequirementLabel(user.role)}.
+      </p>
     </div>
   );
 }

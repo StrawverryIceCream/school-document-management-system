@@ -1,7 +1,7 @@
 import { findOfficeRoute } from "@/lib/sectors/sectors-config";
 import type { AuthUser, UserRole } from "@/types";
 
-export const REQUESTER_ROLES: readonly UserRole[] = ["student", "teacher"];
+export const REQUESTER_ROLES: readonly UserRole[] = ["student", "teacher", "admin", "staff"];
 export const STAFF_ROLES: readonly UserRole[] = ["admin", "staff"];
 export const ADMIN_ROLES: readonly UserRole[] = ["admin"];
 
