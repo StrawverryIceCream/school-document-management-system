@@ -1,71 +1,170 @@
 import type { Request, Response } from "express";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "../db/db.js";
-import { documentTypes } from "../db/schema.js";
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import {
+  documentTypes,
+  offices,
+  users,
+  type RequiredField,
+} from "../db/schema.js";
+import {
+  canStaffManageDocument,
+  hasCrossOfficeReassignmentAttempt,
+  isDocumentInStaffOffice,
+  type OfficeActorRef,
+} from "../lib/document-office-scope.js";
 import { recordAuditLog } from "../services/audit.service.js";
 
 const CATEGORIES = ["student", "teacher", "staff"] as const;
 type DocumentCategory = (typeof CATEGORIES)[number];
 
+type DocumentRow = typeof documentTypes.$inferSelect;
+type OfficeSummary = {
+  id: string;
+  code: string;
+  name: string;
+  sector: typeof offices.$inferSelect.sector;
+};
+type DocumentWithOffice = DocumentRow & { officeRecord: OfficeSummary | null };
+type ResolvedDocumentActor = OfficeActorRef & { isActive: boolean };
+
+function parsePagination(query: Request["query"]) {
+  const { page = "1", limit = "20" } = query;
+  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+  const limitNum = Math.min(
+    500,
+    Math.max(1, parseInt(limit as string, 10) || 20),
+  );
+  const offset = (pageNum - 1) * limitNum;
+  return { pageNum, limitNum, offset };
+}
+
+function buildDocumentFilterWhere(query: Request["query"]) {
+  const { search, isActive, category } = query;
+  const conditions = [];
+
+  if (typeof search === "string" && search.trim()) {
+    const pattern = `%${search.trim()}%`;
+    conditions.push(
+      or(
+        ilike(documentTypes.name, pattern),
+        ilike(documentTypes.code, pattern),
+      ),
+    );
+  }
+
+  if (isActive !== undefined) {
+    conditions.push(eq(documentTypes.isActive, isActive === "true"));
+  }
+
+  const rawCategory = typeof category === "string" ? category : undefined;
+  if (rawCategory && CATEGORIES.includes(rawCategory as DocumentCategory)) {
+    conditions.push(
+      eq(documentTypes.category, rawCategory as DocumentCategory),
+    );
+  }
+
+  return conditions.length ? and(...conditions) : undefined;
+}
+
+async function enrichDocumentOffices(
+  docs: DocumentRow[],
+): Promise<DocumentWithOffice[]> {
+  const officeIds = Array.from(
+    new Set(
+      docs
+        .map((doc) => doc.officeId)
+        .filter((officeId): officeId is string => Boolean(officeId)),
+    ),
+  );
+
+  if (officeIds.length === 0) {
+    return docs.map((doc) => ({ ...doc, officeRecord: null }));
+  }
+
+  const officeRows = await db
+    .select({
+      id: offices.id,
+      code: offices.code,
+      name: offices.name,
+      sector: offices.sector,
+    })
+    .from(offices)
+    .where(inArray(offices.id, officeIds));
+
+  const officeById = new Map(officeRows.map((row) => [row.id, row]));
+
+  return docs.map((doc) => ({
+    ...doc,
+    officeRecord: doc.officeId ? (officeById.get(doc.officeId) ?? null) : null,
+  }));
+}
+
+async function resolveDocumentActor(
+  userId: string,
+): Promise<ResolvedDocumentActor | null> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: {
+      id: true,
+      role: true,
+      office: true,
+      officeId: true,
+      isActive: true,
+    },
+    with: {
+      officeRecord: {
+        columns: { code: true },
+      },
+    },
+  });
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    role: user.role,
+    office: user.office,
+    officeId: user.officeId,
+    officeCode: user.officeRecord?.code ?? null,
+    isActive: user.isActive,
+  };
+}
+
+async function queryPaginatedDocuments(
+  whereClause: ReturnType<typeof buildDocumentFilterWhere>,
+  limitNum: number,
+  offset: number,
+) {
+  const [rows, totalResult] = await Promise.all([
+    db
+      .select()
+      .from(documentTypes)
+      .where(whereClause)
+      .orderBy(desc(documentTypes.createdAt))
+      .limit(limitNum)
+      .offset(offset),
+    db.select({ total: count() }).from(documentTypes).where(whereClause),
+  ]);
+
+  const data = await enrichDocumentOffices(rows);
+  const total = totalResult?.[0]?.total ?? 0;
+
+  return { data, total };
+}
+
 export async function getAllDocument(req: Request, res: Response) {
   try {
-    const { search, isActive, category, page = "1", limit = "20" } = req.query;
-
-    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-    const limitNum = Math.min(
-      500,
-      Math.max(1, parseInt(limit as string, 10) || 20),
+    const { pageNum, limitNum, offset } = parsePagination(req.query);
+    const whereClause = buildDocumentFilterWhere(req.query);
+    const { data, total } = await queryPaginatedDocuments(
+      whereClause,
+      limitNum,
+      offset,
     );
-    const offset = (pageNum - 1) * limitNum;
-
-    const conditions = [];
-
-    if (search) {
-      conditions.push(
-        or(
-          ilike(documentTypes.name, `%${search}%`),
-          ilike(documentTypes.code, `%${search}%`),
-        ),
-      );
-    }
-
-    if (isActive !== undefined) {
-      conditions.push(eq(documentTypes.isActive, isActive === "true"));
-    }
-    const rawCategory = typeof category === "string" ? category : undefined;
-
-    if (rawCategory && ["student", "teacher", "staff"].includes(rawCategory)) {
-      conditions.push(
-        eq(documentTypes.category, rawCategory as DocumentCategory),
-      );
-    }
-
-    const whereClause = conditions.length ? and(...conditions) : undefined;
-
-    const [allDocuments, totalResult] = await Promise.all([
-      db.query.documentTypes.findMany({
-        where: whereClause,
-        with: {
-          officeRecord: {
-            columns: {
-              id: true,
-              code: true,
-              name: true,
-              sector: true,
-            },
-          },
-        },
-        orderBy: (documentTypes, { desc }) => [desc(documentTypes.createdAt)],
-        limit: limitNum,
-        offset,
-      }),
-      db.select({ total: count() }).from(documentTypes).where(whereClause),
-    ]);
-
-    const total = totalResult?.[0]?.total ?? 0;
 
     res.json({
-      data: allDocuments,
+      data,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -76,6 +175,84 @@ export async function getAllDocument(req: Request, res: Response) {
   } catch (err) {
     console.error("[getAllDocument] error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getOfficeScopedDocuments(req: Request, res: Response) {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const actor = await resolveDocumentActor(userId);
+    if (!actor) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+    if (
+      !actor.isActive ||
+      (actor.role !== "admin" && actor.role !== "staff")
+    ) {
+      return res
+        .status(403)
+        .json({ error: "You do not have permission to access this resource" });
+    }
+
+    const { pageNum, limitNum, offset } = parsePagination(req.query);
+    const whereClause = buildDocumentFilterWhere(req.query);
+
+    if (actor.role === "admin") {
+      const { data, total } = await queryPaginatedDocuments(
+        whereClause,
+        limitNum,
+        offset,
+      );
+
+      return res.json({
+        data,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    }
+
+    const rows = await db
+      .select()
+      .from(documentTypes)
+      .where(whereClause)
+      .orderBy(desc(documentTypes.createdAt));
+
+    const enriched = await enrichDocumentOffices(rows);
+    const scopedDocuments = enriched.filter((doc) =>
+      isDocumentInStaffOffice(
+        {
+          code: doc.code,
+          office: doc.office,
+          officeId: doc.officeId,
+          officeCode: doc.officeRecord?.code ?? null,
+        },
+        actor,
+      ),
+    );
+
+    const total = scopedDocuments.length;
+    const data = scopedDocuments.slice(offset, offset + limitNum);
+
+    return res.json({
+      data,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (err) {
+    console.error("[getOfficeScopedDocuments] error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -174,7 +351,54 @@ export async function updateDocumentType(
   res: Response,
 ) {
   try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const actor = await resolveDocumentActor(userId);
+    if (!actor) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+    if (
+      !actor.isActive ||
+      (actor.role !== "admin" && actor.role !== "staff")
+    ) {
+      return res
+        .status(403)
+        .json({ error: "You do not have permission to access this resource" });
+    }
+
     const { id } = req.params;
+    const existing = await db.query.documentTypes.findFirst({
+      where: eq(documentTypes.id, id),
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Document type not found" });
+    }
+
+    const [existingWithOffice] = await enrichDocumentOffices([existing]);
+    const existingWithCode = {
+      code: existing.code,
+      office: existing.office,
+      officeId: existing.officeId,
+      officeCode: existingWithOffice?.officeRecord?.code ?? null,
+    };
+
+    if (!canStaffManageDocument(existingWithCode, actor)) {
+      return res.status(403).json({
+        error: "You can only update document types assigned to your office.",
+      });
+    }
+
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    if (hasCrossOfficeReassignmentAttempt(existingWithCode, body, actor)) {
+      return res.status(403).json({
+        error: "Staff cannot reassign a document type to another office.",
+      });
+    }
+
     const {
       code,
       name,
@@ -185,21 +409,38 @@ export async function updateDocumentType(
       processingDays,
       maxCopies,
       officeId,
+      office,
       category,
-    } = req.body;
+    } = body;
 
     const updates: Partial<typeof documentTypes.$inferInsert> = {};
 
-    if (code !== undefined) updates.code = code;
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description;
-    if (fee !== undefined) updates.fee = fee;
-    if (isActive !== undefined) updates.isActive = isActive;
-    if (requiredFields !== undefined) updates.requiredFields = requiredFields;
-    if (processingDays !== undefined) updates.processingDays = Number(processingDays);
+    if (code !== undefined) updates.code = code as string;
+    if (name !== undefined) updates.name = name as string;
+    if (description !== undefined) {
+      updates.description = description as string | null;
+    }
+    if (fee !== undefined) {
+      updates.fee = typeof fee === "number" ? String(fee) : (fee as string);
+    }
+    if (isActive !== undefined) updates.isActive = isActive as boolean;
+    if (requiredFields !== undefined) {
+      updates.requiredFields = requiredFields as RequiredField[];
+    }
+    if (processingDays !== undefined) {
+      updates.processingDays = Number(processingDays);
+    }
     if (maxCopies !== undefined) updates.maxCopies = Number(maxCopies);
-    if (officeId !== undefined) updates.officeId = officeId;
-    if (category !== undefined) updates.category = category;
+    if (category !== undefined) updates.category = category as DocumentCategory;
+
+    // Defense-in-depth: never allow staff updates to alter office assignment.
+    if (actor.role !== "staff") {
+      if (officeId !== undefined) updates.officeId = officeId as string | null;
+      if (office !== undefined) updates.office = office as "registrar" | "hr";
+    } else {
+      delete updates.officeId;
+      delete updates.office;
+    }
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: "No fields provided to update" });
@@ -216,7 +457,7 @@ export async function updateDocumentType(
     }
 
     void recordAuditLog({
-      actorId: req.session.userId ?? null,
+      actorId: actor.id,
       action: `Updated document type "${updated.name}"`,
       entityType: "document",
       entityId: id,
@@ -225,7 +466,7 @@ export async function updateDocumentType(
 
     return res.json(updated);
   } catch (err: any) {
-    if (err?.code === "23505") {
+    if (err?.code === "23505" || err?.cause?.code === "23505") {
       return res
         .status(409)
         .json({ error: "A document type with that code already exists" });
