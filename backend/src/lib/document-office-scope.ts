@@ -19,6 +19,10 @@ export interface DocumentUpdatePayloadRef {
   officeId?: unknown;
 }
 
+const DOC_PREFIX_OFFICE_ALIASES: Record<string, string> = {
+  TLO: "TLO-ITSO",
+};
+
 function legacyOfficeToCode(office?: "registrar" | "hr" | null): string | null {
   if (office === "hr") return "HRMO";
   if (office === "registrar") return "OUR";
@@ -26,14 +30,14 @@ function legacyOfficeToCode(office?: "registrar" | "hr" | null): string | null {
 }
 
 function extractPrefixCode(code?: string | null): string | null {
-  const trimmed = code?.trim() ?? "";
-  // Use the last hyphen so hyphenated office codes like TLO-ITSO-001 keep their full prefix.
-  const dashIdx = trimmed.lastIndexOf("-");
-  if (dashIdx > 0) {
-    const prefix = trimmed.slice(0, dashIdx).trim().toUpperCase();
-    return prefix || null;
-  }
-  return null;
+  const trimmed = code?.trim().toUpperCase() ?? "";
+  if (!trimmed) return null;
+  if (trimmed.startsWith("TLO-ITSO-")) return "TLO-ITSO";
+  const dashIdx = trimmed.indexOf("-");
+  if (dashIdx <= 0) return null;
+  const prefix = trimmed.slice(0, dashIdx).trim();
+  if (!prefix) return null;
+  return DOC_PREFIX_OFFICE_ALIASES[prefix] ?? prefix;
 }
 
 export function resolveDocumentOfficeCode(doc: DocumentOfficeRef): string | null {
@@ -108,13 +112,19 @@ export function hasCrossOfficeReassignmentAttempt(
     return true;
   }
 
-  if (typeof patch.code === "string") {
+  if (patch.code !== undefined) {
+    if (typeof patch.code !== "string") {
+      return true;
+    }
     const nextCode = patch.code.trim().toUpperCase();
     const currentCode = existingDoc.code?.trim().toUpperCase() ?? "";
-    if (nextCode && nextCode !== currentCode) {
+    if (!nextCode) {
+      return true;
+    }
+    if (nextCode !== currentCode) {
       const existingCode = resolveDocumentOfficeCode(existingDoc);
-      const nextPrefix = extractPrefixCode(patch.code);
-      if (existingCode && nextPrefix && nextPrefix !== existingCode) {
+      const nextPrefix = extractPrefixCode(nextCode);
+      if (!nextPrefix || (existingCode && nextPrefix !== existingCode)) {
         return true;
       }
     }

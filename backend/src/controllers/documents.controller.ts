@@ -189,10 +189,7 @@ export async function getOfficeScopedDocuments(req: Request, res: Response) {
     if (!actor) {
       return res.status(401).json({ error: "Invalid session" });
     }
-    if (
-      !actor.isActive ||
-      (actor.role !== "admin" && actor.role !== "staff")
-    ) {
+    if (!actor.isActive || (actor.role !== "admin" && actor.role !== "staff")) {
       return res
         .status(403)
         .json({ error: "You do not have permission to access this resource" });
@@ -360,10 +357,7 @@ export async function updateDocumentType(
     if (!actor) {
       return res.status(401).json({ error: "Invalid session" });
     }
-    if (
-      !actor.isActive ||
-      (actor.role !== "admin" && actor.role !== "staff")
-    ) {
+    if (!actor.isActive || (actor.role !== "admin" && actor.role !== "staff")) {
       return res
         .status(403)
         .json({ error: "You do not have permission to access this resource" });
@@ -415,7 +409,14 @@ export async function updateDocumentType(
 
     const updates: Partial<typeof documentTypes.$inferInsert> = {};
 
-    if (code !== undefined) updates.code = code as string;
+    if (code !== undefined) {
+      if (typeof code !== "string" || !code.trim()) {
+        return res
+          .status(400)
+          .json({ error: "Document code must be a non-empty string" });
+      }
+      updates.code = code.trim();
+    }
     if (name !== undefined) updates.name = name as string;
     if (description !== undefined) {
       updates.description = description as string | null;

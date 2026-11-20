@@ -210,4 +210,30 @@ assert.deepEqual(filterDocumentsForManager(docs, unassignedStaff), []);
 assert.deepEqual(filterDocumentsForManager(docs, studentUser), []);
 assert.deepEqual(filterDocumentsForManager(docs, null), []);
 
+// Alignment checks: multi-hyphen single-office codes & TLO-ITSO alias parity with backend
+assert.equal(
+  resolveDocumentOfficeCode({
+    code: "OUR-TOR-001",
+    office: "registrar",
+    officeRecord: null,
+  }),
+  "OUR",
+);
+assert.equal(
+  resolveDocumentOfficeCode({
+    code: "TLO-ITSO-001",
+    office: "registrar",
+    officeRecord: null,
+  }),
+  "TLO-ITSO",
+);
+assert.equal(
+  resolveDocumentOfficeCode({
+    code: "TLO-001",
+    office: "registrar",
+    officeRecord: null,
+  }),
+  "TLO-ITSO",
+);
+
 console.log("document-office-scope tests passed");

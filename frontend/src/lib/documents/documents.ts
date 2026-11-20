@@ -103,6 +103,10 @@ export interface StaffOfficeViewer {
   officeRecord?: { id?: string | null; code?: string | null } | null;
 }
 
+const DOC_PREFIX_OFFICE_ALIASES: Record<string, string> = {
+  TLO: "TLO-ITSO",
+};
+
 function legacyOfficeToCode(office?: "registrar" | "hr" | null): string | null {
   if (office === "hr") return "HRMO";
   if (office === "registrar") return "OUR";
@@ -113,10 +117,12 @@ export function resolveDocumentOfficeCode(doc: DocumentOfficeTarget): string | n
   const recordCode = doc.officeRecord?.code?.trim().toUpperCase();
   if (recordCode) return recordCode;
 
-  const trimmedCode = doc.code?.trim() ?? "";
+  const trimmedCode = doc.code?.trim().toUpperCase() ?? "";
+  if (trimmedCode.startsWith("TLO-ITSO-")) return "TLO-ITSO";
   const dashIdx = trimmedCode.indexOf("-");
   if (dashIdx > 0) {
-    return trimmedCode.slice(0, dashIdx).toUpperCase();
+    const prefix = trimmedCode.slice(0, dashIdx).trim();
+    if (prefix) return DOC_PREFIX_OFFICE_ALIASES[prefix] ?? prefix;
   }
 
   return legacyOfficeToCode(doc.office);

@@ -368,8 +368,54 @@ assert.equal(
   false,
 );
 assert.equal(
+  hasCrossOfficeReassignmentAttempt(tloDoc, { code: "TLO-002" }, tloStaff),
+  false,
+);
+assert.equal(
   hasCrossOfficeReassignmentAttempt(tloDoc, { code: "TLO-ITSO-002" }, tloStaff),
   false,
+);
+assert.equal(
+  hasCrossOfficeReassignmentAttempt(
+    ourLegacyDoc,
+    { code: "OUR-TOR-002" },
+    ourStaff,
+  ),
+  false,
+);
+assert.equal(
+  hasCrossOfficeReassignmentAttempt(ourLegacyDoc, { code: "HRMO" }, ourStaff),
+  true,
+);
+assert.equal(
+  hasCrossOfficeReassignmentAttempt(ourLegacyDoc, { code: "   " }, ourStaff),
+  true,
+);
+assert.equal(
+  hasCrossOfficeReassignmentAttempt(ourLegacyDoc, { code: "" }, ourStaff),
+  true,
+);
+assert.equal(
+  hasCrossOfficeReassignmentAttempt(ourLegacyDoc, { code: null }, ourStaff),
+  true,
+);
+assert.equal(
+  resolveDocumentOfficeCode({
+    code: "OUR-TOR-001",
+    office: "registrar",
+    officeId: null,
+    officeCode: null,
+  }),
+  "OUR",
+);
+assert.equal(
+  resolveDocumentOfficeCode({
+    code: "TLO-001",
+    office: "registrar",
+    officeId: null,
+    officeCode: null,
+  }),
+  "TLO-ITSO",
 );
 assert.equal(
   hasCrossOfficeReassignmentAttempt(tloDoc, { code: "HRMO-001" }, tloStaff),
