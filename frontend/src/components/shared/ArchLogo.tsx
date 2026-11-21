@@ -1,4 +1,3 @@
-import { Notebook } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   SYSTEM_NAME,
@@ -66,7 +65,12 @@ export function ArchLogo({
           iconClassName,
         )}
       >
-        <Notebook className={sizeStyles.icon} aria-hidden="true" />
+        <img
+          src="/images/logo/Logo.png"
+          alt=""
+          aria-hidden="true"
+          className={sizeStyles.icon}
+        />
       </div>
       <div>
         <div className="flex items-center gap-2">
