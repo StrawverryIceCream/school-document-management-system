@@ -13,10 +13,14 @@ import {
   isDocumentInStaffOffice,
   type OfficeActorRef,
 } from "../lib/document-office-scope.js";
+import {
+  DOCUMENT_CATEGORIES,
+  normalizeDocumentCreateOptions,
+  type DocumentCategory,
+} from "../lib/document-create-options.js";
 import { recordAuditLog } from "../services/audit.service.js";
 
-const CATEGORIES = ["student", "teacher", "staff"] as const;
-type DocumentCategory = (typeof CATEGORIES)[number];
+const CATEGORIES = DOCUMENT_CATEGORIES;
 
 type DocumentRow = typeof documentTypes.$inferSelect;
 type OfficeSummary = {
@@ -287,7 +291,15 @@ export async function getDocumentById(
 
 export async function createDocument(req: Request, res: Response) {
   try {
-    const { code, name, description, requiredFields, fee, isActive } = req.body;
+    const {
+      code,
+      name,
+      description,
+      requiredFields,
+      fee,
+      isActive,
+      officeId,
+    } = req.body;
 
     if (
       !code ||
@@ -299,6 +311,31 @@ export async function createDocument(req: Request, res: Response) {
       return res.status(400).json({
         error: "Code, name, requiredFields, and fee are required",
       });
+    }
+
+    if (
+      typeof officeId !== "string" ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        officeId,
+      )
+    ) {
+      return res.status(400).json({ error: "Select a valid responsible office" });
+    }
+
+    const createOptions = normalizeDocumentCreateOptions(
+      req.body as Record<string, unknown>,
+    );
+    if (!createOptions.success) {
+      return res.status(400).json({ error: createOptions.error });
+    }
+
+    const [responsibleOffice] = await db
+      .select({ id: offices.id })
+      .from(offices)
+      .where(and(eq(offices.id, officeId), eq(offices.isActive, true)))
+      .limit(1);
+    if (!responsibleOffice) {
+      return res.status(400).json({ error: "Select an active responsible office" });
     }
 
     const existing = await db.query.documentTypes.findFirst({
@@ -316,6 +353,8 @@ export async function createDocument(req: Request, res: Response) {
       requiredFields,
       fee,
       isActive: isActive ?? true,
+      officeId,
+      ...createOptions.options,
     };
 
     const [document] = await db

@@ -22,21 +22,32 @@ const STUDENT_INFO_FIELDS = [
 
 function RequiredFieldsDialog({
   setNewDocument,
+  initialFields,
 }: {
   setNewDocument: React.Dispatch<React.SetStateAction<NewDocument | null>>;
+  initialFields: RequiredFieldDefinition[];
 }) {
-  const [fields, setFields] = useState<RequiredFieldDefinition[]>([]);
-  const [askStudentInfo, setAskStudentInfo] = useState(false);
+  const [fields, setFields] = useState<RequiredFieldDefinition[]>(initialFields);
+  const [askStudentInfo, setAskStudentInfo] = useState(() =>
+    STUDENT_INFO_FIELDS.some((field) =>
+      initialFields.some((initialField) => initialField.key === field.key),
+    ),
+  );
 
   const syncFields = (nextFields: RequiredFieldDefinition[]) => {
     setFields(nextFields);
 
     setNewDocument((prev) => ({
+      ...prev,
       code: prev?.code ?? "",
       name: prev?.name ?? "",
       description: prev?.description ?? "",
       fee: prev?.fee ?? "0",
       isActive: prev?.isActive ?? true,
+      category: prev?.category ?? "student",
+      allowedCategories: prev?.allowedCategories ?? ["student"],
+      processingDays: prev?.processingDays ?? 3,
+      maxCopies: prev?.maxCopies ?? 1,
       requiredFields: nextFields,
     }));
   };

@@ -349,7 +349,7 @@ export interface DocumentType extends Timestamps {
     sector: string;
   } | null;
   category: UserCategory;
-  allowedCategories?: string[] | null;
+  allowedCategories?: UserCategory[] | null;
   allowedStudentStatuses?: string[] | null;
   office: Office;
   description: string | null;
@@ -370,6 +370,8 @@ export interface NewDocument {
   isActive: boolean;
   requiredFields: RequiredFieldDefinition[];
   category?: UserCategory;
+  allowedCategories?: UserCategory[];
+  officeId?: UUID | null;
   office?: Office;
   instructions?: string | null;
   processingDays?: number;

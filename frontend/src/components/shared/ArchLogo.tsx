@@ -69,7 +69,7 @@ export function ArchLogo({
           src="/images/logo/Logo.png"
           alt=""
           aria-hidden="true"
-          className={sizeStyles.icon}
+          className="size-12"
         />
       </div>
       <div>

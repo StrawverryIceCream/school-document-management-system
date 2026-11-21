@@ -1,4 +1,4 @@
-import type { DocumentType } from "@/types";
+import type { DocumentType, NewDocument } from "@/types";
 
 export interface RequiredField {
   label: string;
@@ -79,7 +79,7 @@ export async function getDocumentById(id: string): Promise<DocumentType> {
 }
 
 export async function createDocument(
-  payload: Omit<DocumentType, "id" | "createdAt" | "updatedAt">,
+  payload: NewDocument,
 ): Promise<DocumentType> {
   const url = "/api/documents";
 

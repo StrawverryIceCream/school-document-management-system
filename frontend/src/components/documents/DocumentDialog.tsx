@@ -21,7 +21,13 @@ function DocumentDialog() {
   const isPage1Valid =
     newDocument?.code?.trim() &&
     newDocument?.name?.trim() &&
-    newDocument?.fee?.trim();
+    newDocument?.fee?.trim() &&
+    Boolean(newDocument?.officeId) &&
+    (newDocument.allowedCategories?.length ?? 0) > 0 &&
+    Number.isInteger(newDocument.processingDays) &&
+    (newDocument.processingDays ?? -1) >= 0 &&
+    Number.isInteger(newDocument.maxCopies) &&
+    (newDocument.maxCopies ?? 0) >= 1;
 
   async function handleSubmit() {
     if (!newDocument) return;
@@ -33,7 +39,17 @@ function DocumentDialog() {
         fee: newDocument?.fee ?? "0",
         isActive: newDocument?.isActive ?? true,
         requiredFields: newDocument?.requiredFields ?? [],
-      } as Parameters<typeof createDocument>[0]);
+        category:
+          newDocument?.category ??
+          newDocument?.allowedCategories?.[0] ??
+          "student",
+        allowedCategories:
+          newDocument?.allowedCategories ??
+          [newDocument?.category ?? "student"],
+        officeId: newDocument.officeId ?? null,
+        processingDays: newDocument?.processingDays ?? 3,
+        maxCopies: newDocument?.maxCopies ?? 1,
+      });
       setOpen(false);
       await refreshDocument();
       setCurrentPage(1);
@@ -42,7 +58,10 @@ function DocumentDialog() {
       });
       setNewDocument(null);
     } catch (err) {
-      console.log(err);
+      console.error("Failed to create document:", err);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to create document",
+      );
     }
   }
 
@@ -77,9 +96,15 @@ function DocumentDialog() {
 
         <FieldGroup>
           {currentPage === 1 ? (
-            <DocumentFieldsDialog setNewDocument={setNewDocument} />
+            <DocumentFieldsDialog
+              newDocument={newDocument}
+              setNewDocument={setNewDocument}
+            />
           ) : (
-            <RequiredFieldsDialog setNewDocument={setNewDocument} />
+            <RequiredFieldsDialog
+              initialFields={newDocument?.requiredFields ?? []}
+              setNewDocument={setNewDocument}
+            />
           )}
         </FieldGroup>
 
