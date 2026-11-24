@@ -18,6 +18,7 @@ import {
 } from "../services/storage.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { notifyOfficeStaff } from "../services/notification.service.js";
+import { sendPaymentProofUploadedEmail } from "../services/email.service.js";
 import { isSelfRequestAction } from "../lib/request-guards.js";
 import {
   canRequesterClaimOrUpdateRefund,
@@ -455,9 +456,17 @@ export async function uploadPaymentProofHandler(
 
     // Join through the request so students can only upload to their own payments
     const [payment] = await db
-      .select({ id: payments.id, status: payments.status })
+      .select({
+        id: payments.id,
+        status: payments.status,
+        email: users.email,
+        recipientName: users.fullName,
+        documentName: documentRequests.documentTypeName,
+        referenceNumber: documentRequests.referenceNumber,
+      })
       .from(payments)
       .innerJoin(documentRequests, eq(payments.requestId, documentRequests.id))
+      .innerJoin(users, eq(documentRequests.userId, users.id))
       .where(
         and(eq(payments.id, paymentId), eq(documentRequests.userId, userId)),
       );
@@ -486,6 +495,15 @@ export async function uploadPaymentProofHandler(
       entityId: paymentId,
       ipAddress: req.ip,
       metadata: { paymentId },
+    });
+
+    void sendPaymentProofUploadedEmail(
+      payment.email,
+      payment.recipientName,
+      payment.documentName,
+      payment.referenceNumber,
+    ).catch((err) => {
+      console.error("[uploadPaymentProof] Failed to send upload confirmation email:", err);
     });
 
     return res.json({ paymentProofUrl: url });

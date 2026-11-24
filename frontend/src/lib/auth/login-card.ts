@@ -1,14 +1,14 @@
 export const LOGIN_CARD = {
   title: "Welcome back to ARCH",
-  description: "Enter your institutional credentials to access your account.",
+  description: "Enter your email and password to access your account.",
   formAriaLabel: "Sign in",
 };
 
 export const IDENTIFIER_FIELD = {
   id: "email",
   name: "email",
-  label: "Institutional Email",
-  placeholder: "name@university.edu.ph",
+  label: "Email Address",
+  placeholder: "name@gmail.com",
 };
 
 export const PASSWORD_FIELD = {

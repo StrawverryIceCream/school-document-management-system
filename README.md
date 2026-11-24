@@ -11,7 +11,7 @@ A web-based credential request and lifecycle management platform for university 
 - **Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS v4, Radix UI / shadcn/ui, Lucide Icons, Sonner
 - **Session & Security:** `express-session` (HTTP-only secure cookies), `bcrypt`, Node.js `crypto`
 - **File Storage:** Cloudinary via `multer` (payment slips & requirement attachments)
-- **Email Delivery:** Nodemailer (6-digit registration OTP & status alerts, with local dev console fallback)
+- **Email Delivery:** Brevo HTTPS API (registration/login OTPs, status alerts, and payment-proof confirmations; local dev console fallback)
 
 ---
 
@@ -92,11 +92,8 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-# SMTP Mail Server (Leave empty to log OTPs to the backend terminal in dev mode)
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
+# Transactional Email (optional for local development; leave empty to log emails to the backend terminal)
+BREVO_API_KEY=
 EMAIL_FROM="ARCH Support <noreply@arch.edu>"
 ```
 
@@ -124,6 +121,8 @@ cd frontend
 npm run dev
 ```
 *Frontend runs on: `http://localhost:5173` (Vite dev proxy forwards `/api` to port 5000)*
+
+When `BREVO_API_KEY` is empty, the backend prints outgoing emails—including payment-proof upload acknowledgements—to the backend terminal. To receive real emails, configure a valid Brevo API key and sender in `backend/.env`. Testing payment uploads also requires a working database and Cloudinary credentials.
 
 ---
 
@@ -198,7 +197,7 @@ school-document-management-system/
    - Put new frontend route views in `frontend/src/pages/` and reusable widgets in `frontend/src/components/`.
 3. **Environment Security:**
    - Never commit `.env` files or hardcode secrets into the codebase.
-   - If SMTP credentials are omitted, OTPs will safely print to the backend terminal console for easy local testing.
+   - If `BREVO_API_KEY` is omitted, outgoing emails will safely print to the backend terminal console for easy local testing.
 
 ---
 
@@ -275,7 +274,7 @@ The system uses a decoupled hosting model:
    - `SESSION_SECRET`: 64-character random hex string
    - `CLIENT_ORIGIN`: Your Vercel frontend URL (e.g., `https://your-app.vercel.app` without a trailing slash)
    - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` (optional for local/test console fallback)
+   - `BREVO_API_KEY`, `EMAIL_FROM` (optional for local/test console fallback)
 
 ### 3. Continuous Integration (GitHub Actions)
 Configured in `.github/workflows/ci.yml`. Runs parallel test and build verification on all PRs and commits before reaching production.
