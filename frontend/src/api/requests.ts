@@ -5,6 +5,7 @@ import type {
   RefundMethod,
   RequestStatus,
 } from "@/types";
+import type { ClaimHandoffDetails } from "@/lib/requests/claim-handoff";
 
 export type FormDataValue = string | number | boolean;
 
@@ -73,6 +74,7 @@ export interface UpdateRequestStatusPayload {
   staffNotes?: string | null;
   claimedBy?: string | null;
   remarks?: string | null;
+  handoffDetails?: ClaimHandoffDetails;
   resubmissionAllowed?: boolean;
   missedRequirements?: MissedRequirement[];
 }

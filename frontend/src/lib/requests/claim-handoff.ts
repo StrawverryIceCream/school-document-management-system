@@ -1,21 +1,45 @@
 export type PickupType = "self" | "proxy";
 
+export const AUTHORIZED_PROXY_ID_TYPES = [
+  "Voter's ID",
+  "SSS ID",
+  "GSIS ID",
+  "PhilHealth ID",
+  "TIN ID (Tax Identification Number)",
+  "PWD ID (Person with Disability ID)",
+  "Senior Citizen ID",
+  "Student ID",
+] as const;
+
+export type AuthorizedProxyIdType = (typeof AUTHORIZED_PROXY_ID_TYPES)[number];
+
+export interface ClaimHandoffDetails {
+  pickupType: "proxy";
+  fullName: string;
+  idType: AuthorizedProxyIdType;
+  idNumber: string;
+}
+
 export interface ClaimHandoffInput {
   pickupType: PickupType;
   claimantName: string;
   studentName?: string;
   notes?: string;
+  idType?: string;
+  idNumber?: string;
 }
 
 export interface ClaimHandoffResult {
   valid: boolean;
   errors: {
     claimantName?: string;
-    notes?: string;
+    idType?: string;
+    idNumber?: string;
   };
   data?: {
     claimedBy: string;
     remarks: string;
+    handoffDetails?: ClaimHandoffDetails;
   };
 }
 
@@ -45,10 +69,14 @@ export function formatClaimHandoffProvenance({
 export function validateClaimHandoff(
   input: ClaimHandoffInput,
 ): ClaimHandoffResult {
-  const errors: { claimantName?: string; notes?: string } = {};
+  const errors: ClaimHandoffResult["errors"] = {};
   const cleanName = input.claimantName.trim();
   const cleanNotes = (input.notes || "").trim();
   const defaultStudent = (input.studentName || "").trim();
+  const idType = AUTHORIZED_PROXY_ID_TYPES.find(
+    (authorizedIdType) => authorizedIdType === input.idType,
+  );
+  const idNumber = (input.idNumber || "").trim();
 
   let finalClaimant = cleanName;
 
@@ -65,9 +93,11 @@ export function validateClaimHandoff(
       errors.claimantName =
         "Representative full name is required for proxy pickup";
     }
-    if (!cleanNotes || cleanNotes.length < 3) {
-      errors.notes =
-        "Authorization ID / Letter verification notes are required for proxy pickup";
+    if (!idType) {
+      errors.idType = "Select an ID type for the authorized proxy";
+    }
+    if (!idNumber) {
+      errors.idNumber = "ID number is required for the authorized proxy";
     }
   }
 
@@ -80,6 +110,15 @@ export function validateClaimHandoff(
     claimantName: finalClaimant,
     notes: cleanNotes,
   });
+  const handoffDetails: ClaimHandoffDetails | undefined =
+    input.pickupType === "proxy"
+      ? {
+          pickupType: "proxy",
+          fullName: finalClaimant,
+          idType: idType!,
+          idNumber,
+        }
+      : undefined;
 
   return {
     valid: true,
@@ -87,6 +126,7 @@ export function validateClaimHandoff(
     data: {
       claimedBy: finalClaimant,
       remarks,
+      ...(handoffDetails ? { handoffDetails } : {}),
     },
   };
 }
