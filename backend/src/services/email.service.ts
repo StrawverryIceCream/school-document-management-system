@@ -134,6 +134,36 @@ export async function sendPasswordResetOtpEmail(
   });
 }
 
+export async function sendPaymentProofUploadedEmail(
+  email: string,
+  recipientName: string,
+  documentName: string,
+  referenceNumber: string,
+): Promise<SendOtpResult> {
+  const safeName = escapeHtml(recipientName);
+  const safeDoc = escapeHtml(documentName);
+  const safeRef = escapeHtml(referenceNumber);
+
+  return dispatchEmail({
+    to: email,
+    subject: `ARCH: Payment proof received (${referenceNumber})`,
+    text: `Hello ${recipientName},\n\nWe received your payment proof for ${documentName} (${referenceNumber}). It is pending staff verification. This email confirms the proof upload only; your payment has not yet been verified. We will notify you after staff review.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <h2 style="color: #0f172a; margin-top: 0;">Payment Proof Received</h2>
+        <p style="color: #475569; font-size: 15px;">Hello <strong>${safeName}</strong>,</p>
+        <p style="color: #475569; font-size: 15px;">We received your payment proof for the following request:</p>
+        <div style="background: #f8fafc; border-left: 4px solid #8a1e2b; padding: 12px 16px; margin: 16px 0;">
+          <p style="margin: 4px 0; font-size: 14px;"><strong>Document:</strong> ${safeDoc}</p>
+          <p style="margin: 4px 0; font-size: 14px;"><strong>Reference No:</strong> ${safeRef}</p>
+          <p style="margin: 4px 0; font-size: 14px;"><strong>Status:</strong> Pending staff verification</p>
+        </div>
+        <p style="color: #64748b; font-size: 13px;">This email confirms the proof upload only; your payment has not yet been verified. We will notify you after staff review.</p>
+      </div>
+    `,
+  });
+}
+
 interface StatusEmailDetails {
   releaseDate?: string | null;
   remarks?: string | null;
