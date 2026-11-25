@@ -20,12 +20,11 @@ describe("claim-handoff", () => {
     assert.deepEqual(res.errors, {});
     assert.ok(res.data);
     assert.equal(res.data.claimedBy, "Juan Dela Cruz");
-    assert.equal(res.data.handoffDetails, undefined);
     assert.match(res.data.remarks, /Claimed by student \(Self\)/);
     assert.match(res.data.remarks, /Student ID #2023-01456 verified/);
   });
 
-  it("validates successful proxy pickup with representative name and authorization notes", () => {
+  it("validates successful proxy pickup with representative name and ID details", () => {
     const res = validateClaimHandoff({
       pickupType: "proxy",
       claimantName: "Maria Dela Cruz",
@@ -38,13 +37,8 @@ describe("claim-handoff", () => {
     assert.deepEqual(res.errors, {});
     assert.ok(res.data);
     assert.equal(res.data.claimedBy, "Maria Dela Cruz");
-    assert.deepEqual(res.data.handoffDetails, {
-      pickupType: "proxy",
-      fullName: "Maria Dela Cruz",
-      idType: "SSS ID",
-      idNumber: "1234567890",
-    });
     assert.match(res.data.remarks, /authorized proxy: Maria Dela Cruz/);
+    assert.match(res.data.remarks, /SSS ID #1234567890/);
   });
 
   it("rejects proxy pickup without representative name", () => {
@@ -109,10 +103,10 @@ describe("claim-handoff", () => {
 
     assert.equal(res.valid, true);
     assert.deepEqual(res.errors, {});
-    assert.equal(res.data?.handoffDetails, undefined);
+    assert.ok(res.data);
   });
 
-  it("allows optional verification notes for proxy pickup", () => {
+  it("allows optional verification notes for proxy pickup and persists proxy ID in remarks", () => {
     const res = validateClaimHandoff({
       pickupType: "proxy",
       claimantName: "Maria Dela Cruz",
@@ -122,10 +116,13 @@ describe("claim-handoff", () => {
 
     assert.equal(res.valid, true);
     assert.ok(res.data);
-    assert.equal(res.data.remarks, "[Counter Release] Claimed by authorized proxy: Maria Dela Cruz");
+    assert.equal(
+      res.data.remarks,
+      "[Counter Release] Claimed by authorized proxy: Maria Dela Cruz (SSS ID #1234567890)",
+    );
   });
 
-  it("includes optional proxy verification notes in the remarks", () => {
+  it("includes optional proxy verification notes alongside proxy ID in remarks", () => {
     const res = validateClaimHandoff({
       pickupType: "proxy",
       claimantName: "Maria Dela Cruz",
@@ -136,7 +133,21 @@ describe("claim-handoff", () => {
 
     assert.equal(res.valid, true);
     assert.ok(res.data);
+    assert.match(res.data.remarks, /SSS ID #1234567890/);
     assert.match(res.data.remarks, /Authorization letter presented/);
+  });
+
+  it("rejects proxy pickup when ID number exceeds 120 characters", () => {
+    const res = validateClaimHandoff({
+      pickupType: "proxy",
+      claimantName: "Maria Dela Cruz",
+      idType: "SSS ID",
+      idNumber: "1".repeat(121),
+    });
+
+    assert.equal(res.valid, false);
+    assert.ok(res.errors.idNumber);
+    assert.equal(res.data, undefined);
   });
 
   it("formatClaimHandoffProvenance creates concise audit string", () => {

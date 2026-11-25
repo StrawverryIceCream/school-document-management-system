@@ -13,9 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  AUTHORIZED_PROXY_ID_NUMBER_PLACEHOLDERS,
   AUTHORIZED_PROXY_ID_TYPES,
-  type AuthorizedProxyIdType,
-  type ClaimHandoffDetails,
+  MAX_CLAIMANT_NAME_LENGTH,
+  MAX_PROXY_ID_NUMBER_LENGTH,
   type PickupType,
   validateClaimHandoff,
 } from "@/lib/requests/claim-handoff";
@@ -30,20 +31,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const AUTHORIZED_PROXY_ID_NUMBER_PLACEHOLDERS: Record<
-  AuthorizedProxyIdType,
-  string
-> = {
-  "Voter's ID": "Enter voter's ID number",
-  "SSS ID": "00-0000000-0",
-  "GSIS ID": "Enter BP number",
-  "PhilHealth ID": "00-000000000-0",
-  "TIN ID (Tax Identification Number)": "000-000-000-000",
-  "PWD ID (Person with Disability ID)": "Enter PWD ID number",
-  "Senior Citizen ID": "Enter senior citizen ID number",
-  "Student ID": "Enter student ID number",
-};
-
 export interface ClaimHandoffDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -53,11 +40,7 @@ export interface ClaimHandoffDialogProps {
   referenceNumber?: string;
   documentTitle?: string;
   updating: boolean;
-  onConfirm: (details: {
-    claimedBy: string;
-    reason: string;
-    handoffDetails?: ClaimHandoffDetails;
-  }) => void;
+  onConfirm: (details: { claimedBy: string; reason: string }) => void;
 }
 
 export function ClaimHandoffDialog({
@@ -129,7 +112,6 @@ export function ClaimHandoffDialog({
       onConfirm({
         claimedBy: res.data.claimedBy,
         reason: res.data.remarks,
-        handoffDetails: res.data.handoffDetails,
       });
     }
   };
@@ -239,7 +221,7 @@ export function ClaimHandoffDialog({
                   setErrors((prev) => ({ ...prev, claimantName: undefined }));
                 }
               }}
-              maxLength={120}
+              maxLength={MAX_CLAIMANT_NAME_LENGTH}
               aria-invalid={Boolean(errors.claimantName)}
               className="text-xs"
             />
@@ -301,7 +283,7 @@ export function ClaimHandoffDialog({
                       setErrors((prev) => ({ ...prev, idNumber: undefined }));
                     }
                   }}
-                  maxLength={120}
+                  maxLength={MAX_PROXY_ID_NUMBER_LENGTH}
                   aria-invalid={Boolean(errors.idNumber)}
                   className="text-xs"
                 />

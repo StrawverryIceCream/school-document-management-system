@@ -17,7 +17,6 @@ import { WorkflowPipelineCard } from "@/components/sectors/review/WorkflowPipeli
 import { getOffice } from "@/lib/sectors/sectors-config";
 import { useAuth } from "@/hooks/useAuth";
 import { updateRequestStatus } from "@/api/requests";
-import type { ClaimHandoffDetails } from "@/lib/requests/claim-handoff";
 import {
   canUserManageRefunds,
   REQUEST_STATUS_CONFIG,
@@ -182,7 +181,6 @@ export default function SectorRequestReview() {
   async function confirmStatusChange(details?: {
     reason?: string;
     claimedBy?: string;
-    handoffDetails?: ClaimHandoffDetails;
     resubmissionAllowed?: boolean;
     missedRequirements?: MissedRequirement[];
   }) {
@@ -203,7 +201,6 @@ export default function SectorRequestReview() {
             : details?.reason || staffNotes.trim() || null,
         claimedBy: details?.claimedBy || undefined,
         remarks: details?.reason || undefined,
-        handoffDetails: details?.handoffDetails,
         resubmissionAllowed: details?.resubmissionAllowed,
         missedRequirements: details?.missedRequirements,
       });
