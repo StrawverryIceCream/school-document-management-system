@@ -216,7 +216,7 @@ export function ForgotPasswordDialog({
                 htmlFor="recovery-email"
                 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
               >
-                Institutional Email Address
+                Email Address
               </Label>
               <div className="relative">
                 <Mail
@@ -230,7 +230,7 @@ export function ForgotPasswordDialog({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@university.edu.ph"
+                  placeholder="name@gmail.com"
                   className="h-10 ps-10 rounded-lg text-sm"
                   autoFocus
                 />
