@@ -163,9 +163,7 @@ export function ForgotPasswordDialog({
       onSuccess(email);
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to reset password",
-      );
+      setError(err instanceof Error ? err.message : "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -204,7 +202,10 @@ export function ForgotPasswordDialog({
             role="alert"
             className="flex items-start gap-2.5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive font-medium"
           >
-            <AlertCircle className="size-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <AlertCircle
+              className="size-4 shrink-0 mt-0.5"
+              aria-hidden="true"
+            />
             <span className="flex-1 leading-normal">{error}</span>
           </div>
         )}
@@ -216,7 +217,7 @@ export function ForgotPasswordDialog({
                 htmlFor="recovery-email"
                 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
               >
-                Institutional Email Address
+                Email Address
               </Label>
               <div className="relative">
                 <Mail
@@ -230,7 +231,7 @@ export function ForgotPasswordDialog({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@university.edu.ph"
+                  placeholder="name@gmail.com"
                   className="h-10 ps-10 rounded-lg text-sm"
                   autoFocus
                 />
@@ -244,7 +245,10 @@ export function ForgotPasswordDialog({
             >
               {loading ? (
                 <>
-                  <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
+                  <RefreshCw
+                    className="size-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Sending Code...
                 </>
               ) : (
@@ -320,7 +324,10 @@ export function ForgotPasswordDialog({
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
+                    <RefreshCw
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                     Verifying...
                   </>
                 ) : (
@@ -433,16 +440,15 @@ export function ForgotPasswordDialog({
 
               <Button
                 type="submit"
-                disabled={
-                  loading ||
-                  newPassword.length < 8 ||
-                  !confirmPassword
-                }
+                disabled={loading || newPassword.length < 8 || !confirmPassword}
                 className="flex-1 h-10 gap-2 rounded-lg text-sm font-semibold cursor-pointer"
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
+                    <RefreshCw
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                     Resetting...
                   </>
                 ) : (

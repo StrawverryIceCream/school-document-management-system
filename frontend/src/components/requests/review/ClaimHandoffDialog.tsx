@@ -13,12 +13,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  AUTHORIZED_PROXY_ID_NUMBER_PLACEHOLDERS,
+  AUTHORIZED_PROXY_ID_TYPES,
+  MAX_CLAIMANT_NAME_LENGTH,
+  MAX_PROXY_ID_NUMBER_LENGTH,
   type PickupType,
   validateClaimHandoff,
 } from "@/lib/requests/claim-handoff";
 import { getRoleIdRequirementLabel, ROLE_META } from "@/lib/profile";
 import type { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface ClaimHandoffDialogProps {
   open: boolean;
@@ -43,18 +54,34 @@ export function ClaimHandoffDialog({
   updating,
   onConfirm,
 }: ClaimHandoffDialogProps) {
-  const roleLabel = requesterRole ? ROLE_META[requesterRole].label : "Requester";
+  const roleLabel = requesterRole
+    ? ROLE_META[requesterRole].label
+    : "Requester";
   const idLabel = getRoleIdRequirementLabel(requesterRole);
   const [pickupType, setPickupType] = useState<PickupType>("self");
   const [claimantName, setClaimantName] = useState(studentName);
   const [notes, setNotes] = useState("");
-  const [errors, setErrors] = useState<{ claimantName?: string; notes?: string }>({});
+  const [idType, setIdType] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+  const [errors, setErrors] = useState<{
+    claimantName?: string;
+    idType?: string;
+    idNumber?: string;
+  }>({});
+  const selectedIdType = AUTHORIZED_PROXY_ID_TYPES.find(
+    (authorizedIdType) => authorizedIdType === idType,
+  );
+  const idNumberPlaceholder = selectedIdType
+    ? AUTHORIZED_PROXY_ID_NUMBER_PLACEHOLDERS[selectedIdType]
+    : "Enter the representative's ID number";
 
   const handlePickupTypeChange = (type: PickupType) => {
     setPickupType(type);
     setErrors({});
     if (type === "self") {
       setClaimantName(studentName);
+      setIdType("");
+      setIdNumber("");
       setNotes(
         requesterRole === "student" && studentId
           ? `${idLabel} #${studentId} presented`
@@ -62,6 +89,8 @@ export function ClaimHandoffDialog({
       );
     } else {
       setClaimantName("");
+      setIdType("");
+      setIdNumber("");
       setNotes("");
     }
   };
@@ -72,6 +101,8 @@ export function ClaimHandoffDialog({
       claimantName,
       studentName,
       notes,
+      idType,
+      idNumber,
     });
 
     if (!res.valid) {
@@ -100,7 +131,8 @@ export function ClaimHandoffDialog({
                 Document Counter Release & Hand-Off
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Verify recipient custody before releasing physical document credential.
+                Verify recipient custody before releasing physical document
+                credential.
               </DialogDescription>
             </div>
           </div>
@@ -110,19 +142,28 @@ export function ClaimHandoffDialog({
           <div className="bg-muted/30 rounded-xl p-3 border text-xs space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Reference:</span>
-              <span className="font-mono font-bold text-foreground">{referenceNumber}</span>
+              <span className="font-mono font-bold text-foreground">
+                {referenceNumber}
+              </span>
             </div>
             {documentTitle && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Document:</span>
-                <span className="font-medium text-foreground">{documentTitle}</span>
+                <span className="font-medium text-foreground">
+                  {documentTitle}
+                </span>
               </div>
             )}
             {studentName && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Registered {roleLabel}:</span>
+                <span className="text-muted-foreground">
+                  Registered {roleLabel}:
+                </span>
                 <span className="font-semibold text-foreground">
-                  {studentName} {requesterRole === "student" && studentId ? `(${studentId})` : ""}
+                  {studentName}{" "}
+                  {requesterRole === "student" && studentId
+                    ? `(${studentId})`
+                    : ""}
                 </span>
               </div>
             )}
@@ -175,7 +216,9 @@ export function ClaimHandoffDialog({
         <div className="space-y-3.5 pt-1">
           <div className="space-y-1.5">
             <Label htmlFor="claimant-full-name" className="text-xs font-medium">
-              {pickupType === "self" ? "Claimant Name" : "Representative Full Name"}{" "}
+              {pickupType === "self"
+                ? "Claimant Name"
+                : "Representative Full Name"}{" "}
               <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -192,6 +235,8 @@ export function ClaimHandoffDialog({
                   setErrors((prev) => ({ ...prev, claimantName: undefined }));
                 }
               }}
+              maxLength={MAX_CLAIMANT_NAME_LENGTH}
+              aria-invalid={Boolean(errors.claimantName)}
               className="text-xs"
             />
             {errors.claimantName && (
@@ -201,10 +246,85 @@ export function ClaimHandoffDialog({
             )}
           </div>
 
+          {pickupType === "proxy" && (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="proxy-id-type" className="text-xs font-medium">
+                  ID Type <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={idType}
+                  onValueChange={(value) => {
+                    setIdType(value);
+                    if (errors.idType) {
+                      setErrors((prev) => ({ ...prev, idType: undefined }));
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    id="proxy-id-type"
+                    aria-invalid={Boolean(errors.idType)}
+                    className="w-full text-xs"
+                  >
+                    <SelectValue placeholder="Select an ID type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AUTHORIZED_PROXY_ID_TYPES.map((authorizedIdType) => (
+                      <SelectItem
+                        key={authorizedIdType}
+                        value={authorizedIdType}
+                      >
+                        {authorizedIdType}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.idType && (
+                  <p
+                    className="text-[11px] text-destructive font-medium"
+                    role="alert"
+                  >
+                    {errors.idType}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="proxy-id-number"
+                  className="text-xs font-medium"
+                >
+                  ID Number <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="proxy-id-number"
+                  placeholder={idNumberPlaceholder}
+                  value={idNumber}
+                  onChange={(e) => {
+                    setIdNumber(e.target.value);
+                    if (errors.idNumber) {
+                      setErrors((prev) => ({ ...prev, idNumber: undefined }));
+                    }
+                  }}
+                  maxLength={MAX_PROXY_ID_NUMBER_LENGTH}
+                  aria-invalid={Boolean(errors.idNumber)}
+                  className="text-xs"
+                />
+                {errors.idNumber && (
+                  <p
+                    className="text-[11px] text-destructive font-medium"
+                    role="alert"
+                  >
+                    {errors.idNumber}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
           <div className="space-y-1.5">
             <Label htmlFor="claimant-notes" className="text-xs font-medium">
-              Verification Details & ID Remarks{" "}
-              {pickupType === "proxy" && <span className="text-destructive">*</span>}
+              Verification Details & ID Remarks
             </Label>
             <Textarea
               id="claimant-notes"
@@ -214,20 +334,10 @@ export function ClaimHandoffDialog({
                   : `e.g., Authorization letter presented with ${idLabel} & Representative National ID`
               }
               value={notes}
-              onChange={(e) => {
-                setNotes(e.target.value);
-                if (errors.notes) {
-                  setErrors((prev) => ({ ...prev, notes: undefined }));
-                }
-              }}
+              onChange={(e) => setNotes(e.target.value)}
               className="text-xs resize-none"
               rows={2}
             />
-            {errors.notes && (
-              <p className="text-[11px] text-destructive font-medium">
-                {errors.notes}
-              </p>
-            )}
           </div>
         </div>
 
@@ -250,7 +360,10 @@ export function ClaimHandoffDialog({
             className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer"
           >
             {updating && (
-              <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+              <LoaderCircle
+                className="size-3.5 animate-spin"
+                aria-hidden="true"
+              />
             )}
             Confirm Release & Hand-Off
           </Button>

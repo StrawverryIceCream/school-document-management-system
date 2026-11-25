@@ -79,16 +79,13 @@ function CredentialsFields({
       <div>
         <div className="mb-1.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
           <Label className="text-sm font-semibold" htmlFor="institutional-email">
-            Institutional Email Address
+            Email Address
           </Label>
-          <span className="text-xs sm:text-sm text-muted-foreground">
-            Must be official university domain
-          </span>
         </div>
         <Input
           id="institutional-email"
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="juan.dela.cruz@university.edu.ph"
+          placeholder="name@gmail.com"
           required
           type="email"
           value={email}
