@@ -18,7 +18,10 @@ import {
 } from "../services/storage.service.js";
 import { recordAuditLog } from "../services/audit.service.js";
 import { notifyOfficeStaff } from "../services/notification.service.js";
-import { sendPaymentProofUploadedEmail } from "../services/email.service.js";
+import {
+  sendPaymentProofUploadedEmail,
+  sendPaymentVerifiedEmail,
+} from "../services/email.service.js";
 import { isSelfRequestAction } from "../lib/request-guards.js";
 import {
   canRequesterClaimOrUpdateRefund,
@@ -463,6 +466,8 @@ export async function uploadPaymentProofHandler(
         recipientName: users.fullName,
         documentName: documentRequests.documentTypeName,
         referenceNumber: documentRequests.referenceNumber,
+        method: payments.method,
+        amount: payments.amount,
       })
       .from(payments)
       .innerJoin(documentRequests, eq(payments.requestId, documentRequests.id))
@@ -502,6 +507,8 @@ export async function uploadPaymentProofHandler(
       payment.recipientName,
       payment.documentName,
       payment.referenceNumber,
+      payment.method,
+      payment.amount, 
     ).catch((err) => {
       console.error("[uploadPaymentProof] Failed to send upload confirmation email:", err);
     });
@@ -695,6 +702,30 @@ export async function reviewPaymentHandler(
         rejectionReason: cleanReason,
       },
     });
+    
+    if (body.decision === "verified") {
+      void (async () => {
+        const payer = await db.query.users.findFirst({
+          where: eq(users.id, payment.request.userId),
+          columns: { email: true, fullName: true },
+        });
+        if (!payer) {
+          console.warn("[reviewPayment] Payer not found, no email sent");
+          return;
+        }
+        await sendPaymentVerifiedEmail(
+          payer.email,
+          payer.fullName,
+          docName,
+          payment.request.referenceNumber,
+          payment.method,
+          updated.amount,
+          updated.receiptNumber ?? "N/A",
+        );
+      })().catch((err) => {
+        console.error("[reviewPayment] Failed to send acknowledgement email:", err);
+      });
+    }
 
     return res.json(updated);
   } catch (err) {
