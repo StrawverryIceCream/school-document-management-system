@@ -3,7 +3,7 @@ export type PickupType = "self" | "proxy";
 export const AUTHORIZED_PROXY_ID_TYPES = [
   "Philippine National ID (PhilID / National ID)",
   "Digital National ID",
-  "ePhilID (paper type)",
+  "ePhilID (Paper Type)",
   "Philippine Passport",
   "Driver's License",
   "UMID (Unified Multi-Purpose ID)",
@@ -31,7 +31,7 @@ export const AUTHORIZED_PROXY_ID_NUMBER_PLACEHOLDERS: Record<
   "Philippine National ID (PhilID / National ID)":
     "Enter PhilSys Card Number (PCN)",
   "Digital National ID": "Enter PhilSys Card Number (PCN)",
-  "ePhilID (paper type)": "Enter PhilSys Card Number (PCN)",
+  "ePhilID (Paper Type)": "Enter PhilSys Card Number (PCN)",
   "Philippine Passport": "Enter passport number",
   "Driver's License": "A00-00-000000",
   "UMID (Unified Multi-Purpose ID)": "0000-0000000-0",
