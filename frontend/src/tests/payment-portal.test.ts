@@ -8,10 +8,10 @@ import {
 } from "../lib/payment-portal";
 
 test("payment-portal config and helpers", async (t) => {
-  await t.test("PAYMENT_PORTALS contains exactly MariBank, GoTyme, and GCash", () => {
-    assert.strictEqual(PAYMENT_PORTALS.length, 3);
+  await t.test("PAYMENT_PORTALS contains MariBank, GoTyme, BDO, and GCash", () => {
+    assert.strictEqual(PAYMENT_PORTALS.length, 4);
     const ids = PAYMENT_PORTALS.map((p) => p.id);
-    assert.deepStrictEqual(ids, ["maribank", "gotyme", "gcash"]);
+    assert.deepStrictEqual(ids, ["maribank", "gotyme", "bdo", "gcash"]);
 
     const maribank = PAYMENT_PORTALS.find((p) => p.id === "maribank");
     assert.strictEqual(maribank?.value, "bank_transfer");
@@ -19,6 +19,10 @@ test("payment-portal config and helpers", async (t) => {
     const gotyme = PAYMENT_PORTALS.find((p) => p.id === "gotyme");
     assert.strictEqual(gotyme?.value, "bank_transfer");
     assert.strictEqual(gotyme?.label, "GoTyme");
+
+    const bdo = PAYMENT_PORTALS.find((p) => p.id === "bdo");
+    assert.strictEqual(bdo?.value, "bank_transfer");
+    assert.strictEqual(bdo?.label, "BDO");
 
     const gcash = PAYMENT_PORTALS.find((p) => p.id === "gcash");
     assert.strictEqual(gcash?.value, "e_wallet");
@@ -52,6 +56,15 @@ test("payment-portal config and helpers", async (t) => {
     assert.ok(details);
     assert.strictEqual(details.bankName, "GoTyme Bank");
     assert.strictEqual(details.qrImagePath, "/images/payment/gotyme_qr.jfif");
+    assert.strictEqual(details.hasPhoneNumber, false);
+    assert.strictEqual(details.accountNumber, undefined);
+  });
+
+  await t.test("BDO portal details include QR and no phone number", () => {
+    const details = getPortalPaymentDetails("bdo");
+    assert.ok(details);
+    assert.strictEqual(details.bankName, "BDO");
+    assert.strictEqual(details.qrImagePath, "/images/payment/bdo_qr.jpg");
     assert.strictEqual(details.hasPhoneNumber, false);
     assert.strictEqual(details.accountNumber, undefined);
   });

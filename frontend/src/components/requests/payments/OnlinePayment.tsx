@@ -130,7 +130,7 @@ function OnlinePayment({
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Available Payment Channels
             </p>
-            <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {PAYMENT_PORTALS.map(({ id, label, value, icon: Icon }) => (
                 <button
                   key={id}

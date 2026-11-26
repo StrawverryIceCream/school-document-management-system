@@ -5,7 +5,7 @@ import type { PaymentMethod } from "@/api/payments";
 export type OnlinePaymentMethod = Exclude<PaymentMethod, "cash">;
 
 export interface PaymentPortalOption {
-  id: "maribank" | "gotyme" | "gcash";
+  id: "maribank" | "gotyme" | "bdo" | "gcash";
   label: string;
   value: OnlinePaymentMethod;
   icon: ComponentType<{ className?: string }>;
@@ -25,6 +25,12 @@ export const PAYMENT_PORTALS: readonly PaymentPortalOption[] = [
   {
     id: "gotyme",
     label: "GoTyme",
+    value: "bank_transfer",
+    icon: Landmark,
+  },
+  {
+    id: "bdo",
+    label: "BDO",
     value: "bank_transfer",
     icon: Landmark,
   },
@@ -67,6 +73,16 @@ export const GOTYME_PAYMENT_CONFIG: PortalPaymentDetails = {
     "Scan via GoTyme or any bank/e-wallet app supporting QR Ph / InstaPay.",
 };
 
+export const BDO_PAYMENT_CONFIG: PortalPaymentDetails = {
+  bankName: "BDO",
+  accountName: "BDO Account",
+  qrImagePath: "/images/payment/bdo_qr.jpg",
+  hasPhoneNumber: false,
+  isQrPhCompatible: true,
+  notes:
+    "Scan via BDO or any bank/e-wallet app supporting QR Ph / InstaPay.",
+};
+
 export const GCASH_PAYMENT_CONFIG: PortalPaymentDetails = {
   bankName: "GCash",
   accountName: "GCash Account",
@@ -98,6 +114,7 @@ export function getPortalPaymentDetails(
 ): PortalPaymentDetails | null {
   if (portalId === "maribank") return MARIBANK_PAYMENT_CONFIG;
   if (portalId === "gotyme") return GOTYME_PAYMENT_CONFIG;
+  if (portalId === "bdo") return BDO_PAYMENT_CONFIG;
   if (portalId === "gcash") return GCASH_PAYMENT_CONFIG;
   return null;
 }

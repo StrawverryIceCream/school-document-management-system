@@ -58,7 +58,7 @@ const REFUND_METHOD_OPTIONS: Array<{
   {
     value: "bank_transfer",
     label: "Bank Transfer",
-    description: "MariBank / GoTyme / InstaPay",
+    description: "MariBank / GoTyme / BDO / InstaPay",
     icon: Landmark,
   },
   {
